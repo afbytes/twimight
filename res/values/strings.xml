@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+<string name="app_name">Twimight</string>
+<string name="oauth_name">OAuth</string>
+<string name="timeline_label">Timeline</string>
+<string name="friends_label">Friends</string>
+<string name="titlePrefs">Settings</string>
+<string name="labelOAuth">Authorize</string>
+<string name="titleExit">Exit</string>
+<string name="searchHint">Search hashtags or users</string>
+   <string name="labelTimeline">Timeline</string>
+     <string name="permDescription">The app will be allowed to broadcast tweets</string>
+    
+
+ <!--  Database -->
+   <string name="sql">CREATE table timeline ( _id INTEGER NOT NULL
+      PRIMARY KEY,created_at INTEGER  NOT NULL , status TEXT NOT NULL, userCode INTEGER NOT NULL,
+       isDisaster INTEGER, isFavorite INTEGER);</string>
+      
+    <string name="sqlDisaster">CREATE table DisasterTable ( _id INTEGER NOT NULL PRIMARY KEY
+     , created_at INTEGER NOT NULL, added_at INTEGER, status TEXT NOT NULL, userCode INTEGER NOT NULL, sent_by TEXT,
+      isFromServer INTEGER NOT NULL, hasBeenSent INTEGER, isValid INTEGER NOT NULL, hopCount INTEGER, signature BLOB);</string>
+        
+    <string name="sqlAddresses">CREATE table AddressesTable ( _mac TEXT NOT NULL PRIMARY KEY,
+     met_at INTEGER NOT NULL, tweetsNumber INTEGER NOT NULL );</string>
+     
+     <string name="sqlFavorites">CREATE table FavoritesTable ( _id INTEGER NOT NULL
+        PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, userCode INTEGER NOT NULL);</string> 
+    
+    <string name="sqlMentions">CREATE table MentionsTable ( _id INTEGER NOT NULL
+       PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, userCode INTEGER NOT NULL, isDisaster INTEGER);</string> 
+    
+    <string name="sqlProfilePictures">CREATE table PicturesTable ( user TEXT NOT NULL
+       PRIMARY KEY, image BLOB NOT NULL, created_at INTEGER);</string> 
+    
+    <string name="sqlDirect">CREATE table DirectMessagesTable ( _id INTEGER NOT NULL
+    	PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, user TEXT, userCode INTEGER,
+    	 isDisaster INTEGER);</string> 
+    
+    <string name="sqlSearch">CREATE table SearchTable ( _id INTEGER NOT NULL
+       PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, user TEXT NOT NULL,
+       userCode INTEGER NOT NULL, isDisaster INTEGER);</string> 
+    
+     <string name="sqlFriends">CREATE table FriendsTable ( _id INTEGER NOT NULL
+   		PRIMARY KEY, user TEXT NOT NULL, modulus TEXT, exponent TEXT,
+   		 isDisasterFriend INTEGER NOT NULL, isFollower INTEGER, isFollowed INTEGER);</string>   
+   		
+    <string name="sqlDirectOutgoing">CREATE table DirectOutgoingTable ( _id INTEGER NOT NULL
+    	PRIMARY KEY,created_at INTEGER NOT NULL, status BLOB NOT NULL, recipientUser TEXT NOT NULL, user BLOB NOT NULL,
+    	 isDisaster INTEGER, hasBeenSent INTEGER);</string> 
+     
+
+</resources>
