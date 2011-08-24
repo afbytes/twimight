@@ -8,10 +8,10 @@ tips in order to setup the system. From downloading and compiling the source to 
 = Requirements =
 This is a list of tools and libraries you have to install and be familiar with before starting:
   * [http://www.eclipse.org Eclipse IDE]
-  * [Java SDK]
+  * Java SDK
   * [http://developer.android.com/sdk/installing.html Android SDK]
   * [http://developer.android.com/sdk/eclipse-adt.html ADT plugin for Eclipse]
-  * [OAuth Libraries]
+  * OAuth Libraries
   * [http://www.winterwell.com/software/jtwitter/javadoc/index.html?winterwell/jtwitter/Twitter.html Twitter APIs]
  
 The Java and Android SDK (Standard Development Kit) as well as the ADT (Android Development Tools) plugin are necessary to build the application including the User Interface. The most common and convenient IDE is Eclipse. For Android development the ADT Eclipse plugin has to be installed which provides a rich and powerful environment to build apps. To be able to login into Twitter the application uses to used the OAuth Signpost Libraries providing the basic authentication functionalities. After successful login, Twimight communicates with the Twitter servers using the Open Source JTwitter APIs.
