@@ -1,4 +1,4 @@
-#summary Helps you getting started if you want to contribute to Twimight as a developer
+#summary Helps you getting started if you want to contribute to Twimight as a developer!
 
 This document lists the basic requirement to start developing Android applications and some
 tips in order to setup the system. From downloading and compiling the source to installing the application. We also include some general background about developing for Android.
