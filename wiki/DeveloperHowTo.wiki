@@ -29,6 +29,7 @@ Before getting your hands dirty, read the following:
 After installing Android SDK, Eclipse and ADT, [http://code.google.com/p/twimight/source/checkout checkout] the Twimight code.
 Then, in Eclipse, import the project: "File" -> "Import.." -> "Existing Projects into Workspace". Select the right root directory and hit "Finish".
 
+<wiki:comment>
 = General Android Concepts =
 Android applications are written in Java. The Android SDK is used compile the code into an Android package, a file with the .apk extension. This is the file that Android devices use to install the application.
 
@@ -52,3 +53,4 @@ Every application has a manifest le. It stores the essential information about 
   * The processes that will host application components.
   * Declares the minimum level of the Android API that the application requires.
   * It lists the libraries that the application uses.
+</wiki:comment>
