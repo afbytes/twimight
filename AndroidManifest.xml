@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:versionCode="1"
+	android:versionName="1.0"
+	package="ch.ethz.twimight">  
+	 
+	<application
+		android:icon="@drawable/twitter_icon"
+		android:label="@string/app_name" android:debuggable="true">
+		
+		<activity
+			android:name=".MyTwitter"			
+			android:label="@string/app_name" android:launchMode="singleTask">			
+			<intent-filter>
+				<action	android:name="android.intent.action.MAIN" />					
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>						
+		</activity>
+		<activity
+			android:name="Prefs" android:configChanges="orientation|keyboardHidden"></activity>
+			
+			 <activity android:name=".OAUTH"			
+			android:label="@string/oauth_name" android:noHistory="true">
+		  			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="my-app" android:host="twitt" />
+			</intent-filter>
+        	</activity>        
+              
+        <activity android:name=".Timeline" android:label="@string/timeline_label" 
+        android:noHistory="false" 
+          android:configChanges="orientation|keyboardHidden" android:launchMode="singleTask">
+        <meta-data android:name="android.app.default_searchable"
+                   android:value=".Search" />			
+		</activity>	
+			
+		<activity android:name="Following" android:label="@string/friends_label" 
+        	android:noHistory="false" >
+        	<meta-data android:name="android.app.default_searchable"
+                   android:value=".Search" />			
+		</activity>
+		
+		<activity android:name="Followers"       android:noHistory="false" >
+       		 <meta-data android:name="android.app.default_searchable"
+                   android:value=".Search" />			
+		</activity>
+		
+		<activity android:name=".showDisasterDb" android:launchMode="singleTask"> 		
+		</activity>
+		
+		<activity android:name=".Mentions"> 
+			 <meta-data android:name="android.app.default_searchable"
+                   android:value=".Search" />			
+		</activity>
+				        
+        <service android:enabled="true"  android:name=".UpdaterService"  />        
+        <service android:enabled="true"  android:name=".DevicesDiscovery" />
+        <service android:enabled="true" android:name=".RandomTweetGenerator"  />
+        <service android:enabled="true" android:name="ch.ethz.twimight.DisasterOperations" />
+          
+        <activity android:name=".Search" android:launchMode="standard" android:configChanges="orientation|keyboardHidden">
+        	<intent-filter>
+           		 <action android:name="android.intent.action.SEARCH" />
+      	    </intent-filter>
+      	    <meta-data android:name="android.app.searchable"       			   
+                   android:resource="@xml/searchable"/>
+        </activity>    	
+              
+        <receiver android:name="ch.ethz.twimight.BootBroadReceiver" android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+				<category android:name="android.intent.category.HOME" />
+			</intent-filter>
+	</receiver>		
+        <activity android:name="ch.ethz.twimight.UserInfo" android:label="UserInfo" 
+        	android:configChanges="orientation|keyboardHidden"></activity>   
+        	
+        <activity android:name="ch.ethz.twimight.DirectMessages" android:label="DirectMessages" 
+        	android:configChanges="orientation|keyboardHidden">
+        </activity>
+        	 
+        <activity android:name="ch.ethz.twimight.SendDirectMessage" android:label="Send message" 
+        	android:configChanges="orientation|keyboardHidden" >
+        </activity> 
+         
+        <provider android:name="ch.ethz.twimight.MySuggestionProvider"
+              android:authorities="ch.ethz.twimight" />
+         
+        <provider android:name="ch.ethz.twimight.DbContentProvider" 
+         android:authorities="ch.ethz.twimight.DbContentProvider"/>                 
+    </application>
+	
+	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="10"/>
+                
+      <permission android:description="@string/permDescription"                
+           android:label="Receiving Permission"
+           android:name="com.permission.SENSOR"              
+           android:protectionLevel="dangerous" />
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission> 		
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    	<uses-permission android:name="android.permission.BLUETOOTH" />   
+    	<uses-permission android:name="android.permission.VIBRATE" />      
+   	 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> 
+	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission> 
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.READ_LOGS" />	
+    	<uses-permission android:name="android.permission.RESTART_PACKAGES"></uses-permission>
+   	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
+        <uses-permission android:name="com.permission.SENSOR"></uses-permission>
+	
+	<uses-feature android:name="android.hardware.bluetooth"
+				  android:required="false" />				  
+	<uses-feature android:name="android.hardware.touchscreen" />	
+</manifest> 
