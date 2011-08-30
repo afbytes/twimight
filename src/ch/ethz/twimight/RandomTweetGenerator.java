@@ -14,6 +14,7 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.packets.SignedTweet;
+import ch.ethz.twimight.Constants;
 
 
 
@@ -91,7 +92,7 @@ public class RandomTweetGenerator extends Service {
 			  long tweetsNumber = Math.round(Math.random())+1;			 
     	      
 			  for (int i=0; i<tweetsNumber; i++) {
-				  String status = "random tweet " + Math.round(Math.random() * 10000) + " " + user;	
+				  String status = "random tweet " + Math.round(Math.random() * 10000) + " " + user + " " + Constants.TWHISPER_HASHTAG;	
 				  long time = new Date().getTime();
 				  
 				  SignedTweet tweet = new SignedTweet(status.hashCode(), time, status, user, userId, FALSE,
