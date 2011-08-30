@@ -47,6 +47,7 @@ import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
 import ch.ethz.twimight.AsyncTasks.FetchProfilePic;
 import ch.ethz.twimight.AsyncTasks.Retweet;
 import ch.ethz.twimight.packets.SignedTweet;
+import ch.ethz.twimight.Constants;
 
 
 /** Displays the list of all timelines from the DB. */
@@ -1034,7 +1035,7 @@ private void changeView(boolean isShowing, String table){
     				(isFromServ == FALSE && hasBeenSent == FALSE && isValid == FALSE )) {
     			//publish my tweets that have not been sent
     			String status = cursorDisaster.getString(cursorDisaster.getColumnIndexOrThrow(DbOpenHelper.C_TEXT));		    		
-    			if(!status.contains("random tweet") ) {
+    			if(!status.contains(Constants.TWHISPER_HASHTAG) ) {
     					setStatus(id,status);
     					
     			}
