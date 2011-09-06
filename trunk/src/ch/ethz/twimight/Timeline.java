@@ -1035,7 +1035,7 @@ private void changeView(boolean isShowing, String table){
     				(isFromServ == FALSE && hasBeenSent == FALSE && isValid == FALSE )) {
     			//publish my tweets that have not been sent
     			String status = cursorDisaster.getString(cursorDisaster.getColumnIndexOrThrow(DbOpenHelper.C_TEXT));		    		
-    			if(!status.contains(Constants.TWHISPER_HASHTAG) ) {
+    			if(!(status.contains(Constants.TWHISPER_HASHTAG) | status.contains(Constants.TWINTERNAL_HASHTAG))) {
     					setStatus(id,status);
     					
     			}

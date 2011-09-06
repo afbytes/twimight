@@ -40,6 +40,7 @@ import ch.ethz.twimight.packets.DirectMessage;
 import ch.ethz.twimight.packets.HelloPacket;
 import ch.ethz.twimight.packets.SignedTweet;
 import ch.ethz.twimight.packets.TweetPacket;
+import ch.ethz.twimight.Constants;
 
 public class DisasterOperations extends Service {
 	
@@ -642,7 +643,7 @@ public void onDestroy() {
 	    			 			 }	    			 					 
 	    			 		 } catch (IOException e) {	Log.i(TAG,"io exception");	} 
 	    			 		 */
-	    			 if (!status.contains("random tweet")) {	    			 			 
+	    			 if (!status.contains(Constants.TWINTERNAL_HASHTAG)) {	    			 			 
 	    			 	 dbActions.copyIntoTimelineTable(id,created,status,userId,isFromServer);	    			 					    	    			 			 
 	    			 }
 	    		 }
