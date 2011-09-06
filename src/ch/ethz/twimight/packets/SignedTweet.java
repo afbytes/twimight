@@ -25,13 +25,15 @@ public class SignedTweet implements Serializable  {
 		this.hasBeenSent = hasBeenSent;
 		this.hopCount = hopCount;
 		this.publicKey = publicKey;		
-		signature = sign;
+		this.signature = sign;
 		
 	}
 	
+	/* Concatenates all fields over which we want to sign a tweet and returns the hash */
 	public int hashCode() {
-		String string = status.concat(" " + user + userId + id + created);
-		return string.hashCode();
+		// We sign the tweet, user name, user id, hash and timestamp
+		String serializedInfo = status.concat(" " + user + userId + id + created);
+		return serializedInfo.hashCode();
 		
 	}
 	

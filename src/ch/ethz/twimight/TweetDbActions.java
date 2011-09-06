@@ -16,7 +16,7 @@ public class TweetDbActions {
 	DbOpenHelper dbHelper;
 	private SQLiteDatabase db = UpdaterService.db;	
 	private Cursor cursorNewPeer,cursorDisaster,cursorSelected, cursorPeers;
-//	private static final String TAG	= "TweetDbActions";
+	private static final String TAG	= "TweetDbActions";
 	
 
 	 void createTables(Context cont, SQLiteDatabase db) {
@@ -132,10 +132,11 @@ public class TweetDbActions {
   	    values.put(DbOpenHelper.C_IS_VALID, isValid );
   	    values.put(DbOpenHelper.C_HOPCOUNT, hopCount );
   	    values.put(DbOpenHelper.C_SIGNATURE, signature );
-  	    //  Log.i(TAG, "trying to insert into the Db");	 
+  	    Log.i(TAG, "trying to insert into the Db");	 
   	    try {
   	    	synchronized (this) {
-  	    		db.insertOrThrow(DbOpenHelper.TABLE_DISASTER, null, values);  	    		
+  	    		db.insertOrThrow(DbOpenHelper.TABLE_DISASTER, null, values);
+  	    		Log.i(TAG, "saved into the Db");
   	    		return true;
   	    	}
   	    } 
