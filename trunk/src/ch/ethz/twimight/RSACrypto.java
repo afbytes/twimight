@@ -157,20 +157,27 @@ public class RSACrypto {
 	  
 	  public boolean verifySignature(SignedTweet tweet) {
 		  
+		  Log.i(TAG, "inside verifySignature");
+		  
 		  long hash = tweet.hashCode();
+		  
+		  Log.i(TAG, "got hash");
 		  
 		  try {				
 				Cipher cipher = Cipher.getInstance("RSA");			
 			    	    
 				cipher.init(Cipher.DECRYPT_MODE, tweet.publicKey);
-				if (tweet != null) {					
+				if (tweet != null) {
+					Log.i(TAG, "tweet not null");
 					byte[] decryptedHash = cipher.doFinal(tweet.signature);
 					String originalHash = new String(decryptedHash);
 					
+					Log.i(TAG, "before compare " + originalHash);
 					if (Long.parseLong(originalHash) == hash) {
-						
+						Log.i(TAG, "equal!");
 						return true;
-					}								
+					}					
+					Log.i(TAG, "not equal");
 				}								
 			} catch (NoSuchAlgorithmException e) {			
 			} catch (NoSuchPaddingException e) {			

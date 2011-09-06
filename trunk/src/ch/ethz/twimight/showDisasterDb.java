@@ -75,8 +75,8 @@ public class showDisasterDb extends Activity{
 	  @Override
 	  public boolean onCreateOptionsMenu(Menu menu){
 		  super.onCreateOptionsMenu(menu);
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.menu_disaster_db, menu);
+	    //MenuInflater inflater = getMenuInflater();
+	    //inflater.inflate(R.menu.menu_disaster_db, menu);
 	    return true;
 	  }
 	    

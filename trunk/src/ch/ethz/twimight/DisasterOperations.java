@@ -587,12 +587,17 @@ public void onDestroy() {
  private void extractFields(SignedTweet readMessage) {
 	  int hasBeenSent = FALSE;
 	  RSACrypto crypto = new RSACrypto(mSettings);
+	  
+	  Log.i(TAG, "extractFields");
 		
 	  if (readMessage != null) {
+		  Log.i(TAG, "readMessage not null");
 		 if (readMessage.publicKey != null) {
+			 Log.i(TAG, "readMessage.publicKey not null");
 		  // I  NEED TO VERIFY THE SIGNATURE
 		  if (crypto.verifySignature(readMessage)) {
 			
+			  Log.i(TAG, "Signature verified");
 	  		long id = readMessage.id;
 	  		long created = readMessage.created;
 	  		long userId = readMessage.userId;
@@ -606,6 +611,7 @@ public void onDestroy() {
 	    	int hopCount = readMessage.hopCount + 1;
 	    	byte[] signature = readMessage.signature;
 	    		    	
+	    	Log.i(TAG, "fields read");
 	    	 //NEED TO SAVE USER AND PUBLIC KEY 
 	    	ContentValues values = new ContentValues();
 	    	values.put(DbOpenHelper.C_USER, user );
@@ -621,13 +627,17 @@ public void onDestroy() {
 				values.put(DbOpenHelper.C_EXPONENT, readMessage.publicKey.getPublicExponent().toString());
 			
 			
-			dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);					
+			dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
+			
+			Log.i(TAG, "friend inserted");
 	    		
 	    	// try to save into the disaster table	
 	    	if (dbActions != null) {	    		
 	    		 		
 	    		 if (dbActions.saveIntoDisasterDb(id, created, now, status, userId,
 	    		 				 mConnectedDeviceName,isFromServer,hasBeenSent,TRUE, hopCount,signature)) {
+	    			 
+	    			 Log.i(TAG, "saved Into Disaster DB");
 	    				
 	    		 		// if success notify the user and copy into the timeline table
 	    		 	 notify = true;

@@ -1035,10 +1035,7 @@ private void changeView(boolean isShowing, String table){
     				(isFromServ == FALSE && hasBeenSent == FALSE && isValid == FALSE )) {
     			//publish my tweets that have not been sent
     			String status = cursorDisaster.getString(cursorDisaster.getColumnIndexOrThrow(DbOpenHelper.C_TEXT));		    		
-    			if(!(status.contains(Constants.TWHISPER_HASHTAG) | status.contains(Constants.TWINTERNAL_HASHTAG))) {
-    					setStatus(id,status);
-    					
-    			}
+				setStatus(id,status);
     			
     		} else if (isFromServ == TRUE && hasBeenSent == FALSE) {
     			//publish the retweets 
@@ -1098,12 +1095,14 @@ private void publishDisasterTweets(boolean show) {
 	    	Toast.makeText(this, "No Internet connection", Toast.LENGTH_LONG).show();	
  }
  
+ /* posts a Tweet to the twitter server */
  private boolean setStatus(long id, String status) { // I need an id since it is used for publish disaster tweets as well
 	 if (ConnectionHelper.twitter == null) {			
 	  		connHelper.doLogin();	  							
 	 } 
 			try {
-				if (ConnectionHelper.twitter != null) {					
+				// we only publish the status if it does not contain the TWHISPER or TWINTERNAL hashtags
+				if (ConnectionHelper.twitter != null & !(status.contains(Constants.TWHISPER_HASHTAG) | status.contains(Constants.TWINTERNAL_HASHTAG))) {					
 					resultStatus = ConnectionHelper.twitter.setStatus(status);										
 					if (id != 0) { //in case we are automatically publishing disaster tweets
 						dbActions.updateDisasterTable(resultStatus.getId().longValue(),id,TRUE,TRUE);
