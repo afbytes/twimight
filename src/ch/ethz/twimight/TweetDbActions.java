@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.util.Log;
 
 public class TweetDbActions {
 	DbOpenHelper dbHelper;
@@ -231,10 +232,11 @@ public class TweetDbActions {
  			} catch (Exception ex) {}
      }
      
-     
      synchronized boolean insertIntoTimelineTable(Status status) {
     	 int affected2 = 0;
-    	 int affected= 0;    	 
+    	 int affected= 0;
+    	 
+    	 // prepare tweets to enter into DB
      	ContentValues values = DbOpenHelper.statusToContentValues(status, null);  
      	
      	if (status.isFavorite())        		
@@ -244,24 +246,33 @@ public class TweetDbActions {
      	
        	String dot = status.getText();  
        	
-       	if (!dot.equals(".")) {        		
+       	if (!dot.equals(".")) {
+       		// concatenate tweet and username (= the disaster ID)  
        		String msg = status.getText() + " " + status.getUser().getScreenName();
+       		// delete the respective disaster tweet from the timeline (if there is one)
+   			affected = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_ID + "=" + msg.hashCode(), null); 
+   			
+   			// Theus: I don't understand why we delete messages with the same text! 
+   			// No two users can tweet the same? Commenting this out.
+   			/*
+   			try {
+   				affected2 = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_TEXT + "='" + status.getText() + "'" , null);  
+   			} catch (Exception ex) {}
+			*/
+   			
+   			// Now insert into timeline. This will throw an exception if the tweet with the same ID is already in
+   			try {
+   				db.insertOrThrow(DbOpenHelper.TABLE, null, values);        			   
+   			    
+   			} 
+   			catch (SQLException ex) {
+   				// Since we get an exception, this was not a new tweet -> return false
+   				return false;
+ 			} 
        		
-       			affected = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_ID + "=" + msg.hashCode(), null);     
-       			try {
-       				affected2 = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_TEXT + "='" + status.getText() + "'" , null);  
-       			} catch (Exception ex) {}
-    	
-       			try {
-       				db.insertOrThrow(DbOpenHelper.TABLE, null, values);        			   
-       			    
-       			} 
-       			catch (SQLException ex) {
-       				return false;
-     			} 
-       		
+   			// If we deleted the respective disaster tweet before insertion, this is not a new tweet -> return false
      		if (affected > 0 || affected2 > 0 )    			
-          	 return false; // we dont have new status
+     			return false; // we dont have new status
      		else
      			return true; //we have new status
         

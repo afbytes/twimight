@@ -5,5 +5,6 @@ final class Constants {
     
 	private Constants() { throw new AssertionError("Constants is uninstantiable"); }
     
-    public static final String TWHISPER_HASHTAG = "#twhisper"; 
+    public static final String TWHISPER_HASHTAG = "#twhisper";
+    public static final String TWINTERNAL_HASHTAG = "#twinternal";
 }
