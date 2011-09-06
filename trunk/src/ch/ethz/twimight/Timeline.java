@@ -674,7 +674,7 @@ public void onBackPressed() {
 	}
 }
 
-
+/* Creates the main Menu of the application */
 @Override
   public boolean onCreateOptionsMenu(Menu menu){
 	  super.onCreateOptionsMenu(menu);
@@ -690,7 +690,7 @@ public void onBackPressed() {
 	  menu.add(0, SEARCH_ID, 9, "Search");
 	  menu.add(0, PROFILEINFO_ID,10, "Search User");
 	  menu.add(0, LOGOUT_ID, 11, "Logout");
-	  menu.add(0, DETAILS_ID, 12, "App Details");
+	  //menu.add(0, DETAILS_ID, 12, "App Details");
 	  //menu.add(0, EXIT_ID, 11, "Exit");	
 	  	
     return true;
