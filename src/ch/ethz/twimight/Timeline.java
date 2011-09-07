@@ -156,7 +156,7 @@ public class Timeline extends Activity {
 	    	dbActions.delete(where, DbOpenHelper.TABLE_PICTURES); 
 	    	
 	    	// Get the data from the DB
-			String query = "SELECT tim._id,user,created_at,status,isDisaster FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
+			String query = "SELECT tim._id,user,created_at,status,isDisaster, isFavorite FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
 			cursor = dbActions.rawQuery(query);
 			startManagingCursor(cursor);
 			//cursor = dbActions.queryGeneric(DbOpenHelper.TABLE,null, DbOpenHelper.C_CREATED_AT + " DESC" ,"100");
@@ -883,7 +883,7 @@ private void changeView(boolean isShowing, String table){
 	String query;
 	// Get the data from the DB	
     if (table.equals(DbOpenHelper.TABLE))
-		query = "SELECT tim._id,user,created_at,status,isDisaster FROM " + table + " AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
+		query = "SELECT tim._id,user,created_at,status,isDisaster,isFavorite FROM " + table + " AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
 
     else
 		query = "SELECT tim._id,user,created_at,status FROM " + table + " AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
@@ -1261,13 +1261,29 @@ private void publishDisasterTweets(boolean show) {
 				Toast.makeText(Timeline.this, "Favorite set succesfully", Toast.LENGTH_SHORT).show();
 				else 
 				 Toast.makeText(Timeline.this, "Favorite not set", Toast.LENGTH_SHORT).show();
+				
+				// After favoriting, reload to show the new favorite marked as such
+				if (table.equals(DbOpenHelper.TABLE)) {
+			    	// Get the data from the DB
+					query = "SELECT tim._id,user,created_at,status,isDisaster, isFavorite FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
+					cursor = dbActions.rawQuery(query);
+					//startManagingCursor(cursor);
+					//cursor = dbActions.queryGeneric(DbOpenHelper.TABLE,null, DbOpenHelper.C_CREATED_AT + " DESC" ,"100");
+					Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);		 
+					cursorPictures.moveToFirst();
+					    // Setup the adapter		
+					adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);		
+					listTimeline.setAdapter(adapter); 
+					registerForContextMenu(listTimeline);
+			    }
 			}
 			else {
 				if (result)
 					Toast.makeText(Timeline.this, "Favorite removed succesfully", Toast.LENGTH_SHORT).show();
 				else 
 					Toast.makeText(Timeline.this, "Favorite not removed", Toast.LENGTH_SHORT).show();				
-								
+						
+				// After unfavoriting, reload
 				if(table.equals(DbOpenHelper.TABLE_FAVORITES)) {
 					query = "SELECT tim._id,user,created_at,status FROM FavoritesTable AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";				
 					cursor = dbActions.rawQuery(query);	
@@ -1287,6 +1303,18 @@ private void publishDisasterTweets(boolean show) {
 						
 						
 					}
+			    } else if (table.equals(DbOpenHelper.TABLE)) {
+			    	// Get the data from the DB
+					query = "SELECT tim._id,user,created_at,status,isDisaster, isFavorite FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
+					cursor = dbActions.rawQuery(query);
+					//startManagingCursor(cursor);
+					//cursor = dbActions.queryGeneric(DbOpenHelper.TABLE,null, DbOpenHelper.C_CREATED_AT + " DESC" ,"100");
+					Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);		 
+					cursorPictures.moveToFirst();
+					    // Setup the adapter		
+					adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);		
+					listTimeline.setAdapter(adapter); 
+					registerForContextMenu(listTimeline);
 			    }
 			}			
 		}
@@ -1298,7 +1326,7 @@ private void publishDisasterTweets(boolean show) {
      @Override
      public void onReceive(Context context, Intent intent) {
     	 		  
-		 String query = "SELECT tim._id,user,created_at,status,isDisaster FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
+		 String query = "SELECT tim._id,user,created_at,status,isDisaster,isFavorite FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
  	     cursor = dbActions.rawQuery(query); 	    
  	     startManagingCursor(cursor);
     	 Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);	

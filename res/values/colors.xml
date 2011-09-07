@@ -5,4 +5,6 @@
   <color name="darkBlue">#000F04</color>
   <color name="white">#FFFFFFFF</color>
   <color name="green">#f0f0</color>
+  <color name="highlight_strong">#ff0000</color>
+  <color name="highlight_weak">#ff7979</color>
 </resources>

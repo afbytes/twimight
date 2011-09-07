@@ -2,8 +2,7 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:versionCode="1"
-	android:versionName="1.0"
-	package="ch.ethz.twimight">  
+	package="ch.ethz.twimight" android:versionName="0.6.0">  
 	 
 	<application
 		android:icon="@drawable/twitter_icon"
@@ -58,7 +57,7 @@
 				        
         <service android:enabled="true"  android:name=".UpdaterService"  />        
         <service android:enabled="true"  android:name=".DevicesDiscovery" />
-        <service android:enabled="true" android:name=".RandomTweetGenerator"  />
+        <service android:name=".RandomTweetGenerator"  android:enabled="false"/>
         <service android:enabled="true" android:name="ch.ethz.twimight.DisasterOperations" />
           
         <activity android:name=".Search" android:launchMode="standard" android:configChanges="orientation|keyboardHidden">

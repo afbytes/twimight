@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.util.Log;
 
 /** Custom adapter so we can apply transformations on the data */
 public class TimelineAdapter extends SimpleCursorAdapter {
@@ -70,7 +71,22 @@ private static String TAG = "TimelineAdapter";
     	else 
     		row.setBackgroundColor(0xff000000);
     	
-    
+    	// if the tweet is a favorite, we mark it as such
+    	ImageView favoriteStar = (ImageView) row.findViewById(R.id.favorite);
+		favoriteStar.setImageResource(R.drawable.blank);
+    	try {
+    		int favoriteIndex = cursor.getColumnIndexOrThrow(DbOpenHelper.C_IS_FAVORITE);
+    		int isFavorite =  cursor.getInt(favoriteIndex);
+	    	if (isFavorite == Timeline.TRUE) {
+	    		
+	    		favoriteStar.setImageResource(R.drawable.favorite);
+
+	    	}
+    	} catch (Exception ex) {
+    		// In favorites view we don't have the column isFavorite and this exception will be trown.
+    		//Log.i(TAG, "EXCEPTION! " + ex.getMessage());
+    	}
+    	
     } catch (Exception ex) {
     	//Log.e(TAG,"error inside timeline adapter",ex);
     }
