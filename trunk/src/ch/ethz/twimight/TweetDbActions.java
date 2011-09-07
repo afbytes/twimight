@@ -72,10 +72,9 @@ public class TweetDbActions {
 			long userId, boolean isInTimeline){
 		 ContentValues values = new ContentValues();
 		 
-		 if (isInTimeline ) {
-			 values.put(DbOpenHelper.C_IS_FAVORITE,isFavorite );
-			 db.update(DbOpenHelper.TABLE, values, DbOpenHelper.C_ID + "=" + status.id.longValue() , null);
-		 }
+
+		 values.put(DbOpenHelper.C_IS_FAVORITE,isFavorite );
+		 db.update(DbOpenHelper.TABLE, values, DbOpenHelper.C_ID + "=" + status.id.longValue() , null);
 		 
 		 if (action == Timeline.R_FAVORITE_ID) 
 			 db.delete(DbOpenHelper.TABLE_FAVORITES, DbOpenHelper.C_ID + "=" + status.id.longValue() , null);
