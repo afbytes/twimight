@@ -4,14 +4,12 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 	
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="Twimight"
-		android:textSize="30sp"
-		android:gravity="center"
-		android:textStyle="bold"
-		android:id="@+id/headerText" />
+    <LinearLayout android:layout_marginTop="50px" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="horizontal" android:layout_gravity="center">
+        <ImageView android:id="@+id/imageView1" android:src="@drawable/twitter_icon" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_width="wrap_content"></ImageView>
+        <TextView android:text="Twimight" android:id="@+id/textView2" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center_vertical" android:textAppearance="@style/title"></TextView>
+    </LinearLayout>
+	
+	<TextView android:text="Tap the button below to log in your Twitter account and authorize Twimight to access your data." android:id="@+id/textView1" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_marginLeft="10px" android:layout_marginRight="10px" android:layout_marginTop="100px" android:layout_marginBottom="100px"/>
 		
 	<Button 
 		android:layout_height="wrap_content" 
@@ -21,7 +19,7 @@
 	 	android:visibility="visible"
 	  	android:layout_width="fill_parent"
 	   	android:layout_marginRight="10px"
-	    android:layout_marginLeft="10px" android:clickable="true" android:layout_marginTop="50px">
+	    android:layout_marginLeft="10px" android:clickable="true" android:layout_marginTop="50px" android:layout_gravity="bottom">
 	</Button>
 
 </LinearLayout>
