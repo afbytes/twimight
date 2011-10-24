@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,6 +44,14 @@ public class MyTwitter extends Activity implements OnClickListener{
 	
 	/** Called when the activity is first created. */
     public void onCreate(Bundle savedInstanceState) {
+    	
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+
     	Log.i(TAG,"inside on create");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);          

@@ -26,7 +26,13 @@ public class SendDirectMessage extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.senddirectmsg);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);	   

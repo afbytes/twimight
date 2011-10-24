@@ -7,4 +7,8 @@ final class Constants {
     
     public static final String TWHISPER_HASHTAG = "#twhisper";
     public static final String TWINTERNAL_HASHTAG = "#twinternal";
+    
+    // Intent Actions
+    public static final String ACTION_NEW_DISASTER_TWEET = "New disaster tweet";
+    public static final String ACTION_DISASTER_MODE = "Disaster Mode";
 }

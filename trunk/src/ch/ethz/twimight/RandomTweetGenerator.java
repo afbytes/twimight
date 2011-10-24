@@ -108,7 +108,7 @@ public class RandomTweetGenerator extends Service {
 					} 
 					  catch (IOException e) {	}
 					  */
-					  sendBroadcast(new Intent(Timeline.ACTION_NEW_DISASTER_TWEET));
+					  sendBroadcast(new Intent(Constants.ACTION_NEW_DISASTER_TWEET));
 					  //dbActions.copyIntoTimelineTable(status.hashCode(),time, status,user,FALSE);				
 				  }
 				  

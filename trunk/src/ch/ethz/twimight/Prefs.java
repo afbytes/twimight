@@ -36,29 +36,38 @@ public class Prefs extends PreferenceActivity{
 	  static final String TAG = "Prefs";	 
 	  boolean isAutomatic;
 	  
+	  
   @Override
   public void onCreate(Bundle savedInstanceState){
-    super.onCreate(savedInstanceState);    
-    addPreferencesFromResource(R.xml.prefs);
-    
-	  setResult(RESULT_CANCELED);  
-    // Get shared preferences
-    prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE); 
-   
-      
-    ConnectivityManager connec =  (ConnectivityManager)getSystemService(
-			 Context.CONNECTIVITY_SERVICE);
-    connHelper = new ConnectionHelper(mSettings,connec);
-    
-    prefListener = new OnSharedPreferenceChangeListener() {
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+	    super.onCreate(savedInstanceState);    
+	    addPreferencesFromResource(R.xml.prefs);
+	    
+		  setResult(RESULT_CANCELED);  
+	    // Get shared preferences
+	    prefs = PreferenceManager.getDefaultSharedPreferences(this);
+	    mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE); 
+	   
+	      
+	    ConnectivityManager connec =  (ConnectivityManager)getSystemService(
+				 Context.CONNECTIVITY_SERVICE);
+	    connHelper = new ConnectionHelper(mSettings,connec);
+	    
+	    prefListener = new OnSharedPreferenceChangeListener() {
     	
         public void onSharedPreferenceChanged(SharedPreferences preferences,
             String key) {
       	 
         	if (key.equals("prefDisasterMode") &&  prefs.getBoolean("prefDisasterMode", false) == true ) {
          
-        		enableBluetooth();         	 
+        		enableBluetooth();   
+        	    Log.i(TAG,"enabling disaster mode!");
+        	    
         	}
         
         	else if (key.equals("prefDisasterMode") &&  prefs.getBoolean("prefDisasterMode", false) == false) {        	

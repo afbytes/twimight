@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
@@ -50,7 +51,7 @@ import ch.ethz.twimight.packets.SignedTweet;
 import ch.ethz.twimight.Constants;
 
 
-/** Displays the list of all timelines from the DB. */
+/** Displays the list of all tweets from the DB. */
 public class Timeline extends Activity {
 	
   static final String TAG = "Timeline";
@@ -78,7 +79,6 @@ public class Timeline extends Activity {
   int hasBeenSent = FALSE ;
   private boolean isShowingFavorites =  false;   
 
-  static final String ACTION_NEW_DISASTER_TWEET = "New disaster tweet";
   private static final int PREF_SCREEN = 1;  
   
   static final int REPLY_ID = Menu.FIRST;
@@ -118,7 +118,14 @@ public class Timeline extends Activity {
   String username = "", destinationUsername;
   long id;
   
+	
   public void onCreate(Bundle savedInstanceState) {
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.simplelist);		    
 	   	isRunning = true;  
@@ -171,9 +178,11 @@ public class Timeline extends Activity {
 	    	}	    
 		Log.i(TAG,"on create 3");	
 		
+		// Are we in disaster mode?
 		if (prefs.getBoolean("prefDisasterMode", false) == true) {
 			//it means we are restarting from a crash
-			startServices();			
+			Log.i(TAG, "asdfasdfasdfasdfasdfasdfasdfasdf");
+			startServices();	
 		}		
 		 // I need to know the authenticating username
 		// at the end it will post also the public key
@@ -182,11 +191,12 @@ public class Timeline extends Activity {
 		// Register to get  broadcasts		
 	    registerReceiver(twitterStatusReceiver, new IntentFilter(UpdaterService.ACTION_NEW_TWITTER_STATUS));	    
 	    registerReceiver(directMsgSentReceiver,new IntentFilter("DirectMsg"));
-	    registerReceiver(externalAppReceiver, new IntentFilter("test"),"com.permission.SEND" , null);	 
+	    registerReceiver(externalAppReceiver, new IntentFilter("test"),"com.permission.SEND" , null);
+	    
+	    registerReceiver(modeChangeReceiver, new IntentFilter(Constants.ACTION_DISASTER_MODE));
+	    
 		
   }
- 
-  
   
 @Override
 protected void onStart() {
@@ -199,7 +209,13 @@ protected void onStart() {
 	 //}
 }
 
-
+private void restart(){
+	
+	Log.i(TAG, "IN RESTART!!!!!!!");
+	Intent intent = getIntent();
+	finish();
+	startActivity(intent);
+}
 
 @Override
 protected Dialog onCreateDialog(int id) {	
@@ -443,7 +459,8 @@ class GetFriendKeys implements Runnable {
 
 
 @Override
-  public void onResume() {	
+  public void onResume() {
+	
     super.onResume();
    
     // Cancel notification
@@ -454,9 +471,13 @@ class GetFriendKeys implements Runnable {
 		}
 		new GetAuthenticatingUsername().execute();
    }
+   
+
+
    //this thread was useful to remove spam during tests
    //new Thread(new DeleteMyTweets()).start(); 
   }
+
 
   @Override
   public void onDestroy() {
@@ -464,12 +485,17 @@ class GetFriendKeys implements Runnable {
     unregisterReceiver(twitterStatusReceiver);
     unregisterReceiver(externalAppReceiver);
     unregisterReceiver(directMsgSentReceiver);
+    unregisterReceiver(modeChangeReceiver);
     isRunning = false;
+    
+    /*
     stopService(new Intent(this, UpdaterService.class));
+    
     BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
     mBtAdapter.disable();
     if (prefs.getBoolean("prefDisasterMode", false)) {
     	stopService(new Intent(this,DisasterOperations.class));
+    	//Try to publish disaster tweets
     	 publishDisasterTweets(true);
     }
     	  
@@ -477,7 +503,8 @@ class GetFriendKeys implements Runnable {
     SharedPreferences.Editor editor = prefs.edit();   
     editor.putBoolean("prefDisasterMode", false);   
     editor.commit();
-    //Try to publish disaster tweets   
+    */
+       
     cursor.close();
     db.close();       
     ConnectionHelper.twitter = null;
@@ -692,6 +719,7 @@ public void onBackPressed() {
 	  menu.add(0, LOGOUT_ID, 11, "Logout");
 	  //menu.add(0, DETAILS_ID, 12, "App Details");
 	  //menu.add(0, EXIT_ID, 11, "Exit");	
+	  
 	  	
     return true;
   }    
@@ -966,7 +994,10 @@ private void changeView(boolean isShowing, String table){
   		case PREF_SCREEN:
   			
   			if (resultCode == Prefs.BLUE_ENABLED) { 
-  				startServices();      	      	         
+  				startServices();
+  				
+  				// broadcast the mode change
+  				sendBroadcast(new Intent(Constants.ACTION_DISASTER_MODE));
   			} 
   			
   			else if (resultCode ==  Prefs.DIS_MODE_DISABLED) {  				
@@ -979,7 +1010,11 @@ private void changeView(boolean isShowing, String table){
   	  				mBtAdapter.disable();
   	  		    stopService(new Intent(this,DisasterOperations.class));   	  		 
   				stopService(new Intent(this,DevicesDiscovery.class));
-  				stopService(new Intent(this,RandomTweetGenerator.class));   				  		    
+  				//stopService(new Intent(this,RandomTweetGenerator.class));
+  				  				
+  				// broadcast the mode change
+  				sendBroadcast(new Intent(Constants.ACTION_DISASTER_MODE));
+  				
   	  		    try {
   	  		    	unregisterReceiver(airplaneModeReceiver);
   	  		    } catch (Exception ex) {}
@@ -1007,9 +1042,9 @@ private void changeView(boolean isShowing, String table){
 	  
 	  startService(new Intent(this, DisasterOperations.class));         	         
       startService(new Intent(this, DevicesDiscovery.class));    	         
-      startService(new Intent(this, RandomTweetGenerator.class)); 
+      //startService(new Intent(this, RandomTweetGenerator.class)); 
       
-      IntentFilter filter = new IntentFilter(ACTION_NEW_DISASTER_TWEET);
+      IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_DISASTER_TWEET);
       this.registerReceiver(twitterStatusReceiver, filter); 
       filter = new IntentFilter("android.intent.action.SERVICE_STATE");
 	  this.registerReceiver(airplaneModeReceiver, filter);	  
@@ -1190,7 +1225,7 @@ private void publishDisasterTweets(boolean show) {
 							*
 							*/				 			
 				 			//if it has been added successfully
-				 			sendBroadcast(new Intent(ACTION_NEW_DISASTER_TWEET));
+				 			sendBroadcast(new Intent(Constants.ACTION_NEW_DISASTER_TWEET));
 							if (!result) { //if it has not been successfully pub. I need to show in the timeline
 								//otherwise it means i will receive it from online central servers
 								dbActions.copyIntoTimelineTable(concatenate.hashCode(), new Date().getTime(),
@@ -1319,9 +1354,22 @@ private void publishDisasterTweets(boolean show) {
 			}			
 		}
 	}
-
-
  
+ /*
+  * Down here we define broadcast receivers
+  */
+
+ // Listens to changes from normal mode to disaster mode and vice versa and changes the theme accordingly
+ private final BroadcastReceiver modeChangeReceiver = new BroadcastReceiver() {
+     @Override
+     public void onReceive(Context context, Intent intent) {
+	    	 		  
+    	 Log.i(TAG,"GOOOOOOOOOOOOOOOT 1111111");
+    	 restart();
+     }
+ };
+ 
+ // Listens to new disaster tweets and  updates the shown timeline accordingly
  private final BroadcastReceiver twitterStatusReceiver = new BroadcastReceiver() {
      @Override
      public void onReceive(Context context, Intent intent) {
@@ -1337,6 +1385,7 @@ private void publishDisasterTweets(boolean show) {
      }
  };
  
+ // Listens to airplane mode notification and stops disaster mode (no bluetooth in airplane mode!)
  private final BroadcastReceiver airplaneModeReceiver = new BroadcastReceiver() {
      @Override
      public void onReceive(Context context, Intent intent) {           
@@ -1364,6 +1413,7 @@ private void publishDisasterTweets(boolean show) {
      }
 };
 
+// Listens to and publishes tweets sent by other apps
 private final BroadcastReceiver externalAppReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {	  
@@ -1374,6 +1424,7 @@ private final BroadcastReceiver externalAppReceiver = new BroadcastReceiver() {
     }
 };
 
+// Listens to the result from sending a direct message and updates the input field accordingly
 private final BroadcastReceiver directMsgSentReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {   
