@@ -122,9 +122,10 @@ public class MyTwitter extends Activity implements OnClickListener{
    			startActivity(new Intent(this, Timeline.class));
    			
 				
-			} else {				
-				Toast.makeText(this,"Press the button above to authorize the client" , Toast.LENGTH_SHORT).show();
-			}
+			} 
+   	  	//else {				
+		//		Toast.makeText(this,"Press the button above to authorize the client" , Toast.LENGTH_SHORT).show();
+		//	}
 			  	
    }
 	
