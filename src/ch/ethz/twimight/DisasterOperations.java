@@ -641,7 +641,7 @@ public void onDestroy() {
 	    				
 	    		 		// if success notify the user and copy into the timeline table
 	    		 	 notify = true;
-	    			 sendBroadcast(new Intent(Timeline.ACTION_NEW_DISASTER_TWEET));	    			 		
+	    			 sendBroadcast(new Intent(Constants.ACTION_NEW_DISASTER_TWEET));	    			 		
 	    			 //long delay = Math.round( (now/ 60000) - (created / 60000) );	    			 		
 	    			 		 /*
 	    			 		  * try {

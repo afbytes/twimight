@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,13 @@ public class Followers extends Activity{
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.simplelist);
 		listFriends = (ListView) findViewById(R.id.itemList);

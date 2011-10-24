@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -60,8 +61,17 @@ public class DirectMessages extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.simplelist);
+
 		listDirect = (ListView) findViewById(R.id.itemList);	
 		registerForContextMenu(listDirect);		
 		mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE);	    

@@ -10,11 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
+import ch.ethz.twimight.Constants;
 
 
 
@@ -34,7 +35,13 @@ public class showDisasterDb extends Activity{
 	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+		// Are we in disaster mode?
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			setTheme(R.style.twimightDisasterTheme);
+		} else {
+			setTheme(R.style.twimightTheme);
+		}
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.simplelist);			
 		 // Find views by id
@@ -55,7 +62,7 @@ public class showDisasterDb extends Activity{
 		listTimeline.setAdapter(adapter);   
 			     
 		twitterStatusReceiver = new TwitterStatusReceiver();
-		registerReceiver(twitterStatusReceiver, new IntentFilter(Timeline.ACTION_NEW_DISASTER_TWEET));
+		registerReceiver(twitterStatusReceiver, new IntentFilter(Constants.ACTION_NEW_DISASTER_TWEET));
 		
 	}
 	
