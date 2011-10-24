@@ -918,17 +918,15 @@ private void changeView(boolean isShowing, String table){
 
 	    cursor = dbActions.rawQuery(query);   
 	    // cursor = dbActions.queryGeneric(table, null, DbOpenHelper.C_CREATED_AT + " DESC",  "100");
-	    if (cursor.getCount() > 0) {
-	    	startManagingCursor(cursor);
-	    	Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);
-	    	cursorPictures.moveToFirst();    
-	    	// Setup the adapter	    
-	    	adapter = new TimelineAdapter(this, cursor, cursorPictures);
-	    	listTimeline.setAdapter(adapter);		   
-	    	registerForContextMenu(listTimeline);
-	    	isShowingFavorites =  isShowing;
-	    } else
-	    	Toast.makeText(this, "There are no favorite tweets", Toast.LENGTH_LONG).show();     	
+
+    	startManagingCursor(cursor);
+    	Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);
+    	cursorPictures.moveToFirst();    
+    	// Setup the adapter	    
+    	adapter = new TimelineAdapter(this, cursor, cursorPictures);
+    	listTimeline.setAdapter(adapter);		   
+    	registerForContextMenu(listTimeline);
+    	isShowingFavorites =  isShowing;
   }
   
   class RefreshTimeline extends AsyncTask<Void, Void, Boolean> {		
