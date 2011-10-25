@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<CheckBoxPreference android:title="DisasterMode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:summary="Press to enable disaster mode"></CheckBoxPreference>
-	<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Enable Vibration" android:key="prefVibration" android:summary="Press to enable vibration"></CheckBoxPreference>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Disaster Mode">
+		<CheckBoxPreference android:title="DisasterMode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:summary="Tap to enable disaster mode"></CheckBoxPreference>
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Basic Settings">
+		<ListPreference android:title="Number of Tweets" android:summary="Number of Tweets to download" android:key="nrTweets" android:defaultValue="2" android:entries="@array/nrTweetArray" android:entryValues="@array/nrTweetValues" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="Notifications">
+		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Tweet" android:key="notifyTweet" android:defaultValue="false" android:summary="Tap to get a notification when you have new Tweets in your Timeline"></CheckBoxPreference>
+		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Mention" android:key="notifyMention" android:defaultValue="true" android:summary="Tap to get a notification when you have new Mentions"></CheckBoxPreference>
+		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Direct Msg" android:key="notifyDM" android:defaultValue="true" android:summary="Tap to get a notification when you have a new Direct Message"></CheckBoxPreference>
+		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Enable Vibration" android:key="prefVibration" android:defaultValue="false" android:summary="Tap to enable vibration"></CheckBoxPreference>
+	</PreferenceCategory>
 	
 </PreferenceScreen>
