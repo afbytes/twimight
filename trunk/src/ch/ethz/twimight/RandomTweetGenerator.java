@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import ch.ethz.twimight.packets.SignedTweet;
 import ch.ethz.twimight.Constants;
 
@@ -43,7 +42,7 @@ public class RandomTweetGenerator extends Service {
 		super.onCreate();		
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);		    
 		mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE);
-		String user = mSettings.getString("user", "");
+		//String user = mSettings.getString("user", "");
 	    //dbActions = new TweetDbActions();	 
 	    hand = new Handler();
 	    generateRandTweets = new GenerateRandomTweets();	      

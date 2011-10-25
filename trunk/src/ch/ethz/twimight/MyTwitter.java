@@ -27,7 +27,6 @@ public class MyTwitter extends Activity implements OnClickListener{
     SharedPreferences mSettings;
     Button buttonOAuth; 
     ConnectionHelper connHelper;
-	private DbOpenHelper dbHelper;
 	public String status;
 	static MyTwitter activity;
 	static PendingIntent restartIntent;	

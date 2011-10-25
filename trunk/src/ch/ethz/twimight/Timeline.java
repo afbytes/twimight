@@ -41,7 +41,6 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import ch.ethz.twimight.AsyncTasks.DirectMsgTask;

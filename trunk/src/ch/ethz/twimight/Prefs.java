@@ -79,8 +79,8 @@ public class Prefs extends PreferenceActivity{
         		finish();
         		Log.i(TAG,"disaster mode disabled");
 
-        	} 
-        
+        	}
+        	
         }
     };
     

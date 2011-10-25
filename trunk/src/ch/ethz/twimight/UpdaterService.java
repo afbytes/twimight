@@ -1,7 +1,6 @@
 package ch.ethz.twimight;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +23,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.AsyncTasks.FetchProfilePic;
+import ch.ethz.twimight.Constants;
 
 
 /**
@@ -110,7 +110,7 @@ public class UpdaterService extends Service {
   
 
   class UpdaterLessFrequent implements Runnable {
-	  static final long DELAY_L = 290000L;
+
 	@Override
 	public void run() {		 
 		  try { 
@@ -129,8 +129,8 @@ public class UpdaterService extends Service {
 		      }
 		      
 		  // Set this to run again later
-		  long random = Math.round(Math.random()*20000);
-	      handler.postDelayed(this, DELAY_L + random);
+		  //long random = Math.round(Math.random()*20000);
+	      handler.postDelayed(this, Constants.FRIENDS_UPDATE_INTERVAL);
 		
 	}
 	  
@@ -139,7 +139,6 @@ public class UpdaterService extends Service {
   
   /** Updates the database from twitter.com data */
   class Updater implements Runnable {	  
-	    static final long DELAY = 110000L;	    
 	   
 
     public void run() {      
@@ -152,7 +151,7 @@ public class UpdaterService extends Service {
       try { 
     	if (connHelper.testInternetConnectivity()) {
     		if (twitter !=null) {     			
-    			
+    			// Start the Tweet downloader
     			new Download().execute();    			
     		}
     		else {
@@ -165,20 +164,39 @@ public class UpdaterService extends Service {
       }      
            
       // Set this to run again later
-      long random = Math.round(Math.random()*20000);
-      handler.postDelayed(this, DELAY + random);
+      //long random = Math.round(Math.random()*20000);
+      handler.postDelayed(this, Constants.TWEET_UPDATE_INTERVAL);
     }
   }
   
+  /*
+   * Here we download tweets from Twitter!
+   */
   class Download extends AsyncTask<Long, Void, Boolean> {
 	  
 	  List<Twitter.Status> timeline;
 	  
 			@Override
 			protected Boolean doInBackground(Long... id ) {
+				
+				// Start threads to download DMs and mentions
+				new Thread(new FetchDirect()).start();
+				new Thread(new FetchMentions()).start(); 
+				
+				// How many tweets to request from Twitter?
+				int nrTweets;
+				String nrTweetId_s = prefs.getString("nrTweets", "2");
+				switch(Integer.parseInt(nrTweetId_s)) {
+					case 1: nrTweets = 10; break;
+					case 2: nrTweets = 50; break;
+					case 3: nrTweets = 100; break;
+					case 4: nrTweets = 200; break;
+					default: nrTweets = 50; break;
+				}
+				
 				try {
-					twitter.setCount(40);
-					Log.i(TAG,"inside download");
+					twitter.setCount(nrTweets);
+					Log.i(TAG,"inside download, " + nrTweetId_s + " requesting " + Integer.toString(nrTweets) + " Tweets");
 					timeline = twitter.getHomeTimeline();
 					Log.i(TAG, "timeline size " + timeline.size() );
 					
@@ -212,19 +230,26 @@ public class UpdaterService extends Service {
 			    	  sendBroadcast(new Intent(ACTION_NEW_TWITTER_STATUS));
 			    	  Log.d(TAG, "run() sent ACTION_NEW_TWITTER_STATUS broadcast.");
 
-			          // Create the notification
-			    	  pendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,
-			    	          new Intent(UpdaterService.this, MyTwitter.class), 0);	 
-			    	  notifyUser("You have new tweets in the timeline","New Twitter Status", NOTIFICATION_ID, pendingIntent );			    	  			          
+			    	  pendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,  new Intent(UpdaterService.this, MyTwitter.class), 0);
+			          // Create the notification? Check the settings.
+			    	  if(prefs.getBoolean("notifyTweet", false) == true){	 
+			    		  notifyUser("You have new tweets in the timeline","New Tweets", NOTIFICATION_ID, pendingIntent );
+			    	  }
 			          haveNewStatus = false;
-			      } 			
+			      } 
+				
+				
 			}
 		}
   
+  /* 
+   * Here we download the mentions from Twitter
+   */
    private class FetchMentions implements Runnable {
 	  ContentValues values;	
 	  
 	  public void run() {
+		  Log.i(TAG,"downloading mentions");
 		  if (connHelper.testInternetConnectivity()) {
 			  if (ConnectionHelper.twitter == null ) {						    			
 				  connHelper.doLogin() ;		
@@ -251,32 +276,36 @@ public class UpdaterService extends Service {
 		   	  catch (Exception e) {   }
 		  }	    
 		  
+		  haveNewMentions = false;
+		  
 		  if (results != null) {
 			  for (Status status : results) {
 				  values = DbOpenHelper.statusToContentValues(status,null);
 				 // Log.i(TAG,"adding mention to db");
 				  if (dbActions.insertGeneric(DbOpenHelper.TABLE_MENTIONS, values) ) {
 					  haveNewMentions = true;
-					 // Log.i(TAG,"haveNewMentions set to true");
-				  }
-				  else 
-					  haveNewMentions = false;
+					  //Log.i(TAG,"haveNewMentions set to true");
+				  } 
 		 	 }	
-			  if (haveNewMentions) {
+			 if (haveNewMentions) {
 				  pendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,
 		    	          new Intent(UpdaterService.this, Mentions.class), 0);	
-				  Log.i(TAG,"new mentions, notifying the user");
-		    	  notifyUser("You have new mentions","New mention tweet", MENTION_NOTIFICATION_ID, pendingIntent );			    	  			          
-		          haveNewStatus = false;
+		          
+				  // Create the notification? Check the settings.
+		    	  if(prefs.getBoolean("notifyMention", true) == true){	 
+		    		  notifyUser("You have new mentions","New Mention", MENTION_NOTIFICATION_ID, pendingIntent );
+		    	  }
+		          haveNewMentions = false;
 			  }
 				  
 		  }
-		  
-		  new Thread(new FetchDirect()).start();	
+		  	
 	  }  
   } 
    
-   
+   /*
+    * Here we get the DMs from Twitter
+    */
    private class FetchDirect implements Runnable {
 	  ContentValues values;	
 	  
@@ -301,6 +330,8 @@ public class UpdaterService extends Service {
 		  } 
 		  catch (InterruptedException e) {  }
 		  
+		  haveNewDirect = false;
+		  
 		  if ( messages != null) {
 			  for (Twitter.Message msg : messages ) {				 
 				 Date date = msg.getCreatedAt();
@@ -308,15 +339,19 @@ public class UpdaterService extends Service {
 				 Status status = new Status(user,msg.getText(),msg.getId(),date);
 				 values = DbOpenHelper.statusToContentValues(status,null);
 				 values.put(DbOpenHelper.C_USER, user.getScreenName().toString());
-				 if (dbActions.insertGeneric(DbOpenHelper.TABLE_DIRECT, values)) 
+				 if (dbActions.insertGeneric(DbOpenHelper.TABLE_DIRECT, values)) {
 					 haveNewDirect =true;
+				 }
 				 
 		 	 }	
 			  
 			  if (haveNewDirect) {
 				  pendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,
-		    	          new Intent(UpdaterService.this, DirectMessages.class), 0);			
-				  notifyUser("New Direct Message","You have new disaster direct messages in the database", Timeline.DIRECT_NOTIFICATION_ID, pendingIntent);
+		    	          new Intent(UpdaterService.this, DirectMessages.class), 0);
+				  // Create the notification? Check the settings.
+		    	  if(prefs.getBoolean("notifyDM", true) == true){
+		    		  notifyUser("You have new direct messages", "New Direct Message", Timeline.DIRECT_NOTIFICATION_ID, pendingIntent);
+		    	  }
 				  haveNewDirect = false;
 				 
 			  }
@@ -359,7 +394,6 @@ public class UpdaterService extends Service {
 		@Override
 		protected void onPostExecute(Boolean result) {
 			
-			new Thread(new FetchMentions()).start(); 
 			
 			if (result) {
 				dummyStatus = new ArrayList<Twitter.Status>();				
@@ -406,7 +440,7 @@ public class UpdaterService extends Service {
 		    PendingIntent pendingIntent;	    
 		    
 		    notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-		    notification = new Notification( android.R.drawable.stat_sys_download,
+		    notification = new Notification(R.drawable.twitter_icon,
 		    			"Twimight", System.currentTimeMillis() );
 		    pendingIntent = pend;
 		    
