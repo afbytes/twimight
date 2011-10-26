@@ -90,13 +90,14 @@ public class Mentions extends Activity {
 	}
 	
 	
-	
+	/**
+	 * onResume mainly cancels the pending notification.
+	 */
 	 @Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		 notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		 notificationManager.cancel(UpdaterService.MENTION_NOTIFICATION_ID);
+		 notificationManager.cancel(Constants.MENTION_NOTIFICATION_ID);
 	}
 
 	@Override
