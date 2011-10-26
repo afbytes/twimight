@@ -1,5 +1,6 @@
 package ch.ethz.twimight;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 import winterwell.jtwitter.Twitter.Status;
@@ -231,10 +232,8 @@ public class TweetDbActions {
  				}
  			} catch (Exception ex) {}
      }
-     
+    
      synchronized boolean insertIntoTimelineTable(Status status) {
-    	 int affected2 = 0;
-    	 int affected= 0;
     	 
     	 // prepare tweets to enter into DB
      	ContentValues values = DbOpenHelper.statusToContentValues(status, null);  
@@ -243,42 +242,17 @@ public class TweetDbActions {
            	values.put(DbOpenHelper.C_IS_FAVORITE,1);       	
         else 
            	values.put(DbOpenHelper.C_IS_FAVORITE,0);
-     	
-       	String dot = status.getText();  
        	
-       	if (!dot.equals(".")) {
-       		// concatenate tweet and username (= the disaster ID)  
-       		String msg = status.getText() + " " + status.getUser().getScreenName();
-       		// delete the respective disaster tweet from the timeline (if there is one)
-   			affected = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_ID + "=" + msg.hashCode(), null); 
-   			
-   			// Theus: I don't understand why we delete messages with the same text! 
-   			// No two users can tweet the same? Commenting this out.
-   			/*
-   			try {
-   				affected2 = db.delete(DbOpenHelper.TABLE,DbOpenHelper.C_TEXT + "='" + status.getText() + "'" , null);  
-   			} catch (Exception ex) {}
-			*/
-   			
-   			// Now insert into timeline. This will throw an exception if the tweet with the same ID is already in
-   			try {
-   				db.insertOrThrow(DbOpenHelper.TABLE, null, values);        			   
-   			    
-   			} 
-   			catch (SQLException ex) {
-   				// Since we get an exception, this was not a new tweet -> return false
-   				return false;
- 			} 
-       		
-   			// If we deleted the respective disaster tweet before insertion, this is not a new tweet -> return false
-     		if (affected > 0 || affected2 > 0 )    			
-     			return false; // we dont have new status
-     		else
-     			return true; //we have new status
-        
-       	}
-       	else 
+       	try {
+       		db.insertOrThrow(DbOpenHelper.TABLE, null, values);        			   
+			    
+       	} 
+       	catch (SQLException ex) {
+       		//Since we get an exception, this was not a new tweet -> return false
        		return false;
+       	}
+       	
+       	return true;
      }
       
       synchronized public boolean insertGeneric(String table, ContentValues values) {
@@ -331,6 +305,30 @@ public class TweetDbActions {
     	  else
     		  return null;
     	 
+      }
+      
+      /**
+       * Set the Favorite flag in the timeline Table to 1
+       * @param tweetId ID of Tweet
+       * @return number of rows affected
+       */
+      synchronized int setFavorite(BigInteger tweetId){
+      	ContentValues values = new ContentValues();
+      	values.put(DbOpenHelper.C_IS_FAVORITE, 1);
+      	
+      	return db.update(DbOpenHelper.TABLE, values, DbOpenHelper.C_ID + "=" + tweetId.toString(), null);
+      }
+      
+      /**
+       * Set the Favorite flag in the timeline Table to 0
+       * @param tweetId ID of Tweet
+       * @return number of rows affected
+       */
+      synchronized int unsetFavorite(BigInteger tweetId){
+      	ContentValues values = new ContentValues();
+      	values.put(DbOpenHelper.C_IS_FAVORITE, 0);
+      	
+      	return db.update(DbOpenHelper.TABLE, values, DbOpenHelper.C_ID + "=" + tweetId.toString(), null);
       }
    
 }

@@ -82,17 +82,15 @@ public class DirectMessages extends Activity {
 		visualize();
 	}
 	
-	private void cancelNotification() {
-		 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		 notificationManager.cancel(Timeline.DIRECT_NOTIFICATION_ID);
-	}
-
+	/**
+	 * on Resume mainly cancels pending notifiactions
+	 */
 	@Override
 	  public void onResume() {
 	    super.onResume();
 	    // Cancel notification
-	    cancelNotification(); 
-	    
+		 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		 notificationManager.cancel(Constants.DIRECT_NOTIFICATION_ID);
 	       
 	  }
 	

@@ -68,7 +68,7 @@ public class showDisasterDb extends Activity{
 	
 	private void cancelNotification() {
 		 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		 notificationManager.cancel(Timeline.NOTIFICATION_ID);
+		 notificationManager.cancel(Constants.NOTIFICATION_ID);
 	}
 
 	@Override

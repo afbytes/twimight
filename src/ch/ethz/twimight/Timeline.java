@@ -106,8 +106,6 @@ public class Timeline extends Activity {
   
   public static final int FALSE = 0;
   public static final int TRUE = 1; 
-  static final int NOTIFICATION_ID = 47;
-  static final int DIRECT_NOTIFICATION_ID = 48;
   static final long DELAY = 10000L; 
   
   static PendingIntent restartIntent;
@@ -188,7 +186,7 @@ public class Timeline extends Activity {
 		new GetAuthenticatingUsername().execute();	
 		
 		// Register to get  broadcasts		
-	    registerReceiver(twitterStatusReceiver, new IntentFilter(UpdaterService.ACTION_NEW_TWITTER_STATUS));	    
+	    registerReceiver(twitterStatusReceiver, new IntentFilter(Constants.ACTION_NEW_TWEETS));	    
 	    registerReceiver(directMsgSentReceiver,new IntentFilter("DirectMsg"));
 	    registerReceiver(externalAppReceiver, new IntentFilter("test"),"com.permission.SEND" , null);
 	    
@@ -296,7 +294,7 @@ protected Dialog onCreateDialog(int id) {
 
 private void cancelNotification() {
 	 notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-	 notificationManager.cancel(UpdaterService.NOTIFICATION_ID);
+	 notificationManager.cancel(Constants.NOTIFICATION_ID);
 	 if (isShowingFavorites) {		
 			changeView(false,DbOpenHelper.TABLE);	
 	 }
@@ -1290,24 +1288,12 @@ private void publishDisasterTweets(boolean show) {
 		protected void onPostExecute(Boolean result) {			
 			if (action == FAVORITE_ID) {
 				if (result)
-				Toast.makeText(Timeline.this, "Favorite set succesfully", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Timeline.this, "Favorite set succesfully", Toast.LENGTH_SHORT).show();
 				else 
-				 Toast.makeText(Timeline.this, "Favorite not set", Toast.LENGTH_SHORT).show();
+					Toast.makeText(Timeline.this, "Favorite not set", Toast.LENGTH_SHORT).show();
 				
-				// After favoriting, reload to show the new favorite marked as such
-				if (table.equals(DbOpenHelper.TABLE)) {
-			    	// Get the data from the DB
-					query = "SELECT tim._id,user,created_at,status,isDisaster, isFavorite FROM timeline AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";
-					cursor = dbActions.rawQuery(query);
-					//startManagingCursor(cursor);
-					//cursor = dbActions.queryGeneric(DbOpenHelper.TABLE,null, DbOpenHelper.C_CREATED_AT + " DESC" ,"100");
-					Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);		 
-					cursorPictures.moveToFirst();
-					    // Setup the adapter		
-					adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);		
-					listTimeline.setAdapter(adapter); 
-					registerForContextMenu(listTimeline);
-			    }
+				// After favoriting, refresh the timeline
+				sendBroadcast(new Intent(Constants.ACTION_NEW_TWEETS));
 			}
 			else {
 				if (result)
@@ -1315,7 +1301,7 @@ private void publishDisasterTweets(boolean show) {
 				else 
 					Toast.makeText(Timeline.this, "Favorite not removed", Toast.LENGTH_SHORT).show();				
 						
-				// After unfavoriting, reload
+				// After unfavoriting, refresh timeline
 				if(table.equals(DbOpenHelper.TABLE_FAVORITES)) {
 					query = "SELECT tim._id,user,created_at,status FROM FavoritesTable AS tim, FriendsTable AS f WHERE tim.userCode = f._id ORDER BY tim.created_at DESC";				
 					cursor = dbActions.rawQuery(query);	

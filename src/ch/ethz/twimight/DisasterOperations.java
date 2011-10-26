@@ -714,7 +714,7 @@ public void onDestroy() {
 			 }	
 		 	if (notify) {
 		 		PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, showDisasterDb.class), 0);
-		 		notifyUser("New Disaster Tweets","You have new tweets in the database", Timeline.NOTIFICATION_ID, pend);
+		 		notifyUser("New Disaster Tweets","You have new tweets in the database", Constants.NOTIFICATION_ID, pend);
 		 		notify = false;
 		 	 }
 		 	
@@ -730,7 +730,7 @@ public void onDestroy() {
 			 }
 			 if (notify) {
 				    PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, DirectMessages.class), 0);
-			 		notifyUser("New Direct Message","You have new disaster direct messages in the database", Timeline.DIRECT_NOTIFICATION_ID,pend);
+			 		notifyUser("New Direct Message","You have new disaster direct messages in the database", Constants.DIRECT_NOTIFICATION_ID,pend);
 			 		notify = false;
 			 }			
 			 dbActions.savePairedPeer(mConnectedDeviceAddress,numberOfTweets);	
