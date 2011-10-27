@@ -7,6 +7,7 @@ import java.util.List;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.Twitter.Status;
 import winterwell.jtwitter.Twitter.User;
+import winterwell.jtwitter.TwitterException;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -359,7 +360,9 @@ public class UpdaterService extends Service {
 					try{
 						favorites = twitter.getFavorites();
 					} catch (NullPointerException e){
-						Log.e(TAG, "Could not load Favorites!");
+						Log.d(TAG, "Could not load Favorites!");
+					} catch (TwitterException e){
+						Log.d(TAG, "TwitterException: Timeout while loading favorites.");
 					}
 					
 					if(favorites != null){
@@ -419,13 +422,16 @@ public class UpdaterService extends Service {
 					connHelper.doLogin() ;		
 				}
 
-				try {
-					if (ConnectionHelper.twitter != null) {
+
+				if (ConnectionHelper.twitter != null) {
+					try {
 						results = (ArrayList<Status>)ConnectionHelper.twitter.getReplies();
 						new Thread(new FetchProfilePic(results, dbActions, UpdaterService.this)).start();
-					}				  	
-				} 
-				catch (Exception e) {   }
+					} 
+					catch (NullPointerException e){ Log.e(TAG, "NullPointer exception while loading mentions"); }
+					catch (TwitterException e) { Log.i(TAG, "TwitterException while loading mentions."); }
+										  	
+				}
 			}	    
 
 			haveNewMentions = false;
@@ -480,15 +486,15 @@ public class UpdaterService extends Service {
 				if (ConnectionHelper.twitter == null ) {						    			
 					connHelper.doLogin() ;		
 				}
-				try {
-					if (ConnectionHelper.twitter != null) {
-						messages = (ArrayList<Twitter.Message>)ConnectionHelper.twitter.getDirectMessages();
-						Log.i(TAG,"messages size " + messages.size());
-						// new Thread(new FetchProfilePic()).start();
+
+				if (ConnectionHelper.twitter != null) {
+					try{
+					messages = (ArrayList<Twitter.Message>)ConnectionHelper.twitter.getDirectMessages();
+					Log.i(TAG,"messages size " + messages.size());
+					// new Thread(new FetchProfilePic()).start();
 					}
-				} 
-				catch (Exception e) { 
-					Log.e(TAG, "error loading direct messages", e);
+					catch (NullPointerException e) { Log.e(TAG, "NullPointer exception while loading DMs"); }
+					catch (TwitterException e) {Log.i(TAG, "TwitterException while loading DMs"); }
 				}
 			}		  
 			// we sleep for a while. (why??)
