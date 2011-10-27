@@ -355,33 +355,40 @@ public class UpdaterService extends Service {
 				// Are we logged in?
 				if(ConnectionHelper.twitter != null){
 					// We are logged in, so we can load the favorites
-					List<Status> favorites = twitter.getFavorites();
-
-					boolean haveNewFavorites = false;
-
-					// Insert Favorites in Table
-					for (Status status : favorites) {
-						if(status != null){
-							ContentValues values = DbOpenHelper.statusToContentValues(status,null);
-							if(dbActions.insertGeneric(DbOpenHelper.TABLE_FAVORITES, values)==true){
-								haveNewFavorites = true;
-
-								// set the favorite flag in the timeline table
-								Log.i(TAG,"Updating Favorites!!!!!!!");
-								dbActions.setFavorite(status.id);
-							} 
+					List<Status> favorites = null;
+					try{
+						favorites = twitter.getFavorites();
+					} catch (NullPointerException e){
+						Log.e(TAG, "Could not load Favorites!");
+					}
+					
+					if(favorites != null){
+						boolean haveNewFavorites = false;
+						
+						// Insert Favorites in Table
+						for (Status status : favorites) {
+							if(status != null){
+								ContentValues values = DbOpenHelper.statusToContentValues(status,null);
+								if(dbActions.insertGeneric(DbOpenHelper.TABLE_FAVORITES, values)==true){
+									haveNewFavorites = true;
+	
+									// set the favorite flag in the timeline table
+									Log.i(TAG,"Updating Favorites!!!!!!!");
+									dbActions.setFavorite(status.id);
+								} 
+							}
 						}
+	
+						// TODO: What if a tweet got unfavorited in another application?
+	
+						// Broadcast an intent so that timeline is updates (favorites stars)
+						if(haveNewFavorites){
+							sendBroadcast(new Intent(ACTION_NEW_TWITTER_STATUS));
+						}
+	
+						// Finally, start thread to load profile pics
+						new Thread(new FetchProfilePic(favorites, dbActions, UpdaterService.this)).start();
 					}
-
-					// TODO: What if a tweet got unfavorited in another application?
-
-					// Broadcast an intent so that timeline is updates (favorites stars)
-					if(haveNewFavorites){
-						sendBroadcast(new Intent(ACTION_NEW_TWITTER_STATUS));
-					}
-
-					// Finally, start thread to load profile pics
-					new Thread(new FetchProfilePic(favorites, dbActions, UpdaterService.this)).start();
 				} // End: Are we logged in?
 			} // End: Are we connected?
 		} // End: run
