@@ -874,7 +874,7 @@ public boolean onPrepareOptionsMenu(Menu menu) {
     	  dbActions.createTables(this,db);
     	  isRunning = false;
     	  finish();
-    	  startActivity(new Intent(this,MyTwitter.class));
+    	  startActivity(new Intent(this,TwimightActivity.class));
     	}
     	else 
     		Toast.makeText(this, "Disable the disaster mode first", Toast.LENGTH_LONG).show();     

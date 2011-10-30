@@ -150,7 +150,7 @@ public class OAUTH extends Activity {
 				Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
 			} finally {				
 				finish();	
-				startActivity(new Intent(this, MyTwitter.class ));
+				startActivity(new Intent(this, TwimightActivity.class ));
 				
 			}
 		}  

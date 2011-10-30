@@ -28,5 +28,7 @@ final class Constants {
     
     // Update intervals
     public static final long TWEET_UPDATE_INTERVAL = 110000L; /**  Update interval for loading tweets. This is also for mentions and DMs! */
-    public static final long FRIENDS_UPDATE_INTERVAL = 3600000L; /** Update interval for laoding followers and followees */ 
+    public static final long FRIENDS_UPDATE_INTERVAL = 3600000L; /** Update interval for laoding followers and followees */
+    
+    public static final long KEY_GENERATION_INTERVAL = 172800000L; /** Interval for creating a new key pair */
 }
