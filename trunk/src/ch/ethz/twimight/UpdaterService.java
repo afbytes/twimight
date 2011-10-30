@@ -40,9 +40,6 @@ public class UpdaterService extends Service {
 	static final String TAG = "UpdaterService"; // For logging
 	public static final String ACTION_NEW_TWITTER_STATUS = "ACTION_NEW_TWITTER_STATUS"; // TODO: Move this to Constants (this is not local)
 
-	// Globals
-	public static boolean isRunning = false;
-
 	// Member variables
 	Handler handler;
 	Updater updater;
@@ -72,7 +69,6 @@ public class UpdaterService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		// Setup handler
-		isRunning = true;
 		handler = new Handler();  
 		dbHelper = new DbOpenHelper(this);
 		db = dbHelper.getWritableDatabase(); 
@@ -119,7 +115,6 @@ public class UpdaterService extends Service {
 	 */
 	@Override
 	public void onDestroy() {
-		isRunning = false;
 		super.onDestroy();
 		handler.removeCallbacks(updater); // stop the updater  
 		Log.d(TAG, "onDestroy'd");
@@ -287,7 +282,7 @@ public class UpdaterService extends Service {
 
 				// Notify the user? Check settings.
 				if(prefs.getBoolean("notifyTweet", false) == true){
-					twPendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,  new Intent(UpdaterService.this, MyTwitter.class), 0);
+					twPendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,  new Intent(UpdaterService.this, TwimightActivity.class), 0);
 					notifyUser("You have new tweets in the timeline","New Tweets", Constants.NOTIFICATION_ID, twPendingIntent );
 				}
 				haveNewStatus = false;
