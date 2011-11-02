@@ -26,40 +26,40 @@ import android.widget.Toast;
  */
 public class TwimightActivity extends Activity implements OnClickListener{
 
-    static final String TAG = "Twimight";    
-      
-    SharedPreferences mSettings;
-    ConnectionHelper connHelper;
-    Button buttonOAuth;
+	static final String TAG = "Twimight";    
+
+	SharedPreferences mSettings;
+	ConnectionHelper connHelper;
+	Button buttonOAuth;
 	static PendingIntent restartIntent;
-	
+
 	private static TwimightActivity instance = null; /** The single instance of this class */
-	
+
 	/**
 	 * returns the one instance of this activity
 	 */
 	public static TwimightActivity getInstance() {
 		return instance;
 	}
-	
+
 	/**
 	 * onClick handler of the Twitter login button
 	 */
 	@Override
-    public void onClick(View src) {
-	switch (src.getId()) {		
+	public void onClick(View src) {
+		switch (src.getId()) {		
 		case R.id.buttonOAuth:
 			startActivity(new Intent(this,OAUTH.class));	
 			break;						
 		}    
-    }      
-	
+	}      
+
 	/** 
 	 * onCreate: Shows the timeline or login button 
 	 */
-    @Override
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
-    	
+
 		// Are we in disaster mode?
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			setTheme(R.style.twimightDisasterTheme);
@@ -67,124 +67,124 @@ public class TwimightActivity extends Activity implements OnClickListener{
 			setTheme(R.style.twimightTheme);
 		}
 
-    	Log.i(TAG,"inside on create");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);  
-        
-        instance = this;
-        
-        // check if the updater service is running
-        if(!isUpdaterServiceRunning()){
-        	startService(new Intent(this, UpdaterService.class));
+		Log.i(TAG,"inside on create");
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);  
+
+		instance = this;
+
+		// check if the updater service is running
+		if(!isUpdaterServiceRunning()){
+			startService(new Intent(this, UpdaterService.class));
 			Log.i(TAG,"Updater service started");
-        }
-        
+		}
+
 		if (Timeline.isRunning) {
 			finish();
 			startActivity(new Intent(this, Timeline.class));
 		}
 		else {
 			mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE);          
-	        // find views by id
-	        buttonOAuth = (Button) findViewById(R.id.buttonOAuth);
-	        
+			// find views by id
+			buttonOAuth = (Button) findViewById(R.id.buttonOAuth);
+
 			restartIntent = PendingIntent.getActivity(this.getBaseContext(), 0, 
 					new Intent(getIntent()), getIntent().getFlags());
-			
+
 			// Triggers RSA key generation
 			new Thread(new GenerateKeys()).start();
-			
+
 			// Login
 			ifTokensTryLogin();
-			
-	        // Add listeners       
-	        buttonOAuth.setOnClickListener(this);      
+
+			// Add listeners       
+			buttonOAuth.setOnClickListener(this);      
 		}
-            
-    }    
-   
-  
-    /**
-     * onRestart: checks if updater service is still running and logs us in
-     */
-	 @Override
+
+	}    
+
+
+	/**
+	 * onRestart: checks if updater service is still running and logs us in
+	 */
+	@Override
 	protected void onRestart() {
 		super.onRestart();
-        // check if the updater service is running
-        if(!isUpdaterServiceRunning()){
-        	startService(new Intent(this, UpdaterService.class));
+		// check if the updater service is running
+		if(!isUpdaterServiceRunning()){
+			startService(new Intent(this, UpdaterService.class));
 			Log.i(TAG,"Updater service started");
-        }
-        
-        // log in
+		}
+
+		// log in
 		ifTokensTryLogin();
 	}
-	 
-	 /**
-	  * Validates the tokens and starts the timeline activity.
-	  */
-	 private void ifTokensTryLogin() {
-		  	
-	   	  if(mSettings.contains(OAUTH.USER_TOKEN) && mSettings.contains(OAUTH.USER_SECRET)) {    			
-	   			ConnectivityManager connec =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-	   			connHelper = new ConnectionHelper(mSettings,connec); 
-	   			new Login().execute();
-	   			startActivity(new Intent(this, Timeline.class));
-	   	  } 
-				  	
-	   }
-	 
-	 /**
-	  * Gets the information if the service is running from the OS.
-	  * @return true if UpdaterService is running, false otherwise.
-	  */
-	 private boolean isUpdaterServiceRunning() {
-		    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-		        if ("ch.ethz.twimight.UpdaterService".equals(service.service.getClassName())) {
-		        	Log.i(TAG, "UpdaterService is running");
-		            return true;
-		        }
-		    }
-		    return false;
-		}
-	 
-	 /**
-	  * 
-	  * Thread to log in with the Twitter credentials.
-	  * @author pcarta
-	  *
-	  */
-	 class Login extends AsyncTask<Long, Void, String> {
-		 
-		 /**
-		  * Main function of AsyncTask. Checks connectivity and triggers the login.
-		  */
-			@Override
-			protected String doInBackground(Long... id ) {
-				if (connHelper.testInternetConnectivity()) {
-					boolean result = connHelper.doLogin();
-					Log.i(TAG,"" + result);
-    				if (result) {    				
-    					return "Login Successful";							   			    
-    				} else 
-    					return "Incorrect Login, showing old tweets"; 				
-    			}
-    			else 
-    				return "No internet connectivity";	
-    			
-			}		
 
-			/** 
-			 * Shows a Toast with the Login return message.
-			 */
-			@Override
-			protected void onPostExecute(String message) {				
-				Toast.makeText(TwimightActivity.this, message, Toast.LENGTH_SHORT).show();
-				finish();
+	/**
+	 * Validates the tokens and starts the timeline activity.
+	 */
+	private void ifTokensTryLogin() {
+
+		if(mSettings.contains(OAUTH.USER_TOKEN) && mSettings.contains(OAUTH.USER_SECRET)) {    			
+			ConnectivityManager connec =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+			connHelper = new ConnectionHelper(mSettings,connec); 
+			new Login().execute();
+			startActivity(new Intent(this, Timeline.class));
+		} 
+
+	}
+
+	/**
+	 * Gets the information if the service is running from the OS.
+	 * @return true if UpdaterService is running, false otherwise.
+	 */
+	private boolean isUpdaterServiceRunning() {
+		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+			if ("ch.ethz.twimight.UpdaterService".equals(service.service.getClassName())) {
+				Log.i(TAG, "UpdaterService is running");
+				return true;
 			}
-	 }
-	 
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * Thread to log in with the Twitter credentials.
+	 * @author pcarta
+	 *
+	 */
+	class Login extends AsyncTask<Long, Void, String> {
+
+		/**
+		 * Main function of AsyncTask. Checks connectivity and triggers the login.
+		 */
+		@Override
+		protected String doInBackground(Long... id ) {
+			if (connHelper.testInternetConnectivity()) {
+				boolean result = connHelper.doLogin();
+				Log.i(TAG,"" + result);
+				if (result) {    				
+					return "Login Successful";							   			    
+				} else 
+					return "Incorrect Login, showing old tweets"; 				
+			}
+			else 
+				return "No internet connectivity";	
+
+		}		
+
+		/** 
+		 * Shows a Toast with the Login return message.
+		 */
+		@Override
+		protected void onPostExecute(String message) {				
+			Toast.makeText(TwimightActivity.this, message, Toast.LENGTH_SHORT).show();
+			finish();
+		}
+	}
+
 
 	/**
 	 * Thread to create a pair of public and private keys.
@@ -203,10 +203,10 @@ public class TwimightActivity extends Activity implements OnClickListener{
 				editor.remove("PublicKeyPosted");
 				editor.commit();
 			}
-			
+
 		}
-		
+
 	}
-	
-	
+
+
 }

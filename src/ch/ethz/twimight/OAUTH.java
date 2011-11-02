@@ -28,9 +28,12 @@ import android.widget.Toast;
 
 public class OAUTH extends Activity {
 	private static final String TAG = "OAUTH";
-	
-	 static final String CONSUMER_KEY="zgzydHlCf081YeoPiGDTA";
-	 static final String CONSUMER_SECRET="4H0oCpTixLUDXCuVIeCuLbKwloKEPLjmsNXc4zi9g";
+
+	static final String CONSUMER_KEY="zgzydHlCf081YeoPiGDTA";
+
+	// IMPORTANT!!!! Replace the following with the Twimight consumer secret
+	// To obtain the secret, get in touch with @twimight
+	static final String CONSUMER_SECRET="dummy";
 
 	public static final String USER_TOKEN = "user_token";
 	public static final String USER_SECRET = "user_secret";
@@ -47,63 +50,63 @@ public class OAUTH extends Activity {
 
 	private OAuthConsumer mConsumer = null;
 	private OAuthProvider mProvider = null;
-	
+
 	SharedPreferences mSettings;
 
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);   
-		
+
 		mSettings = this.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
 		if (!(mSettings.contains(OAUTH.USER_TOKEN) && mSettings.contains(OAUTH.USER_SECRET)) ) {			
-		
-	    // We don't need to worry about any saved states: we can reconstruct the state
-		mConsumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY,CONSUMER_SECRET);		
-		mProvider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,
-				TWITTER_AUTHORIZE_URL);
-		
-		// It turns out this was the missing thing to making standard Activity launch mode work
-		mProvider.setOAuth10a(true);
-		
-		Intent i = this.getIntent();
-		if (i.getData() == null) {		
-			try {
-                   // This is really important. If you were able to register your real callback Uri with Twitter, and not some fake Uri
-                   // like I registered when I wrote this example, you need to send null as the callback Uri in this function call. Then
-                   // Twitter will correctly process your callback redirection
-				String authUrl = mProvider.retrieveRequestToken(mConsumer, CALLBACK_URI.toString());
-				saveRequestInformation(mSettings, mConsumer.getToken(), mConsumer.getTokenSecret());
-				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
-				intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-				this.startActivity(intent);
-		// At this point I should have catched the Request Token
-			} catch (OAuthMessageSignerException e) {
-				e.printStackTrace();
-				Toast.makeText(this,"signing the request failed " , Toast.LENGTH_LONG).show();
-				finish();
-			} catch (OAuthNotAuthorizedException e) {
-				e.printStackTrace();
-				Toast.makeText(this,"Twitter is not reachable at the moment, please try again later" ,
-						Toast.LENGTH_LONG).show();
-				finish();
-			} catch (OAuthExpectationFailedException e) {
-				e.printStackTrace();
-				Toast.makeText(this,"required parameters were not correctly set" , Toast.LENGTH_LONG).show();
-				finish();
-			} catch (OAuthCommunicationException e) {
-				e.printStackTrace();
-				Toast.makeText(this,"server communication failed, check internet connectivity" ,
-						Toast.LENGTH_SHORT).show();
-				finish();
+
+			// We don't need to worry about any saved states: we can reconstruct the state
+			mConsumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY,CONSUMER_SECRET);		
+			mProvider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,
+					TWITTER_AUTHORIZE_URL);
+
+			// It turns out this was the missing thing to making standard Activity launch mode work
+			mProvider.setOAuth10a(true);
+
+			Intent i = this.getIntent();
+			if (i.getData() == null) {		
+				try {
+					// This is really important. If you were able to register your real callback Uri with Twitter, and not some fake Uri
+					// like I registered when I wrote this example, you need to send null as the callback Uri in this function call. Then
+					// Twitter will correctly process your callback redirection
+					String authUrl = mProvider.retrieveRequestToken(mConsumer, CALLBACK_URI.toString());
+					saveRequestInformation(mSettings, mConsumer.getToken(), mConsumer.getTokenSecret());
+					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
+					intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+					intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+					this.startActivity(intent);
+					// At this point I should have catched the Request Token
+				} catch (OAuthMessageSignerException e) {
+					e.printStackTrace();
+					Toast.makeText(this,"signing the request failed " , Toast.LENGTH_LONG).show();
+					finish();
+				} catch (OAuthNotAuthorizedException e) {
+					e.printStackTrace();
+					Toast.makeText(this,"Twitter is not reachable at the moment, please try again later" ,
+							Toast.LENGTH_LONG).show();
+					finish();
+				} catch (OAuthExpectationFailedException e) {
+					e.printStackTrace();
+					Toast.makeText(this,"required parameters were not correctly set" , Toast.LENGTH_LONG).show();
+					finish();
+				} catch (OAuthCommunicationException e) {
+					e.printStackTrace();
+					Toast.makeText(this,"server communication failed, check internet connectivity" ,
+							Toast.LENGTH_SHORT).show();
+					finish();
+				}
 			}
+		} else  {
+			finish();		 
 		}
-	  } else  {
-		  finish();		 
-	   }
-	  }
-		  
-		  
-	
+	}
+
+
+
 
 	@Override
 	protected void onResume() {
@@ -113,7 +116,7 @@ public class OAUTH extends Activity {
 		if (uri != null && CALLBACK_URI.getScheme().equals(uri.getScheme())) {
 			String token = mSettings.getString(OAUTH.REQUEST_TOKEN, null);
 			String secret = mSettings.getString(OAUTH.REQUEST_SECRET, null);
-			
+
 			try {
 				if(!(token == null || secret == null)) {
 					mConsumer.setTokenWithSecret(token, secret);
@@ -134,7 +137,7 @@ public class OAUTH extends Activity {
 				OAUTH.saveAuthInformation(mSettings, token, secret);
 				// Clear the request stuff, now that we have the real thing
 				OAUTH.saveRequestInformation(mSettings, null, null);
-				
+
 			} catch (OAuthMessageSignerException e) {
 				e.printStackTrace();
 				Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
@@ -151,11 +154,11 @@ public class OAUTH extends Activity {
 			} finally {				
 				finish();	
 				startActivity(new Intent(this, TwimightActivity.class ));
-				
+
 			}
 		}  
 	}
-	
+
 
 
 
@@ -180,9 +183,9 @@ public class OAUTH extends Activity {
 			Log.d(TAG, "Saving Request Secret: " + secret);
 		}
 		editor.commit();
-		
+
 	}
-	
+
 	public static void saveAuthInformation(SharedPreferences settings, String token, String secret) {
 		// null means to clear the old values
 		SharedPreferences.Editor editor = settings.edit();
@@ -203,8 +206,8 @@ public class OAUTH extends Activity {
 			Log.d(TAG, "Saving OAuth Secret: " + secret);
 		}
 		editor.commit();
-		
+
 	}
-	
+
 }
 
