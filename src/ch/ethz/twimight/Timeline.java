@@ -898,7 +898,7 @@ public boolean onPrepareOptionsMenu(Menu menu) {
     		Toast.makeText(this, "No internet connectivity", Toast.LENGTH_SHORT).show();   
     	return true;
     case RECEIVED_DIRECT_ID:
-    	startActivity(new Intent(this,DirectMessages.class));   
+    	startActivity(new Intent(this,DirectMessagesActivity.class));   
     	return true;
     case DETAILS_ID:
     	if (connHelper.testInternetConnectivity()) {
