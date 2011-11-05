@@ -1,4 +1,4 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.util;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -23,7 +23,7 @@ public class LogFilesOperations {
 	    	 return false;
 	 }
 	 
-	  void createLogsFolder() {
+	  public void createLogsFolder() {
 		 if (getSdState()) { 
 			 try {
 				 root =  Environment.getExternalStorageDirectory();       	        		
@@ -39,7 +39,7 @@ public class LogFilesOperations {
 	 		 }
 		 }
 	 }
-	  FileWriter createLogFile(String name) {
+	  public FileWriter createLogFile(String name) {
 		  FileWriter logWriter = null;
 		  // log file     
 	      if (getSdState()) {     	

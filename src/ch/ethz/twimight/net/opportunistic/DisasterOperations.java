@@ -1,4 +1,4 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.net.opportunistic;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,12 +34,24 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-import ch.ethz.twimight.packets.AbstractPacket;
-import ch.ethz.twimight.packets.DirectMessage;
-import ch.ethz.twimight.packets.HelloPacket;
-import ch.ethz.twimight.packets.SignedTweet;
-import ch.ethz.twimight.packets.TweetPacket;
-import ch.ethz.twimight.Constants;
+import ch.ethz.twimight.DirectMessages;
+import ch.ethz.twimight.Timeline;
+import ch.ethz.twimight.TweetContextActions;
+import ch.ethz.twimight.TwimightActivity;
+import ch.ethz.twimight.UpdaterService;
+import ch.ethz.twimight.showDisasterDb;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.RSACrypto;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.net.opportunistic.packets.AbstractPacket;
+import ch.ethz.twimight.net.opportunistic.packets.DirectMessage;
+import ch.ethz.twimight.net.opportunistic.packets.HelloPacket;
+import ch.ethz.twimight.net.opportunistic.packets.SignedTweet;
+import ch.ethz.twimight.net.opportunistic.packets.TweetPacket;
+import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.LogFilesOperations;
 
 /**
  * Service for running the disaster mode. This is the meat of the disaster mode!
@@ -85,7 +97,7 @@ public class DisasterOperations extends Service {
 	private String mConnectedDeviceName = null;
 	private String mConnectedDeviceAddress =  null;
 	private ArrayList<BluetoothDevice> devicesArrayList = null; 
-	TweetDbActions dbActions = UpdaterService.dbActions;
+	TweetDbActions dbActions = UpdaterService.getDbActions();
 	TweetContextActions contextActions;  
 	WakeLock wakeLock;
 	Handler handler;	
@@ -207,7 +219,7 @@ public class DisasterOperations extends Service {
 			//closeService();		
 			DisasterOperations.this.stopSelf();
 			AlarmManager mgr = (AlarmManager) TwimightActivity.getInstance().getSystemService(Context.ALARM_SERVICE);
-			mgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, TwimightActivity.restartIntent);
+			mgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, TwimightActivity.getRestartIntent());
 			System.exit(2);
 		}
 	}

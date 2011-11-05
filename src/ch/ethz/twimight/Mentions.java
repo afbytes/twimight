@@ -23,8 +23,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
-import ch.ethz.twimight.AsyncTasks.Retweet;
+import ch.ethz.twimight.net.twitter.DirectMsgTask;
+import ch.ethz.twimight.ui.Retweet;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TimelineAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.util.Constants;
 
 public class Mentions extends Activity {
 	ListView listMentions;
@@ -39,7 +45,7 @@ public class Mentions extends Activity {
 	private DbOpenHelper dbHelper;
 	AlertDialog.Builder alert;
 	private EditText input, inputDirect;
-	TweetDbActions dbActions = UpdaterService.dbActions;
+	TweetDbActions dbActions = UpdaterService.getDbActions();
 	TweetContextActions contextActions;
 	String destinationUsername;
 	NotificationManager notificationManager;
@@ -158,7 +164,7 @@ public class Mentions extends Activity {
 	  	 	alert.setPositiveButton("Send", new OnClickListener() {
 	   			public void onClick(DialogInterface dialog, int whichButton) {
 	   			  String message = input.getText().toString();	  	
-	   			  Timeline.activity.sendMessage(message);
+	   			  Timeline.getActivity().sendMessage(message);
 	   			  dialog.dismiss();	  		  		
 	   			}
 	  	 		});

@@ -1,6 +1,4 @@
-package ch.ethz.twimight;
-
-
+package ch.ethz.twimight.data;
 
 import winterwell.jtwitter.Twitter.Status;
 import android.content.ContentValues;
@@ -9,44 +7,46 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import ch.ethz.twimight.R;
+
 public class DbOpenHelper extends SQLiteOpenHelper {
 	  Context context;
 	  static final String TAG = "DbHelper";
 	  static final String DB_NAME = "timeline.db";
 	  static final int    DB_VERSION = 14;
 	  //TABLES
-	  static final String TABLE = "timeline"; 
-	  static final String TABLE_DISASTER = "DisasterTable";
-	  static final String TABLE_ADDRESSES = "AddressesTable";
-	  static final String TABLE_FAVORITES = "FavoritesTable";  
-	  static final String TABLE_MENTIONS = "MentionsTable";
-	  static final String TABLE_PICTURES = "PicturesTable";
-	  static final String TABLE_DIRECT = "DirectMessagesTable";
-	  static final String TABLE_SEARCH = "SearchTable";
+	  public static final String TABLE = "timeline"; 
+	  public static final String TABLE_DISASTER = "DisasterTable";
+	  public static final String TABLE_ADDRESSES = "AddressesTable";
+	  public static final String TABLE_FAVORITES = "FavoritesTable";  
+	  public static final String TABLE_MENTIONS = "MentionsTable";
+	  public static final String TABLE_PICTURES = "PicturesTable";
+	  public static final String TABLE_DIRECT = "DirectMessagesTable";
+	  public static final String TABLE_SEARCH = "SearchTable";
 	  public static final String TABLE_FRIENDS = "FriendsTable";	
 	  public static final String TABLE_DIRECT_OUTGOING = "DirectOutgoingTable";
 	  
 	  //COLUMN NAMES
-	  static final String C_MAC = "_mac";  
-	  static final String C_MET_AT = "met_at";
-	  static final String C_TWEETS_NUMBER = "tweetsNumber";
-	  static final String C_ADDED_AT = "added_at";
+	  public static final String C_MAC = "_mac";  
+	  public static final String C_MET_AT = "met_at";
+	  public static final String C_TWEETS_NUMBER = "tweetsNumber";
+	  public static final String C_ADDED_AT = "added_at";
 	  public static final String C_ID = "_id";
 	  public static final String C_CREATED_AT = "created_at";
 	  public static final String C_TEXT = "status";
 	  public static final String C_USER = "user";
 	  public static final String C_USER_ID = "userCode";	
 	  public static final String C_USER_RECIPIENT = "recipientUser";
-	  static final String C_SENT_BY = "sent_by";
-	  static final String C_IS_FAVORITE = "isFavorite";
+	  public static final String C_SENT_BY = "sent_by";
+	  public static final String C_IS_FAVORITE = "isFavorite";
 	  public static final String C_IS_DISASTER = "isDisaster";
 	  public static final String C_IS_DISASTER_FRIEND = "isDisasterFriend";	  
 	  public static final String C_IS_MY_FOLLOWER = "isFollower";
 	  public static final String C_IS_FOLLOWED_BY_ME = "isFollowed";
-	  static final String C_ISFROMSERVER = "isFromServer";
+	  public static final String C_ISFROMSERVER = "isFromServer";
 	  public static final String C_HASBEENSENT = "hasBeenSent";
-	  static final String C_IS_VALID = "isValid";
-	  static final String C_HOPCOUNT = "hopCount";
+	  public static final String C_IS_VALID = "isValid";
+	  public static final String C_HOPCOUNT = "hopCount";
 	  public static final String C_IMAGE = "image";
 	  public static final String C_MODULUS = "modulus";
 	  public static final String C_EXPONENT = "exponent";	 

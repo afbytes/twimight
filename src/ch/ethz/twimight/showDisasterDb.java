@@ -15,7 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
-import ch.ethz.twimight.Constants;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TimelineAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.util.Constants;
 
 
 
@@ -26,7 +29,7 @@ public class showDisasterDb extends Activity{
 	  DbOpenHelper dbHelper;
 	 // SQLiteDatabase db ;
 	  Cursor cursor;
-	  TweetDbActions dbActions = UpdaterService.dbActions;
+	  TweetDbActions dbActions = UpdaterService.getDbActions();
 	  TimelineAdapter adapter;
 	  Calendar cal = Calendar.getInstance(); 
 	  private static final String TAG = "showDisasterDb";

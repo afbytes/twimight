@@ -1,6 +1,11 @@
 package ch.ethz.twimight;
 
 import java.util.Date;
+
+import ch.ethz.twimight.net.RSACrypto;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.util.Constants;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -31,28 +36,9 @@ public class TwimightActivity extends Activity implements OnClickListener{
 	SharedPreferences mSettings;
 	ConnectionHelper connHelper;
 	Button buttonOAuth;
-	static PendingIntent restartIntent;
+	private static PendingIntent restartIntent;
 
 	private static TwimightActivity instance = null; /** The single instance of this class */
-
-	/**
-	 * returns the one instance of this activity
-	 */
-	public static TwimightActivity getInstance() {
-		return instance;
-	}
-
-	/**
-	 * onClick handler of the Twitter login button
-	 */
-	@Override
-	public void onClick(View src) {
-		switch (src.getId()) {		
-		case R.id.buttonOAuth:
-			startActivity(new Intent(this,OAUTH.class));	
-			break;						
-		}    
-	}      
 
 	/** 
 	 * onCreate: Shows the timeline or login button 
@@ -88,8 +74,8 @@ public class TwimightActivity extends Activity implements OnClickListener{
 			// find views by id
 			buttonOAuth = (Button) findViewById(R.id.buttonOAuth);
 
-			restartIntent = PendingIntent.getActivity(this.getBaseContext(), 0, 
-					new Intent(getIntent()), getIntent().getFlags());
+			setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
+					new Intent(getIntent()), getIntent().getFlags()));
 
 			// Triggers RSA key generation
 			new Thread(new GenerateKeys()).start();
@@ -103,6 +89,17 @@ public class TwimightActivity extends Activity implements OnClickListener{
 
 	}    
 
+	/**
+	 * onClick handler of the Twitter login button
+	 */
+	@Override
+	public void onClick(View src) {
+		switch (src.getId()) {		
+		case R.id.buttonOAuth:
+			startActivity(new Intent(this,OAUTH.class));	
+			break;						
+		}    
+	}      
 
 	/**
 	 * onRestart: checks if updater service is still running and logs us in
@@ -118,6 +115,13 @@ public class TwimightActivity extends Activity implements OnClickListener{
 
 		// log in
 		ifTokensTryLogin();
+	}
+
+	/**
+	 * returns the one instance of this activity
+	 */
+	public static TwimightActivity getInstance() {
+		return instance;
 	}
 
 	/**
@@ -147,6 +151,20 @@ public class TwimightActivity extends Activity implements OnClickListener{
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @param restartIntent the restartIntent to set
+	 */
+	public static void setRestartIntent(PendingIntent restartIntent) {
+		TwimightActivity.restartIntent = restartIntent;
+	}
+
+	/**
+	 * @return the restartIntent
+	 */
+	public static PendingIntent getRestartIntent() {
+		return restartIntent;
 	}
 
 	/**

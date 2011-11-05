@@ -1,11 +1,11 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.util;
 
 /**
  * This is where all global constants (should) go!
  * @author thossmann
  *
  */
-final class Constants { 
+public final class Constants { 
     
 	/**
 	 * Do not instantiate!
@@ -23,7 +23,7 @@ final class Constants {
     
     // Notifications
     public static final int MENTION_NOTIFICATION_ID = 49; /** Pending user notification ID for new mentions */
-    static final int DIRECT_NOTIFICATION_ID = 48; /** Pending user notification ID for new DMs */
+    public static final int DIRECT_NOTIFICATION_ID = 48; /** Pending user notification ID for new DMs */
     public static final int NOTIFICATION_ID = 47; /** Pending user notification ID for new Tweets in timeline */
     
     // Update intervals
@@ -31,4 +31,9 @@ final class Constants {
     public static final long FRIENDS_UPDATE_INTERVAL = 3600000L; /** Update interval for laoding followers and followees */
     
     public static final long KEY_GENERATION_INTERVAL = 172800000L; /** Interval for creating a new key pair */
+    
+    
+	public static final int FALSE = 0;
+	public static final int TRUE = 1;
+
 }

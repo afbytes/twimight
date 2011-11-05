@@ -1,4 +1,4 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.util;
 
 import java.util.Date;
 
@@ -12,25 +12,26 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import ch.ethz.twimight.packets.SignedTweet;
-import ch.ethz.twimight.Constants;
-
-
-
-
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.util.LogFilesOperations;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.net.RSACrypto;
+import ch.ethz.twimight.TweetContextActions;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.UpdaterService;
+import ch.ethz.twimight.net.opportunistic.packets.SignedTweet;
+import ch.ethz.twimight.util.Constants;
 
 public class RandomTweetGenerator extends Service {
 	 
-	//private static final String TAG = "RandomTweetGenerator";
+	private static final String TAG = "RandomTweetGenerator";
 	//Handler hand;	
 
-	TweetDbActions dbActions = UpdaterService.dbActions;
+	TweetDbActions dbActions = UpdaterService.getDbActions();
 	TweetContextActions contextActions;
 	Handler hand;
 	ConnectionHelper connHelper;
 	SharedPreferences mSettings,prefs; 
-	static final int FALSE = 0;
-	static final int TRUE = 1;
 	 private BluetoothAdapter mBtAdapter;
 	//static FileWriter generatorWriter;
 	GenerateRandomTweets generateRandTweets =  null;	
@@ -94,13 +95,13 @@ public class RandomTweetGenerator extends Service {
 				  String status = "random tweet " + Math.round(Math.random() * 10000) + " " + user + " " + Constants.TWHISPER_HASHTAG + " " + Constants.TWINTERNAL_HASHTAG;	
 				  long time = new Date().getTime();
 				  
-				  SignedTweet tweet = new SignedTweet(status.hashCode(), time, status, user, userId, FALSE,
-	    					TRUE, 0, null, null);			 			
+				  SignedTweet tweet = new SignedTweet(status.hashCode(), time, status, user, userId, Constants.FALSE,
+	    					Constants.TRUE, 0, null, null);			 			
 		 			RSACrypto crypto = new RSACrypto(mSettings);
 		 			byte[] signature = crypto.sign(tweet);
 				  
 				  if (dbActions.saveIntoDisasterDb(status.hashCode(),time,time,status,userId,"",
-						  FALSE,TRUE, TRUE, 0,signature)) {
+						  Constants.FALSE,Constants.TRUE, Constants.TRUE, 0,signature)) {
 					 /* try {
 						generatorWriter.write(mac + ":" + user + ":" + status.hashCode() + ":random:" + time
 								+ ":" + new Date().toString() + "\n");						

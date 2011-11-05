@@ -2,7 +2,6 @@ package ch.ethz.twimight;
 
 import java.util.Date;
 
-import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.Twitter.Status;
 import winterwell.jtwitter.Twitter.User;
 import android.bluetooth.BluetoothAdapter;
@@ -10,13 +9,17 @@ import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
-import ch.ethz.twimight.packets.SignedTweet;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.RSACrypto;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.opportunistic.packets.SignedTweet;
 
 public class TweetContextActions {
 	private Cursor cursorSelected;
 	ConnectionHelper connHelper;	
 	  SharedPreferences prefs, mSettings;
-	  TweetDbActions dbActions = UpdaterService.dbActions;
+	  TweetDbActions dbActions = UpdaterService.getDbActions();
 	  BluetoothAdapter mBtAdapter;
 	
 	 private static final int FALSE = 0;

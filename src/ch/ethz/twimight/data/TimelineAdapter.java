@@ -1,6 +1,9 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.data;
 
 import java.io.ByteArrayInputStream;
+
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.Constants;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -65,7 +68,7 @@ private static String TAG = "TimelineAdapter";
     	}    	
     	int index = cursor.getColumnIndexOrThrow(DbOpenHelper.C_IS_DISASTER);
     	int isDisaster =  cursor.getInt(index);
-    	if (isDisaster == Timeline.TRUE) {
+    	if (isDisaster == Constants.TRUE) {
     		row.setBackgroundColor(0xcccc2200);    		
     	}
     	else 
@@ -77,7 +80,7 @@ private static String TAG = "TimelineAdapter";
     	try {
     		int favoriteIndex = cursor.getColumnIndexOrThrow(DbOpenHelper.C_IS_FAVORITE);
     		int isFavorite =  cursor.getInt(favoriteIndex);
-	    	if (isFavorite == Timeline.TRUE) {
+	    	if (isFavorite == Constants.TRUE) {
 	    		
 	    		favoriteStar.setImageResource(R.drawable.favorite);
 

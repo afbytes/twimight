@@ -1,5 +1,10 @@
 package ch.ethz.twimight;
 
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.FriendsAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +29,7 @@ public class Following extends Activity{
 	SharedPreferences mSettings ;
 	ConnectivityManager connec ;
 	ConnectionHelper connHelper;
-	TweetDbActions dbActions = UpdaterService.dbActions;
+	TweetDbActions dbActions = UpdaterService.getDbActions();
 	
 	
 	@Override

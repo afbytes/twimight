@@ -43,11 +43,20 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
-import ch.ethz.twimight.AsyncTasks.FetchProfilePic;
-import ch.ethz.twimight.AsyncTasks.Retweet;
-import ch.ethz.twimight.packets.SignedTweet;
-import ch.ethz.twimight.Constants;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TimelineAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.opportunistic.DevicesDiscovery;
+import ch.ethz.twimight.net.opportunistic.DisasterOperations;
+import ch.ethz.twimight.net.RSACrypto;
+import ch.ethz.twimight.net.tds.KeysActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.DirectMsgTask;
+import ch.ethz.twimight.net.twitter.FetchProfilePic;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.ui.Retweet;
+import ch.ethz.twimight.net.opportunistic.packets.SignedTweet;
+import ch.ethz.twimight.util.Constants;
 
 
 /** Displays the list of all tweets from the DB. */
@@ -84,7 +93,7 @@ public class Timeline extends Activity {
   static final int RETWEET_ID = Menu.FIRST + 1;
   static final int DELETE_ID = Menu.FIRST + 2;
   static final int FAVORITE_ID = Menu.FIRST + 3;
-  static final int R_FAVORITE_ID = Menu.FIRST + 4;
+  public static final int R_FAVORITE_ID = Menu.FIRST + 4;
   static final int PROFILEINFO_ID = Menu.FIRST + 11;
   static final int DIRECT_ID = Menu.FIRST + 5;
   
@@ -109,7 +118,7 @@ public class Timeline extends Activity {
   static final long DELAY = 10000L; 
   
   static PendingIntent restartIntent;
-  static Timeline activity ;
+  private static Timeline activity ;
   WakeLock wakeLock;
   static ConnectivityManager connec;
   String username = "", destinationUsername;
@@ -142,14 +151,14 @@ public class Timeline extends Activity {
 	  	db = dbHelper.getWritableDatabase(); 	
 	    
 	  	registerForContextMenu(listTimeline);	 
-	    activity =this;	  
+	    setActivity(this);	  
 	    Log.i(TAG,"on create 2.1");
-	    dbActions = UpdaterService.dbActions;
+	    dbActions = UpdaterService.getDbActions();
 	    if (dbActions == null) {
 	    	 dbHelper = new DbOpenHelper(this);
-	    	 UpdaterService.db = dbHelper.getWritableDatabase(); 
-	    	 UpdaterService.dbActions = new TweetDbActions();
-	    	 dbActions = UpdaterService.dbActions;
+	    	 UpdaterService.setDb(dbHelper.getWritableDatabase()); 
+	    	 UpdaterService.setDbActions(new TweetDbActions());
+	    	 dbActions = UpdaterService.getDbActions();
 	    }
 	    //delete really old tweets from the tables
 	    try {
@@ -1147,7 +1156,22 @@ private void publishDisasterTweets(boolean show) {
 			} 
  }
  
-  class SendTask extends AsyncTask<Void, Void, Boolean> {	
+  /**
+ * @param activity the activity to set
+ */
+public static void setActivity(Timeline activity) {
+	Timeline.activity = activity;
+}
+
+/**
+ * @return the activity
+ */
+public static Timeline getActivity() {
+	return activity;
+}
+
+
+class SendTask extends AsyncTask<Void, Void, Boolean> {	
 		 long id;
 		 String status;		
 		 boolean isDisaster;

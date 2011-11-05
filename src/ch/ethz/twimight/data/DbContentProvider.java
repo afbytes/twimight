@@ -1,5 +1,6 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.data;
 
+import ch.ethz.twimight.util.Constants;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -85,7 +86,7 @@ public class DbContentProvider extends ContentProvider {
 				valuesFriends.put(DbOpenHelper.C_USER, values.getAsString("user") );
 				values.remove("user");
 				valuesFriends.put(DbOpenHelper.C_ID, values.getAsLong("userCode") );
-				valuesFriends.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.TRUE);
+				valuesFriends.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.TRUE);
 				db.insertOrThrow(DbOpenHelper.TABLE_FRIENDS, null, valuesFriends);					
 
 				Log.i(TAG,"external app added added");
