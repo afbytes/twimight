@@ -549,7 +549,7 @@ public class UpdaterService extends Service {
 					// Notify the user? Check the settings.
 					if(prefs.getBoolean("notifyDM", true) == true){
 						dmPendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,
-								new Intent(UpdaterService.this, DirectMessages.class), 0);
+								new Intent(UpdaterService.this, DirectMessagesActivity.class), 0);
 						notifyUser("You have new direct messages", "New Direct Message", Constants.DIRECT_NOTIFICATION_ID, dmPendingIntent);
 					}
 					haveNewDirect = false;

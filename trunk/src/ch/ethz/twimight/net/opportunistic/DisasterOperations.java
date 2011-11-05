@@ -34,7 +34,7 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-import ch.ethz.twimight.DirectMessages;
+import ch.ethz.twimight.DirectMessagesActivity;
 import ch.ethz.twimight.Timeline;
 import ch.ethz.twimight.TweetContextActions;
 import ch.ethz.twimight.TwimightActivity;
@@ -754,7 +754,7 @@ private void closeLogFiles() {
 					extractDirectMessages(directMessage);
 				}
 				if (notify) {
-					PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, DirectMessages.class), 0);
+					PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, DirectMessagesActivity.class), 0);
 					notifyUser("New Direct Message","You have new disaster direct messages in the database", Constants.DIRECT_NOTIFICATION_ID,pend);
 					notify = false;
 				}			
