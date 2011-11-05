@@ -1,7 +1,12 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.data;
 
 import java.math.BigInteger;
 import java.util.Date;
+
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.Timeline;
+import ch.ethz.twimight.UpdaterService;
+import ch.ethz.twimight.data.DbOpenHelper;
 
 import winterwell.jtwitter.Twitter.Status;
 import android.content.ContentValues;
@@ -15,12 +20,12 @@ import android.util.Log;
 
 public class TweetDbActions {
 	DbOpenHelper dbHelper;
-	private SQLiteDatabase db = UpdaterService.db;	
+	private SQLiteDatabase db = UpdaterService.getDb();	
 	private Cursor cursorNewPeer,cursorDisaster,cursorSelected, cursorPeers;
 	private static final String TAG	= "TweetDbActions";
 	
 
-	 void createTables(Context cont, SQLiteDatabase db) {
+	 public void createTables(Context cont, SQLiteDatabase db) {
 		    String sql = cont.getResources().getString(R.string.sql);	    
 		    String sqlFavorites = cont.getResources().getString(R.string.sqlFavorites);
 		    String sqlMentions = cont.getResources().getString(R.string.sqlMentions);
@@ -52,7 +57,7 @@ public class TweetDbActions {
 	  return recentTweetTime;
 	}
 	
-	Cursor disasterDbQuery(String where, String order) {
+	public Cursor disasterDbQuery(String where, String order) {
 		  if (db != null) {
 		    	if (db.isOpen()) {
 		    		try{
@@ -69,7 +74,7 @@ public class TweetDbActions {
 		  	  
 	  }
 	
-	synchronized void updateTables(int isFavorite, int action, Status status,
+	public synchronized void updateTables(int isFavorite, int action, Status status,
 			long userId, boolean isInTimeline){
 		 ContentValues values = new ContentValues();
 		 
@@ -86,7 +91,7 @@ public class TweetDbActions {
 		 
 	}
 	
-    void savePairedPeer(String address, long tweetsNumber) {		  			 
+    public void savePairedPeer(String address, long tweetsNumber) {		  			 
 		  if (address != null) {			 
 			  ContentValues values = new ContentValues();
 			  values.put(DbOpenHelper.C_MAC, address );
@@ -108,7 +113,7 @@ public class TweetDbActions {
 		  
 	  }
     
-    void updateDisasterTable(long id, long oldId, int hasBeenSent, int isValid) {
+    public void updateDisasterTable(long id, long oldId, int hasBeenSent, int isValid) {
     	ContentValues values = new ContentValues();		  
   	    values.put(DbOpenHelper.C_HASBEENSENT, hasBeenSent ); 
   	    values.put(DbOpenHelper.C_IS_VALID, isValid);
@@ -117,7 +122,7 @@ public class TweetDbActions {
     	db.update(DbOpenHelper.TABLE_DISASTER, values, DbOpenHelper.C_ID + "=" + oldId, null);
     }
     
-   boolean saveIntoDisasterDb(long id,long date,long added_at, String status, long userId,
+   public boolean saveIntoDisasterDb(long id,long date,long added_at, String status, long userId,
   		  String sentBy, int isFromServer, int hasBeenSent, int isValid, int hopCount, byte[] signature) {
   	
   	    ContentValues values = new ContentValues();		  
@@ -145,7 +150,7 @@ public class TweetDbActions {
   	    }
     }
     
-    synchronized boolean copyIntoTimelineTable(long id,long created, String status, long userId, int isFromServer) {
+    public synchronized boolean copyIntoTimelineTable(long id,long created, String status, long userId, int isFromServer) {
 	    ContentValues values = new ContentValues();
 	    
 	    values.put(DbOpenHelper.C_ID, id);
@@ -163,7 +168,7 @@ public class TweetDbActions {
 	    	}
   }
     
-    synchronized String userDbQuery(AdapterContextMenuInfo info, String table) {
+    public synchronized String userDbQuery(AdapterContextMenuInfo info, String table) {
     	String query;
     	
     	if (table.equals(DbOpenHelper.TABLE_DIRECT) || table.equals(DbOpenHelper.TABLE_FRIENDS) )
@@ -187,7 +192,7 @@ public class TweetDbActions {
         
     }
     
-    synchronized Cursor contextMenuQuery(long id, String table) {
+    public synchronized Cursor contextMenuQuery(long id, String table) {
     	cursorSelected = null;
     	String query = "SELECT DISTINCT f.user,status,created_at,tim.userCode FROM " + table + " AS tim, FriendsTable AS f WHERE tim.userCode = f._id AND tim._id =" + id;
 		cursorSelected = rawQuery(query);		 
@@ -195,7 +200,7 @@ public class TweetDbActions {
 		 return cursorSelected;
     }
     
-    Cursor peersDbQuery(String deviceMac) {	
+    public Cursor peersDbQuery(String deviceMac) {	
 		 if (db != null) {
 		    if (db.isOpen()) {
 		    	try{
@@ -213,7 +218,7 @@ public class TweetDbActions {
  } 
     
     
-     void delete(String where,String table){
+     public void delete(String where,String table){
     	 if (db != null) {
     		 synchronized(this) {
     			 if (db != null) {
@@ -228,12 +233,12 @@ public class TweetDbActions {
     	 try {
  				synchronized(this) {
  					db.insertOrThrow(DbOpenHelper.TABLE_PICTURES, null, dataToInsert);
- 					Timeline.activity.sendBroadcast(new Intent(UpdaterService.ACTION_NEW_TWITTER_STATUS));
+ 					Timeline.getActivity().sendBroadcast(new Intent(UpdaterService.ACTION_NEW_TWITTER_STATUS));
  				}
  			} catch (Exception ex) {}
      }
     
-     synchronized boolean insertIntoTimelineTable(Status status) {
+     public synchronized boolean insertIntoTimelineTable(Status status) {
     	 
     	 // prepare tweets to enter into DB
      	ContentValues values = DbOpenHelper.statusToContentValues(status, null);  
@@ -312,7 +317,7 @@ public class TweetDbActions {
        * @param tweetId ID of Tweet
        * @return number of rows affected
        */
-      synchronized int setFavorite(BigInteger tweetId){
+      public synchronized int setFavorite(BigInteger tweetId){
       	ContentValues values = new ContentValues();
       	values.put(DbOpenHelper.C_IS_FAVORITE, 1);
       	

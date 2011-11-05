@@ -23,11 +23,18 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TimelineAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.util.Constants;
+
 public class DirectMessages extends Activity {
 	ListView listDirect;
 	Cursor cursor, cursorPictures;
 	TimelineAdapter adapter;
-	TweetDbActions dbActions = UpdaterService.dbActions;
+	TweetDbActions dbActions = UpdaterService.getDbActions();
 	SharedPreferences mSettings;
 	ConnectivityManager connec;
 	ConnectionHelper connHelper;	

@@ -1,5 +1,7 @@
 package ch.ethz.twimight;
 
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
 import winterwell.jtwitter.Twitter;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;

@@ -33,8 +33,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import ch.ethz.twimight.AsyncTasks.FetchProfilePic;
-import ch.ethz.twimight.AsyncTasks.Retweet;
+import ch.ethz.twimight.net.twitter.FetchProfilePic;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.ui.Retweet;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TimelineAdapter;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
 
 
 public class Search extends Activity {
@@ -48,7 +53,7 @@ public class Search extends Activity {
 	 AlertDialog.Builder alert;
 	 EditText input;
 	 TweetContextActions contextActions;
-	 TweetDbActions dbActions = UpdaterService.dbActions;
+	 TweetDbActions dbActions = UpdaterService.getDbActions();
 	 TimelineAdapter adapter;
 	 Bitmap theImage ;
 	 boolean isDisaster, disasterResults, normalResults;
@@ -152,7 +157,7 @@ public class Search extends Activity {
 	 	  	alert.setPositiveButton("Send", new OnClickListener() {
 	 	  		public void onClick(DialogInterface dialog, int whichButton) {
 	 	  		 String message = input.getText().toString();	  	
-	 	  		  Timeline.activity.sendMessage(message);
+	 	  		  Timeline.getActivity().sendMessage(message);
 	 	  		  dialog.dismiss();	  		  		
 	 	  		  }
 	 	  		});

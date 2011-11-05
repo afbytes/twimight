@@ -1,4 +1,4 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.net.opportunistic;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;

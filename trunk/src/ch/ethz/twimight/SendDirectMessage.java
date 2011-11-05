@@ -14,7 +14,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
+import ch.ethz.twimight.net.twitter.DirectMsgTask;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.OAUTH;
 
 public class SendDirectMessage extends Activity {
 	EditText msgEditText;

@@ -23,8 +23,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import ch.ethz.twimight.AsyncTasks.FetchProfilePic;
-import ch.ethz.twimight.Constants;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TweetDbActions;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.FetchProfilePic;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.util.Constants;
 
 
 /**
@@ -45,8 +49,8 @@ public class UpdaterService extends Service {
 	Updater updater;
 	UpdaterLessFrequent updaterLf;
 
-	static  SQLiteDatabase db;
-	static TweetDbActions dbActions;
+	private static  SQLiteDatabase db;
+	private static TweetDbActions dbActions;
 	Thread updaterThread, updaterLfThread; // the two threads for updating
 	DbOpenHelper dbHelper;  
 	ConnectivityManager connec;
@@ -71,7 +75,7 @@ public class UpdaterService extends Service {
 		// Setup handler
 		handler = new Handler();  
 		dbHelper = new DbOpenHelper(this);
-		db = dbHelper.getWritableDatabase(); 
+		setDb(dbHelper.getWritableDatabase()); 
 		mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE);   
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		connec =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -90,7 +94,7 @@ public class UpdaterService extends Service {
 
 			updater = new Updater();
 			updaterLf = new UpdaterLessFrequent();
-			dbActions = new TweetDbActions();
+			setDbActions(new TweetDbActions());
 
 			if (connHelper.testInternetConnectivity()) {
 				if (ConnectionHelper.twitter == null)
@@ -127,6 +131,34 @@ public class UpdaterService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
+	}
+
+	/**
+	 * @param dbActions the dbActions to set
+	 */
+	public static void setDbActions(TweetDbActions dbActions) {
+		UpdaterService.dbActions = dbActions;
+	}
+
+	/**
+	 * @return the dbActions
+	 */
+	public static TweetDbActions getDbActions() {
+		return dbActions;
+	}
+
+	/**
+	 * @param db the db to set
+	 */
+	public static void setDb(SQLiteDatabase db) {
+		UpdaterService.db = db;
+	}
+
+	/**
+	 * @return the db
+	 */
+	public static SQLiteDatabase getDb() {
+		return db;
 	}
 
 	/** 
@@ -238,7 +270,7 @@ public class UpdaterService extends Service {
 				timeline = twitter.getHomeTimeline();
 				Log.i(TAG, "timeline size " + timeline.size() );
 
-				new Thread(new FetchProfilePic(timeline, dbActions, UpdaterService.this)).start();
+				new Thread(new FetchProfilePic(timeline, getDbActions(), UpdaterService.this)).start();
 
 			} catch (Exception ex) {					
 
@@ -260,7 +292,7 @@ public class UpdaterService extends Service {
 				for (Twitter.Status status : timeline) {
 					if (status != null) {
 						// Insert the tweet into the DB. The function will return false if we already have had it
-						if( dbActions.insertIntoTimelineTable(status)){
+						if( getDbActions().insertIntoTimelineTable(status)){
 							haveNewStatus = true;
 						}
 
@@ -269,7 +301,7 @@ public class UpdaterService extends Service {
 						values.put(DbOpenHelper.C_USER, status.getUser().getScreenName().toString()  );
 						values.put(DbOpenHelper.C_ID, status.getUser().getId());
 						values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);
-						dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
+						getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 					}
 
 				}
@@ -367,12 +399,12 @@ public class UpdaterService extends Service {
 						for (Status status : favorites) {
 							if(status != null){
 								ContentValues values = DbOpenHelper.statusToContentValues(status,null);
-								if(dbActions.insertGeneric(DbOpenHelper.TABLE_FAVORITES, values)==true){
+								if(getDbActions().insertGeneric(DbOpenHelper.TABLE_FAVORITES, values)==true){
 									haveNewFavorites = true;
 	
 									// set the favorite flag in the timeline table
 									Log.i(TAG,"Updating Favorites!!!!!!!");
-									dbActions.setFavorite(status.id);
+									getDbActions().setFavorite(status.id);
 								} 
 							}
 						}
@@ -385,7 +417,7 @@ public class UpdaterService extends Service {
 						}
 	
 						// Finally, start thread to load profile pics
-						new Thread(new FetchProfilePic(favorites, dbActions, UpdaterService.this)).start();
+						new Thread(new FetchProfilePic(favorites, getDbActions(), UpdaterService.this)).start();
 					}
 				} // End: Are we logged in?
 			} // End: Are we connected?
@@ -421,7 +453,7 @@ public class UpdaterService extends Service {
 				if (ConnectionHelper.twitter != null) {
 					try {
 						results = (ArrayList<Status>)ConnectionHelper.twitter.getReplies();
-						new Thread(new FetchProfilePic(results, dbActions, UpdaterService.this)).start();
+						new Thread(new FetchProfilePic(results, getDbActions(), UpdaterService.this)).start();
 					} 
 					catch (NullPointerException e){ Log.e(TAG, "NullPointer exception while loading mentions"); }
 					catch (TwitterException e) { Log.i(TAG, "TwitterException while loading mentions."); }
@@ -437,7 +469,7 @@ public class UpdaterService extends Service {
 					if(status != null){
 						// prepare to enter in DB
 						values = DbOpenHelper.statusToContentValues(status,null);
-						if (dbActions.insertGeneric(DbOpenHelper.TABLE_MENTIONS, values) ) {
+						if (getDbActions().insertGeneric(DbOpenHelper.TABLE_MENTIONS, values) ) {
 							// if this is successful, we know that we have new mentions
 							haveNewMentions = true;
 						}	 
@@ -506,7 +538,7 @@ public class UpdaterService extends Service {
 						Status status = new Status(user,msg.getText(),msg.getId(),date);
 						values = DbOpenHelper.statusToContentValues(status,null);
 						values.put(DbOpenHelper.C_USER, user.getScreenName().toString());
-						if (dbActions.insertGeneric(DbOpenHelper.TABLE_DIRECT, values)) {
+						if (getDbActions().insertGeneric(DbOpenHelper.TABLE_DIRECT, values)) {
 							haveNewDirect =true;
 						}
 					}
@@ -579,7 +611,7 @@ public class UpdaterService extends Service {
 					values.put(DbOpenHelper.C_ID, user.getId().longValue());
 					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);	
 					values.put(DbOpenHelper.C_IS_FOLLOWED_BY_ME, Timeline.TRUE);	
-					dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
+					getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 
 					Twitter.Status status = new Twitter.Status(user,null,null,null);					
 					dummyStatus.add(status);					
@@ -593,7 +625,7 @@ public class UpdaterService extends Service {
 					values.put(DbOpenHelper.C_ID, user.getId().longValue());
 					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);
 					values.put(DbOpenHelper.C_IS_MY_FOLLOWER, Timeline.TRUE);
-					dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
+					getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 
 					Twitter.Status status = new Twitter.Status(user,null,null,null);					
 					dummyStatus.add(status);					
@@ -602,7 +634,7 @@ public class UpdaterService extends Service {
 				}
 
 				sendBroadcast(new Intent(ACTION_NEW_TWITTER_STATUS));
-				new Thread(new FetchProfilePic(dummyStatus, dbActions, UpdaterService.this)).start();
+				new Thread(new FetchProfilePic(dummyStatus, getDbActions(), UpdaterService.this)).start();
 			}		 		 
 
 		}

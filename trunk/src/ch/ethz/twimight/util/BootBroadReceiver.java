@@ -1,5 +1,6 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.util;
 
+import ch.ethz.twimight.UpdaterService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

@@ -1,6 +1,8 @@
-package ch.ethz.twimight;
+package ch.ethz.twimight.data;
 
 import java.io.ByteArrayInputStream;
+
+import ch.ethz.twimight.R;
 
 import android.content.Context;
 import android.database.Cursor;

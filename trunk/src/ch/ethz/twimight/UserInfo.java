@@ -37,7 +37,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import ch.ethz.twimight.AsyncTasks.DirectMsgTask;
+import ch.ethz.twimight.net.twitter.ConnectionHelper;
+import ch.ethz.twimight.net.twitter.DirectMsgTask;
+import ch.ethz.twimight.net.twitter.OAUTH;
+import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.data.TweetDbActions;
 
 public class UserInfo extends Activity {	
 	
@@ -286,7 +290,7 @@ public class UserInfo extends Activity {
 		  	alert.setPositiveButton("Send", new OnClickListener() {
 		  		public void onClick(DialogInterface dialog, int whichButton) {
 		  		 String message = input.getText().toString();	  	
-		  		 Timeline.activity.sendMessage(message);
+		  		 Timeline.getActivity().sendMessage(message);
 		  		  dialog.dismiss();	  		  		
 		  		  }
 		  		});

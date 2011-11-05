@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package ch.ethz.twimight;
+package ch.ethz.twimight.net.opportunistic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import ch.ethz.twimight.packets.AbstractPacket;
+import ch.ethz.twimight.net.opportunistic.packets.AbstractPacket;
 
 /**
  * This class does all the work for setting up and managing Bluetooth

@@ -1,4 +1,4 @@
-package ch.ethz.twimight.AsyncTasks;
+package ch.ethz.twimight.ui;
 
 import android.content.Context;
 import android.os.AsyncTask;
