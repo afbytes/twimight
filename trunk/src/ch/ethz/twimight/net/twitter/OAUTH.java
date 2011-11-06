@@ -34,7 +34,7 @@ public class OAUTH extends Activity {
 
 	// IMPORTANT!!!! Replace the following with the Twimight consumer secret
 	// To obtain the secret, get in touch with @twimight
-	static final String CONSUMER_SECRET="4H0oCpTixLUDXCuVIeCuLbKwloKEPLjmsNXc4zi9g";
+	static final String CONSUMER_SECRET="dummy";
 
 	public static final String USER_TOKEN = "user_token";
 	public static final String USER_SECRET = "user_secret";

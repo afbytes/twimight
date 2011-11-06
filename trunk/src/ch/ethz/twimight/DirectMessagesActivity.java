@@ -100,7 +100,7 @@ public class DirectMessagesActivity extends Activity {
 			return true;
 
 		case SEND_DIRECT_ID:
-			Intent intent = new Intent(this,SendDirectMessage.class);
+			Intent intent = new Intent(this,SendDirectMessageActivity.class);
 			String tweetUser = dbActions.userDbQuery(info,DbOpenHelper.TABLE_DIRECT);
 			Log.i("direct messages", "tweetUser = " + tweetUser);
 			intent.putExtra("username", tweetUser);
@@ -144,7 +144,7 @@ public class DirectMessagesActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {		
 		switch(item.getItemId()){ 
 		case SEND_DIRECT_ID:
-			Intent intent = new Intent(this,SendDirectMessage.class);				
+			Intent intent = new Intent(this,SendDirectMessageActivity.class);				
 			startActivity(intent);
 			return true;
 		case DELETE_ALL_ID:

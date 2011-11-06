@@ -43,8 +43,13 @@ import ch.ethz.twimight.net.twitter.OAUTH;
 import ch.ethz.twimight.data.DbOpenHelper;
 import ch.ethz.twimight.data.TweetDbActions;
 
-public class UserInfo extends Activity {	
-	
+/**
+ * Shows a user profile
+ * @author pcarta
+ * @author thossmann
+ */
+public class UserInfoActivity extends Activity {	
+
 	private static final int UNFOLLOW_ID = Menu.FIRST;
 	private static final int FOLLOW_ID = Menu.FIRST +1;
 	private static final int SEND_ID = Menu.FIRST +2;
@@ -61,9 +66,12 @@ public class UserInfo extends Activity {
 	SharedPreferences mSettings,prefs;
 	ConnectivityManager connec;
 	ConnectionHelper connHelper;
-	
+
 	private static final String TAG = "UserInfo";
 
+	/**
+	 * Set up everything.
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// Are we in disaster mode?
@@ -89,11 +97,13 @@ public class UserInfo extends Activity {
 		connHelper = new ConnectionHelper(mSettings,connec);
 		registerReceiver(directMsgSentReceiver,new IntentFilter("DirectMsgSent"));
 		new RetrieveProfile().execute();
-			
+
 	}
-	
-	
-	
+
+
+	/**
+	 * Set up.
+	 */
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
@@ -102,7 +112,9 @@ public class UserInfo extends Activity {
 	}
 
 
-
+	/**
+	 * Populate options menu
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// TODO Auto-generated method stub
@@ -112,52 +124,65 @@ public class UserInfo extends Activity {
 			else
 				menu.add(0, FOLLOW_ID, 2, "Follow").setIcon(R.drawable.ic_menu_cc);
 		}
-		
+
 		menu.add(0, SEND_ID, 2, "Reply").setIcon(android.R.drawable.ic_menu_revert)	;
 		menu.add(0, DIRECT_ID, 2, "Direct Message").setIcon(R.drawable.ic_menu_send);
 		return super.onCreateOptionsMenu(menu);
 	}
-	
-	
+
+	/**
+	 * Which menu of the options did the user select?
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		
+
 		switch (item.getItemId()) {
-		
+
 		case UNFOLLOW_ID:
-			 if (ConnectionHelper.twitter != null)
-				 ConnectionHelper.twitter.stopFollowing(username);
-			 return true;
-			
+			if (ConnectionHelper.twitter != null)
+				ConnectionHelper.twitter.stopFollowing(username);
+			return true;
+
 		case FOLLOW_ID:
-			 if (ConnectionHelper.twitter != null)
-				 ConnectionHelper.twitter.follow(username);
+			if (ConnectionHelper.twitter != null)
+				ConnectionHelper.twitter.follow(username);
 			return true;
 		case SEND_ID:			      
-            input.setText("@" + username);
+			input.setText("@" + username);
 			showDialog(0);
 			return true;
 		case DIRECT_ID:			
 			showDialog(1);
-            return true;
+			return true;
 		}
 		return false;
-		
+
 	}
 
+	/**
+	 * Get the user profile from Twitter.
+	 * @author pcarta
+	 *
+	 */
 	class RetrieveProfile extends AsyncTask<Void, Void, Boolean> {		
-	    ProgressDialog postDialog;
-	    byte[] imageByteArray = null;
-	
+		ProgressDialog postDialog;
+		byte[] imageByteArray = null;
+
+		/**
+		 * Show a dialog
+		 */
 		@Override
 		protected void onPreExecute() {
-			postDialog = ProgressDialog.show(UserInfo.this, 
+			postDialog = ProgressDialog.show(UserInfoActivity.this, 
 					"Retrieving Profile", "Please wait while retrieving data", 
 					true,	// indeterminate duration
 					false); // not cancel-able
 		}
-		
+
+		/**
+		 * Make the request
+		 */
 		@Override
 		protected Boolean doInBackground(Void...nil ) {
 			if (ConnectionHelper.twitter != null) {
@@ -165,48 +190,50 @@ public class UserInfo extends Activity {
 					userList = (ArrayList<User>) ConnectionHelper.twitter.bulkShow(screenNamesList);
 					//new RetrieveFigure().execute();
 					if (intent.getStringArrayExtra("friends") != null)
-						 isFollowing = true;
-					 else {
-						 List<User> friendsList= ConnectionHelper.twitter.getFriends();
-						 for(User friend : friendsList) {
-							 if (friend.getScreenName().toString().equals(username))
-								 isFollowing = true;
-						 }
-					 }
-					
+						isFollowing = true;
+					else {
+						List<User> friendsList= ConnectionHelper.twitter.getFriends();
+						for(User friend : friendsList) {
+							if (friend.getScreenName().toString().equals(username))
+								isFollowing = true;
+						}
+					}
+
 				} catch (Exception ex) {
 					return false;
 				}
-				
+
 				Cursor cPic = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,
 						DbOpenHelper.C_USER + "='" + username + "'",null, null);
 				if (cPic.getCount() > 0) {
 					cPic.moveToFirst();
 					imageByteArray = cPic.getBlob(cPic.getColumnIndex(DbOpenHelper.C_IMAGE));  
 					if (imageByteArray != null) {    			
-		    			ByteArrayInputStream imageStream = new ByteArrayInputStream(imageByteArray);    	
-		        		theImage = BitmapFactory.decodeStream(imageStream);
-		        		
-		    		}
+						ByteArrayInputStream imageStream = new ByteArrayInputStream(imageByteArray);    	
+						theImage = BitmapFactory.decodeStream(imageStream);
+
+					}
 				}
 				else
 					new RetrieveFigure().execute();
-				
+
 				return true;				
 			}
 			return true;
 		}		
 
-		// This is in the UI thread, so we can mess with the UI
+		/**
+		 * remove dialog and populate user profile
+		 */
 		@Override
 		protected void onPostExecute(Boolean result) {
 			postDialog.dismiss();
 			if (result) {
 				ImageView picture = (ImageView) findViewById(R.id.imageUser);
 				picture.setImageBitmap(theImage);
-        		imageByteArray = null;
+				imageByteArray = null;
 				User user = userList.get(0);				
-				
+
 				TextView textView = (TextView) findViewById(R.id.tweetsTextView);
 				textView.append(" " + user.getStatusesCount());				
 				textView = (TextView) findViewById(R.id.descrTextView);
@@ -226,116 +253,132 @@ public class UserInfo extends Activity {
 				textView.append(" " + user.getFavoritesCount()); 			
 			}	
 			else {
-				Toast.makeText(UserInfo.this	, "No user has been found", Toast.LENGTH_SHORT).show();
+				Toast.makeText(UserInfoActivity.this	, "No user has been found", Toast.LENGTH_SHORT).show();
 				finish();
 			}
-				
-			
+
+
 		}
 	}
-	
+
+	/**
+	 * Load user picture
+	 * @author pcarta
+	 *
+	 */
 	class RetrieveFigure extends AsyncTask<Void, Void, Boolean> {    		
-		
+
+		/**
+		 * Make the request to twitter
+		 */
 		@Override
 		protected Boolean doInBackground(Void...nil ) {
 			try {
-			    User user = userList.get(0);
-			    URL url = new URL(user.getProfileImageUrl().toURL().toString());
-	  			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-	  			connection.setDoInput(true);
-	  			connection.connect();
-	  			InputStream input = connection.getInputStream();			
-	  			
-	  			BufferedInputStream bis = new BufferedInputStream(input,128);			
-	  			ByteArrayBuffer baf = new ByteArrayBuffer(128);			
-	  			//get the bytes one by one			
-	  			int current = 0;			
-	  			while ((current = bis.read()) != -1) {			
-	  			        baf.append((byte) current);			
-	  			}
-	  			ByteArrayInputStream imageStream = new ByteArrayInputStream(baf.toByteArray());    	
-        	    theImage = BitmapFactory.decodeStream(imageStream);
-        		
+				User user = userList.get(0);
+				URL url = new URL(user.getProfileImageUrl().toURL().toString());
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setDoInput(true);
+				connection.connect();
+				InputStream input = connection.getInputStream();			
+
+				BufferedInputStream bis = new BufferedInputStream(input,128);			
+				ByteArrayBuffer baf = new ByteArrayBuffer(128);			
+				//get the bytes one by one			
+				int current = 0;			
+				while ((current = bis.read()) != -1) {			
+					baf.append((byte) current);			
+				}
+				ByteArrayInputStream imageStream = new ByteArrayInputStream(baf.toByteArray());    	
+				theImage = BitmapFactory.decodeStream(imageStream);
+
 			} catch (Exception ex) {
-				 Log.e(TAG,"Exception",ex);
+				Log.e(TAG,"Exception",ex);
 				return false;
 			}
-	  			return true;
+			return true;
 		}		
 
+		/**
+		 * Show the image
+		 */
 		// This is in the UI thread, so we can mess with the UI
 		@Override
 		protected void onPostExecute(Boolean result) {
-			
+
 			if (result) {
-				 Log.i(TAG,"setting image");
+				Log.i(TAG,"setting image");
 				ImageView image = (ImageView) findViewById(R.id.imageUser);
-        		image.setImageBitmap(theImage);		
+				image.setImageBitmap(theImage);		
 			}	
-			
+
 		}
 	}
-	
-		
+
+	/**
+	 * Dialog to send DM
+	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		//dismissDialog(0);
 		alert = new AlertDialog.Builder(this);		
-		
+
 		if (id == 0) {
 			alert.setView(input); 
 			alert.setTitle("Send a Tweet");  	
-		  	// Set an EditText view to get user input     	
-		  	 	
-		  	alert.setPositiveButton("Send", new OnClickListener() {
-		  		public void onClick(DialogInterface dialog, int whichButton) {
-		  		 String message = input.getText().toString();	  	
-		  		 Timeline.getActivity().sendMessage(message);
-		  		  dialog.dismiss();	  		  		
-		  		  }
-		  		});
+			// Set an EditText view to get user input     	
 
-		  	alert.setNegativeButton("Cancel", new OnClickListener() {
-		  		  public void onClick(DialogInterface dialog, int whichButton) {
-		  			 input.setText(""); 
-		  			 dialog.dismiss();	  		    
-		  		  }
-		  		}); 
+			alert.setPositiveButton("Send", new OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					String message = input.getText().toString();	  	
+					TimelineActivity.getActivity().sendMessage(message);
+					dialog.dismiss();	  		  		
+				}
+			});
+
+			alert.setNegativeButton("Cancel", new OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					input.setText(""); 
+					dialog.dismiss();	  		    
+				}
+			}); 
 		}
 		else {
 			alert.setTitle("Insert Message");  	
-		  	// Set an EditText view to get user input     	
+			// Set an EditText view to get user input     	
 			alert.setView(inputDirect); 	
-		  	alert.setPositiveButton("Send", new OnClickListener() {
-		  		public void onClick(DialogInterface dialog, int whichButton) {
-		  		 String message = inputDirect.getText().toString();
-		  		 if (connHelper.testInternetConnectivity()) {
-		  			 String sender = mSettings.getString("user", "not found");
-		  			 new DirectMsgTask(message, username, UserInfo.this, connHelper,
-		  					mSettings,prefs.getBoolean("prefDisasterMode", false)).execute();
-		  		 }
-		  		 else
-		  			Toast.makeText(UserInfo.this, "No Internet connectivity", Toast.LENGTH_SHORT).show();
-		  		  }
-		  		});
+			alert.setPositiveButton("Send", new OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					String message = inputDirect.getText().toString();
+					if (connHelper.testInternetConnectivity()) {
+						String sender = mSettings.getString("user", "not found");
+						new DirectMsgTask(message, username, UserInfoActivity.this, connHelper,
+								mSettings,prefs.getBoolean("prefDisasterMode", false)).execute();
+					}
+					else
+						Toast.makeText(UserInfoActivity.this, "No Internet connectivity", Toast.LENGTH_SHORT).show();
+				}
+			});
 
-		  	alert.setNegativeButton("Cancel", new OnClickListener() {
-		  		  public void onClick(DialogInterface dialog, int whichButton) {
-		  			 inputDirect.setText(""); 
-		  			 dialog.dismiss();	  		    
-		  		  }
-		  		}); 
+			alert.setNegativeButton("Cancel", new OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					inputDirect.setText(""); 
+					dialog.dismiss();	  		    
+				}
+			}); 
 		}	 	
-	  	return alert.create();	
+		return alert.create();	
 	}
-	
+
+	/**
+	 * Listen to sent DM notification
+	 */
 	private final BroadcastReceiver directMsgSentReceiver = new BroadcastReceiver() {
-	    @Override
-	    public void onReceive(Context context, Intent intent) { 	  
-	   	 inputDirect.setText("");	   	   
-	    }
+		@Override
+		public void onReceive(Context context, Intent intent) { 	  
+			inputDirect.setText("");	   	   
+		}
 	};
-	
-	
+
+
 
 }

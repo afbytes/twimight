@@ -35,11 +35,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.DirectMessagesActivity;
-import ch.ethz.twimight.Timeline;
+import ch.ethz.twimight.TimelineActivity;
 import ch.ethz.twimight.TweetContextActions;
 import ch.ethz.twimight.TwimightActivity;
 import ch.ethz.twimight.UpdaterService;
-import ch.ethz.twimight.showDisasterDb;
+import ch.ethz.twimight.ShowDisasterDbActivity;
 import ch.ethz.twimight.data.DbOpenHelper;
 import ch.ethz.twimight.data.TweetDbActions;
 import ch.ethz.twimight.net.RSACrypto;
@@ -388,7 +388,7 @@ private void closeLogFiles() {
 		notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 		notification = new Notification( android.R.drawable.stat_sys_download,
 				"DisasterMode", System.currentTimeMillis() );
-		pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, Timeline.class), 0);	
+		pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, TimelineActivity.class), 0);	
 
 		// Create the notification
 		notification.setLatestEventInfo(this, "Crash",
@@ -645,7 +645,7 @@ private void closeLogFiles() {
 					Cursor cursor = dbActions.queryGeneric(DbOpenHelper.TABLE_FRIENDS,DbOpenHelper.C_ID + "=" + userId, null,null);
 					if (cursor != null) {
 						if(cursor.getCount() == 0) {
-							values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.TRUE);						
+							values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.TRUE);						
 						}					
 					}				
 					values.put(DbOpenHelper.C_MODULUS, readMessage.publicKey.getModulus().toString() );
@@ -738,7 +738,7 @@ private void closeLogFiles() {
 					extractFields(tweet);		   
 				}	
 				if (notify) {
-					PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, showDisasterDb.class), 0);
+					PendingIntent pend = PendingIntent.getActivity(this, 0, new Intent(this, ShowDisasterDbActivity.class), 0);
 					notifyUser("New Disaster Tweets","You have new tweets in the database", Constants.NOTIFICATION_ID, pend);
 					notify = false;
 				}

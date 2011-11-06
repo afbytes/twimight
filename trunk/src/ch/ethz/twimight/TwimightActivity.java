@@ -65,9 +65,9 @@ public class TwimightActivity extends Activity implements OnClickListener{
 			Log.i(TAG,"Updater service started");
 		}
 
-		if (Timeline.isRunning) {
+		if (TimelineActivity.isRunning) {
 			finish();
-			startActivity(new Intent(this, Timeline.class));
+			startActivity(new Intent(this, TimelineActivity.class));
 		}
 		else {
 			mSettings = getSharedPreferences(OAUTH.PREFS, Context.MODE_PRIVATE);          
@@ -133,7 +133,7 @@ public class TwimightActivity extends Activity implements OnClickListener{
 			ConnectivityManager connec =  (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			connHelper = new ConnectionHelper(mSettings,connec); 
 			new Login().execute();
-			startActivity(new Intent(this, Timeline.class));
+			startActivity(new Intent(this, TimelineActivity.class));
 		} 
 
 	}

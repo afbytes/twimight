@@ -14,6 +14,7 @@ import ch.ethz.twimight.data.TweetDbActions;
 import ch.ethz.twimight.net.RSACrypto;
 import ch.ethz.twimight.net.twitter.ConnectionHelper;
 import ch.ethz.twimight.net.opportunistic.packets.SignedTweet;
+import ch.ethz.twimight.util.Constants;
 
 public class TweetContextActions {
 	private Cursor cursorSelected;
@@ -44,13 +45,13 @@ public class TweetContextActions {
 				ConnectionHelper.twitter.destroyStatus(id);
 				dbActions.delete(DbOpenHelper.C_ID + "=" + id,DbOpenHelper.TABLE);
 				if (isDisaster)					
-					dbActions.updateDisasterTable(id,id, Timeline.TRUE, Timeline.FALSE);				
+					dbActions.updateDisasterTable(id,id, Constants.TRUE, Constants.FALSE);				
 				return true;
 			}
 			else {
 				if (isDisaster) {
 					dbActions.delete(DbOpenHelper.C_ID + "=" + id,DbOpenHelper.TABLE);
-					dbActions.updateDisasterTable(id,id, Timeline.TRUE, Timeline.FALSE);				
+					dbActions.updateDisasterTable(id,id, Constants.TRUE, Constants.FALSE);				
 				}
 				return false;
 			} 
@@ -58,7 +59,7 @@ public class TweetContextActions {
 		} catch (Exception ex) {
 			if (isDisaster) {
 				dbActions.delete(DbOpenHelper.C_ID + "=" + id,DbOpenHelper.TABLE);
-				dbActions.updateDisasterTable(id,id, Timeline.TRUE, Timeline.FALSE);				
+				dbActions.updateDisasterTable(id,id, Constants.TRUE, Constants.FALSE);				
 			}
 			return false;
 			}
@@ -78,7 +79,7 @@ public class TweetContextActions {
 	        Status status = new Status(user,text,id,date);	        
 				try {
 					//if i am in the timeline view
-			        if (action == Timeline.FAVORITE_ID) {
+			        if (action == TimelineActivity.FAVORITE_ID) {
 			        	Log.i(TAG,"setting as a favorite");
 			        	ConnectionHelper.twitter.setFavorite(status, true);	
 			        	if (table.equals(DbOpenHelper.TABLE))
@@ -188,7 +189,7 @@ public class TweetContextActions {
 		    			 ContentValues values = new ContentValues();
 		    		    	values.put(DbOpenHelper.C_USER, username );
 		    				values.put(DbOpenHelper.C_ID, userId);
-		    				values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.TRUE);		    							
+		    				values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.TRUE);		    							
 		    				dbActions.insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);				
 		    		 }
 		    			 

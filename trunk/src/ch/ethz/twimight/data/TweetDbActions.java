@@ -4,9 +4,10 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.Timeline;
+import ch.ethz.twimight.TimelineActivity;
 import ch.ethz.twimight.UpdaterService;
 import ch.ethz.twimight.data.DbOpenHelper;
+import ch.ethz.twimight.util.Constants;
 
 import winterwell.jtwitter.Twitter.Status;
 import android.content.ContentValues;
@@ -82,7 +83,7 @@ public class TweetDbActions {
 		 values.put(DbOpenHelper.C_IS_FAVORITE,isFavorite );
 		 db.update(DbOpenHelper.TABLE, values, DbOpenHelper.C_ID + "=" + status.id.longValue() , null);
 		 
-		 if (action == Timeline.R_FAVORITE_ID) 
+		 if (action == TimelineActivity.R_FAVORITE_ID) 
 			 db.delete(DbOpenHelper.TABLE_FAVORITES, DbOpenHelper.C_ID + "=" + status.id.longValue() , null);
 		 else {
 			 values = DbOpenHelper.statusToContentValues(status,userId);
@@ -157,7 +158,7 @@ public class TweetDbActions {
 	    values.put(DbOpenHelper.C_CREATED_AT, created);
 	    values.put(DbOpenHelper.C_TEXT, status);
 	    values.put(DbOpenHelper.C_USER_ID, userId);
-	    values.put(DbOpenHelper.C_IS_DISASTER, Timeline.TRUE);
+	    values.put(DbOpenHelper.C_IS_DISASTER, Constants.TRUE);
 	    
 	    try {
 	    	db.insertOrThrow(DbOpenHelper.TABLE, null, values);	    	
@@ -233,7 +234,7 @@ public class TweetDbActions {
     	 try {
  				synchronized(this) {
  					db.insertOrThrow(DbOpenHelper.TABLE_PICTURES, null, dataToInsert);
- 					Timeline.getActivity().sendBroadcast(new Intent(UpdaterService.ACTION_NEW_TWITTER_STATUS));
+ 					TimelineActivity.getActivity().sendBroadcast(new Intent(UpdaterService.ACTION_NEW_TWITTER_STATUS));
  				}
  			} catch (Exception ex) {}
      }

@@ -18,14 +18,23 @@ import ch.ethz.twimight.net.twitter.DirectMsgTask;
 import ch.ethz.twimight.net.twitter.ConnectionHelper;
 import ch.ethz.twimight.net.twitter.OAUTH;
 
-public class SendDirectMessage extends Activity {
+/**
+ * Activity to send a DM
+ * @author pcarta
+ * @author thossmann
+ *
+ */
+public class SendDirectMessageActivity extends Activity {
 	EditText msgEditText;
 	String username;
 	SharedPreferences mSettings,prefs;
 	ConnectivityManager connec;
 	ConnectionHelper connHelper;
 	EditText userEditText;
-	
+
+	/**
+	 * Set everything up.
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// Are we in disaster mode?
@@ -53,9 +62,11 @@ public class SendDirectMessage extends Activity {
 		connHelper = new ConnectionHelper(mSettings,connec);
 		registerReceiver(directMsgSentReceiver,new IntentFilter("DirectMsg"));
 	}
-	
-	
-	
+
+
+	/**
+	 * Clean up.
+	 */
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
@@ -64,26 +75,31 @@ public class SendDirectMessage extends Activity {
 	}
 
 
-
+	/**
+	 * Listens to send button event.
+	 */
 	final OnClickListener sendClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
-			 String message = msgEditText.getText().toString();
-			 if (username == null)
-				 username = userEditText.getText().toString();
-			 if (username.length() > 0) {
+			String message = msgEditText.getText().toString();
+			if (username == null)
+				username = userEditText.getText().toString();
+			if (username.length() > 0) {
 				// String sender = mSettings.getString("user", "not found");
-				 new DirectMsgTask(message, username, SendDirectMessage.this, connHelper,
-						 mSettings,prefs.getBoolean("prefDisasterMode", false)).execute();
-			 }
-			 else 
-				 Toast.makeText(SendDirectMessage.this, "Insert Username", Toast.LENGTH_SHORT).show();   
-			 
+				new DirectMsgTask(message, username, SendDirectMessageActivity.this, connHelper,
+						mSettings,prefs.getBoolean("prefDisasterMode", false)).execute();
+			}
+			else 
+				Toast.makeText(SendDirectMessageActivity.this, "Insert Username", Toast.LENGTH_SHORT).show();   
+
 		}
-		
+
 	};
-	
+
+	/**
+	 * Listens to cancel button event
+	 */
 	final OnClickListener canceClickListener = new OnClickListener() {
 
 		@Override
@@ -91,17 +107,20 @@ public class SendDirectMessage extends Activity {
 			finish();			
 		}		
 	};
-	
+
+	/**
+	 * Broadcast receiver to listen for DM sent.
+	 */
 	private final BroadcastReceiver directMsgSentReceiver = new BroadcastReceiver() {
-	    @Override
-	    public void onReceive(Context context, Intent intent) {   
-	    	int result = intent.getIntExtra("result", DirectMsgTask.NOT_SENT );
-	    	if (result == DirectMsgTask.SENT) {
-	    		msgEditText.setText("");
-	    		userEditText.setText("");
-	    		finish();
-	    	}	   	   
-	    }
+		@Override
+		public void onReceive(Context context, Intent intent) {   
+			int result = intent.getIntExtra("result", DirectMsgTask.NOT_SENT );
+			if (result == DirectMsgTask.SENT) {
+				msgEditText.setText("");
+				userEditText.setText("");
+				finish();
+			}	   	   
+		}
 	};
 
 }

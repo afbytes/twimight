@@ -15,7 +15,8 @@ import android.widget.Toast;
 import ch.ethz.twimight.net.twitter.ConnectionHelper;
 import ch.ethz.twimight.data.DbOpenHelper;
 import ch.ethz.twimight.net.RSACrypto;
-import ch.ethz.twimight.Timeline;
+import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.TimelineActivity;
 import ch.ethz.twimight.data.TweetDbActions;
 
 public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
@@ -25,7 +26,7 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 	ConnectionHelper connHelper;	
 	TweetDbActions dbActions;
 	Twitter.Message messageResult;
-	int isDisaster, hasBeenSent = Timeline.FALSE;
+	int isDisaster, hasBeenSent = Constants.FALSE;
 	SharedPreferences mSettings;
 		
 	public static final int SENT = 1;
@@ -40,9 +41,9 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 		this.connHelper = connHelper;
 		this.mSettings = mSettings;
 		if (isDisaster)
-			this.isDisaster = Timeline.TRUE;
+			this.isDisaster = Constants.TRUE;
 		else
-			this.isDisaster = Timeline.FALSE;		
+			this.isDisaster = Constants.FALSE;		
 		this.senderUser = mSettings.getString("user", "");
 		dbActions = new TweetDbActions();
 		
@@ -61,7 +62,7 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 		try {
 			if (connHelper.testInternetConnectivity()) {
 			messageResult = ConnectionHelper.twitter.sendMessage(username, message);
-			hasBeenSent = Timeline.TRUE;
+			hasBeenSent = Constants.TRUE;
 			return true;
 			}
 		} catch (Exception ex) {			
@@ -88,7 +89,7 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 			}
 			cont.sendBroadcast(intent);	
 			
-		if (isDisaster == Timeline.TRUE ) {	//if we are in disaster mode	
+		if (isDisaster == Constants.TRUE ) {	//if we are in disaster mode	
 			
 		 	if (message.length() > 0  ) {  //and length is ok	
 		 		
@@ -97,7 +98,7 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 		 		String concatenate = message.concat(" " + senderUser) ; 
 		 		long time = new Date().getTime();
 		 		
-		 		if (hasBeenSent == Timeline.TRUE)
+		 		if (hasBeenSent == Constants.TRUE)
 		 			resultId = messageResult.getId().longValue(); //id from twitter servers
 		 		else
 		 			resultId = concatenate.hashCode(); //local id
@@ -133,7 +134,7 @@ public class DirectMsgTask extends AsyncTask<Void, Void, Boolean> {
 		 			else
 		 				Log.i(TAG,"no key has been found");
 		 		
-		 		hasBeenSent = Timeline.FALSE;								   
+		 		hasBeenSent = Constants.FALSE;								   
 		 	}		 	
 		}
 		

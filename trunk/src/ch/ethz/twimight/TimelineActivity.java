@@ -60,7 +60,7 @@ import ch.ethz.twimight.util.Constants;
 
 
 /** Displays the list of all tweets from the DB. */
-public class Timeline extends Activity {
+public class TimelineActivity extends Activity {
 	
   static final String TAG = "Timeline";
   private ListView listTimeline;
@@ -118,7 +118,7 @@ public class Timeline extends Activity {
   static final long DELAY = 10000L; 
   
   static PendingIntent restartIntent;
-  private static Timeline activity ;
+  private static TimelineActivity activity ;
   WakeLock wakeLock;
   static ConnectivityManager connec;
   String username = "", destinationUsername;
@@ -225,7 +225,7 @@ private void restart(){
 
 @Override
 protected Dialog onCreateDialog(int id) {	
-	alert = new AlertDialog.Builder(Timeline.this);
+	alert = new AlertDialog.Builder(TimelineActivity.this);
 	
 	//Dialog for sending a tweet
 	if (id == 0) {
@@ -283,7 +283,7 @@ protected Dialog onCreateDialog(int id) {
 	  		public void onClick(DialogInterface dialog, int whichButton) {
 	  			
 	  		 String message = inputDirect.getText().toString();	  		
-	  		 new DirectMsgTask(message,destinationUsername,Timeline.this, connHelper,
+	  		 new DirectMsgTask(message,destinationUsername,TimelineActivity.this, connHelper,
 	  				 mSettings,prefs.getBoolean("prefDisasterMode", false)).execute();	  		
 	  		    		  		
 	  		  }
@@ -397,8 +397,8 @@ class GetAuthenticatingUsername extends AsyncTask<Void, Void, String> {
 				ContentValues values = new ContentValues();
 				values.put(DbOpenHelper.C_USER, user);
 				values.put(DbOpenHelper.C_ID, userId);
-				values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.TRUE);
-				values.put(DbOpenHelper.C_IS_FOLLOWED_BY_ME, Timeline.FALSE);	
+				values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.TRUE);
+				values.put(DbOpenHelper.C_IS_FOLLOWED_BY_ME, Constants.FALSE);	
 				String modulus = mSettings.getString("modulus_public", "");
 				String exponent = mSettings.getString("exponent_public", "");
 				values.put(DbOpenHelper.C_MODULUS, modulus);
@@ -687,7 +687,7 @@ private void lookProfile(AdapterContextMenuInfo info, String user) {
 		}
 		else 
 			username = user;		  
-		 Intent intent = new Intent(this,UserInfo.class);
+		 Intent intent = new Intent(this,UserInfoActivity.class);
 		 intent.putExtra("username", username);
 		 startActivity(intent);
 	  }
@@ -828,23 +828,23 @@ public boolean onPrepareOptionsMenu(Menu menu) {
     
     case SETTINGS_ID:
       // Launch Prefs activity
-      Intent i = new Intent(this, Prefs.class);
+      Intent i = new Intent(this, PrefsActivity.class);
       startActivityForResult(i, PREF_SCREEN);    
       return true;       
     case EXIT_ID:
   	  finish();
   	  return true;  	  
     case DISASTER_ID:    	   		
-    	startActivity(new Intent(this,showDisasterDb.class));     	
+    	startActivity(new Intent(this,ShowDisasterDbActivity.class));     	
     	return true;  
     case FOLLOWING_ID:
-      startActivity(new Intent(this,Following.class));
+      startActivity(new Intent(this,FollowingActivity.class));
       if (!connHelper.testInternetConnectivity()  )  
     	  Toast.makeText(this, "No internet connectivity", Toast.LENGTH_LONG).show();        
       
   	  return true;  
     case FOLLOWERS_ID:
-        startActivity(new Intent(this,Followers.class));
+        startActivity(new Intent(this,FollowersActivity.class));
         if (!connHelper.testInternetConnectivity()  )  
       	  Toast.makeText(this, "No internet connectivity", Toast.LENGTH_LONG).show();        
         
@@ -863,7 +863,7 @@ public boolean onPrepareOptionsMenu(Menu menu) {
     	setTitle("Timeline");
     	return true;
     case MENTIONS_ID:     
-    		startActivity(new Intent(this,Mentions.class));     	    
+    		startActivity(new Intent(this,MentionsActivity.class));     	    
     	return true;
     case LOGOUT_ID:
     	if (prefs.getBoolean("prefDisasterMode", false) == false) {
@@ -945,7 +945,7 @@ private void changeView(boolean isShowing, String table){
 			@Override
 			protected void onPreExecute() {
 				if (showDialog)
-					postDialog = ProgressDialog.show(Timeline.this, 
+					postDialog = ProgressDialog.show(TimelineActivity.this, 
 							"Refreshing Timeline", "Please wait while your timeline is being refreshed", 
 							true,	// indeterminate duration
 							false); // not cancel-able
@@ -961,7 +961,7 @@ private void changeView(boolean isShowing, String table){
 		    			if (ConnectionHelper.twitter != null) {
 		    				ConnectionHelper.twitter.setCount(40);
 		    		    	List<Twitter.Status> timeline = ConnectionHelper.twitter.getHomeTimeline();
-		    		    	new Thread(new FetchProfilePic(timeline, dbActions, Timeline.this)).start();
+		    		    	new Thread(new FetchProfilePic(timeline, dbActions, TimelineActivity.this)).start();
 		    		    	for (Twitter.Status status : timeline) {		    		    		
 		    		    		
 		    		    		dbActions.insertIntoTimelineTable(status);    		        		
@@ -983,11 +983,11 @@ private void changeView(boolean isShowing, String table){
 				if (result) {
 					cursor.requery();
 					if (showDialog)
-						Toast.makeText(Timeline.this, "Timeline updated", Toast.LENGTH_LONG).show();
+						Toast.makeText(TimelineActivity.this, "Timeline updated", Toast.LENGTH_LONG).show();
 				}									
 				else {
 					if (showDialog)
-						Toast.makeText(Timeline.this, "Timeline not updated", Toast.LENGTH_LONG).show(); 	
+						Toast.makeText(TimelineActivity.this, "Timeline not updated", Toast.LENGTH_LONG).show(); 	
 				}
 			}
 		}
@@ -997,14 +997,14 @@ private void changeView(boolean isShowing, String table){
   		switch (requestCode) {
   		case PREF_SCREEN:
   			
-  			if (resultCode == Prefs.BLUE_ENABLED) { 
+  			if (resultCode == PrefsActivity.BLUE_ENABLED) { 
   				startServices();
   				
   				// broadcast the mode change
   				sendBroadcast(new Intent(Constants.ACTION_DISASTER_MODE));
   			} 
   			
-  			else if (resultCode ==  Prefs.DIS_MODE_DISABLED) {  				
+  			else if (resultCode ==  PrefsActivity.DIS_MODE_DISABLED) {  				
   				
   				SharedPreferences.Editor editor = prefs.edit();   
   			    editor.putBoolean("prefDisasterMode", false);   
@@ -1157,16 +1157,16 @@ private void publishDisasterTweets(boolean show) {
  }
  
   /**
- * @param activity the activity to set
+ * @param timelineActivity the activity to set
  */
-public static void setActivity(Timeline activity) {
-	Timeline.activity = activity;
+public static void setActivity(TimelineActivity timelineActivity) {
+	activity = timelineActivity;
 }
 
 /**
  * @return the activity
  */
-public static Timeline getActivity() {
+public static TimelineActivity getActivity() {
 	return activity;
 }
 
@@ -1200,16 +1200,16 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
 						
 						if (connHelper.testInternetConnectivity())
 							new RefreshTimeline(false).execute();  
-						Toast.makeText(Timeline.this, "Tweet has been sent", Toast.LENGTH_SHORT).show();  
+						Toast.makeText(TimelineActivity.this, "Tweet has been sent", Toast.LENGTH_SHORT).show();  
 						hasBeenSent = TRUE;
 					}					
 				}
 				else {  //if it hasn't been sent
 					if (id == 0) {  // and it is a normal sending
 						if (!isDisaster)
-							Toast.makeText(Timeline.this, "Tweet not sent", Toast.LENGTH_SHORT).show();
+							Toast.makeText(TimelineActivity.this, "Tweet not sent", Toast.LENGTH_SHORT).show();
 						else
-							Toast.makeText(Timeline.this, "Tweet added to disaster table", Toast.LENGTH_SHORT).show();
+							Toast.makeText(TimelineActivity.this, "Tweet added to disaster table", Toast.LENGTH_SHORT).show();
 					}
 				}					
 				if (isDisaster == true ) {	//if we are in disaster mode	
@@ -1277,15 +1277,15 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
 			cursor.requery();
 			if (!isDisaster) {
 				if (!result)				
-					Toast.makeText(Timeline.this, "Unable to delete the tweet", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Unable to delete the tweet", Toast.LENGTH_SHORT).show();
 				else
-					Toast.makeText(Timeline.this, "Tweet deleted", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Tweet deleted", Toast.LENGTH_SHORT).show();
 			}
 			else {
 				if (result)
-					Toast.makeText(Timeline.this, "Disaster Tweet deleted", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Disaster Tweet deleted", Toast.LENGTH_SHORT).show();
 				else 
-					Toast.makeText(Timeline.this, "Disaster Tweet deleted from disaster table", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Disaster Tweet deleted from disaster table", Toast.LENGTH_SHORT).show();
 			}
 			
 		}
@@ -1312,18 +1312,18 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
 		protected void onPostExecute(Boolean result) {			
 			if (action == FAVORITE_ID) {
 				if (result)
-					Toast.makeText(Timeline.this, "Favorite set succesfully", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Favorite set succesfully", Toast.LENGTH_SHORT).show();
 				else 
-					Toast.makeText(Timeline.this, "Favorite not set", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Favorite not set", Toast.LENGTH_SHORT).show();
 				
 				// After favoriting, refresh the timeline
 				sendBroadcast(new Intent(Constants.ACTION_NEW_TWEETS));
 			}
 			else {
 				if (result)
-					Toast.makeText(Timeline.this, "Favorite removed succesfully", Toast.LENGTH_SHORT).show();
+					Toast.makeText(TimelineActivity.this, "Favorite removed succesfully", Toast.LENGTH_SHORT).show();
 				else 
-					Toast.makeText(Timeline.this, "Favorite not removed", Toast.LENGTH_SHORT).show();				
+					Toast.makeText(TimelineActivity.this, "Favorite not removed", Toast.LENGTH_SHORT).show();				
 						
 				// After unfavoriting, refresh timeline
 				if(table.equals(DbOpenHelper.TABLE_FAVORITES)) {
@@ -1337,7 +1337,7 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
 	        			else {
 	        		 		 Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);	
 	        		 		 cursorPictures.moveToFirst();
-	        		 		 adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);
+	        		 		 adapter = new TimelineAdapter(TimelineActivity.this, cursor, cursorPictures);
 	        		 		
 	   		    			 listTimeline.setAdapter(adapter);		   
 	   		    			 registerForContextMenu(listTimeline);
@@ -1354,7 +1354,7 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
 					Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);		 
 					cursorPictures.moveToFirst();
 					    // Setup the adapter		
-					adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);		
+					adapter = new TimelineAdapter(TimelineActivity.this, cursor, cursorPictures);		
 					listTimeline.setAdapter(adapter); 
 					registerForContextMenu(listTimeline);
 			    }
@@ -1387,7 +1387,7 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
     	 Cursor cursorPictures = dbActions.queryGeneric(DbOpenHelper.TABLE_PICTURES,null, null, null);	
     	 cursorPictures.moveToFirst();
     		    // Setup the adapter
-    	 adapter = new TimelineAdapter(Timeline.this, cursor, cursorPictures);
+    	 adapter = new TimelineAdapter(TimelineActivity.this, cursor, cursorPictures);
     	 listTimeline.setAdapter(adapter);   
      }
  };
@@ -1400,18 +1400,18 @@ class SendTask extends AsyncTask<Void, Void, Boolean> {
         		   Settings.System.AIRPLANE_MODE_ON, 0);
            if (isModeOn == TRUE) {
         	   if (prefs.getBoolean("prefDisasterMode", false) == true) {
-        		   stopService(new Intent(Timeline.this,DisasterOperations.class));
-        		   stopService(new Intent(Timeline.this, DevicesDiscovery.class));    	         
+        		   stopService(new Intent(TimelineActivity.this,DisasterOperations.class));
+        		   stopService(new Intent(TimelineActivity.this, DevicesDiscovery.class));    	         
         		  // stopService(new Intent(Timeline.this, RandomTweetGenerator.class)); 
-        		   Toast.makeText(Timeline.this, "Airplane mode on, disaster mode will be restarted as soon as it will be switch off",
+        		   Toast.makeText(TimelineActivity.this, "Airplane mode on, disaster mode will be restarted as soon as it will be switch off",
         				   Toast.LENGTH_LONG).show();         		  
         	   }
            }
            else if (isModeOn == FALSE) {
         	   if (prefs.getBoolean("prefDisasterMode", false) == true) {
         		  try {
-        		   startService(new Intent(Timeline.this,DisasterOperations.class));
-        		   startService(new Intent(Timeline.this, DevicesDiscovery.class));    	         
+        		   startService(new Intent(TimelineActivity.this,DisasterOperations.class));
+        		   startService(new Intent(TimelineActivity.this, DevicesDiscovery.class));    	         
         		  // startService(new Intent(Timeline.this, RandomTweetGenerator.class)); 
         		  } catch (Exception ex) {}
         	   }

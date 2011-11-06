@@ -300,7 +300,7 @@ public class UpdaterService extends Service {
 						ContentValues values = new ContentValues();
 						values.put(DbOpenHelper.C_USER, status.getUser().getScreenName().toString()  );
 						values.put(DbOpenHelper.C_ID, status.getUser().getId());
-						values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);
+						values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.FALSE);
 						getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 					}
 
@@ -479,7 +479,7 @@ public class UpdaterService extends Service {
 				if (haveNewMentions) {
 					// notify the user? Check the settings.
 					mePendingIntent = PendingIntent.getActivity(UpdaterService.this, 0,
-							new Intent(UpdaterService.this, Mentions.class), 0);
+							new Intent(UpdaterService.this, MentionsActivity.class), 0);
 					if(prefs.getBoolean("notifyMention", true) == true){	 
 						notifyUser("You have new mentions","New Mention", Constants.MENTION_NOTIFICATION_ID, mePendingIntent );
 					}
@@ -609,8 +609,8 @@ public class UpdaterService extends Service {
 
 					values.put(DbOpenHelper.C_USER, user.getScreenName().toString() );
 					values.put(DbOpenHelper.C_ID, user.getId().longValue());
-					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);	
-					values.put(DbOpenHelper.C_IS_FOLLOWED_BY_ME, Timeline.TRUE);	
+					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.FALSE);	
+					values.put(DbOpenHelper.C_IS_FOLLOWED_BY_ME, Constants.TRUE);	
 					getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 
 					Twitter.Status status = new Twitter.Status(user,null,null,null);					
@@ -623,8 +623,8 @@ public class UpdaterService extends Service {
 
 					values.put(DbOpenHelper.C_USER, user.getScreenName().toString() );
 					values.put(DbOpenHelper.C_ID, user.getId().longValue());
-					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Timeline.FALSE);
-					values.put(DbOpenHelper.C_IS_MY_FOLLOWER, Timeline.TRUE);
+					values.put(DbOpenHelper.C_IS_DISASTER_FRIEND, Constants.FALSE);
+					values.put(DbOpenHelper.C_IS_MY_FOLLOWER, Constants.TRUE);
 					getDbActions().insertGeneric(DbOpenHelper.TABLE_FRIENDS, values);
 
 					Twitter.Status status = new Twitter.Status(user,null,null,null);					
