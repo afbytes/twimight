@@ -169,19 +169,15 @@ public class OAUTH extends Activity {
 		SharedPreferences.Editor editor = settings.edit();
 		if(token == null) {
 			editor.remove(OAUTH.REQUEST_TOKEN);
-			Log.d(TAG, "Clearing Request Token");
 		}
 		else {
 			editor.putString(OAUTH.REQUEST_TOKEN, token);
-			Log.d(TAG, "Saving Request Token: " + token);
 		}
 		if (secret == null) {
 			editor.remove(OAUTH.REQUEST_SECRET);
-			Log.d(TAG, "Clearing Request Secret");
 		}
 		else {
 			editor.putString(OAUTH.REQUEST_SECRET, secret);
-			Log.d(TAG, "Saving Request Secret: " + secret);
 		}
 		editor.commit();
 
@@ -192,19 +188,15 @@ public class OAUTH extends Activity {
 		SharedPreferences.Editor editor = settings.edit();
 		if(token == null) {
 			editor.remove(OAUTH.USER_TOKEN);
-			Log.d(TAG, "Clearing OAuth Token");
 		}
 		else {
 			editor.putString(OAUTH.USER_TOKEN, token);
-			Log.d(TAG, "Saving OAuth Token: " + token);
 		}
 		if (secret == null) {
 			editor.remove(OAUTH.USER_SECRET);
-			Log.d(TAG, "Clearing OAuth Secret");
 		}
 		else {
 			editor.putString(OAUTH.USER_SECRET, secret);
-			Log.d(TAG, "Saving OAuth Secret: " + secret);
 		}
 		editor.commit();
 
