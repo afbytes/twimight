@@ -55,7 +55,7 @@
 				android:layout_gravity="right"
 				android:gravity="right" 
 				android:layout_width="fill_parent"
-				android:textColor="@color/white" 
+				android:textColor="@color/grey" 
 				android:layout_marginTop="10dp" />
 
 		</LinearLayout>
@@ -66,7 +66,7 @@
 			android:id="@+id/textText"
 			android:text="The latest status " 
 			android:textColor="@color/white"
-			android:textSize="18sp" 
+			android:textSize="16sp" 
 			android:layout_marginBottom="6dp" />
 
 	</LinearLayout>

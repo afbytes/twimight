@@ -17,6 +17,7 @@ import ch.ethz.twimight.R;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -47,11 +48,15 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		TextView textCreatedAt = (TextView) row.findViewById(R.id.textCreatedAt);
 		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 		
-		// TODO: Image
-		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
-		picture.setImageResource(R.drawable.default_profile);
+		// Profile image
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
+			ImageView picture = (ImageView) row.findViewById(R.id.imageView1);			
+			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
+
 		
-		ImageView favoriteStar = (ImageView) row.findViewById(R.id.favorite);
+		// any transactional flags?
 		ImageView toPostInfo = (ImageView) row.findViewById(R.id.topost);
 		int flags = cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
 		
@@ -63,6 +68,9 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			toPostInfo.setImageResource(R.drawable.blank);
 		}
 		
+		// favorited
+		ImageView favoriteStar = (ImageView) row.findViewById(R.id.favorite);
+
 		boolean favorited = ((cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_FAVORITED)) > 0) 
 							&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
 							|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
@@ -72,7 +80,6 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			favoriteStar.setImageResource(R.drawable.blank);
 		}
 		
-		// TODO: Sending?
 	}
 	
 }

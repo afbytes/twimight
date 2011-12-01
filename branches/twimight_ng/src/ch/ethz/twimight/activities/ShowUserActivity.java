@@ -18,8 +18,10 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -27,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -44,6 +47,7 @@ public class ShowUserActivity extends Activity{
 	int flags;
 	
 	// Views
+	private ImageView profileImage;
 	private TextView screenName;
 	private TextView realName;
 	private TextView location;
@@ -65,6 +69,7 @@ public class ShowUserActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showuser);
 		
+		profileImage = (ImageView) findViewById(R.id.showUserProfileImage);
 		screenName = (TextView) findViewById(R.id.showUserScreenName);
 		realName = (TextView) findViewById(R.id.showUserRealName);
 		location = (TextView) findViewById(R.id.showUserLocation);
@@ -93,6 +98,12 @@ public class ShowUserActivity extends Activity{
 		/*
 		 * User info
 		 */
+		
+		// do we have a profile image?
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
+			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
 		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)); 
 		screenName.setText(userScreenName);
 		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_NAME)));

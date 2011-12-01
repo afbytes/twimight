@@ -24,8 +24,10 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -83,7 +85,6 @@ public class ShowTweetActivity extends Activity{
 		createdTextView = (TextView) findViewById(R.id.showTweetCreatedAt);
 		createdWithView = (TextView) findViewById(R.id.showTweetCreatedWith);
 		
-		
 		rowId = getIntent().getIntExtra("rowId", 0);
 		
 		// If we don't know which tweet to show, we stop the activity
@@ -132,6 +133,13 @@ public class ShowTweetActivity extends Activity{
 			}
 			
 		});
+		
+		// Profile image
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
+			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
+			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
 		
 		flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
 

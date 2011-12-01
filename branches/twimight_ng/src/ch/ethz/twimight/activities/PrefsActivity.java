@@ -13,7 +13,6 @@
 package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.R.xml;
 import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
@@ -43,7 +42,6 @@ public class PrefsActivity extends PreferenceActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState){
-
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.prefs);
 		

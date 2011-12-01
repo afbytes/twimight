@@ -90,10 +90,12 @@ public final class Constants {
 	public static final long MENTIONS_MIN_SYNCH = 60*1000L; /** Minimum time between two mentions updates */
 	public static final long FRIENDS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the friends list */
 	public static final long FOLLOWERS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the list of followers */
+	public static final long USERS_MIN_SYNCH = 24*3600*1000L; /** Minmum time between two updates of a user profile */
 	
 	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
 	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
+
 
 
 	

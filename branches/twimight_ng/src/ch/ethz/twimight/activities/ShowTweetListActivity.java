@@ -39,6 +39,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -149,6 +150,14 @@ public class ShowTweetListActivity extends Activity{
 	public void onResume(){
 		super.onResume();
 		
+		// Are we in disaster mode?
+		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
+		} else {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background);
+		}
+
 		Log.i(TAG, "resuming");
 		
 		// if we just got logged in, we load the timeline

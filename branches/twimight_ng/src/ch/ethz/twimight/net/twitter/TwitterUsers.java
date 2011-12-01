@@ -101,7 +101,9 @@ public class TwitterUsers implements BaseColumns {
 	public static final String TWITTERUSERS_COLUMNS_FOLLOWING = "following"; /** is the user following us? */
 	public static final String TWITTERUSERS_COLUMNS_FOLLOW = "follow"; /** are we following the user? */
 	public static final String TWITTERUSERS_COLUMNS_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
+	public static final String TWITTERUSERS_COLUMNS_PROFILEIMAGE = "profile_image";
 	
+	public static final String TWITTERUSERS_COLUMNS_LASTUPDATE = "last_update";
 	public static final String TWITTERUSERS_COLUMNS_FLAGS = "flags";
 	
 	public static final String DEFAULT_SORT_ORDER = TWITTERUSERS_COLUMNS_SCREENNAME + " DESC";

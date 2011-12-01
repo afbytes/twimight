@@ -35,7 +35,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_TWEETS = "tweets";
 	public static final String TABLE_USERS = "users";
 
-	private static final int DATABASE_VERSION = 22;
+	private static final int DATABASE_VERSION = 25;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -104,9 +104,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING + " integer, "
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW + " integer, "
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWREQUEST + " integer, "
+			+ TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " blob,"
+			+ TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE + " integer,"
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS + " integer not null default 0);";
-	
-	// TODO: ProfileImages
 	
 	// TODO: MyDisasterTweets
 	

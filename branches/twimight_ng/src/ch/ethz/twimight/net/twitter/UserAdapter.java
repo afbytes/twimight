@@ -17,6 +17,7 @@ import ch.ethz.twimight.R;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
@@ -39,10 +40,12 @@ public class UserAdapter extends SimpleCursorAdapter {
 	public void bindView(View userrow, Context context, Cursor cursor) {
 		super.bindView(userrow, context, cursor);
 				
-		// TODO: Image
-		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		picture.setImageResource(R.drawable.default_profile);
-		
+		// Profile image
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
+			ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);			
+			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}		
 		
 	}
 	
