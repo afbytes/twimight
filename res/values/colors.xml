@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-	 <color name="title">#ffffff</color>
-  <color name="transparentBlue">#60FF</color>
-  <color name="darkBlue">#000F04</color>
-  <color name="white">#FFFFFFFF</color>
-  <color name="green">#f0f0</color>
-  <color name="highlight_strong">#ff0000</color>
-  <color name="highlight_weak">#ff7979</color>
-  <color name="titletextcolor">#000000</color>
-  <color name="titlenormalbackgroundcolor">#939393</color>
-  <color name="titledisasterbackgroundcolor">#ff0000</color>
-</resources>
+
+    <resources>
+        <color name="transparent">#00000000</color>
+        <color name="tweet_background">#dddddd</color>
+        <color name="text">#000000</color>
+        <color name="white">#FFFFFF</color>
+        <color name="black">#000000</color>
+        <color name="headerBarTextOn">#FFFFFF</color>
+        <color name="headerBarTextOff">#00000000</color>
+    </resources>

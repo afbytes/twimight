@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (c) 2011 ETH Zurich.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the GNU Public License v2.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+  
+  Contributors:
+      Paolo Carta - Implementation
+      Theus Hossmann - Implementation
+      Dominik Schatzmann - Message specification
+-->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory android:title="Disaster Mode">
-		<CheckBoxPreference android:title="DisasterMode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:summary="Tap to enable disaster mode"></CheckBoxPreference>
+	<PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
+		<CheckBoxPreference android:title="Use Location" android:key="prefUseLocation" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to geo-tag your Tweets by default."></CheckBoxPreference>
 	</PreferenceCategory>
-	<PreferenceCategory android:title="Basic Settings">
-		<ListPreference android:title="Number of Tweets" android:summary="Number of Tweets to download" android:key="nrTweets" android:defaultValue="2" android:entries="@array/nrTweetArray" android:entryValues="@array/nrTweetValues" />
+    
+   	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
+		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
+		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
+		<CheckBoxPreference android:title="Location Updates" android:key="prefLocationUpdates" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!"></CheckBoxPreference>
 	</PreferenceCategory>
-	<PreferenceCategory android:title="Notifications">
-		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Tweet" android:key="notifyTweet" android:defaultValue="false" android:summary="Tap to get a notification when you have new Tweets in your Timeline"></CheckBoxPreference>
-		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Mention" android:key="notifyMention" android:defaultValue="true" android:summary="Tap to get a notification when you have new Mentions"></CheckBoxPreference>
-		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Notify Direct Msg" android:key="notifyDM" android:defaultValue="true" android:summary="Tap to get a notification when you have a new Direct Message"></CheckBoxPreference>
-		<CheckBoxPreference android:selectable="true" android:enabled="true" android:title="Enable Vibration" android:key="prefVibration" android:defaultValue="false" android:summary="Tap to enable vibration"></CheckBoxPreference>
-	</PreferenceCategory>
-	
 </PreferenceScreen>

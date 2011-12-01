@@ -25,6 +25,13 @@
 			android:layout_width="fill_parent" 
 			android:layout_marginTop="6dp">
 
+   			<!-- placeholder for the "unposted" notification -->
+			<ImageView 
+				android:id="@+id/topost" 
+				android:src="@drawable/blank"
+				android:layout_width="wrap_content" 
+				android:layout_height="wrap_content" />
+		    
 			<!-- placeholder for the favorite icon -->
 			<ImageView 
 				android:id="@+id/favorite" 
@@ -60,8 +67,7 @@
 			android:text="The latest status " 
 			android:textColor="@color/white"
 			android:textSize="18sp" 
-			android:layout_marginBottom="6dp"
-			android:autoLink="web" />
+			android:layout_marginBottom="6dp" />
 
 	</LinearLayout>
 </LinearLayout>
