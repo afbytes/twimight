@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.util.Constants;
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -29,6 +30,7 @@ import android.util.Log;
 
 /**
  * TODO: Create the queries more elegantly..
+ * TODO: Make purge more efficient (e.g., maintain only the disaster buffer size on inserting a disaster tweet)
  * @author thossmann
  *
  */
@@ -126,6 +128,9 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 	}
 
+	/**
+	 * Query the timeline table
+	 */
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
@@ -158,6 +163,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_LAT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_LNG + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_ID + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
@@ -279,86 +286,44 @@ public class TweetsContentProvider extends ContentProvider {
 		return c;
 	}
 
+	/**
+	 * Insert a tweet into the DB
+	 */
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 		Log.i(TAG, "insert: " + uri);
 		
-		Intent i;
-
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:
-				if(checkValues(values)){
-					// set the insert flag if the tweet does not have an ID from twitter
-					/*
-					if(!values.containsKey(Tweets.TWEETS_COLUMNS_TID) | (values.getAsLong(Tweets.TWEETS_COLUMNS_TID)==0)){
-						values.put(Tweets.TWEETS_COLUMNS_FLAGS, Tweets.FLAG_TO_INSERT);
+				return insertTweet(values);
+			case TWEETS_TIMELINE_DISASTER:
+				// in disaster mode, we set the is disaster flag 
+				//and sign the tweet (if we have a certificate for our key pair)
+				values.put(Tweets.TWEETS_COLUMNS_ISDISASTER, 1);
+				CertificateManager cm = new CertificateManager(getContext());
+				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.TWEETS_COLUMNS_USER).toString())){
+					Log.i(TAG, "our own tweet!");
+					if(cm.hasCertificate()){
+						Log.i(TAG, "signing tweet");
+						// TODO: put signature
+						// TODO: put certificate
+						values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 1);
 					} else {
-						values.put(Tweets.TWEETS_COLUMNS_FLAGS, 0);
-					}
-					*/
-					int flags = values.getAsInteger(Tweets.TWEETS_COLUMNS_FLAGS);
-					
-					if(!values.containsKey(Tweets.TWEETS_COLUMNS_CREATED)){
-						// set the current timestamp
-						values.put(Tweets.TWEETS_COLUMNS_CREATED, System.currentTimeMillis());
-					}
-					
-					// does it mention the local user?
-					String text = values.getAsString(Tweets.TWEETS_COLUMNS_TEXT);
-					String localUserScreenName = getLocalScreenName();
-					if(text.contains("@"+localUserScreenName)){
-						values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 1);
-						Log.i(TAG, "is mention set!");
-					} else {
-						values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 0);
-					}
-					
-					long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);
-					if(rowId >= 0){
-						
-						// delete everything that now falls out of the buffer
-						purgeTimeline();
-						
-						Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
-						getContext().getContentResolver().notifyChange(insertUri, null);
-						
-						Log.i(TAG, "Tweet inserted! " + values);
-						if(flags>0){
-							// start synch service with a synch tweet request
-							i = new Intent(TwitterService.SYNCH_ACTION);
-							i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-							i.putExtra("rowId", rowId);
-							getContext().startService(i);
-						}
-						return insertUri;
-					} else {
-						throw new IllegalStateException("Could not insert tweet into timeline " + values);
+						Log.i(TAG, "no certificate, not signing tweet");
+						values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 0);
 					}
 				} else {
-					throw new IllegalArgumentException("Illegal tweet: " + values);
+					Log.i(TAG, "not our own tweet!");
 				}
-			case TWEETS_TIMELINE_DISASTER:
-				// TODO
-				return null;
+
+				return insertTweet(values);
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
 		}
 	}
 
-	private String getLocalScreenName() {
-		if(LoginActivity.getTwitterId(getContext()) == null) return null;
-		
-		Long localUserId = new Long(LoginActivity.getTwitterId(getContext()));
-		
-		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-		
-		Cursor c = getContext().getContentResolver().query(uri, null, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+localUserId, null, null);
-		
-		if(c.getCount() == 0) return null;
-		
-		c.moveToFirst();
-		return c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME));
-	}
-
+	/**
+	 * Update a tweet
+	 */
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -392,6 +357,9 @@ public class TweetsContentProvider extends ContentProvider {
 		return nrRows;
 	}
 	
+	/**
+	 * Keeps the timeline table at acceptable size
+	 */
 	private void purgeTimeline(){
 		/*
 		 *  1. Delete all tweets which are 
@@ -456,9 +424,100 @@ public class TweetsContentProvider extends ContentProvider {
 
 	}
 	
+	/**
+	 * The screenname of the local user
+	 * @return
+	 */
+	private String getLocalScreenName() {
+		if(LoginActivity.getTwitterId(getContext()) == null) return null;
+		
+		Long localUserId = new Long(LoginActivity.getTwitterId(getContext()));
+		
+		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+		
+		Cursor c = getContext().getContentResolver().query(uri, null, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+localUserId, null, null);
+		
+		if(c.getCount() == 0) return null;
+		
+		c.moveToFirst();
+		return c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME));
+	}
+	
+	/**
+	 * Computes the java String object hash code (32 bit) as the disaster ID of the tweet
+	 * @param cv
+	 * @return
+	 */
+	private int getDisasterID(ContentValues cv){
+		String text = cv.getAsString(Tweets.TWEETS_COLUMNS_USER);
+		String userId;
+		if(!cv.containsKey(Tweets.TWEETS_COLUMNS_USER) | (cv.getAsString(Tweets.TWEETS_COLUMNS_USER)==null)){
+			userId = cv.getAsString(Tweets.TWEETS_COLUMNS_USER);
+		} else {
+			userId = LoginActivity.getTwitterId(getContext()).toString();
+		}
+		
+		return (new String(text+userId)).hashCode();
+	}
+	
+	/**
+	 * Input verification for new tweets
+	 * @param values
+	 * @return
+	 */
 	private boolean checkValues(ContentValues values){
 		// TODO: Input validation
 		return true;
+	}
+	
+	/**
+	 * Inserts a tweet into the DB
+	 */
+	private Uri insertTweet(ContentValues values){
+		if(checkValues(values)){
+			int flags = values.getAsInteger(Tweets.TWEETS_COLUMNS_FLAGS);
+			
+			if(!values.containsKey(Tweets.TWEETS_COLUMNS_CREATED)){
+				// set the current timestamp
+				values.put(Tweets.TWEETS_COLUMNS_CREATED, System.currentTimeMillis());
+			}
+			
+			// the disaster ID must be set for all tweets (normal and disaster)
+			values.put(Tweets.TWEETS_COLUMNS_DISASTERID, getDisasterID(values));
+			
+			// does it mention the local user?
+			String text = values.getAsString(Tweets.TWEETS_COLUMNS_TEXT);
+			String localUserScreenName = getLocalScreenName();
+			if(text.contains("@"+localUserScreenName)){
+				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 1);
+			} else {
+				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 0);
+			}
+			
+			long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);
+			if(rowId >= 0){
+				
+				// delete everything that now falls out of the buffer
+				purgeTimeline();
+				
+				Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
+				getContext().getContentResolver().notifyChange(insertUri, null);
+				
+				Log.i(TAG, "Tweet inserted! ");
+				if(flags>0){
+					// start synch service with a synch tweet request
+					Intent i = new Intent(TwitterService.SYNCH_ACTION);
+					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+					i.putExtra("rowId", rowId);
+					getContext().startService(i);
+				}
+				return insertUri;
+			} else {
+				throw new IllegalStateException("Could not insert tweet into timeline " + values);
+			}
+		} else {
+			throw new IllegalArgumentException("Illegal tweet: " + values);
+		}
 	}
 
 

@@ -45,6 +45,10 @@ public class ShowUserListActivity extends Activity{
 	private Button friendsButton;
 	private Button followersButton;
 	
+	// the menu
+	private static final int OPTIONS_MENU_HOME = 10;
+
+	
 	
 	static final int SHOW_FRIENDS = 1;
 	static final int SHOW_FOLLOWERS = 2;
@@ -128,7 +132,7 @@ public class ShowUserListActivity extends Activity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-
+		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
 		return true;
 	}
 
@@ -138,6 +142,17 @@ public class ShowUserListActivity extends Activity{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 
+		Intent i;
+		switch(item.getItemId()){
+		
+		case OPTIONS_MENU_HOME:
+			// show the timeline
+			i = new Intent(this, ShowTweetListActivity.class);
+			startActivity(i);
+			break;
+		default:
+			return false;
+		}
 		return true;
 	}
 	

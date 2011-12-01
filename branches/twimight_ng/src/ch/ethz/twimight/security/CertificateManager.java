@@ -87,7 +87,7 @@ public class CertificateManager {
 	 * Do we have a currently valid certificate?
 	 */
 	public boolean hasCertificate(){
-		return !hasCertificateAtDate(new Date());
+		return hasCertificateAtDate(new Date());
 	}
 	
 	/**

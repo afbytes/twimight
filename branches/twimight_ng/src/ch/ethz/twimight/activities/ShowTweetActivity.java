@@ -27,9 +27,7 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,12 +44,10 @@ import android.widget.TextView;
  */
 public class ShowTweetActivity extends Activity{
 
-	private static final String TAG = "ShowTweetActivity";
 	
 	Cursor c;
 	
 	// Views
-	private ImageView profileImage;
 	private TextView screenNameView;
 	private TextView realNameView;
 	private TextView tweetTextView;
@@ -59,6 +55,11 @@ public class ShowTweetActivity extends Activity{
 	private TextView createdWithView;
 	
 	private LinearLayout userInfoView;
+	
+	// the menu
+	private static final int OPTIONS_MENU_HOME = 10;
+
+	
 	Uri uri;
 	
 	private boolean favorited;
@@ -77,7 +78,6 @@ public class ShowTweetActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showtweet);
 		
-		profileImage = (ImageView) findViewById(R.id.showTweetProfileImage);
 		screenNameView = (TextView) findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) findViewById(R.id.showTweetRealName);
 		
@@ -139,6 +139,15 @@ public class ShowTweetActivity extends Activity{
 			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
 			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
+		
+		// Disaster Tweet?
+		if(c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
+			tweetTextView.setBackgroundResource(R.drawable.disaster_tweet_background);
+			if(c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_ISVERIFIED))==0){
+				LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
+				unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
+			}
 		}
 		
 		flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
@@ -276,7 +285,7 @@ public class ShowTweetActivity extends Activity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-
+		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
 		return true;
 	}
 
@@ -286,11 +295,18 @@ public class ShowTweetActivity extends Activity{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 
+		Intent i;
 		switch(item.getItemId()){
-
+		
+		case OPTIONS_MENU_HOME:
+			// show the timeline
+			i = new Intent(this, ShowTweetListActivity.class);
+			startActivity(i);
+			break;
 		default:
-			return true;
+			return false;
 		}
+		return true;
 	}
 	
 	/**

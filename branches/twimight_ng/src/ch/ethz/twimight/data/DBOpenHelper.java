@@ -28,14 +28,15 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "twimight";
 
 	// Database table names;
-	static final String TABLE_REVOCATIONS = "revocations";
-	static final String TABLE_MACS = "macs";
+	static final String TABLE_REVOCATIONS = "revocations"; /** the table holding the local version of the revocation list */
+	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */
 	static final String TABLE_LOCATIONS = "locations";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
 	public static final String TABLE_TWEETS = "tweets";
 	public static final String TABLE_USERS = "users";
+	public static final String TABLE_DTWEETS = "deleted_dtweets"; /** the list of deleted disaster tweets */
 
-	private static final int DATABASE_VERSION = 25;
+	private static final int DATABASE_VERSION = 28;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -63,7 +64,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ "twitter_id bigint not null, "
 			+ "key text not null);";
 	
-	// Extend this with the rest of a tweet's metadata
+	// Tweets (including disaster tweets)
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
 			+ "_id integer primary key autoincrement not null, "
 			+ Tweets.TWEETS_COLUMNS_TEXT + " string not null, "
@@ -78,7 +79,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.TWEETS_COLUMNS_LNG + " real, "
 			+ Tweets.TWEETS_COLUMNS_CREATED + " integer, "
 			+ Tweets.TWEETS_COLUMNS_SOURCE + " string, "
-			+ Tweets.TWEETS_COLUMNS_FLAGS + " integer not null default 0);";
+			+ Tweets.TWEETS_COLUMNS_FLAGS + " integer not null default 0, "
+			+ Tweets.TWEETS_COLUMNS_ISDISASTER + " integer not null default 0, "
+			+ Tweets.TWEETS_COLUMNS_DISASTERID + " integer not null, "
+			+ Tweets.TWEETS_COLUMNS_ISVERIFIED + " integer, "
+			+ Tweets.TWEETS_COLUMNS_SIGNATURE + " string, "
+			+ Tweets.TWEETS_COLUMNS_CERTIFICATE + " string);";
 	
 	// Twitter Users
 	private static final String TABLE_USERS_CREATE = "create table "+TABLE_USERS+" ("
@@ -107,12 +113,11 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " blob,"
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE + " integer,"
 			+ TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS + " integer not null default 0);";
-	
-	// TODO: MyDisasterTweets
-	
-	// TODO: DisasterTweets
-	
-	// TODO: DeletedDisasterTweets
+
+	private static final String TABLE_DTWEETS_CREATE = "create table "+TABLE_DTWEETS+" ("
+			+ "_id integer primary key autoincrement not null, "
+			+ "d_id bigint unique not null, "
+			+ "timestamp bigint not null);";
 	
 	// TODO: DisasterMessages
 	
@@ -122,8 +127,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	// TODO: SearchResults
 
-	// TODO: Images
-	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
 
 	/**
@@ -158,6 +161,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_FRIENDS_KEYS_CREATE);
 		database.execSQL(TABLE_TWEETS_CREATE);
 		database.execSQL(TABLE_USERS_CREATE);
+		database.execSQL(TABLE_DTWEETS_CREATE);
 	}
 
 	/**
@@ -175,11 +179,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
+		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DTWEETS);
 		onCreate(database);
 	}
 	
 	/**
-	 * Drops all tables;
+	 * Empties all tables;
 	 */
 	public void flushDB(){
 		
@@ -190,5 +195,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DELETE FROM "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);
 		database.execSQL("DELETE FROM "+TABLE_USERS);
+		database.execSQL("DELETE FROM "+TABLE_DTWEETS);
 	}
 }

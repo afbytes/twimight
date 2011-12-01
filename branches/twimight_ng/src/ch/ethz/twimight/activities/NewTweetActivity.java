@@ -13,8 +13,6 @@
 
 package ch.ethz.twimight.activities;
 
-import java.math.BigInteger;
-
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.util.Constants;
@@ -216,15 +214,17 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	private void sendTweet(){
 		Log.i(TAG, "send tweet!");
 		// if no connectivity, notify user that the tweet will be send later
-		
-		ContentProviderClient client = getContentResolver().acquireContentProviderClient(Tweets.CONTENT_URI);
-		ContentProvider provider = client.getLocalContentProvider();
 		try{
-			
-			provider.insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), createContentValues());
-			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-			if(cm.getActiveNetworkInfo()!=null && !cm.getActiveNetworkInfo().isConnected()){
-				Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG);
+			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){
+				Log.i(TAG, "DISASTER TWEEEEET!!!");
+				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), createContentValues());
+			} else {
+				Log.i(TAG, "NORMAL TWEEEEET!!!");
+				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), createContentValues());
+				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG);
+				}				
 			}
 			finish();
 			

@@ -91,11 +91,12 @@ public class TwitterService extends Service {
 		
 		
 		// Do we have connectivity?
-		// TODO: This seems not to work properly, the service is trying to synch even if there is no connectivity!
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-		if(cm.getActiveNetworkInfo()!=null && !cm.getActiveNetworkInfo().isConnected()){
+		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.i(TAG, "Error synching: no connectivity");
 			return START_STICKY;
+		} else {
+			Log.i(TAG, "We are connected!");
 		}
 		
 		// Create twitter object

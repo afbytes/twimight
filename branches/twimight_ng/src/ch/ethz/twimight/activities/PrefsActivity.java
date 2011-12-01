@@ -16,15 +16,24 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
+import ch.ethz.twimight.net.tds.TDSRevokeTask;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 /**
  * Shows the preferences.
@@ -36,7 +45,10 @@ public class PrefsActivity extends PreferenceActivity{
 
 	private OnSharedPreferenceChangeListener prefListener;
 	private SharedPreferences prefs;
-	
+
+	// the menu
+	private static final int OPTIONS_MENU_HOME = 10;
+
 	/**
 	 * Set everything up.
 	 */
@@ -107,6 +119,36 @@ public class PrefsActivity extends PreferenceActivity{
 	public void onPause(){
 		super.onPause();
 		prefs.unregisterOnSharedPreferenceChangeListener(prefListener);
+	}
+	
+	/**
+	 * Populate the Options menu
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu){
+		super.onCreateOptionsMenu(menu);
+		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
+		return true;
+	}
+
+	/**
+	 * Handle options menu selection
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+
+		Intent i;
+		switch(item.getItemId()){
+		
+		case OPTIONS_MENU_HOME:
+			// show the timeline
+			i = new Intent(this, ShowTweetListActivity.class);
+			startActivity(i);
+			break;
+		default:
+			return false;
+		}
+		return true;
 	}
 
 }
