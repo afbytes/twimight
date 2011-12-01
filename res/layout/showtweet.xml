@@ -17,7 +17,8 @@
 			android:orientation="horizontal" android:clickable="true"
 			android:focusable="true">
 			<ImageView android:id="@+id/showTweetProfileImage"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:layout_height="45dp" 
+		android:layout_width="45dp"
 				android:src="@drawable/default_profile" />
 			<LinearLayout android:id="@+id/linearLayout1"
 				android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -47,10 +48,12 @@
 				android:autoLink="web" />
 			<TextView android:id="@+id/showTweetCreatedAt" android:text="Created at.."
 				android:layout_width="match_parent" android:layout_height="wrap_content"
-				android:textSize="14sp" />
+				android:textColor="@color/grey"
+				android:textSize="16sp" />
 			<TextView android:id="@+id/showTweetCreatedWith"
 				android:text="Created with.." android:layout_width="match_parent"
-				android:layout_height="wrap_content" android:textSize="14sp" />
+				android:textColor="@color/grey"
+				android:layout_height="wrap_content" android:textSize="16sp" />
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetTosend"

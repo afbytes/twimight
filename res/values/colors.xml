@@ -1,5 +1,7 @@
-
+<?xml version="1.0" encoding="utf-8"?>
     <resources>
+    	<color name="grey">#999999</color>
+    	<color name="title">#ffffff</color>
         <color name="transparent">#00000000</color>
         <color name="tweet_background">#dddddd</color>
         <color name="text">#000000</color>
@@ -7,4 +9,6 @@
         <color name="black">#000000</color>
         <color name="headerBarTextOn">#FFFFFF</color>
         <color name="headerBarTextOff">#00000000</color>
+        <color name="titlenormalbackgroundcolor">#939393</color>
+  		<color name="titledisasterbackgroundcolor">#ff0000</color>
     </resources>
