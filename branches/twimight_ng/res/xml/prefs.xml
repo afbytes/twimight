@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (c) 2011 ETH Zurich.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the GNU Public License v2.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+  
+  Contributors:
+      Paolo Carta - Implementation
+      Theus Hossmann - Implementation
+      Dominik Schatzmann - Message specification
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
+		<CheckBoxPreference android:title="Use Location" android:key="prefUseLocation" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to geo-tag your Tweets by default."></CheckBoxPreference>
+	</PreferenceCategory>
+    
+   	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
+		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
+		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
+		<CheckBoxPreference android:title="Location Updates" android:key="prefLocationUpdates" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!"></CheckBoxPreference>
+	</PreferenceCategory>
+</PreferenceScreen>
