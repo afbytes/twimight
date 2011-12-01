@@ -56,6 +56,20 @@
 				android:layout_height="wrap_content" android:textSize="16sp" />
 		</LinearLayout>
 
+		<LinearLayout android:id="@+id/showTweetUnverified"
+			android:orientation="horizontal" android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:padding="10dp"
+			android:layout_marginTop="10dp" android:background="@drawable/border"
+			android:visibility="gone">
+			<ImageView android:id="@+id/showTweetInfo0"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:src="@android:drawable/ic_dialog_alert"
+				android:layout_marginRight="10dp" />
+			<TextView android:id="@+id/showTweetInfoText0"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="The digital signature of this Tweet could not be verified!" />
+		</LinearLayout>
+
 		<LinearLayout android:id="@+id/showTweetTosend"
 			android:orientation="horizontal" android:layout_width="match_parent"
 			android:layout_height="wrap_content" android:padding="10dp"
