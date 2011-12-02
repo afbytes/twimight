@@ -90,8 +90,8 @@ public class TDSCommunication {
 	 * @return
 	 * @throws JSONException
 	 */
-	public int createCertificateObject(KeyPair kp, X509Certificate cert) throws Exception{
-		tdsRequest.createCertificateObject(kp, cert);
+	public int createCertificateObject(KeyPair toSign, KeyPair toRevoke) throws Exception{
+		tdsRequest.createCertificateObject(toSign, toRevoke);
 		return 0;
 	}
 	

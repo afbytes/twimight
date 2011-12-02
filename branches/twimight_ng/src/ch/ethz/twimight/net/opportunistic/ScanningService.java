@@ -43,6 +43,9 @@ public class ScanningService extends Service {
 	
 	private static PowerManager.WakeLock wakeLock; 
 	private static final String WAKE_LOCK = "ScanningWakeLock";
+
+	public static final String FORCE_SCAN = "force_scan"; /** To force a scan, put this extra in the starting intent */
+	public static final String FORCE_SCAN_DELAY = "force_scan_delay"; /** To force a scan after a given delay, put this extra in the starting intent */
 	
 	private boolean isRunning = false;
 		
@@ -59,7 +62,7 @@ public class ScanningService extends Service {
 	}
 	
 	/**
-	 * Starts the updating threads.
+	 * Starts the updating threads. If the service is running and we have extras in the intent asking for an immediate scan, we start scanning.
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -88,7 +91,12 @@ public class ScanningService extends Service {
 			isRunning = true;
 			
 			Log.d(TAG, "onStart'ed"); 
-		} 
+		} else {
+			
+			if(intent.hasExtra(FORCE_SCAN)){
+				scheduleScanning(intent.getLongExtra(FORCE_SCAN_DELAY, 0));
+			}
+		}
 
 		
 		return START_STICKY;
@@ -107,6 +115,7 @@ public class ScanningService extends Service {
 
 	/**
 	 * Schedules a Scanning communication
+	 * @param delay after how many milliseconds (0 for immediately)?
 	 */
 	public static void scheduleScanning(long delay) {
 		

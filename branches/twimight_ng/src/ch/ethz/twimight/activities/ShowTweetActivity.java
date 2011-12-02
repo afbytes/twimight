@@ -134,6 +134,7 @@ public class ShowTweetActivity extends Activity{
 			
 		});
 		
+		
 		// Profile image
 		if(!c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
 			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
@@ -148,6 +149,8 @@ public class ShowTweetActivity extends Activity{
 				LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
 				unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 			}
+		} else {
+			tweetTextView.setBackgroundResource(R.drawable.normal_tweet_background);
 		}
 		
 		flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));

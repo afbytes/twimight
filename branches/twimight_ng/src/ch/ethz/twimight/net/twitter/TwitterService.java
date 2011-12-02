@@ -49,6 +49,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * The service to send all kinds of API calls to Twitter. 
@@ -209,7 +210,7 @@ public class TwitterService extends Service {
 	 * Stores the user ID in the shared preferences.
 	 */
 	private void synchLogin(){
-		(new VerifyCredentialsTask()).execute();
+		(new VerifyCredentialsTask()).execute(Constants.LOGIN_ATTEMPTS);
 	}
 
 	/**
@@ -589,6 +590,7 @@ public class TwitterService extends Service {
 		cv.put(Tweets.TWEETS_COLUMNS_SOURCE, tweet.source);
 		cv.put(Tweets.TWEETS_COLUMNS_TID, tweet.getId().longValue());
 		cv.put(Tweets.TWEETS_COLUMNS_FAVORITED, tweet.isFavorite());
+		
 		// TODO: How do we know if we have retweeted the tweet?
 		cv.put(Tweets.TWEETS_COLUMNS_RETWEETED, 0);
 		cv.put(Tweets.TWEETS_COLUMNS_RETWEETCOUNT, tweet.retweetCount);
@@ -636,10 +638,11 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class VerifyCredentialsTask extends AsyncTask<Void, Void, Twitter.User> {
+	private class VerifyCredentialsTask extends AsyncTask<Integer, Void, Twitter.User> {
+		int attempts;
 		@Override
-	     protected Twitter.User doInBackground(Void... params) {
-			ShowTweetListActivity.setLoading(true);
+	     protected Twitter.User doInBackground(Integer... params) {
+			attempts = params[0];
 			Twitter.User user = null;
 			
 			try {
@@ -648,7 +651,6 @@ public class TwitterService extends Service {
 				
 			} catch (Exception ex) {					
 				Log.e(TAG, "Error while verifying credentials: " + ex);
-				ShowTweetListActivity.setLoading(false);
 			}
 	         
 	        return user;
@@ -657,7 +659,13 @@ public class TwitterService extends Service {
 		@Override
 	     protected void onPostExecute(Twitter.User result) {
 			if(result==null) {
-				ShowTweetListActivity.setLoading(false);
+				// if we still have more attempts, we start a new thread
+				if(attempts>0){
+					(new VerifyCredentialsTask()).execute(attempts-1);
+				} else {
+					// tell the user that the login was not successful
+					Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+				}
 				return;
 			}
 
@@ -666,8 +674,20 @@ public class TwitterService extends Service {
 			Log.i(TAG, "Local user id: "+ Long.toString(result.getId()));
 			// update user in DB
 			updateUser(result);
-
-			ShowTweetListActivity.setLoading(false);
+			
+			// start the timeline activity and the periodic alarms
+			LoginActivity.startAlarms(getBaseContext());
+			
+			Intent timelineIntent = new Intent(getBaseContext(), ShowTweetListActivity.class);
+			timelineIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			timelineIntent.putExtra("login", true);
+			startActivity(timelineIntent);
+			
+			// stop the login activity
+			Intent loginIntent = new Intent(getBaseContext(), LoginActivity.class);
+			loginIntent.putExtra(LoginActivity.FORCE_FINISH, true);
+			loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(loginIntent);
 	     }
 	}
 	

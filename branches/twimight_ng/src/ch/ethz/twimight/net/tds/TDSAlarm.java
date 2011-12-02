@@ -135,8 +135,10 @@ public class TDSAlarm extends BroadcastReceiver {
 				enableBluetooth(); // this will also schedule a TDSThread, once bluetooth is done.
 				
 			} else {
-				// Launch Thread
-				new Thread(new TDSThread(context)).start();
+				// Request the sync
+				Intent synchIntent = new Intent(context, TDSService.class);
+				synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
+				context.startService(synchIntent);
 			}
 		}
 
@@ -192,8 +194,10 @@ public class TDSAlarm extends BroadcastReceiver {
 					BluetoothAdapter.getDefaultAdapter().disable();
 
 					if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) != null &&PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON) == true ){
-						// Launch the worker thread
-						new Thread(new TDSThread(context)).start();
+						// Request the sync
+						Intent synchIntent = new Intent(context, TDSService.class);
+						synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
+						context.startService(synchIntent);
 					} else {
 						Log.e(TAG, "Sometimes everything goes wrong. Can't obtain a MAC address, rescheduling now.");
 						scheduleCommunication(context, Constants.TDS_UPDATE_INTERVAL);

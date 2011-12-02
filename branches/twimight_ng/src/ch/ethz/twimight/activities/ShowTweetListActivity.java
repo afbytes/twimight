@@ -13,10 +13,9 @@
 package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.tds.TDSRevokeTask;
+import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import android.app.Activity;
@@ -250,8 +249,9 @@ public class ShowTweetListActivity extends Activity{
 		case OPTIONS_MENU_REVOKE:
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()){
-				TDSRevokeTask task = new TDSRevokeTask(this);
-				task.execute();
+				Intent revokeIntent = new Intent(this, TDSService.class);
+				revokeIntent.putExtra("synch_request", TDSService.SYNCH_REVOKE);
+				startService(revokeIntent);
 			} else {
 				Toast.makeText(this, "No Internet connection, please try again later!", Toast.LENGTH_LONG).show();
 			}
@@ -306,21 +306,19 @@ public class ShowTweetListActivity extends Activity{
 		switch(filter) {
 		case SHOW_TIMELINE: 
 			b = timelineButton;
-			// TODO: Are we in disaster mode?
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
+			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 			break;
 		case SHOW_FAVORITES: 
 			b = favoritesButton;
-			// TODO: Are we in disaster mode?
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
+			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_FAVORITES;
 
 			break;
 		case SHOW_MENTIONS: 
 			b = mentionsButton;
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
+			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
 
 			break;
@@ -329,8 +327,7 @@ public class ShowTweetListActivity extends Activity{
 			break;
 		default:
 			b= timelineButton;
-			// TODO: Are we in disaster mode?
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
+			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 		}
