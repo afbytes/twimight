@@ -13,6 +13,7 @@
 
 package ch.ethz.twimight.net.tds;
 
+import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class TDSRequestMessage {
 	 * @return
 	 * @throws JSONException 
 	 */
-	public void createCertificateObject(KeyPair toSign, X509Certificate toRevoke) throws JSONException {
+	public void createCertificateObject(KeyPair toSign, KeyPair toRevoke) throws JSONException {
 		
 		certificateObject = new JSONObject();
 		if(toSign!=null){
@@ -139,7 +140,7 @@ public class TDSRequestMessage {
 		}
 		
 		if(toRevoke!=null){
-			certificateObject.put("revoke", Long.toHexString(toRevoke.getSerialNumber().longValue()));
+			certificateObject.put("revoke", KeyManager.getPemPublicKey(toRevoke));
 		}
 	}
 	

@@ -142,14 +142,18 @@ public class TDSResponseMessage {
 			return null;
 		}
 		
+		Log.i(TAG, "Bluetooth object status ok");
 		List<String> macList = new ArrayList<String>();
 		JSONArray macs = bluetoothObject.getJSONArray("list");
 		
 		if(macs!= null){
 			for(int i = 0 ; i < macs.length(); i++){
+				Log.i(TAG, "macs length: " + macs.length() + " " + i);
+				Log.i(TAG, "MAC: " + macs.getString(i));
 				macList.add(macs.getString(i));
 			}
 		}
+		Log.i(TAG, "macs done ");
 
 		return macList;
 	}
@@ -187,7 +191,7 @@ public class TDSResponseMessage {
 	 * @return
 	 */
 	public int parseCertificateStatus() throws JSONException{
-		if(!hasRevocationObject()) return 0;
+		if(!hasCertificateObject()) return 0;
 		
 		return certificateObject.getInt("status");
 	}
@@ -253,18 +257,22 @@ public class TDSResponseMessage {
 			return null;
 		}
 
-		List<TDSPublicKey> keyList = new ArrayList<TDSPublicKey>();
-		JSONArray entries = followerObject.getJSONArray("update");
+		List<TDSPublicKey> keyList = null;
 		
-		Log.i(TAG, "reading update");
-		
-		if(entries!= null){
-			for(int i = 0 ; i < entries.length(); i++){
-				JSONArray entry = entries.getJSONArray(i);
-				long twitterId = entry.getLong(0);
-				String keyPem = entry.getString(1);
-				if(twitterId!=0 && keyPem!=null){
-					keyList.add(new TDSPublicKey(twitterId, keyPem));
+		if(followerObject.has("update")){
+			keyList = new ArrayList<TDSPublicKey>();
+			JSONArray entries = followerObject.getJSONArray("update");
+			
+			Log.i(TAG, "reading update");
+			
+			if(entries!= null){
+				for(int i = 0 ; i < entries.length(); i++){
+					JSONArray entry = entries.getJSONArray(i);
+					long twitterId = entry.getLong(0);
+					String keyPem = entry.getString(1);
+					if(twitterId!=0 && keyPem!=null){
+						keyList.add(new TDSPublicKey(twitterId, keyPem));
+					}
 				}
 			}
 		}

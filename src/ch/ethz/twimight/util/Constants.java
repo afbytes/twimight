@@ -31,11 +31,11 @@ public final class Constants {
 
 	// TDS configuration
 	public static final int TDS_MESSAGE_VERSION = 1; /** Which message version */
-    public static final long TDS_UPDATE_INTERVAL = 30*60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
+    public static final long TDS_UPDATE_INTERVAL = 60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
     public static final long TDS_UPDATE_RETRY_INTERVAL = 60*1000L; /** Initial interval for re-trying to connect to TDS */
     public static final boolean TDS_DEFAULT_ON = true; /** Opt in or opt out for TDS communication? */
-    public static final long WAIT_FOR_CONNECTIVITY = 30*1000L; /** After waking up we have to wait to get connectivity */
-    public static final String TDS_BASE_URL = "https://pc-10329-virt08.ethz.ch"; /** The URL of the TDS */
+    public static final long WAIT_FOR_CONNECTIVITY = 5*1000L; /** After waking up we have to wait to get connectivity */
+    public static final String TDS_BASE_URL = "https://api.twimight.com"; /** The URL of the TDS */
     public static final int HTTP_CONNECTION_TIMEOUT = 3*1000; /** How long do we wait for a connection? */
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     
@@ -78,6 +78,7 @@ public final class Constants {
 	
 	// Twitter
 	public static final int CONSUMER_ID = 1;
+	public static final int LOGIN_ATTEMPTS = 5; /** How many times do we attempt to log in before giving up? */
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
 	public static final boolean TWEET_DEFAULT_LOCATION = false; /** Are tweets by default geo-tagged or not? */
 	
@@ -95,6 +96,7 @@ public final class Constants {
 	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
 	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
+
 
 
 

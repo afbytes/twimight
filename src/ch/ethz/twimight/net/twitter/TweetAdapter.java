@@ -21,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -78,6 +79,23 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			favoriteStar.setImageResource(android.R.drawable.star_off);
 		} else {
 			favoriteStar.setImageResource(R.drawable.blank);
+		}
+		
+		// disaster tweet or normal tweet?
+		LinearLayout rowLayout = (LinearLayout) row.findViewById(R.id.rowLayout);
+		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
+		if(cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
+			rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
+			verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
+			verifiedImage.setVisibility(ImageView.VISIBLE);
+			if(cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_ISVERIFIED))>0){
+				verifiedImage.setImageResource(android.R.drawable.ic_secure);
+			} else {
+				verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
+			}
+		} else {
+			rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
+			verifiedImage.setVisibility(ImageView.GONE);
 		}
 		
 	}

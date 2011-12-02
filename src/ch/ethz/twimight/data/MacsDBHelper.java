@@ -118,7 +118,6 @@ public class MacsDBHelper {
 	public boolean updateMacsDeActive() {
 		ContentValues values = new ContentValues();
 		values.put(KEY_ACTIVE, 0);
-
 		int resultCode = 0;
 		try{
 			resultCode = database.update(DBOpenHelper.TABLE_MACS, values, null, null);

@@ -147,13 +147,14 @@ public class CertificateManager {
 		
 		return true;
 	}
-
+	
 	/**
-	 * Checks if a certificate is valid
-	 * @param cert
-	 * @return
+	 * Checks if the certificate is valid for the provided twitterId
+	 * @param cert X509CertificateObject
+	 * @param twitterId String user ID
+	 * @return true if valid, false otherwise
 	 */
-	public boolean checkCertificate(X509CertificateObject cert) {
+	public boolean checkCertificate(X509CertificateObject cert, String twitterId){
 		// is it valid?
 		try {
 			cert.checkValidity();
@@ -167,7 +168,7 @@ public class CertificateManager {
 		
 		// is it ours?
 		Principal subjectDN = cert.getSubjectDN();
-		if(!subjectDN.getName().substring(2).equals(LoginActivity.getTwitterId(context))){
+		if(!subjectDN.getName().substring(2).equals(twitterId)){
 			Log.e(TAG, "wrong DN in certificate! " + subjectDN.getName());
 			return false;
 		}
@@ -179,10 +180,22 @@ public class CertificateManager {
 			return false;
 		}
 		
+		// check the signature
+		// TODO
+		
 		// is it on the revocation list?
 		// TODO
-
 		return true;
+	}
+
+	/**
+	 * Checks if a given certificate is valid for our own Twitter ID
+	 * @param cert
+	 * @return
+	 */
+	public boolean checkCertificate(X509CertificateObject cert) {
+
+		return checkCertificate(cert, LoginActivity.getTwitterId(context));
 	}
 
 	/**

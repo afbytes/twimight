@@ -30,7 +30,7 @@ import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
-import ch.ethz.twimight.net.tds.TDSThread;
+import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -73,7 +73,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TWITTER_ACCESS_TOKEN_URL = "http://twitter.com/oauth/access_token";
 	private static final String TWITTER_AUTHORIZE_URL = "http://twitter.com/oauth/authorize";
 	private static final Uri CALLBACK_URI = Uri.parse("my-app://bluetest");
-
+	
+	public static final String FORCE_FINISH = "force_finish";
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -83,20 +84,35 @@ public class LoginActivity extends Activity implements OnClickListener{
 		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
+		// check if we have a finish request in the intent
+		Intent intent = getIntent();
+		if(intent.hasExtra(FORCE_FINISH)) {
+			finish();
+			return;
+		}
+		
 		// if we have token and secret, launch the timeline activity
 		if(hasAccessToken(this) && hasAccessTokenSecret(this)){
-			Log.i(TAG, "we have the tokens, do we have connectivity?");
+			Log.i(TAG, "we have the tokens, do we have the ID?");
 			
-			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-			if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){
+			// If we have the Twitter Id of the local user, we proceed to the timeline.
+			// Otherwise we verify the credentials to get the twitter ID
+			if(getTwitterId(this)!=null){
+				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+					Toast.makeText(this,"Not connected to the Internet, showing old Tweets!", Toast.LENGTH_LONG).show();
+				}
+				startTimeline(this);
+				finish();
+
+			} else {
 				// call the twitter service to verify the credentials
+				// this call will proceed to the timeline once we have the local twitter id
+				// or show an error otherwise
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
 				startService(i);
-			} else {
-				Toast.makeText(this,"Not connected to the Internet, showing old Tweets!", Toast.LENGTH_LONG).show();
 			}
-			startTimeline();
 		}
 		
 		// We get the URI when we are called back from Twitter
@@ -259,41 +275,39 @@ public class LoginActivity extends Activity implements OnClickListener{
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
 				startService(i);
-				startTimeline();
-
+				
 			}
 		}
 		
 				
 	}
 
-	private void startTimeline() {
-		startAlarms();
-		Intent i = new Intent(this, ShowTweetListActivity.class);
+	public static void startTimeline(Context context) {
+		startAlarms(context);
+		Intent i = new Intent(context, ShowTweetListActivity.class);
 		i.putExtra("login", true);
-		startActivity(i);
-		finish();
+		context.startActivity(i);
 	}
 
 	/**
 	 * Start all the enabled alarms and services.
 	 */
-	private void startAlarms() {
+	public static void startAlarms(Context context) {
 		// Start the alarm for communication with the TDS
-		if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-			new TDSAlarm(this, Constants.TDS_UPDATE_INTERVAL);
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
+			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 		}
 		
 		
-		if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-			startService(new Intent(this, ScanningService.class));
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
+			context.startService(new Intent(context, ScanningService.class));
 		}
 		
 		
 		// Start the location update alarm
 		
-		if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
-			new LocationAlarm(this, Constants.LOCATION_UPDATE_TIME);
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
+			new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
 		}
 				
 	}
@@ -327,8 +341,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		// Stop all alarms
 		stopAlarms(context);
-		TDSThread.resetLastUpdate(context);
-		TDSThread.resetUpdateInterval(context);
+		TDSService.resetLastUpdate(context);
+		TDSService.resetUpdateInterval(context);
 		
 		// Delete our Twitter ID
 		setTwitterId(null, context);
