@@ -77,10 +77,10 @@ public class ShowTweetListActivity extends Activity{
 	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
 
-	private static final int SHOW_TIMELINE = 1;
-	private static final int SHOW_FAVORITES = 2;
-	private static final int SHOW_MENTIONS = 3;
-	private static final int SHOW_SEARCH = 5;
+	public static final int SHOW_TIMELINE = 1;
+	public static final int SHOW_FAVORITES = 2;
+	public static final int SHOW_MENTIONS = 3;
+	public static final int SHOW_SEARCH = 5;
 	
 	private int currentFilter = 0;
 	private int positionIndex;
@@ -162,7 +162,9 @@ public class ShowTweetListActivity extends Activity{
 		
 		// if we just got logged in, we load the timeline
 		Intent i = getIntent();
-		if(i.hasExtra("login")){
+		if(i.hasExtra("filter_request")) {
+			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
+		} else if(i.hasExtra("login")){
 			Log.i(TAG, "just logged in");
 			i.removeExtra("login");
 			setFilter(SHOW_TIMELINE);
