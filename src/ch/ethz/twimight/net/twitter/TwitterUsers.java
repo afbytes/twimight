@@ -106,7 +106,7 @@ public class TwitterUsers implements BaseColumns {
 	public static final String TWITTERUSERS_COLUMNS_LASTUPDATE = "last_update";
 	public static final String TWITTERUSERS_COLUMNS_FLAGS = "flags";
 	
-	public static final String DEFAULT_SORT_ORDER = TWITTERUSERS_COLUMNS_SCREENNAME + " DESC";
+	public static final String DEFAULT_SORT_ORDER = TWITTERUSERS_COLUMNS_SCREENNAME;
 	
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_UPDATE = 1;

@@ -39,13 +39,15 @@ public class UserAdapter extends SimpleCursorAdapter {
 	@Override
 	public void bindView(View userrow, Context context, Cursor cursor) {
 		super.bindView(userrow, context, cursor);
-				
+			
 		// Profile image
+		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
-			ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);			
 			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-		}		
+		} else {
+			picture.setImageResource(R.drawable.default_profile);
+		}
 		
 	}
 	

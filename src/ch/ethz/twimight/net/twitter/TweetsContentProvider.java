@@ -104,6 +104,10 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int NOTIFY_DISASTER = 3;
 	private static final int NOTIFY_TWEET = 4;
 	
+	// for purging the tweets table
+	private static final int PURGE_NORMAL = 1;
+	private static final int PURGE_DISASTER = 2;
+	
 	/**
 	 * onCreate we initialize and open the DB.
 	 */
@@ -509,6 +513,8 @@ public class TweetsContentProvider extends ContentProvider {
 		Log.i(TAG, "insert: " + uri);
 		int disasterId;
 		Cursor c;
+		Uri insertUri = null; // the return value;
+		
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:
 				/*
@@ -554,7 +560,11 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 				c.close();
 				// if none of the before was true, this is a proper new tweet which we now insert
-				return insertTweet(values);
+				insertUri = insertTweet(values);
+				// delete everything that now falls out of the buffer
+				purgeTimeline(LoginActivity.getTwitterId(getContext()), PURGE_NORMAL);
+				
+				break;
 				
 			case TWEETS_TIMELINE_DISASTER:
 				// in disaster mode, we set the is disaster flag 
@@ -631,9 +641,16 @@ public class TweetsContentProvider extends ContentProvider {
 					
 				}
 				c.close();
-				return insertTweet(values);
+				insertUri = insertTweet(values);
+				
+				// delete everything that now falls out of the buffer
+				purgeTimeline(LoginActivity.getTwitterId(getContext()), PURGE_DISASTER);
+				break;
+				
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
 		}
+		
+		return insertUri;
 	}
 
 	/**
@@ -676,106 +693,114 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Keeps the timeline table at acceptable size
 	 * TODO: this seems not to work!!
 	 */
-	private void purgeTimeline(String userId){
+	private void purgeTimeline(String userId, int whichBuffer){
 		
-		Log.i(TAG, "purging buffers "+userId);
-		/*
-		 *  1. Delete all tweets which are 
-		 *  - not favorites 
-		 *  - not mentions
-		 *  - do not have transactional flags
-		 *  - are beyond the buffer size
-		 *  NOTE: DELETE in android does not allow ORDER BY. Hence, the trick with the _id
-		 *  TODO: let the caller select which "buffer" should be purged
-		 */
-		String sqlWhere;
-		String sql;
-		Cursor c;
-		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
-		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-				+ " WHERE " + sqlWhere
-				+ " LIMIT -1 OFFSET "
-				+ Constants.TIMELINE_BUFFER_SIZE+");";
-		Log.i(TAG, "Query: " + sql);
-		c = database.rawQuery(sql, null);
-		
-		c.close();
-		
-		/*
-		 *  2. Delete all tweets which 
-		 *  - are favorites
-		 *  - are not mentions
-		 *  - don't have transactional flags 
-		 *  - are beyond the favorites buffer size
-		 */
-		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+">0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
-		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-				+ " WHERE " + sqlWhere
-				+ " LIMIT -1 OFFSET "
-				+ Constants.FAVORITES_BUFFER_SIZE+");";
-		Log.i(TAG, "Query: " + sql);
-		c = database.rawQuery(sql, null);
-		
-		c.close();
-		
-		/*
-		 *  3. Delete all tweets which
-		 *  - are mentions 
-		 *  - are not favorites  
-		 *  - don't have transactional flags 
-		 *  - are beyond the mentions buffer size
-		 */
-		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+">0";
-		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-				+ " WHERE " + sqlWhere
-				+ " LIMIT -1 OFFSET "
-				+ Constants.MENTIONS_BUFFER_SIZE+");";
-		Log.i(TAG, "Query: " + sql);
-		c = database.rawQuery(sql, null);
-		
-		c.close();
+		switch(whichBuffer){
+		case PURGE_NORMAL:
+			Log.i(TAG, "purging buffers "+userId);
+			/*
+			 *  1. Delete all tweets which are 
+			 *  - not favorites 
+			 *  - not mentions
+			 *  - do not have transactional flags
+			 *  - are beyond the buffer size
+			 *  NOTE: DELETE in android does not allow ORDER BY. Hence, the trick with the _id
+			 *  TODO: let the caller select which "buffer" should be purged
+			 */
+			String sqlWhere;
+			String sql;
+			Cursor c;
+			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
+			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+"WHERE "
+					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+					+ " WHERE " + sqlWhere
+					+ " LIMIT -1 OFFSET "
+					+ Constants.TIMELINE_BUFFER_SIZE+");";
+			Log.i(TAG, "Query: " + sql);
+			c = database.rawQuery(sql, null);
+			
+			c.close();
+			
+			/*
+			 *  2. Delete all tweets which 
+			 *  - are favorites
+			 *  - are not mentions
+			 *  - don't have transactional flags 
+			 *  - are beyond the favorites buffer size
+			 */
+			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+">0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
+			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+"WHERE "
+					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+					+ " WHERE " + sqlWhere
+					+ " LIMIT -1 OFFSET "
+					+ Constants.FAVORITES_BUFFER_SIZE+");";
+			Log.i(TAG, "Query: " + sql);
+			c = database.rawQuery(sql, null);
+			
+			c.close();
+			
+			/*
+			 *  3. Delete all tweets which
+			 *  - are mentions 
+			 *  - are not favorites  
+			 *  - don't have transactional flags 
+			 *  - are beyond the mentions buffer size
+			 */
+			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+">0";
+			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+"WHERE "
+					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+					+ " WHERE " + sqlWhere
+					+ " LIMIT -1 OFFSET "
+					+ Constants.MENTIONS_BUFFER_SIZE+");";
+			Log.i(TAG, "Query: " + sql);
+			c = database.rawQuery(sql, null);
+			
+			c.close();
+			break;
+		case PURGE_DISASTER:
 
-		/*
-		 *  4. Delete all disaster tweets which
-		 *  - are not our own 
-		 *  - are beyond the DTweets buffer size
-		 */
-		sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
-					+Tweets.TWEETS_COLUMNS_USER+"!="+userId;
-		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-				+ " WHERE " + sqlWhere
-				+ " LIMIT -1 OFFSET "
-				+ Constants.DTWEET_BUFFER_SIZE+");";
-		Log.i(TAG, "Query: " + sql);
-		c = database.rawQuery(sql, null);
+			/*
+			 *  4. Delete all disaster tweets which
+			 *  - are not our own 
+			 *  - are beyond the DTweets buffer size
+			 */
+			sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
+						+Tweets.TWEETS_COLUMNS_USER+"!="+userId;
+			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+"WHERE "
+					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+					+ " WHERE " + sqlWhere
+					+ " LIMIT -1 OFFSET "
+					+ Constants.DTWEET_BUFFER_SIZE+");";
+			Log.i(TAG, "Query: " + sql);
+			c = database.rawQuery(sql, null);
+			
+			c.close();
+			
+			/*
+			 *  5. Delete all disaster tweets which
+			 *  - are our own 
+			 *  - are beyond the DTweets buffer size
+			 */
+			sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
+						+Tweets.TWEETS_COLUMNS_USER+"="+userId;
+			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+"WHERE "
+					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+					+ " WHERE " + sqlWhere
+					+ " LIMIT -1 OFFSET "
+					+ Constants.MYDTWEET_BUFFER_SIZE+");";
+			Log.i(TAG, "Query: " + sql);
+			c = database.rawQuery(sql, null);
+			
+			c.close();	
+			break;
 		
-		c.close();
+		}
 		
-		/*
-		 *  5. Delete all disaster tweets which
-		 *  - are our own 
-		 *  - are beyond the DTweets buffer size
-		 */
-		sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
-					+Tweets.TWEETS_COLUMNS_USER+"="+userId;
-		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-				+ " WHERE " + sqlWhere
-				+ " LIMIT -1 OFFSET "
-				+ Constants.MYDTWEET_BUFFER_SIZE+");";
-		Log.i(TAG, "Query: " + sql);
-		c = database.rawQuery(sql, null);
-		
-		c.close();
 	}
 	
 	/**
@@ -857,9 +882,6 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);
 			if(rowId >= 0){
-				
-				// delete everything that now falls out of the buffer
-				purgeTimeline(LoginActivity.getTwitterId(getContext()));
 				
 				Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);

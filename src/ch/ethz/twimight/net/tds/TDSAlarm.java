@@ -41,8 +41,7 @@ public class TDSAlarm extends BroadcastReceiver {
 	private static final String WAKE_LOCK = "TDSLock";
 	private static final String TAG = "TDSAlarm";
 	private static WakeLock wakeLock;
-	private static Context context;
-
+	
 	/**
 	 * This constructor is called the alarm manager.
 	 */
@@ -54,8 +53,6 @@ public class TDSAlarm extends BroadcastReceiver {
 	 * @param timeOut
 	 */
 	public TDSAlarm(Context context, long timeOut){
-
-		TDSAlarm.context = context;
 		
 		// determine the time of the last successful update
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -126,13 +123,13 @@ public class TDSAlarm extends BroadcastReceiver {
 
 			// can we obtain the Bluetooth MAC?
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				getMacFromAdapter();
+				getMacFromAdapter(context);
 			}
 			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
 			if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null){
 	
 				Log.d(TAG, "No MAC address, enabling Bluetooth");
-				enableBluetooth(); // this will also schedule a TDSThread, once bluetooth is done.
+				enableBluetooth(context); // this will also schedule a TDSThread, once bluetooth is done.
 				
 			} else {
 				// Request the sync
@@ -171,7 +168,7 @@ public class TDSAlarm extends BroadcastReceiver {
 	 * Enable Bluetooth for 2 seconds to read the local mac address
 	 * Note: this is an ugly hack, please close both eyes here!
 	 */
-	protected static void enableBluetooth() {
+	protected static void enableBluetooth(final Context context) {
 
 		new Thread(new Runnable() {
 			@Override
@@ -187,7 +184,7 @@ public class TDSAlarm extends BroadcastReceiver {
 						}
 
 						// can we now get an address?
-						getMacFromAdapter();
+						getMacFromAdapter(context);
 
 						attempts++;
 					}
@@ -212,7 +209,7 @@ public class TDSAlarm extends BroadcastReceiver {
 	 * Saves the MAC address to SharedPreferences
 	 * @return false if we can't get a MAC address (Bluetooth off)
 	 */
-	private static boolean getMacFromAdapter(){
+	private static boolean getMacFromAdapter(Context context){
 		String mac = BluetoothAdapter.getDefaultAdapter().getAddress();
 		if(mac != null){
 			SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
