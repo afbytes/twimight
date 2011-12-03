@@ -31,8 +31,8 @@ public final class Constants {
 
 	// TDS configuration
 	public static final int TDS_MESSAGE_VERSION = 1; /** Which message version */
-    public static final long TDS_UPDATE_INTERVAL = 60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
-    public static final long TDS_UPDATE_RETRY_INTERVAL = 60*1000L; /** Initial interval for re-trying to connect to TDS */
+    public static final long TDS_UPDATE_INTERVAL = 30*60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
+    public static final long TDS_UPDATE_RETRY_INTERVAL = 30*1000L; /** Initial interval for re-trying to connect to TDS */
     public static final boolean TDS_DEFAULT_ON = true; /** Opt in or opt out for TDS communication? */
     public static final long WAIT_FOR_CONNECTIVITY = 5*1000L; /** After waking up we have to wait to get connectivity */
     public static final String TDS_BASE_URL = "https://api.twimight.com"; /** The URL of the TDS */
@@ -61,7 +61,7 @@ public final class Constants {
 	public static final String PEERS_MET = "peers_met";
 	
 	// Location
-	public static final long LOCATION_UPDATE_TIME = 10*60*1000L; /** Location update interval */
+	public static final long LOCATION_UPDATE_TIME = 6*60*60*1000L; /** Location update interval */
 	public static final long LOCATION_WAIT = 60*1000L; /** How long should we wait for a location. This MUST NOT be larger than LOCATION_UPDATE_TIME */
 	public static final int LOCATION_ACCURACY = 150; /** What is a satisfying accuracy? */
 	public static final boolean LOCATION_DEFAULT_ON = true; /** Do we send location updates by default? */
@@ -73,7 +73,7 @@ public final class Constants {
     }	
 	
 	// Security
-	public static final long DISASTER_DURATION = 24*60*60*1000L; /** How long do we need the certificate to be valid during loss of connectivity? */
+	public static final long DISASTER_DURATION = 7*24*60*60*1000L; /** How long do we need the certificate to be valid during loss of connectivity? */
 	public static final int SECURITY_KEY_SIZE = 2048; /** RSA Key length */
 	
 	// Twitter
