@@ -13,15 +13,21 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -90,6 +96,13 @@ public class TweetsContentProvider extends ContentProvider {
 
 
 	}
+	
+	// for the status bar notification
+	private static final int TWEET_NOTIFICATION_ID = 1;
+	
+	private static final int NOTIFY_MENTION = 2;
+	private static final int NOTIFY_DISASTER = 3;
+	private static final int NOTIFY_TWEET = 4;
 	
 	/**
 	 * onCreate we initialize and open the DB.
@@ -601,6 +614,9 @@ public class TweetsContentProvider extends ContentProvider {
 						Log.i(TAG, "certificate is not valid!");
 					}
 					
+					// notify user 
+					notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.TWEETS_COLUMNS_TEXT));
+					
 				}
 				c.close();
 				return insertTweet(values);
@@ -821,6 +837,8 @@ public class TweetsContentProvider extends ContentProvider {
 			String localUserScreenName = getLocalScreenName();
 			if(text.contains("@"+localUserScreenName)){
 				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 1);
+				// notify user
+				notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.TWEETS_COLUMNS_TEXT));
 			} else {
 				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 0);
 			}
@@ -851,5 +869,45 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 	}
 
+	
+	/**
+	 * Creates and triggers the status bar notifications
+	 */
+	private void notifyUser(int type, String tickerText){
+		
+		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+		int icon = R.drawable.ic_launcher_twimight;
+		long when = System.currentTimeMillis();
+		Notification notification = new Notification(icon, tickerText, when);
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		
+		Context context = getContext().getApplicationContext();
+		
+		CharSequence contentTitle = "New Tweets!";
+		CharSequence contentText = "New Tweets!";
+		Intent notificationIntent = new Intent(getContext(), ShowTweetListActivity.class);
+		PendingIntent contentIntent;
+		switch(type){
+		case(NOTIFY_MENTION):
+			contentText = "You have new mention(s)";
+			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_MENTIONS);
+			break;
+		case(NOTIFY_DISASTER):
+			contentText = "You have new disaster tweet(s)";
+			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			break;
+		case(NOTIFY_TWEET):
+			contentText = "New tweet(s) in your timeline";
+			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			break;
+		default:
+			break;
+		}
+		contentIntent = PendingIntent.getActivity(getContext(), 0, notificationIntent, 0);
+		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+
+		mNotificationManager.notify(TWEET_NOTIFICATION_ID, notification);
+
+	}
 
 }
