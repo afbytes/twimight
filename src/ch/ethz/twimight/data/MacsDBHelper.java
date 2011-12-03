@@ -12,6 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.data;
 
+import java.util.Date;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -35,6 +37,7 @@ public class MacsDBHelper {
 	public static final String KEY_ATTEMPTS = "attempts";
 	public static final String KEY_SUCCESSFUL = "successful";
 	public static final String KEY_ACTIVE = "active";
+	public static final String KEY_LAST = "last_update";
 	
 	private Context context;
 	
@@ -207,6 +210,39 @@ public class MacsDBHelper {
 			
 			return false;
 		}
+	}
+	
+	/**
+	 * Update the timestamp of the last successful connection
+	 */
+	public void setLastSuccessful(long mac, Date date) {
+
+		ContentValues values = new ContentValues();
+		values.put(KEY_LAST, date.getTime());
+
+		try{
+			database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "=" + mac, null);
+		} catch (SQLiteException e){
+			Log.e(TAG, "SQLiteException: " + e.toString());
+		}
+	}
+	
+	/**
+	 * Get the timestamp of the last successful connection
+	 */
+	public Long getLastSuccessful(long mac) {
+
+		String[] where = {KEY_LAST};
+		Cursor c = database.query(DBOpenHelper.TABLE_MACS, where, KEY_MAC+"="+mac,null,null,null,null);
+		if(c.getCount()>0){
+			c.moveToFirst();
+			long last = c.getLong(c.getColumnIndex(KEY_LAST));
+			c.close();
+			return last;
+		} else {
+			return null;
+		}
+
 	}
 
 	/**

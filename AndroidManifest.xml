@@ -12,7 +12,7 @@
       Dominik Schatzmann - Message specification
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="2" android:versionName="1.0">
+	package="ch.ethz.twimight" android:versionCode="2" android:versionName="0.7preview">
 	<uses-sdk android:minSdkVersion="10" />
 
 	<application 
@@ -51,7 +51,9 @@
 		<activity android:name=".activities.ShowUserListActivity" android:label="Twimight" />
 		<activity android:name=".activities.NewTweetActivity" android:label="Twimight" android:theme="@style/Theme.Transparent" android:windowSoftInputMode="stateAlwaysVisible" />
 	    <activity android:name=".activities.PrefsActivity" android:label="Twimight Settings" />
+	    <activity android:name=".activities.AboutActivity" android:label="About Twimight" />
 
+	    <service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
 		    <intent-filter>

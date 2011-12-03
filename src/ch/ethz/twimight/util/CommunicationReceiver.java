@@ -15,6 +15,7 @@ package ch.ethz.twimight.util;
 import java.util.Date;
 
 import ch.ethz.twimight.net.tds.TDSAlarm;
+import ch.ethz.twimight.net.twitter.TwitterService;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,8 +49,11 @@ public class CommunicationReceiver extends BroadcastReceiver {
 				new TDSAlarm();
 			}
 			
-			// Twitter update
-			// TODO
+			// Trigger Twitter synch
+			Intent i = new Intent(context, TwitterService.class);
+			i.putExtra("synch_request", TwitterService.SYNCH_ALL);
+			context.startService(i);
+			
 		} catch (Exception e) {
 			Log.e(TAG, "Error on connectivity change");
 		}

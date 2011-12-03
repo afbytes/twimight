@@ -122,11 +122,10 @@ public class TwitterService extends Service {
 			break;
 		case SYNCH_ALL:
 			Log.i(TAG, "SYNCH_ALL");
+			synchTransactionalTweets();
 			synchTimeline();
 			synchMentions();
 			synchFavorites();
-			//synchFollowers();
-			synchFriends();
 			break;
 		case SYNCH_TIMELINE:
 			Log.i(TAG, "SYNCH_TIMELINE");
@@ -214,6 +213,23 @@ public class TwitterService extends Service {
 	}
 
 	/**
+	 * Syncs all tweets which have transactional flags set
+	 */
+	private void synchTransactionalTweets(){
+		// get the flagged tweets
+		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
+		Cursor c = getContentResolver().query(queryUri, null, Tweets.TWEETS_COLUMNS_FLAGS+"!=0", null, null);
+		Log.i(TAG, c.getCount()+" transactional tweets to synch");
+		if(c.getCount() >= 0){
+			c.moveToFirst();
+			while(!c.isAfterLast()){
+				synchTweet(c.getLong(c.getColumnIndex("_id")));
+				c.moveToNext();
+			}
+		}
+	}
+	
+	/**
 	 * Checks the transactional flags of the tweet with the given _id and performs the corresponding actions
 	 */
 	private void synchTweet(long rowId) {
@@ -245,9 +261,7 @@ public class TwitterService extends Service {
 		} else if((flags & Tweets.FLAG_TO_RETWEET)>0) {
 			// retweet
 			(new RetweetStatusTask()).execute(rowId);
-		} else if((flags & Tweets.FLAG_TO_UPDATE)>0) {
-			// TODO
-		}
+		} 
 		c.close();
 	}
 	

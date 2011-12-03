@@ -64,7 +64,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int TWEETS_MENTIONS_NORMAL = 12;
 	private static final int TWEETS_MENTIONS_DISASTER = 13;
 	private static final int TWEETS_MENTIONS_ALL = 14;
-	
+		
 	// Here we define all the URIs this provider knows
 	static{
 		tweetUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -186,6 +186,7 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE_NORMAL:
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
@@ -214,14 +215,18 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE_DISASTER: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RECEIVED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CERTIFICATE + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_SIGNATURE + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
@@ -471,7 +476,8 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 		Log.i(TAG, "insert: " + uri);
-		
+		int disasterId;
+		Cursor c;
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:
 				/*
@@ -486,9 +492,9 @@ public class TweetsContentProvider extends ContentProvider {
 				 *  3 It may be a hash function collision (two different tweets have the same hash code)
 				 *    Probability of this should be small.  
 				 */
-				int disasterId = getDisasterID(values);
+				disasterId = getDisasterID(values);
 				
-				Cursor c = query(Tweets.CONTENT_URI, null, Tweets.TWEETS_COLUMNS_DISASTERID+"="+disasterId, null, null);
+				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.TWEETS_COLUMNS_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
 					Log.i(TAG, "PANIIIIIIIIIIIIIIIIIIIIC: "+c.getCount()+" tweets with the same disaster ID");
 
@@ -515,6 +521,7 @@ public class TweetsContentProvider extends ContentProvider {
 					}
 					
 				}
+				c.close();
 				// if none of the before was true, this is a proper new tweet which we now insert
 				return insertTweet(values);
 				
@@ -522,6 +529,19 @@ public class TweetsContentProvider extends ContentProvider {
 				// in disaster mode, we set the is disaster flag 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(Tweets.TWEETS_COLUMNS_ISDISASTER, 1);
+				
+				// if we already have a disaster tweet with the same disaster ID, 
+				// we discard the new one
+				disasterId = getDisasterID(values);
+				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.TWEETS_COLUMNS_DISASTERID+"="+disasterId+" AND "+Tweets.TWEETS_COLUMNS_ISDISASTER+">0", null, null, null, null);
+				if(c.getCount()>0){
+					c.moveToFirst();
+					Log.i(TAG, "already have disaster tweet");
+					Uri oldUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));
+					c.close();
+					return oldUri; 
+				}
+				
 				CertificateManager cm = new CertificateManager(getContext());
 				KeyManager km = new KeyManager(getContext());
 				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.TWEETS_COLUMNS_USER).toString())){
@@ -576,7 +596,7 @@ public class TweetsContentProvider extends ContentProvider {
 					}
 					
 				}
-
+				c.close();
 				return insertTweet(values);
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
 		}
@@ -620,8 +640,11 @@ public class TweetsContentProvider extends ContentProvider {
 	
 	/**
 	 * Keeps the timeline table at acceptable size
+	 * TODO: this seems not to work!!
 	 */
-	private void purgeTimeline(){
+	private void purgeTimeline(String userId){
+		
+		Log.i(TAG, "purging buffers "+userId);
 		/*
 		 *  1. Delete all tweets which are 
 		 *  - not favorites 
@@ -636,7 +659,7 @@ public class TweetsContentProvider extends ContentProvider {
 		Cursor c;
 		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
 		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE " +sqlWhere+ " AND "
+				+"WHERE "
 				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
 				+ " WHERE " + sqlWhere
 				+ " LIMIT -1 OFFSET "
@@ -655,7 +678,7 @@ public class TweetsContentProvider extends ContentProvider {
 		 */
 		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+">0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
 		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE " +sqlWhere+ " AND "
+				+"WHERE "
 				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
 				+ " WHERE " + sqlWhere
 				+ " LIMIT -1 OFFSET "
@@ -674,7 +697,7 @@ public class TweetsContentProvider extends ContentProvider {
 		 */
 		sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+">0";
 		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-				+"WHERE " +sqlWhere+ " AND "
+				+"WHERE "
 				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
 				+ " WHERE " + sqlWhere
 				+ " LIMIT -1 OFFSET "
@@ -684,6 +707,41 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		c.close();
 
+		/*
+		 *  4. Delete all disaster tweets which
+		 *  - are not our own 
+		 *  - are beyond the DTweets buffer size
+		 */
+		sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
+					+Tweets.TWEETS_COLUMNS_USER+"!="+userId;
+		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+				+"WHERE "
+				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+				+ " WHERE " + sqlWhere
+				+ " LIMIT -1 OFFSET "
+				+ Constants.DTWEET_BUFFER_SIZE+");";
+		Log.i(TAG, "Query: " + sql);
+		c = database.rawQuery(sql, null);
+		
+		c.close();
+		
+		/*
+		 *  5. Delete all disaster tweets which
+		 *  - are our own 
+		 *  - are beyond the DTweets buffer size
+		 */
+		sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
+					+Tweets.TWEETS_COLUMNS_USER+"="+userId;
+		sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
+				+"WHERE "
+				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+				+ " WHERE " + sqlWhere
+				+ " LIMIT -1 OFFSET "
+				+ Constants.MYDTWEET_BUFFER_SIZE+");";
+		Log.i(TAG, "Query: " + sql);
+		c = database.rawQuery(sql, null);
+		
+		c.close();
 	}
 	
 	/**
@@ -737,12 +795,17 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	private Uri insertTweet(ContentValues values){
 		if(checkValues(values)){
-			int flags = values.getAsInteger(Tweets.TWEETS_COLUMNS_FLAGS);
+			
+			int flags = 0;
+			if(values.containsKey(Tweets.TWEETS_COLUMNS_FLAGS))
+				flags = values.getAsInteger(Tweets.TWEETS_COLUMNS_FLAGS);
 			
 			if(!values.containsKey(Tweets.TWEETS_COLUMNS_CREATED)){
 				// set the current timestamp
 				values.put(Tweets.TWEETS_COLUMNS_CREATED, System.currentTimeMillis());
 			}
+			
+			values.put(Tweets.TWEETS_COLUMNS_RECEIVED, System.currentTimeMillis());
 			
 			// the disaster ID must be set for all tweets (normal and disaster)
 			values.put(Tweets.TWEETS_COLUMNS_DISASTERID, getDisasterID(values));
@@ -760,7 +823,7 @@ public class TweetsContentProvider extends ContentProvider {
 			if(rowId >= 0){
 				
 				// delete everything that now falls out of the buffer
-				purgeTimeline();
+				purgeTimeline(LoginActivity.getTwitterId(getContext()));
 				
 				Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);

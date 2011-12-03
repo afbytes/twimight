@@ -74,7 +74,7 @@ public class ShowTweetListActivity extends Activity{
 	private static final int OPTIONS_MENU_MESSAGES = 20;
 	private static final int OPTIONS_MENU_SETTINGS = 40;
 	private static final int OPTIONS_MENU_PAIR = 50;
-	private static final int OPTIONS_MENU_REVOKE = 60;
+	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
 
 	private static final int SHOW_TIMELINE = 1;
@@ -199,7 +199,7 @@ public class ShowTweetListActivity extends Activity{
 			menu.add(1,OPTIONS_MENU_PAIR, 2, "Pair");
 		}
 		 */
-		menu.add(4, OPTIONS_MENU_REVOKE, 5, "Revoke");
+		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About");
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout");
 
 		return true;
@@ -246,15 +246,10 @@ public class ShowTweetListActivity extends Activity{
 				Toast.makeText(this, "Disable Disaster Mode first. NOTE: Once you log out Twimight will not work until you are connected to the internet again!", Toast.LENGTH_LONG).show();
 			}
 			break;
-		case OPTIONS_MENU_REVOKE:
-			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-			if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()){
-				Intent revokeIntent = new Intent(this, TDSService.class);
-				revokeIntent.putExtra("synch_request", TDSService.SYNCH_REVOKE);
-				startService(revokeIntent);
-			} else {
-				Toast.makeText(this, "No Internet connection, please try again later!", Toast.LENGTH_LONG).show();
-			}
+		case OPTIONS_MENU_ABOUT:
+			// Launch AboutActivity
+			i = new Intent(this, AboutActivity.class);
+			startActivity(i);    
 			break;
 		default:
 			return false;

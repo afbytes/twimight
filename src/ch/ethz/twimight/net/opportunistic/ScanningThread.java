@@ -14,11 +14,19 @@ package ch.ethz.twimight.net.opportunistic;
 
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.spongycastle.util.encoders.Base64;
+
 import ch.ethz.twimight.data.MacsDBHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -106,7 +114,7 @@ public class ScanningThread implements Runnable{
 		if (cursor.moveToFirst()) {
             // Get the field values
             long mac = cursor.getLong(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
-            displayState("Scanning for: " + dbHelper.long2mac(mac) + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+            Log.i(TAG, "Scanning for: " + dbHelper.long2mac(mac) + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
             bluetoothHelper.connect(dbHelper.long2mac(mac));
             
         } else {
@@ -126,7 +134,7 @@ public class ScanningThread implements Runnable{
 			// do we have another MAC in the cursor?
 			if(cursor.moveToNext()){
 	            long mac = cursor.getLong(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
-	            displayState("Scanning for: " + dbHelper.long2mac(mac) + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+	            Log.i(TAG, "Scanning for: " + dbHelper.long2mac(mac) + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
 	            bluetoothHelper.connect(dbHelper.long2mac(mac));
 			} else {
 				stopScanning();
@@ -154,7 +162,7 @@ public class ScanningThread implements Runnable{
 			
 			// start listening mode
 			bluetoothHelper.start();
-			displayState("Listening...");
+			Log.i(TAG, "Listening...");
 		}
 	}
 	
@@ -175,11 +183,27 @@ public class ScanningThread implements Runnable{
 			switch (msg.what) {          
 
 			case Constants.MESSAGE_READ:         	 
-				displayState(msg.obj.toString());        	              		               
+				Log.i(TAG, msg.obj.toString());
+				
+				try {
+					ContentValues cvTweet = getTweetCV(msg.obj.toString());
+					ContentValues cvUser = getUserCV(msg.obj.toString());
+					
+					// insert the tweet
+					Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+					context.getContentResolver().insert(insertUri, cvTweet);
+					
+					// insert the user
+					Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
+					context.getContentResolver().insert(insertUserUri, cvUser);
+					
+				} catch (JSONException e1) {
+					Log.i(TAG, "Exception while receiving disaster tweet " + e1);
+				}
 				break;             
 				
 			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
-				displayState("connection succeeded");   
+				Log.i(TAG, "connection succeeded");   
 				
 				// Cancel future scans
 				ScanningService.stopScanning();
@@ -187,15 +211,39 @@ public class ScanningThread implements Runnable{
 				// Insert successful connection into DB
 				dbHelper.updateMacSuccessful(dbHelper.mac2long(msg.obj.toString()), 1);
 				
-				// TODO: Here starts the protocol for Tweet exchange.
-				// For testing resasons we just restart the scanning after a random time
-				bluetoothHelper.write("Hello, I'm " + bluetoothHelper.getMac());
+				// Here starts the protocol for Tweet exchange.
+				Long last = dbHelper.getLastSuccessful(dbHelper.mac2long(msg.obj.toString()));
+				
+				// get disaster tweets
+				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+				Cursor c = context.getContentResolver().query(queryUri, null, null, null, null);
+				
+				try{
+					if(c.getCount()>0){
+						c.moveToFirst();
+						while(!c.isAfterLast()){
+							if(last != null && (c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_RECEIVED))>last)){
+								JSONObject toSend = getJSON(c);
+								Log.i(TAG, toSend.toString(5));
+								bluetoothHelper.write(toSend.toString());
+							}
+							c.moveToNext();
+						}
+					}
+					dbHelper.setLastSuccessful(dbHelper.mac2long(msg.obj.toString()), new Date());
+				} catch(Exception e){
+					Log.i(TAG, "Exception while sending disaster tweets " + e);
+				} finally {
+					c.close();
+				}
+				
+				
 				if(isDisasterMode()){
 					ScanningService.scheduleScanning(Math.round(Math.random()*2*Constants.SCANNING_INTERVAL));
 				}
 				break;   
 			case Constants.MESSAGE_CONNECTION_FAILED:             
-				displayState("connection failed");
+				Log.i(TAG, "connection failed");
 				
 				// Insert failed connection into DB
 				dbHelper.updateMacAttempts(dbHelper.mac2long(msg.obj.toString()), 1);
@@ -205,7 +253,7 @@ public class ScanningThread implements Runnable{
 				break;
 				
 			case Constants.MESSAGE_CONNECTION_LOST:         	 
-				displayState("connection lost");   
+				Log.i(TAG, "connection lost");   
 				if(isDisasterMode()){
 					ScanningService.scheduleScanning(Math.round(Math.random()*2*Constants.SCANNING_INTERVAL));
 					bluetoothHelper.start();
@@ -224,16 +272,93 @@ public class ScanningThread implements Runnable{
 	private boolean isDisasterMode(){
 		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true);
 	}
+
+	/**
+	 * Creates a JSON Object from a Tweet
+	 * TODO: Move this where it belongs!
+	 * @param c
+	 * @return
+	 * @throws JSONException 
+	 */
+	protected JSONObject getJSON(Cursor c) throws JSONException {
+		JSONObject o = new JSONObject();
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CERTIFICATE) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_CERTIFICATE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CERTIFICATE)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SIGNATURE) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_SIGNATURE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SIGNATURE)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CREATED) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_CREATED, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CREATED)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_TEXT, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_USER, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_REPLYTO, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_LAT, c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_LNG, c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG)));
+		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SOURCE) >=0)
+			o.put(Tweets.TWEETS_COLUMNS_SOURCE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SOURCE)));
+		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME) >=0)
+			o.put(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)));
+		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE) >=0)
+			o.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE)))));
+		return o;
+	}
 	
 	/**
-	 * Display a message to the debugger.
-	 * @param s
+	 * Creates content values for a Tweet from a JSON object
+	 * TODO: Move this to where it belongs
+	 * @param o
+	 * @return
+	 * @throws JSONException
 	 */
-	private void displayState(String s){
-				
-		// Log entry
-		Log.i(TAG, s);
-		
-	}
+	protected ContentValues getTweetCV(String msgString) throws JSONException{
+		JSONObject o = new JSONObject(msgString);
+		ContentValues cv = new ContentValues();
+		if(o.has(Tweets.TWEETS_COLUMNS_CERTIFICATE))
+			cv.put(Tweets.TWEETS_COLUMNS_CERTIFICATE, o.getString(Tweets.TWEETS_COLUMNS_CERTIFICATE));
+		if(o.has(Tweets.TWEETS_COLUMNS_SIGNATURE))
+			cv.put(Tweets.TWEETS_COLUMNS_SIGNATURE, o.getString(Tweets.TWEETS_COLUMNS_SIGNATURE));
+		if(o.has(Tweets.TWEETS_COLUMNS_CREATED))
+			cv.put(Tweets.TWEETS_COLUMNS_CREATED, o.getLong(Tweets.TWEETS_COLUMNS_CREATED));
+		if(o.has(Tweets.TWEETS_COLUMNS_TEXT))
+			cv.put(Tweets.TWEETS_COLUMNS_TEXT, o.getString(Tweets.TWEETS_COLUMNS_TEXT));
+		if(o.has(Tweets.TWEETS_COLUMNS_USER))
+			cv.put(Tweets.TWEETS_COLUMNS_USER, o.getLong(Tweets.TWEETS_COLUMNS_USER));
+		if(o.has(Tweets.TWEETS_COLUMNS_REPLYTO))
+			cv.put(Tweets.TWEETS_COLUMNS_REPLYTO, o.getLong(Tweets.TWEETS_COLUMNS_REPLYTO));
+		if(o.has(Tweets.TWEETS_COLUMNS_LAT))
+			cv.put(Tweets.TWEETS_COLUMNS_LAT, o.getDouble(Tweets.TWEETS_COLUMNS_LAT));
+		if(o.has(Tweets.TWEETS_COLUMNS_LNG))
+			cv.put(Tweets.TWEETS_COLUMNS_LNG, o.getDouble(Tweets.TWEETS_COLUMNS_LNG));
+		if(o.has(Tweets.TWEETS_COLUMNS_SOURCE))
+			cv.put(Tweets.TWEETS_COLUMNS_SOURCE, o.getString(Tweets.TWEETS_COLUMNS_SOURCE));
 
+		return cv;
+	}
+	
+	/**
+	 * Creates content values for a User from a JSON object
+	 * TODO: Move this to where it belongs
+	 * @param o
+	 * @return
+	 * @throws JSONException
+	 */
+	protected ContentValues getUserCV(String msgString) throws JSONException{
+		JSONObject o = new JSONObject(msgString);
+
+		// create the content values for the user
+		ContentValues cv = new ContentValues();
+		if(o.has(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME))
+			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, o.getString(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME));
+		if(o.has(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))
+			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE)));
+		if(o.has(Tweets.TWEETS_COLUMNS_USER))
+			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, o.getLong(Tweets.TWEETS_COLUMNS_USER));
+
+		return cv;
+	}
+	
 };

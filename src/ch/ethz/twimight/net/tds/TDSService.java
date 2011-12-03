@@ -59,6 +59,7 @@ public class TDSService extends Service {
 	public static final int SYNCH_ALL = 1;
 	public static final int SYNCH_REVOKE = 2;
 	public static final int SYNCH_SIGN = 3;
+	public static final int SYNCH_ALL_FORCE = 4;
 
 	TDSCommunication tds;
 
@@ -79,6 +80,7 @@ public class TDSService extends Service {
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.i(TAG, "Error synching: no connectivity");
+			schedulePeriodic(false);
 			return START_STICKY;
 		} else {
 			Log.i(TAG, "We are connected!");
@@ -92,10 +94,13 @@ public class TDSService extends Service {
 				tds = new TDSCommunication(getBaseContext(), Constants.CONSUMER_ID, token, secret);
 			} catch (JSONException e) {
 				Log.e(TAG, "error while setting up TDS Communication");
+				schedulePeriodic(false);
 				return START_STICKY;
 			}
 		} else {
 			Log.i(TAG, "Error synching: no access token or secret");
+			schedulePeriodic(false);
+			
 			return START_STICKY;
 		}
 
@@ -106,6 +111,10 @@ public class TDSService extends Service {
 		case SYNCH_ALL:
 			Log.i(TAG, "SYNCH_ALL");
 			synchAll();
+			break;
+		case SYNCH_ALL_FORCE:
+			Log.i(TAG, "SYNCH_ALL_FORCE");
+			synchAllForce();
 			break;
 		case SYNCH_REVOKE:
 			Log.i(TAG, "SYNCH_REVOKE");
@@ -130,9 +139,18 @@ public class TDSService extends Service {
 			Log.i(TAG, "starting synch task");
 			new SynchAllTask().execute();
 		} else {
-			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - getLastUpdate()));
+			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - getLastUpdate(getBaseContext())));
 			Log.i(TAG, "no synch needed");
 		}
+	}
+	
+	/**
+	 * Regular TDS update, forced (outside the update schedule)
+	 */
+	private void synchAllForce() {
+		Log.i(TAG, "starting synch task");
+		new SynchAllTask().execute();
+
 	}
 
 	/**
@@ -146,14 +164,62 @@ public class TDSService extends Service {
 	 * Sign a new key
 	 */
 	private void synchSign(){
+		new SignTask().execute();
+	}
+	
+	/**
+	 * Schedule the next periodic TDS communication
+	 */
+	private void schedulePeriodic(boolean result){
+		if(result){
+			// remember the time of successful update
+			setLastUpdate();
 
+			// reset retry interval
+			setUpdateInterval(Constants.TDS_UPDATE_RETRY_INTERVAL);
+
+			// reschedule
+			TDSAlarm.scheduleCommunication(getBaseContext(), Constants.TDS_UPDATE_INTERVAL);
+
+			Log.i(TAG,"update successful");
+		} else {
+			// get the last successful update
+			Long lastUpdate = getLastUpdate(getBaseContext());
+
+			// get from shared preferences
+			Long currentUpdateInterval = getUpdateInterval();
+
+			// when should the next update be scheduled?
+			Long nextUpdate = 0L;
+			if(System.currentTimeMillis()-lastUpdate > Constants.TDS_UPDATE_INTERVAL){
+				nextUpdate = currentUpdateInterval;
+			} else {
+				nextUpdate = Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis()-lastUpdate);
+			}
+
+			// exponentially schedule again after TDS_UPDAT_RETRY_INTERVAL
+			TDSAlarm.scheduleCommunication(getBaseContext(), nextUpdate);
+
+			currentUpdateInterval *= 2;
+			// cap at TDS_UPDATE_INTERVAL
+			if(currentUpdateInterval > Constants.TDS_UPDATE_INTERVAL){
+				currentUpdateInterval = Constants.TDS_UPDATE_INTERVAL;
+			}
+
+			// write back to shared preferences
+			setUpdateInterval(currentUpdateInterval);
+			Log.i(TAG, "update not successful");
+		}
+
+		// finally, release the lock
+		TDSAlarm.releaseWakeLock();
 	}
 
 	/**
 	 * Get the time (unix time stamp) of the last successful update
 	 */
-	private Long getLastUpdate(){
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	public static Long getLastUpdate(Context context){
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getLong(TDS_LAST_UPDATE, 0);
 
 	}
@@ -194,7 +260,7 @@ public class TDSService extends Service {
 	private boolean needUpdate(){
 
 		// when was the last successful update?
-		if(System.currentTimeMillis() - getLastUpdate() > Constants.TDS_UPDATE_INTERVAL){
+		if(System.currentTimeMillis() - getLastUpdate(getBaseContext()) > Constants.TDS_UPDATE_INTERVAL){
 			return true;
 		} else {
 			return false;
@@ -262,7 +328,7 @@ public class TDSService extends Service {
 				LocationDBHelper locationAdapter = new LocationDBHelper(getBaseContext());
 				locationAdapter.open();
 
-				Date sinceWhen = new Date(getLastUpdate());
+				Date sinceWhen = new Date(getLastUpdate(getBaseContext()));
 				ArrayList<Location> locationList = (ArrayList<Location>) locationAdapter.getLocationsSince(sinceWhen);
 				if(!locationList.isEmpty()){
 					tds.createLocationObject(locationList);
@@ -409,49 +475,7 @@ public class TDSService extends Service {
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if(result){
-				// remember the time of successful update
-				setLastUpdate();
-
-				// reset retry interval
-				setUpdateInterval(Constants.TDS_UPDATE_RETRY_INTERVAL);
-
-				// reschedule
-				TDSAlarm.scheduleCommunication(getBaseContext(), Constants.TDS_UPDATE_INTERVAL);
-
-				Log.i(TAG,"update successful");
-			} else {
-				// get the last successful update
-				Long lastUpdate = getLastUpdate();
-
-				// get from shared preferences
-				Long currentUpdateInterval = getUpdateInterval();
-
-				// when should the next update be scheduled?
-				Long nextUpdate = 0L;
-				if(System.currentTimeMillis()-lastUpdate > Constants.TDS_UPDATE_INTERVAL){
-					nextUpdate = currentUpdateInterval;
-				} else {
-					nextUpdate = Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis()-lastUpdate);
-				}
-
-				// exponentially schedule again after TDS_UPDAT_RETRY_INTERVAL
-				TDSAlarm.scheduleCommunication(getBaseContext(), nextUpdate);
-
-				currentUpdateInterval *= 2;
-				// cap at TDS_UPDATE_INTERVAL
-				if(currentUpdateInterval > Constants.TDS_UPDATE_INTERVAL){
-					currentUpdateInterval = Constants.TDS_UPDATE_INTERVAL;
-				}
-
-				// write back to shared preferences
-				setUpdateInterval(currentUpdateInterval);
-				Log.i(TAG, "update not successful");
-			}
-
-			// finally, release the lock
-			TDSAlarm.releaseWakeLock();
-
+			schedulePeriodic(result);
 		}
 
 	}
