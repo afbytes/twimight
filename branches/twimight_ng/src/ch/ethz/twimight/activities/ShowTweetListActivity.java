@@ -132,7 +132,8 @@ public class ShowTweetListActivity extends Activity{
 		searchButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				setFilter(SHOW_SEARCH);
+				Toast.makeText(getBaseContext(), "SEARCH NOT YET AVAILABLE", Toast.LENGTH_LONG).show();
+				//setFilter(SHOW_SEARCH);
 			}
 		});
 		
@@ -230,6 +231,7 @@ public class ShowTweetListActivity extends Activity{
 			break;
 		
 		case OPTIONS_MENU_MESSAGES:
+			Toast.makeText(this, "DIRECT MESSAGES NOT YET AVAILABLE", Toast.LENGTH_LONG).show();
 			break;
 		
 		case OPTIONS_MENU_SETTINGS:
