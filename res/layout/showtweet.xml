@@ -138,22 +138,23 @@
 		<LinearLayout android:id="@+id/showTweetButtons"
 			android:orientation="horizontal" android:layout_width="match_parent"
 			android:layout_height="wrap_content" android:layout_marginTop="10dp">
-			<ImageButton android:id="@+id/showTweetRetweet"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_menu_send" android:background="@color/transparent"
-				android:layout_marginRight="20dp" />
 			<ImageButton android:id="@+id/showTweetFavorite"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/btn_star_big_off" android:background="@color/transparent"
-				android:layout_marginRight="20dp" />
-			<ImageButton android:id="@+id/showTweetReply"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_menu_revert" android:background="@color/transparent"
+				android:src="@android:drawable/star_big_off" android:background="@color/transparent"
 				android:layout_marginRight="20dp" />
 			<ImageButton android:id="@+id/showTweetDelete"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_menu_delete" android:background="@color/transparent"
+				android:layout_marginRight="20dp" />			
+			<Button android:id="@+id/showTweetRetweet"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="RT"
 				android:layout_marginRight="20dp" />
+			<Button android:id="@+id/showTweetReply"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="Reply"
+				android:layout_marginRight="20dp" />
+
 		</LinearLayout>
 
 	</LinearLayout>

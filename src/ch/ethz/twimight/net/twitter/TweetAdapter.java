@@ -14,6 +14,7 @@
 package ch.ethz.twimight.net.twitter;
 
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.LoginActivity;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -81,7 +82,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			favoriteStar.setImageResource(R.drawable.blank);
 		}
 		
-		// disaster tweet or normal tweet?
+		// tweet background and disaster info
 		LinearLayout rowLayout = (LinearLayout) row.findViewById(R.id.rowLayout);
 		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
 		if(cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
@@ -93,6 +94,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			} else {
 				verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
 			}
+		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_USER))).equals(LoginActivity.getTwitterId(context))) {
+			rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
+			verifiedImage.setVisibility(ImageView.GONE);
+		} else if((cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS)>=0) && (cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS))>0)){
+			rowLayout.setBackgroundResource(R.drawable.mention_tweet_background);
+			verifiedImage.setVisibility(ImageView.GONE);			
 		} else {
 			rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 			verifiedImage.setVisibility(ImageView.GONE);

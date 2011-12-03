@@ -18,6 +18,8 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.security.CertificateManager;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
@@ -64,11 +66,7 @@ public class AboutActivity extends Activity{
 			revokeButton.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View v) {
-					Intent revokeIntent = new Intent(getBaseContext(), TDSService.class);
-					revokeIntent.putExtra("synch_request", TDSService.SYNCH_REVOKE);
-					startService(revokeIntent);
-					Toast.makeText(getBaseContext(), "Revoking your keys", Toast.LENGTH_LONG).show();
-					finish();
+					showRevokeDialog();
 				}
 			});
 		} else {
@@ -159,5 +157,30 @@ public class AboutActivity extends Activity{
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Asks the user if she really wants to revoke the key
+	 */
+	private void showRevokeDialog(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).")
+		       .setCancelable(false)
+		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+						Intent updateIntent = new Intent(getBaseContext(), TDSService.class);
+						updateIntent.putExtra("synch_request", TDSService.SYNCH_REVOKE);
+						startService(updateIntent);
+						Toast.makeText(getBaseContext(), "Revoking key.", Toast.LENGTH_LONG).show();
+						finish();
+		           }
+		       })
+		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                dialog.cancel();
+		           }
+		       });
+		AlertDialog alert = builder.create();
+		alert.show();
 	}
 }

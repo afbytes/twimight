@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -142,13 +143,17 @@ public class ShowTweetActivity extends Activity{
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		}
 		
-		// Disaster Tweet?
+		// Tweet background and disaster info
 		if(c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
 			tweetTextView.setBackgroundResource(R.drawable.disaster_tweet_background);
 			if(c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_ISVERIFIED))==0){
 				LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
 				unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 			}
+		} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER))).equals(LoginActivity.getTwitterId(this))) {
+			tweetTextView.setBackgroundResource(R.drawable.own_tweet_background);
+		} else if((c.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS)>=0) && (c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS))>0)){
+			tweetTextView.setBackgroundResource(R.drawable.mention_tweet_background);
 		} else {
 			tweetTextView.setBackgroundResource(R.drawable.normal_tweet_background);
 		}
@@ -189,16 +194,15 @@ public class ShowTweetActivity extends Activity{
 		 *  Buttons
 		 */
 		// Retweet Button
-		ImageButton retweetButton = (ImageButton) findViewById(R.id.showTweetRetweet);
+		Button retweetButton = (Button) findViewById(R.id.showTweetRetweet);
 		// we do not show the retweet button for (1) tweets from the local user, (2) tweets which have been flagged to retweeted and (3) tweets which have been marked as retweeted 
 		if(userString.equals(localUserString) | ((flags & Tweets.FLAG_TO_RETWEET) > 0) | (c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_RETWEETED))>0)){
-			retweetButton.setVisibility(ImageButton.GONE);
+			retweetButton.setVisibility(Button.GONE);
 		} else {
 			retweetButton.setOnClickListener(new OnClickListener(){
 
 				@Override
 				public void onClick(View v) {
-					v.setBackgroundResource(android.R.drawable.list_selector_background);
 					showRetweetDialog();
 				}
 				
@@ -212,9 +216,7 @@ public class ShowTweetActivity extends Activity{
 				deleteButton.setOnClickListener(new OnClickListener(){
 					@Override
 					public void onClick(View v) {
-						v.setBackgroundResource(android.R.drawable.list_selector_background);
 						showDeleteDialog();
-						
 					}
 				});
 			} else {
@@ -225,7 +227,7 @@ public class ShowTweetActivity extends Activity{
 		}
 		
 		// Reply button: we show it only if we have a Tweet ID!
-		ImageButton replyButton = (ImageButton) findViewById(R.id.showTweetReply);
+		Button replyButton = (Button) findViewById(R.id.showTweetReply);
 		if(c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)) != 0){
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -237,7 +239,7 @@ public class ShowTweetActivity extends Activity{
 				}
 			});
 		} else {
-			replyButton.setVisibility(ImageButton.GONE);
+			replyButton.setVisibility(Button.GONE);
 		}
 		
 		// Favorite button
@@ -250,19 +252,16 @@ public class ShowTweetActivity extends Activity{
 
 			@Override
 			public void onClick(View v) {
-				v.setBackgroundResource(android.R.drawable.list_selector_background);
 				if(favorited){
 					// unfavorite
 					getContentResolver().update(uri, clearFavoriteFlag(flags), null, null);
 					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_off);
 					favorited=false;
-					// TODO: remove from favorites table
 				} else {
 					// favorite
 					getContentResolver().update(uri, setFavoriteFlag(flags), null, null);
 					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_on);
 					favorited=true;
-					// TODO: insert to favorites table
 				}
 				
 			}
