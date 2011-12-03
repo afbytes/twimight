@@ -51,10 +51,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 		
 		// Profile image
+		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
-			ImageView picture = (ImageView) row.findViewById(R.id.imageView1);			
 			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		} else {
+			picture.setImageResource(R.drawable.default_profile);
 		}
 
 		

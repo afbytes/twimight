@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -586,6 +587,8 @@ public class TwitterService extends Service {
 				getContentResolver().update(updateUri, getUserContentValues(user), null, null);
 				userId = c.getLong(c.getColumnIndex("_id"));
 				c.close();
+				// get the profile image
+				(new UpdateProfileImageTask()).execute(userId);
 			}
 		}
 		return userId;
@@ -906,34 +909,45 @@ public class TwitterService extends Service {
 				return;
 			}
 			
-			Log.i(TAG, "done.. what now? " + result.size());
+			// this is the list of user IDs we will request updates for
+			List<Long> toLookup = new ArrayList<Long>();
 			
 			if(!result.isEmpty()){
 				for (Number userId: result) {
-					
-					// do we already have the user?
-					Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-					String[] projection = {"_id"};
 					
 					ContentValues cv = new ContentValues();
 					// all we know is the user id and that we follow them
 					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, userId.longValue());
 					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW, 1);
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, TwitterUsers.FLAG_TO_UPDATE);
 
+					// do we already have the user?
+					Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+					String[] projection = {"_id", TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE};
 					Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+userId, null, null);
 					if(c.getCount() == 0){ // we don't have the local user in the DB yet!
 						Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 						getContentResolver().insert(insertUri, cv);
+						
+						// do we need to update the user?
+						if(toLookup.size()< 100){
+							toLookup.add((Long) userId);
+						}
+
 					} else {
 						c.moveToFirst();
-						if(c.isNull(c.getColumnIndex("_id"))){
-							throw new IllegalStateException("Error while loading user from the DB ");
-						} else {
-							Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
-							getContentResolver().update(updateUri, cv, null, null);
+						Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
+						getContentResolver().update(updateUri, cv, null, null);
+
+						// do we need to update the user?
+						if(toLookup.size()< 100){
+							if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
+								toLookup.add((Long) userId);
+							}
 						}
+
 					}
+					
+					
 					c.close();
 				}
 			}
@@ -941,6 +955,11 @@ public class TwitterService extends Service {
 			// save the timestamp of the last update
 			setLastFriendsUpdate(new Date(), getBaseContext());
 			ShowUserListActivity.setLoading(false);
+			
+			// if we have users to lookup, we do it now
+			if(!toLookup.isEmpty()){
+				new UpdateUserListTask().execute(toLookup);
+			}
 	     }
 
 	 }
@@ -971,47 +990,61 @@ public class TwitterService extends Service {
 
 		@Override
 	     protected void onPostExecute(List<Number> result) {
-			if(result==null) {
+			if(result==null || result.isEmpty()) {
 				Log.i(TAG, "null");
 				ShowUserListActivity.setLoading(false);
 				return;
 			}
 			
-			Log.i(TAG, "done.. what now? " + result.size());
+			// this is the list of user IDs we will request updates for
+			List<Long> toLookup = new ArrayList<Long>();
 			
-			if(!result.isEmpty()){
-				for (Number userId: result) {
-					
-					// do we already have the user?
-					Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-					String[] projection = {"_id"};
-					
-					ContentValues cv = new ContentValues();
-					// all we know is the user id and that we follow them
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, userId.longValue());
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING, 1);
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, TwitterUsers.FLAG_TO_UPDATE);
+			for (Number userId: result) {
+				
+				ContentValues cv = new ContentValues();
+				// all we know is the user id and that we follow them
+				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, userId.longValue());
+				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING, 1);
 
-					Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+userId, null, null);
-					if(c.getCount() == 0){ // we don't have the local user in the DB yet!
-						Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-						getContentResolver().insert(insertUri, cv);
-					} else {
-						c.moveToFirst();
-						if(c.isNull(c.getColumnIndex("_id"))){
-							throw new IllegalStateException("Error while loading user from the DB ");
-						} else {
-							Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
-							getContentResolver().update(updateUri, cv, null, null);
+				// do we already have the user?
+				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+				String[] projection = {"_id", TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE};
+				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+userId, null, null);
+				if(c.getCount() == 0){ // we don't have the local user in the DB yet!
+					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+					getContentResolver().insert(insertUri, cv);
+					
+					// do we need to update the user?
+					if(toLookup.size()< 100){
+						toLookup.add((Long) userId);
+					}
+
+				} else {
+					c.moveToFirst();
+					
+					Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
+					getContentResolver().update(updateUri, cv, null, null);
+
+					// do we need to update the user?
+					if(toLookup.size()< 100){
+						if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
+							toLookup.add((Long) userId);
 						}
 					}
-					c.close();
+
 				}
+				
+				c.close();
 			}
 			
 			// save the timestamp of the last update
 			setLastFollowerUpdate(new Date(), getBaseContext());
 			ShowUserListActivity.setLoading(false);
+			
+			// if we have users to lookup, we do it now
+			if(!toLookup.isEmpty()){
+				new UpdateUserListTask().execute(toLookup);
+			}
 	     }
 
 	 }
@@ -1091,6 +1124,73 @@ public class TwitterService extends Service {
 			
 			getContentResolver().update(queryUri, cv, null, null);
 			ShowTweetListActivity.setLoading(false);
+	     }
+
+	 }
+	
+	/**
+	 * Gets user info for a list of users from twitter
+	 * @author thossmann
+	 */
+	private class UpdateUserListTask extends AsyncTask<List<Long>, Void, List<Twitter.User>> {
+		
+		
+		@Override
+	     protected List<Twitter.User> doInBackground(List<Long>... userIds) {
+			ShowUserListActivity.setLoading(true);
+			
+			List<Twitter.User> userList = null;
+			try {
+				userList = twitter.bulkShowById(userIds[0]);
+
+			} catch (Exception ex) {
+				Log.e(TAG, "Error while loading user: " + ex);
+				ShowUserListActivity.setLoading(false);
+			} 
+	        return userList;
+	     }
+
+		/**
+		 * Clear to update flag and update the user with the information from twitter
+		 */
+		@Override
+	     protected void onPostExecute(List<Twitter.User> result) {
+			
+			if(result==null || result.isEmpty()){
+				Log.i(TAG, "User list not (or empty) received");
+				return;
+			}
+			
+			ContentValues cv = new ContentValues();
+			for (Twitter.User user: result) {
+				
+				long rowId = 0;
+				// get the row of the user in the DB
+				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+				String[] projection = {"_id"};
+				
+				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+user.id, null, null);
+				if(c.getCount() > 0){
+					c.moveToFirst();
+					rowId = c.getLong(c.getColumnIndex("_id"));
+				}
+				c.close();
+
+				cv= getUserContentValues(user);
+				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE, System.currentTimeMillis());
+
+				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);			
+				getContentResolver().update(queryUri, cv, null, null);
+				ShowUserListActivity.setLoading(false);
+				
+				// if we have a profile_image_url, we dowload the image
+				(new UpdateProfileImageTask()).execute(rowId);
+				
+				getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+
+			}
+		
 	     }
 
 	 }
@@ -1233,6 +1333,9 @@ public class TwitterService extends Service {
 			Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+this.rowId);			
 			getContentResolver().update(queryUri, cv, null, null);
 			ShowUserListActivity.setLoading(false);
+			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+
 			
 	     }
 
