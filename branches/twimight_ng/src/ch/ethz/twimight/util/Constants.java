@@ -96,9 +96,7 @@ public final class Constants {
 	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
 	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
-
-
-
-
+	public static final int DTWEET_BUFFER_SIZE = 100; /** How many disaster tweets of other users */
+	public static final int MYDTWEET_BUFFER_SIZE = 2; /** How many of our own disaster tweets */
 	
 }

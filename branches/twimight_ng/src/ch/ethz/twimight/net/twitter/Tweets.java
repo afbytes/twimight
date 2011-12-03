@@ -57,6 +57,7 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_COLUMNS_LAT = "lat"; /** latitude in case of geo-tagging */
 	public static final String TWEETS_COLUMNS_LNG = "lng"; /** longitude in case of geo-tagging */
 	public static final String TWEETS_COLUMNS_CREATED = "created"; /** the creation timestamp (millisecs since 1970) */
+	public static final String TWEETS_COLUMNS_RECEIVED = "received"; /** timestamp we insert the tweet into the DB */
 	public static final String TWEETS_COLUMNS_SOURCE = "source"; /** the application with which the tweet was created (as reported by twitter) */
 	public static final String TWEETS_COLUMNS_FLAGS = "flags"; /** Transactional flags */
 	

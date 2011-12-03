@@ -143,6 +143,13 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
+			// if we already have the user, we discard the request
+			String[] projection = {"_id"};
+			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+values.getAsLong(TwitterUsers.TWITTERUSERS_COLUMNS_ID), null, null, null, null);
+			if(c.getCount()>0){
+				Log.i(TAG, "already have user!");
+				return null;
+			}
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 			if(rowId >= 0){
