@@ -46,29 +46,29 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_ID = "id"; /** a specific tweet */
 	
 	// here start the column names
-	public static final String TWEETS_COLUMNS_TEXT = "text"; /** the tweet text */
-	public static final String TWEETS_COLUMNS_USER = "user"; /** the user id of the sender */
-	public static final String TWEETS_COLUMNS_TID = "t_id"; /** the "official" tweet ID from twitter */
-	public static final String TWEETS_COLUMNS_REPLYTO = "reply_to"; /** the tweet ID to which this tweet replies */
-	public static final String TWEETS_COLUMNS_FAVORITED = "favorited"; /** is it a favorite? */
-	public static final String TWEETS_COLUMNS_RETWEETED = "retweeted"; /** did we retweet the tweet? */
-	public static final String TWEETS_COLUMNS_RETWEETCOUNT = "retweet_count"; /** how many retweets does twitter report for this tweet */
-	public static final String TWEETS_COLUMNS_MENTIONS = "mentions"; /** does the tweet mention the local user */
-	public static final String TWEETS_COLUMNS_LAT = "lat"; /** latitude in case of geo-tagging */
-	public static final String TWEETS_COLUMNS_LNG = "lng"; /** longitude in case of geo-tagging */
-	public static final String TWEETS_COLUMNS_CREATED = "created"; /** the creation timestamp (millisecs since 1970) */
-	public static final String TWEETS_COLUMNS_RECEIVED = "received"; /** timestamp we insert the tweet into the DB */
-	public static final String TWEETS_COLUMNS_SOURCE = "source"; /** the application with which the tweet was created (as reported by twitter) */
-	public static final String TWEETS_COLUMNS_FLAGS = "flags"; /** Transactional flags */
+	public static final String COL_TEXT = "text"; /** the tweet text */
+	public static final String COL_USER = "user"; /** the user id of the sender */
+	public static final String COL_TID = "t_id"; /** the "official" tweet ID from twitter */
+	public static final String COL_REPLYTO = "reply_to"; /** the tweet ID to which this tweet replies */
+	public static final String COL_FAVORITED = "favorited"; /** is it a favorite? */
+	public static final String COL_RETWEETED = "retweeted"; /** did we retweet the tweet? */
+	public static final String COL_RETWEETCOUNT = "retweet_count"; /** how many retweets does twitter report for this tweet */
+	public static final String COL_MENTIONS = "mentions"; /** does the tweet mention the local user */
+	public static final String COL_LAT = "lat"; /** latitude in case of geo-tagging */
+	public static final String COL_LNG = "lng"; /** longitude in case of geo-tagging */
+	public static final String COL_CREATED = "created"; /** the creation timestamp (millisecs since 1970) */
+	public static final String COL_RECEIVED = "received"; /** timestamp we insert the tweet into the DB */
+	public static final String COL_SOURCE = "source"; /** the application with which the tweet was created (as reported by twitter) */
+	public static final String COL_FLAGS = "flags"; /** Transactional flags */
 	
 	// for disaster mode
-	public static final String TWEETS_COLUMNS_ISDISASTER = "is_disaster_tweet"; /** disaster or normal tweet? */
-	public static final String TWEETS_COLUMNS_DISASTERID = "d_id"; /** the disaster ID of the tweet (for both, disaster and normal tweets) this is the java hashcode (32Bit) of the String TWEETS_COLUMNS_TEXT+TWEETS_COLUMNS_USER */
-	public static final String TWEETS_COLUMNS_ISVERIFIED = "is_verified"; /** is the signature of the disaster tweet valid? */
-	public static final String TWEETS_COLUMNS_SIGNATURE = "signature"; /** the signature of the disaster tweet */
-	public static final String TWEETS_COLUMNS_CERTIFICATE = "certificate"; /** the certificate of the user */
+	public static final String COL_ISDISASTER = "is_disaster_tweet"; /** disaster or normal tweet? */
+	public static final String COL_DISASTERID = "d_id"; /** the disaster ID of the tweet (for both, disaster and normal tweets) this is the java hashcode (32Bit) of the String TWEETS_COLUMNS_TEXT+TWEETS_COLUMNS_USER */
+	public static final String COL_ISVERIFIED = "is_verified"; /** is the signature of the disaster tweet valid? */
+	public static final String COL_SIGNATURE = "signature"; /** the signature of the disaster tweet */
+	public static final String COL_CERTIFICATE = "certificate"; /** the certificate of the user */
 	
-	public static final String DEFAULT_SORT_ORDER = TWEETS_COLUMNS_CREATED + " DESC";
+	public static final String DEFAULT_SORT_ORDER = COL_CREATED + " DESC";
 	
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_INSERT = 1; /** The tweet is new and should be posted to twitter */

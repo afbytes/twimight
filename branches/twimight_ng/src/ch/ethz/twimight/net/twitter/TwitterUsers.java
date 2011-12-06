@@ -79,34 +79,34 @@ public class TwitterUsers implements BaseColumns {
 	public static final String TWITTERUSERS_ID = "id";
 	
 	// here start the column names
-	public static final String TWITTERUSERS_COLUMNS_SCREENNAME = "screen_name";
-	public static final String TWITTERUSERS_COLUMNS_ID = "u_id";
-	public static final String TWITTERUSERS_COLUMNS_NAME = "name";
-	public static final String TWITTERUSERS_COLUMNS_LANG = "lang";
-	public static final String TWITTERUSERS_COLUMNS_DESCRIPTION = "description";
-	public static final String TWITTERUSERS_COLUMNS_IMAGEURL = "profile_image_url";
-	public static final String TWITTERUSERS_COLUMNS_STATUSES = "statuses_count";
-	public static final String TWITTERUSERS_COLUMNS_FOLLOWERS = "followers_count";
-	public static final String TWITTERUSERS_COLUMNS_FRIENDS = "friends_count";
-	public static final String TWITTERUSERS_COLUMNS_LISTED = "listed_count";
-	public static final String TWITTERUSERS_COLUMNS_FAVORITES = "favorites_count";
-	public static final String TWITTERUSERS_COLUMNS_LOCATION = "location";
-	public static final String TWITTERUSERS_COLUMNS_UTCOFFSET = "utc_offset";
-	public static final String TWITTERUSERS_COLUMNS_TIMEZONE = "timezone";
-	public static final String TWITTERUSERS_COLUMNS_URL = "url";
-	public static final String TWITTERUSERS_CREATED = "created_at";
-	public static final String TWITTERUSERS_COLUMNS_PROTECTED = "protected";
-	public static final String TWITTERUSERS_COLUMNS_VERIFIED = "verified";
+	public static final String COL_SCREENNAME = "screen_name";
+	public static final String COL_ID = "u_id";
+	public static final String COL_NAME = "name";
+	public static final String COL_LANG = "lang";
+	public static final String COL_DESCRIPTION = "description";
+	public static final String COL_IMAGEURL = "profile_image_url";
+	public static final String COL_STATUSES = "statuses_count";
+	public static final String COL_FOLLOWERS = "followers_count";
+	public static final String COL_FRIENDS = "friends_count";
+	public static final String COL_LISTED = "listed_count";
+	public static final String COL_FAVORITES = "favorites_count";
+	public static final String COL_LOCATION = "location";
+	public static final String COL_UTCOFFSET = "utc_offset";
+	public static final String COL_TIMEZONE = "timezone";
+	public static final String COL_URL = "url";
+	public static final String COL_CREATED = "u_created_at";
+	public static final String COL_PROTECTED = "protected";
+	public static final String COL_VERIFIED = "verified";
 	
-	public static final String TWITTERUSERS_COLUMNS_FOLLOWING = "following"; /** is the user following us? */
-	public static final String TWITTERUSERS_COLUMNS_FOLLOW = "follow"; /** are we following the user? */
-	public static final String TWITTERUSERS_COLUMNS_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
-	public static final String TWITTERUSERS_COLUMNS_PROFILEIMAGE = "profile_image";
+	public static final String COL_FOLLOWING = "following"; /** is the user following us? */
+	public static final String COL_FOLLOW = "follow"; /** are we following the user? */
+	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
+	public static final String COL_PROFILEIMAGE = "profile_image";
 	
-	public static final String TWITTERUSERS_COLUMNS_LASTUPDATE = "last_update";
-	public static final String TWITTERUSERS_COLUMNS_FLAGS = "flags";
+	public static final String COL_LASTUPDATE = "last_update";
+	public static final String COL_FLAGS = "u_flags";
 	
-	public static final String DEFAULT_SORT_ORDER = TWITTERUSERS_COLUMNS_SCREENNAME;
+	public static final String DEFAULT_SORT_ORDER = COL_SCREENNAME;
 	
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_UPDATE = 1;

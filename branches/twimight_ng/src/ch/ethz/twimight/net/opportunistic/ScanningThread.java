@@ -222,7 +222,7 @@ public class ScanningThread implements Runnable{
 					if(c.getCount()>0){
 						c.moveToFirst();
 						while(!c.isAfterLast()){
-							if(last != null && (c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_RECEIVED))>last)){
+							if(last != null && (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))>last)){
 								JSONObject toSend = getJSON(c);
 								Log.i(TAG, toSend.toString(5));
 								bluetoothHelper.write(toSend.toString());
@@ -282,28 +282,28 @@ public class ScanningThread implements Runnable{
 	 */
 	protected JSONObject getJSON(Cursor c) throws JSONException {
 		JSONObject o = new JSONObject();
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CERTIFICATE) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_CERTIFICATE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CERTIFICATE)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SIGNATURE) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_SIGNATURE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SIGNATURE)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CREATED) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_CREATED, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_CREATED)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_TEXT, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_USER, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_REPLYTO, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_LAT, c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_LNG, c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG)));
-		if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SOURCE) >=0)
-			o.put(Tweets.TWEETS_COLUMNS_SOURCE, c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_SOURCE)));
-		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME) >=0)
-			o.put(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)));
-		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE) >=0)
-			o.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE)))));
+		if(c.getColumnIndex(Tweets.COL_CERTIFICATE) >=0)
+			o.put(Tweets.COL_CERTIFICATE, c.getString(c.getColumnIndex(Tweets.COL_CERTIFICATE)));
+		if(c.getColumnIndex(Tweets.COL_SIGNATURE) >=0)
+			o.put(Tweets.COL_SIGNATURE, c.getString(c.getColumnIndex(Tweets.COL_SIGNATURE)));
+		if(c.getColumnIndex(Tweets.COL_CREATED) >=0)
+			o.put(Tweets.COL_CREATED, c.getLong(c.getColumnIndex(Tweets.COL_CREATED)));
+		if(c.getColumnIndex(Tweets.COL_TEXT) >=0)
+			o.put(Tweets.COL_TEXT, c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
+		if(c.getColumnIndex(Tweets.COL_USER) >=0)
+			o.put(Tweets.COL_USER, c.getLong(c.getColumnIndex(Tweets.COL_USER)));
+		if(c.getColumnIndex(Tweets.COL_REPLYTO) >=0)
+			o.put(Tweets.COL_REPLYTO, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+		if(c.getColumnIndex(Tweets.COL_LAT) >=0)
+			o.put(Tweets.COL_LAT, c.getDouble(c.getColumnIndex(Tweets.COL_LAT)));
+		if(c.getColumnIndex(Tweets.COL_LNG) >=0)
+			o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
+		if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
+			o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));
+		if(c.getColumnIndex(TwitterUsers.COL_SCREENNAME) >=0)
+			o.put(TwitterUsers.COL_SCREENNAME, c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+		if(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE) >=0)
+			o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)))));
 		return o;
 	}
 	
@@ -317,24 +317,24 @@ public class ScanningThread implements Runnable{
 	protected ContentValues getTweetCV(String msgString) throws JSONException{
 		JSONObject o = new JSONObject(msgString);
 		ContentValues cv = new ContentValues();
-		if(o.has(Tweets.TWEETS_COLUMNS_CERTIFICATE))
-			cv.put(Tweets.TWEETS_COLUMNS_CERTIFICATE, o.getString(Tweets.TWEETS_COLUMNS_CERTIFICATE));
-		if(o.has(Tweets.TWEETS_COLUMNS_SIGNATURE))
-			cv.put(Tweets.TWEETS_COLUMNS_SIGNATURE, o.getString(Tweets.TWEETS_COLUMNS_SIGNATURE));
-		if(o.has(Tweets.TWEETS_COLUMNS_CREATED))
-			cv.put(Tweets.TWEETS_COLUMNS_CREATED, o.getLong(Tweets.TWEETS_COLUMNS_CREATED));
-		if(o.has(Tweets.TWEETS_COLUMNS_TEXT))
-			cv.put(Tweets.TWEETS_COLUMNS_TEXT, o.getString(Tweets.TWEETS_COLUMNS_TEXT));
-		if(o.has(Tweets.TWEETS_COLUMNS_USER))
-			cv.put(Tweets.TWEETS_COLUMNS_USER, o.getLong(Tweets.TWEETS_COLUMNS_USER));
-		if(o.has(Tweets.TWEETS_COLUMNS_REPLYTO))
-			cv.put(Tweets.TWEETS_COLUMNS_REPLYTO, o.getLong(Tweets.TWEETS_COLUMNS_REPLYTO));
-		if(o.has(Tweets.TWEETS_COLUMNS_LAT))
-			cv.put(Tweets.TWEETS_COLUMNS_LAT, o.getDouble(Tweets.TWEETS_COLUMNS_LAT));
-		if(o.has(Tweets.TWEETS_COLUMNS_LNG))
-			cv.put(Tweets.TWEETS_COLUMNS_LNG, o.getDouble(Tweets.TWEETS_COLUMNS_LNG));
-		if(o.has(Tweets.TWEETS_COLUMNS_SOURCE))
-			cv.put(Tweets.TWEETS_COLUMNS_SOURCE, o.getString(Tweets.TWEETS_COLUMNS_SOURCE));
+		if(o.has(Tweets.COL_CERTIFICATE))
+			cv.put(Tweets.COL_CERTIFICATE, o.getString(Tweets.COL_CERTIFICATE));
+		if(o.has(Tweets.COL_SIGNATURE))
+			cv.put(Tweets.COL_SIGNATURE, o.getString(Tweets.COL_SIGNATURE));
+		if(o.has(Tweets.COL_CREATED))
+			cv.put(Tweets.COL_CREATED, o.getLong(Tweets.COL_CREATED));
+		if(o.has(Tweets.COL_TEXT))
+			cv.put(Tweets.COL_TEXT, o.getString(Tweets.COL_TEXT));
+		if(o.has(Tweets.COL_USER))
+			cv.put(Tweets.COL_USER, o.getLong(Tweets.COL_USER));
+		if(o.has(Tweets.COL_REPLYTO))
+			cv.put(Tweets.COL_REPLYTO, o.getLong(Tweets.COL_REPLYTO));
+		if(o.has(Tweets.COL_LAT))
+			cv.put(Tweets.COL_LAT, o.getDouble(Tweets.COL_LAT));
+		if(o.has(Tweets.COL_LNG))
+			cv.put(Tweets.COL_LNG, o.getDouble(Tweets.COL_LNG));
+		if(o.has(Tweets.COL_SOURCE))
+			cv.put(Tweets.COL_SOURCE, o.getString(Tweets.COL_SOURCE));
 
 		return cv;
 	}
@@ -351,12 +351,12 @@ public class ScanningThread implements Runnable{
 
 		// create the content values for the user
 		ContentValues cv = new ContentValues();
-		if(o.has(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME))
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, o.getString(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME));
-		if(o.has(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE)));
-		if(o.has(Tweets.TWEETS_COLUMNS_USER))
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, o.getLong(Tweets.TWEETS_COLUMNS_USER));
+		if(o.has(TwitterUsers.COL_SCREENNAME))
+			cv.put(TwitterUsers.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));
+		if(o.has(TwitterUsers.COL_PROFILEIMAGE))
+			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE)));
+		if(o.has(Tweets.COL_USER))
+			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
 
 		return cv;
 	}

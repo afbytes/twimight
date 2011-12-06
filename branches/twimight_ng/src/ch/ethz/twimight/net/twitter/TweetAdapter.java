@@ -32,7 +32,7 @@ import android.widget.TextView;
  */
 public class TweetAdapter extends SimpleCursorAdapter {
 	
-	static final String[] from = {TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, Tweets.TWEETS_COLUMNS_TEXT};
+	static final String[] from = {TwitterUsers.COL_SCREENNAME, Tweets.COL_TEXT};
 	static final int[] to = {R.id.textUser, R.id.textText};
 
 	/** Constructor */
@@ -46,14 +46,14 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		super.bindView(row, context, cursor);
 		
 		// Find views by id
-		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_CREATED));
+		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
 		TextView textCreatedAt = (TextView) row.findViewById(R.id.textCreatedAt);
 		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 		
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
@@ -62,7 +62,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		// any transactional flags?
 		ImageView toPostInfo = (ImageView) row.findViewById(R.id.topost);
-		int flags = cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+		int flags = cursor.getInt(cursor.getColumnIndex(Tweets.COL_FLAGS));
 		
 		boolean toPost = (flags>0);
 		if(toPost){
@@ -75,7 +75,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		// favorited
 		ImageView favoriteStar = (ImageView) row.findViewById(R.id.favorite);
 
-		boolean favorited = ((cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_FAVORITED)) > 0) 
+		boolean favorited = ((cursor.getInt(cursor.getColumnIndex(Tweets.COL_FAVORITED)) > 0) 
 							&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
 							|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		if(favorited){
@@ -87,19 +87,19 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		// tweet background and disaster info
 		LinearLayout rowLayout = (LinearLayout) row.findViewById(R.id.rowLayout);
 		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
-		if(cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
+		if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISDISASTER))>0){
 			rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
 			verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
 			verifiedImage.setVisibility(ImageView.VISIBLE);
-			if(cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_ISVERIFIED))>0){
+			if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISVERIFIED))>0){
 				verifiedImage.setImageResource(android.R.drawable.ic_secure);
 			} else {
 				verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
 			}
-		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_USER))).equals(LoginActivity.getTwitterId(context))) {
+		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(context))) {
 			rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
 			verifiedImage.setVisibility(ImageView.GONE);
-		} else if((cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS)>=0) && (cursor.getInt(cursor.getColumnIndex(Tweets.TWEETS_COLUMNS_MENTIONS))>0)){
+		} else if((cursor.getColumnIndex(Tweets.COL_MENTIONS)>=0) && (cursor.getInt(cursor.getColumnIndex(Tweets.COL_MENTIONS))>0)){
 			rowLayout.setBackgroundResource(R.drawable.mention_tweet_background);
 			verifiedImage.setVisibility(ImageView.GONE);			
 		} else {

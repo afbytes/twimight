@@ -242,16 +242,16 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	private ContentValues createContentValues() {
 		ContentValues tweetContentValues = new ContentValues();
 		
-		tweetContentValues.put(Tweets.TWEETS_COLUMNS_TEXT, text.getText().toString());
-		tweetContentValues.put(Tweets.TWEETS_COLUMNS_USER, LoginActivity.getTwitterId(this));
-		tweetContentValues.put(Tweets.TWEETS_COLUMNS_REPLYTO, isReplyTo);
-		tweetContentValues.put(Tweets.TWEETS_COLUMNS_FLAGS, Tweets.FLAG_TO_INSERT);
+		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
+		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
+		tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
+		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
 
 		if(useLocation){
 			Location loc = getLocation();
 			if(loc!=null){
-				tweetContentValues.put(Tweets.TWEETS_COLUMNS_LAT, loc.getLatitude());
-				tweetContentValues.put(Tweets.TWEETS_COLUMNS_LNG, loc.getLongitude());
+				tweetContentValues.put(Tweets.COL_LAT, loc.getLatitude());
+				tweetContentValues.put(Tweets.COL_LNG, loc.getLongitude());
 			}
 		}
 		return tweetContentValues;

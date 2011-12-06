@@ -110,7 +110,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 			case USERS_FOLLOWERS:
 				Log.i(TAG, "query matched... FOLLOWERS");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING+">0 AND "+TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_FOLLOWING+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				
@@ -122,7 +122,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				break;
 			case USERS_FRIENDS:
 				Log.i(TAG, "query matched... FRIENDS");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW+">0 AND "+TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_FOLLOW+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				// start synch service with a synch friends request
@@ -147,7 +147,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(checkValues(values)){
 			// if we already have the user, we discard the request
 			String[] projection = {"_id"};
-			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+values.getAsLong(TwitterUsers.TWITTERUSERS_COLUMNS_ID), null, null, null, null);
+			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ID+"="+values.getAsLong(TwitterUsers.COL_ID), null, null, null, null);
 			if(c.getCount()>0){
 				Log.i(TAG, "already have user!");
 				return null;
@@ -155,8 +155,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 			if(rowId >= 0){
-				if(values.containsKey(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS))
-				if(values.getAsInteger(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS)>0)
+				if(values.containsKey(TwitterUsers.COL_FLAGS))
+				if(values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
 				{
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USER);
@@ -189,8 +189,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
 			if(nrRows > 0){
 				
-				if(values.containsKey(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS))
-				if(values.getAsInteger(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS)>0)
+				if(values.containsKey(TwitterUsers.COL_FLAGS))
+				if(values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
 				{
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USER);
