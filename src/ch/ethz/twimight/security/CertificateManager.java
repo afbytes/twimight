@@ -62,6 +62,8 @@ public class CertificateManager {
 	 */
 	public X509CertificateObject parsePem(String pemString){
 		
+		if(pemString == null) return null;
+		
 		X509CertificateObject cert = null;
 		
 		PEMReader pem = new PEMReader(new StringReader(pemString));
@@ -155,6 +157,9 @@ public class CertificateManager {
 	 * @return true if valid, false otherwise
 	 */
 	public boolean checkCertificate(X509CertificateObject cert, String twitterId){
+		
+		if(cert == null || twitterId == null) return false;
+		
 		// is it valid?
 		try {
 			cert.checkValidity();
