@@ -27,7 +27,7 @@ import android.widget.SimpleCursorAdapter;
  */
 public class UserAdapter extends SimpleCursorAdapter {
 	
-	static final String[] from = {TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, TwitterUsers.TWITTERUSERS_COLUMNS_NAME, TwitterUsers.TWITTERUSERS_COLUMNS_LOCATION};
+	static final String[] from = {TwitterUsers.COL_SCREENNAME, TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION};
 	static final int[] to = {R.id.showUserScreenName, R.id.showUserRealName, R.id.showUserLocation};
 
 	/** Constructor */
@@ -42,8 +42,8 @@ public class UserAdapter extends SimpleCursorAdapter {
 			
 		// Profile image
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		} else {
 			picture.setImageResource(R.drawable.default_profile);

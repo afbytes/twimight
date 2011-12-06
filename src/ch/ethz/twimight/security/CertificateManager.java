@@ -173,13 +173,6 @@ public class CertificateManager {
 			return false;
 		}
 			
-		// is the public key correct?
-		KeyManager km = new KeyManager(context);
-		if(!cert.getPublicKey().equals(km.getKey().getPublic())){
-			Log.e(TAG, "wrong public key in certificate!");
-			return false;
-		}
-		
 		// check the signature
 		// TODO
 		

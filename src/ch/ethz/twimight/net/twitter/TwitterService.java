@@ -219,7 +219,7 @@ public class TwitterService extends Service {
 	private void synchTransactionalTweets(){
 		// get the flagged tweets
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
-		Cursor c = getContentResolver().query(queryUri, null, Tweets.TWEETS_COLUMNS_FLAGS+"!=0", null, null);
+		Cursor c = getContentResolver().query(queryUri, null, Tweets.COL_FLAGS+"!=0", null, null);
 		Log.i(TAG, c.getCount()+" transactional tweets to synch");
 		if(c.getCount() >= 0){
 			c.moveToFirst();
@@ -244,7 +244,7 @@ public class TwitterService extends Service {
 		}
 		c.moveToFirst();
 		
-		int flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+		int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 		if(flags == 0){
 			Log.i(TAG, "nothing to do");
 		} else if((flags & Tweets.FLAG_TO_DELETE)>0) {
@@ -280,12 +280,12 @@ public class TwitterService extends Service {
 		}
 		c.moveToFirst();
 		
-		int flags = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS));
+		int flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		if(flags == 0){
 			Log.i(TAG, "nothing to do");
 		} else if((flags & TwitterUsers.FLAG_TO_UPDATE)>0) {
 			// Update a user if it's time to do so
-			if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) | (System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE))>Constants.USERS_MIN_SYNCH)){
+			if(c.isNull(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) | (System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE))>Constants.USERS_MIN_SYNCH)){
 				(new UpdateUserTask()).execute(rowId);
 			} else {
 				Log.i(TAG, "Last user update too recent");
@@ -529,7 +529,7 @@ public class TwitterService extends Service {
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 		String[] projection = {"_id"};
 		
-		Cursor c = getContentResolver().query(queryUri, projection, Tweets.TWEETS_COLUMNS_TID+"="+tweet.getId(), null, null);
+		Cursor c = getContentResolver().query(queryUri, projection, Tweets.COL_TID+"="+tweet.getId(), null, null);
 
 		int tweetId = 0;
 		
@@ -569,7 +569,7 @@ public class TwitterService extends Service {
 		
 		Long userId = new Long(0);
 		
-		Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+user.id, null, null);
+		Cursor c = getContentResolver().query(uri, projection, TwitterUsers.COL_ID+"="+user.id, null, null);
 		if(c.getCount() == 0){ // we don't have the local user in the DB yet!
 			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			Uri resultUri = getContentResolver().insert(insertUri, getUserContentValues(user));
@@ -602,20 +602,20 @@ public class TwitterService extends Service {
 	 */
 	private ContentValues getTweetContentValues(Twitter.Status tweet) {
 		ContentValues cv = new ContentValues();
-		cv.put(Tweets.TWEETS_COLUMNS_TEXT, tweet.getText());
-		cv.put(Tweets.TWEETS_COLUMNS_CREATED, tweet.getCreatedAt().getTime());
-		cv.put(Tweets.TWEETS_COLUMNS_SOURCE, tweet.source);
-		cv.put(Tweets.TWEETS_COLUMNS_TID, tweet.getId().longValue());
-		cv.put(Tweets.TWEETS_COLUMNS_FAVORITED, tweet.isFavorite());
+		cv.put(Tweets.COL_TEXT, tweet.getText());
+		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
+		cv.put(Tweets.COL_SOURCE, tweet.source);
+		cv.put(Tweets.COL_TID, tweet.getId().longValue());
+		cv.put(Tweets.COL_FAVORITED, tweet.isFavorite());
 		
 		// TODO: How do we know if we have retweeted the tweet?
-		cv.put(Tweets.TWEETS_COLUMNS_RETWEETED, 0);
-		cv.put(Tweets.TWEETS_COLUMNS_RETWEETCOUNT, tweet.retweetCount);
+		cv.put(Tweets.COL_RETWEETED, 0);
+		cv.put(Tweets.COL_RETWEETCOUNT, tweet.retweetCount);
 		if(tweet.inReplyToStatusId != null){
-			cv.put(Tweets.TWEETS_COLUMNS_REPLYTO, tweet.inReplyToStatusId.longValue());
+			cv.put(Tweets.COL_REPLYTO, tweet.inReplyToStatusId.longValue());
 		}
-		cv.put(Tweets.TWEETS_COLUMNS_USER, tweet.getUser().getId());
-		cv.put(Tweets.TWEETS_COLUMNS_FLAGS, 0);
+		cv.put(Tweets.COL_USER, tweet.getUser().getId());
+		cv.put(Tweets.COL_FLAGS, 0);
 		// TODO: Location (enter coordinates of tweet)
 		
 		return cv;
@@ -630,22 +630,22 @@ public class TwitterService extends Service {
 		ContentValues userContentValues = new ContentValues();
 		
 		if(user!=null){
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, user.id);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME, user.screenName);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_NAME, user.name);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_DESCRIPTION, user.description);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_LOCATION, user.location);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FAVORITES, user.favoritesCount);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FRIENDS, user.friendsCount);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWERS, user.followersCount);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_LISTED, user.listedCount);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_TIMEZONE, user.timezone);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_STATUSES, user.statusesCount);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_VERIFIED, user.verified);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROTECTED, user.protectedUser);
+			userContentValues.put(TwitterUsers.COL_ID, user.id);
+			userContentValues.put(TwitterUsers.COL_SCREENNAME, user.screenName);
+			userContentValues.put(TwitterUsers.COL_NAME, user.name);
+			userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.description);
+			userContentValues.put(TwitterUsers.COL_LOCATION, user.location);
+			userContentValues.put(TwitterUsers.COL_FAVORITES, user.favoritesCount);
+			userContentValues.put(TwitterUsers.COL_FRIENDS, user.friendsCount);
+			userContentValues.put(TwitterUsers.COL_FOLLOWERS, user.followersCount);
+			userContentValues.put(TwitterUsers.COL_LISTED, user.listedCount);
+			userContentValues.put(TwitterUsers.COL_TIMEZONE, user.timezone);
+			userContentValues.put(TwitterUsers.COL_STATUSES, user.statusesCount);
+			userContentValues.put(TwitterUsers.COL_VERIFIED, user.verified);
+			userContentValues.put(TwitterUsers.COL_PROTECTED, user.protectedUser);
 			//userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING, user.isFollowingYou()?1:0);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWREQUEST, user.followRequestSent);
-			userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_IMAGEURL, user.getProfileImageUrl().toString());
+			userContentValues.put(TwitterUsers.COL_FOLLOWREQUEST, user.followRequestSent);
+			userContentValues.put(TwitterUsers.COL_IMAGEURL, user.getProfileImageUrl().toString());
 		}
 		return userContentValues;
 	}
@@ -917,13 +917,13 @@ public class TwitterService extends Service {
 					
 					ContentValues cv = new ContentValues();
 					// all we know is the user id and that we follow them
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, userId.longValue());
-					cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW, 1);
+					cv.put(TwitterUsers.COL_ID, userId.longValue());
+					cv.put(TwitterUsers.COL_FOLLOW, 1);
 
 					// do we already have the user?
 					Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-					String[] projection = {"_id", TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE};
-					Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+userId, null, null);
+					String[] projection = {"_id", TwitterUsers.COL_LASTUPDATE};
+					Cursor c = getContentResolver().query(uri, projection, TwitterUsers.COL_ID+"="+userId, null, null);
 					if(c.getCount() == 0){ // we don't have the local user in the DB yet!
 						Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 						getContentResolver().insert(insertUri, cv);
@@ -940,7 +940,7 @@ public class TwitterService extends Service {
 
 						// do we need to update the user?
 						if(toLookup.size()< 100){
-							if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
+							if(c.isNull(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
 								toLookup.add((Long) userId);
 							}
 						}
@@ -1003,13 +1003,13 @@ public class TwitterService extends Service {
 				
 				ContentValues cv = new ContentValues();
 				// all we know is the user id and that we follow them
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_ID, userId.longValue());
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING, 1);
+				cv.put(TwitterUsers.COL_ID, userId.longValue());
+				cv.put(TwitterUsers.COL_FOLLOWING, 1);
 
 				// do we already have the user?
 				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-				String[] projection = {"_id", TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE};
-				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+userId, null, null);
+				String[] projection = {"_id", TwitterUsers.COL_LASTUPDATE};
+				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.COL_ID+"="+userId, null, null);
 				if(c.getCount() == 0){ // we don't have the local user in the DB yet!
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 					getContentResolver().insert(insertUri, cv);
@@ -1027,7 +1027,7 @@ public class TwitterService extends Service {
 
 					// do we need to update the user?
 					if(toLookup.size()< 100){
-						if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
+						if(c.isNull(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) || (System.currentTimeMillis() - c.getLong(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)){
 							toLookup.add((Long) userId);
 						}
 					}
@@ -1071,22 +1071,22 @@ public class TwitterService extends Service {
 				return null;
 			}
 			c.moveToFirst();
-			flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 
 			Twitter.Status tweet = null;
 			
 			try {
-				String text = c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT));
+				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 				
-				if(!(c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG))==0)){
-					double[] location = {c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LAT)),c.getDouble(c.getColumnIndex(Tweets.TWEETS_COLUMNS_LNG))}; 
+				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
+					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
 					twitter.setMyLocation(location);
 					Log.i(TAG, "Location set: " + location[0] +" " + location[1]);
 				} else {
 					twitter.setMyLocation(null);
 				}
-				if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO)>=0){
-					tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_REPLYTO)));
+				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
+					tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
 				} else {
 					tweet = twitter.updateStatus(text);
 				}
@@ -1120,7 +1120,7 @@ public class TwitterService extends Service {
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			
 			ContentValues cv = getTweetContentValues(result);
-			cv.put(Tweets.TWEETS_COLUMNS_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
+			cv.put(Tweets.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
 			
 			getContentResolver().update(queryUri, cv, null, null);
 			ShowTweetListActivity.setLoading(false);
@@ -1169,7 +1169,7 @@ public class TwitterService extends Service {
 				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 				String[] projection = {"_id"};
 				
-				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+user.id, null, null);
+				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.COL_ID+"="+user.id, null, null);
 				if(c.getCount() > 0){
 					c.moveToFirst();
 					rowId = c.getLong(c.getColumnIndex("_id"));
@@ -1177,7 +1177,7 @@ public class TwitterService extends Service {
 				c.close();
 
 				cv= getUserContentValues(user);
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
 
 				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);			
 				getContentResolver().update(queryUri, cv, null, null);
@@ -1218,12 +1218,12 @@ public class TwitterService extends Service {
 				return null;
 			}
 			c.moveToFirst();
-			flags = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
 			Twitter.User user = null;
 			
 			try {
-				user = twitter.show(c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_ID)));
+				user = twitter.show(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
 
 			} catch (Exception ex) {
 				Log.e(TAG, "Error while loading user: " + ex);
@@ -1243,10 +1243,10 @@ public class TwitterService extends Service {
 			ContentValues cv = getUserContentValues(result);
 			if(result!=null) {
 				cv= getUserContentValues(result);
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_LASTUPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
 			}
 			// we clear the to update flag in any case
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, flags & ~(TwitterUsers.FLAG_TO_UPDATE));
+			cv.put(TwitterUsers.COL_FLAGS, flags & ~(TwitterUsers.FLAG_TO_UPDATE));
 			
 			Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+this.rowId);			
 			getContentResolver().update(queryUri, cv, null, null);
@@ -1285,11 +1285,11 @@ public class TwitterService extends Service {
 			
 			String imageUrl = null;
 			// this should not happen
-			if(c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_IMAGEURL))){
+			if(c.isNull(c.getColumnIndex(TwitterUsers.COL_IMAGEURL))){
 				c.close();
 				return null;
 			} else {
-				imageUrl = c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_IMAGEURL));
+				imageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
 			}
 			
 			HttpEntity entity = null;
@@ -1324,7 +1324,7 @@ public class TwitterService extends Service {
 			
 			ContentValues cv = new ContentValues();
 			try {
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE, EntityUtils.toByteArray(result));
+				cv.put(TwitterUsers.COL_PROFILEIMAGE, EntityUtils.toByteArray(result));
 			} catch (IOException e) {
 				Log.i(TAG, "IOException while getting image from http entity");
 				return;
@@ -1367,15 +1367,15 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 			
 			// checking if we really have an official Twitter ID
-			if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)<0 | c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)) == 0){
+			if(c.getColumnIndex(Tweets.COL_TID)<0 | c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
 				Log.i(TAG, "DestroyStatusTask: Tweet has no ID! " + this.rowId);
 				c.close();
 				return null;
 			}
 
-			flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			try {
-				twitter.destroyStatus(c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)));
+				twitter.destroyStatus(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 				result = 1;
 			} catch (Exception ex) {
 				ShowTweetListActivity.setLoading(false);
@@ -1395,7 +1395,7 @@ public class TwitterService extends Service {
 	     protected void onPostExecute(Integer result) {
 			if(result == null){
 				ContentValues cv = new ContentValues();
-				cv.put(Tweets.TWEETS_COLUMNS_FLAGS, flags & ~Tweets.FLAG_TO_DELETE);
+				cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_DELETE);
 				Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 				getContentResolver().update(updateUri, cv, null, null);
 
@@ -1435,16 +1435,16 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 
 			// making sure we have an official Tweet ID from Twitter
-			if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)<0 | c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)) == 0){
+			if(c.getColumnIndex(Tweets.COL_TID)<0 | c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
 				Log.i(TAG, "FavoriteStatusTask: Tweet has no ID! " + this.rowId);
 				c.close();
 				return null;
 			}
 
 			// save the flags for clearing the to favorite flag later
-			flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			try {
-				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)), null), true);
+				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), true);
 				result = 1;
 			} catch (TwitterException.Repetition ex){
 				// we get a repetition exception if the tweet was already favorited
@@ -1465,10 +1465,10 @@ public class TwitterService extends Service {
 		@Override
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
-			cv.put(Tweets.TWEETS_COLUMNS_FLAGS, flags & ~Tweets.FLAG_TO_FAVORITE);
+			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_FAVORITE);
 			// we get null if there was a problem with favoriting (already a favorite, etc.).
 			if(result!=null) {
-				cv.put(Tweets.TWEETS_COLUMNS_FAVORITED, 1);
+				cv.put(Tweets.COL_FAVORITED, 1);
 			}
 			
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
@@ -1506,16 +1506,16 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 
 			// making sure we have an official Tweet ID from Twitter
-			if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)<0 | c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)) == 0){
+			if(c.getColumnIndex(Tweets.COL_TID)<0 | c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
 				Log.i(TAG, "UnavoriteStatusTask: Tweet has no ID! " + this.rowId);
 				c.close();
 				return null;
 			}
 
 			// save the flags for clearing the to favorite flag later
-			flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			try {
-				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)), null), false);
+				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), false);
 				result = 1;
 			} catch (TwitterException.Repetition ex){
 				// we get a repetition exception if the tweet was not a favorite
@@ -1535,10 +1535,10 @@ public class TwitterService extends Service {
 		@Override
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
-			cv.put(Tweets.TWEETS_COLUMNS_FLAGS, flags & ~Tweets.FLAG_TO_UNFAVORITE);
+			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_UNFAVORITE);
 
 			if(result!=null) {
-				cv.put(Tweets.TWEETS_COLUMNS_FAVORITED, 0);
+				cv.put(Tweets.COL_FAVORITED, 0);
 			}
 			
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
@@ -1575,16 +1575,16 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 
 			// making sure we have an official Tweet ID from Twitter
-			if(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)<0 | c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)) == 0){
+			if(c.getColumnIndex(Tweets.COL_TID)<0 | c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
 				Log.i(TAG, "RetweetStatusTask: Tweet has no ID! " + this.rowId);
 				c.close();
 				return null;
 			}
 
 			// save the flags for clearing the to favorite flag later
-			flags = c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			try {
-				twitter.retweet(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TID)), null));
+				twitter.retweet(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null));
 			} catch (Exception ex) {
 				ShowTweetListActivity.setLoading(false);
 				Log.e(TAG, "Error while retweeting tweet: " + ex);
@@ -1600,10 +1600,10 @@ public class TwitterService extends Service {
 		@Override
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
-			cv.put(Tweets.TWEETS_COLUMNS_FLAGS, flags & ~Tweets.FLAG_TO_RETWEET);
+			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_RETWEET);
 
 			if(result!=null) {
-				cv.put(Tweets.TWEETS_COLUMNS_RETWEETED, 1);
+				cv.put(Tweets.COL_RETWEETED, 1);
 			}
 			
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
@@ -1637,12 +1637,12 @@ public class TwitterService extends Service {
 				return null;
 			}
 			c.moveToFirst();
-			flags = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
 			Twitter.User user = null;
 			
 			try {
-				user = twitter.follow(c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)));
+				user = twitter.follow(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 			} catch (Exception ex) {
 				Log.e(TAG, "Error while following user: " + ex);
 				ShowUserListActivity.setLoading(false);
@@ -1660,11 +1660,11 @@ public class TwitterService extends Service {
 			// we get null if: the user does not exist or is protected
 			// in any case we clear the to follow flag
 			ContentValues cv = getUserContentValues(result);
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, (flags & ~TwitterUsers.FLAG_TO_FOLLOW));
+			cv.put(TwitterUsers.COL_FLAGS, (flags & ~TwitterUsers.FLAG_TO_FOLLOW));
 			// we get a user if the follow was successful
 			// in that case we also mark the user as followed in the DB
 			if(result!=null) {
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW, 1);
+				cv.put(TwitterUsers.COL_FOLLOW, 1);
 			}
 
 			Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+this.rowId);
@@ -1699,12 +1699,12 @@ public class TwitterService extends Service {
 				return null;
 			}
 			c.moveToFirst();
-			flags = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS));
+			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
 			Twitter.User user = null;
 			
 			try {
-				user = twitter.stopFollowing(c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)));
+				user = twitter.stopFollowing(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 			} catch (Exception ex) {
 				Log.e(TAG, "Error while unfollowing user: " + ex);
 				ShowUserListActivity.setLoading(false);
@@ -1722,11 +1722,11 @@ public class TwitterService extends Service {
 			// we get null if we did not follow the user
 			// in any case we clear the to follow flag
 			ContentValues cv = getUserContentValues(result);
-			cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, (flags & ~TwitterUsers.FLAG_TO_UNFOLLOW));
+			cv.put(TwitterUsers.COL_FLAGS, (flags & ~TwitterUsers.FLAG_TO_UNFOLLOW));
 			// we get a user if the follow was successful
 			// in that case we remove the follow in the DB
 			if(result!=null) {
-				cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW, 0);
+				cv.put(TwitterUsers.COL_FOLLOW, 0);
 				Log.i(TAG, "unfollowed successfully.. ");
 			}
 			

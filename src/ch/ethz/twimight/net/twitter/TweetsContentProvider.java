@@ -172,29 +172,29 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_ID: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TID + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_SOURCE + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETCOUNT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_LAT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_LNG + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_SOURCE + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETCOUNT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LAT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LNG + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_NAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_NAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -205,22 +205,22 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE_NORMAL:
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" =0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -235,25 +235,25 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE_DISASTER: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RECEIVED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CERTIFICATE + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_SIGNATURE + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RECEIVED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CERTIFICATE + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_SIGNATURE + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" =1 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =1 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -265,25 +265,26 @@ public class TweetsContentProvider extends ContentProvider {
 				i.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
 				getContext().startService(i);
 				break;
-			case TWEETS_TIMELINE_ALL: 
+			case TWEETS_TIMELINE_ALL:
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
+
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
@@ -297,25 +298,25 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_FAVORITES_NORMAL: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" =0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
+					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -332,25 +333,25 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_FAVORITES_DISASTER: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "					
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" >0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
+					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" >0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -367,24 +368,24 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_FAVORITES_ALL: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "					
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -401,24 +402,24 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_MENTIONS_NORMAL: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "					
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS+">0 AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" =0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 AND "
+					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -435,24 +436,24 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_MENTIONS_DISASTER: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "					
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS+">0 AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_ISDISASTER+" >0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 AND "
+					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" >0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -469,23 +470,23 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_MENTIONS_ALL: 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_TEXT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_USER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS + ", "					
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_CREATED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_REPLYTO + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FAVORITED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_RETWEETED + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE + " "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.TWEETS_COLUMNS_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.TWITTERUSERS_COLUMNS_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.TWEETS_COLUMNS_MENTIONS+">0 "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -531,23 +532,23 @@ public class TweetsContentProvider extends ContentProvider {
 				 */
 				disasterId = getDisasterID(values);
 				
-				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.TWEETS_COLUMNS_DISASTERID+"="+disasterId, null, null, null, null);
+				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
 					Log.i(TAG, "PANIIIIIIIIIIIIIIIIIIIIC: "+c.getCount()+" tweets with the same disaster ID");
 
 					c.moveToFirst();
 					while(!c.isAfterLast()){
-						if(c.getInt(c.getColumnIndex(Tweets.TWEETS_COLUMNS_ISDISASTER))>0){
+						if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
 							// check if the text is the same
-							if(c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT)).equals(values.getAsString(Tweets.TWEETS_COLUMNS_TEXT))){
+							if(c.getString(c.getColumnIndex(Tweets.COL_TEXT)).equals(values.getAsString(Tweets.COL_TEXT))){
 								Log.i(TAG, "Disaster tweet with same text and disaster ID");
 								Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 								update(updateUri, values, null, null);
 								return updateUri;
 							}
-						} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.TWEETS_COLUMNS_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
+						} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
 							// check if the text is the same
-							if(c.getString(c.getColumnIndex(Tweets.TWEETS_COLUMNS_TEXT)).equals(values.getAsString(Tweets.TWEETS_COLUMNS_TEXT))){
+							if(c.getString(c.getColumnIndex(Tweets.COL_TEXT)).equals(values.getAsString(Tweets.COL_TEXT))){
 								Log.i(TAG, "Normal tweet with same text and disaster ID");
 								Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 								update(updateUri, values, null, null);
@@ -569,12 +570,12 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE_DISASTER:
 				// in disaster mode, we set the is disaster flag 
 				//and sign the tweet (if we have a certificate for our key pair)
-				values.put(Tweets.TWEETS_COLUMNS_ISDISASTER, 1);
+				values.put(Tweets.COL_ISDISASTER, 1);
 				
 				// if we already have a disaster tweet with the same disaster ID, 
 				// we discard the new one
 				disasterId = getDisasterID(values);
-				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.TWEETS_COLUMNS_DISASTERID+"="+disasterId+" AND "+Tweets.TWEETS_COLUMNS_ISDISASTER+">0", null, null, null, null);
+				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId+" AND "+Tweets.COL_ISDISASTER+">0", null, null, null, null);
 				if(c.getCount()>0){
 					c.moveToFirst();
 					Log.i(TAG, "already have disaster tweet");
@@ -585,26 +586,26 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				CertificateManager cm = new CertificateManager(getContext());
 				KeyManager km = new KeyManager(getContext());
-				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.TWEETS_COLUMNS_USER).toString())){
+				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
 					Log.i(TAG, "our own tweet!");
 					if(cm.hasCertificate()){
 						Log.i(TAG, "signing tweet");
 						
 						// we put the signature
-						String text = values.getAsString(Tweets.TWEETS_COLUMNS_TEXT);
+						String text = values.getAsString(Tweets.COL_TEXT);
 						String userId = LoginActivity.getTwitterId(getContext()).toString();
 						
 						String signature = km.getSignature(new String(text+userId));
-						values.put(Tweets.TWEETS_COLUMNS_SIGNATURE, signature);
+						values.put(Tweets.COL_SIGNATURE, signature);
 						
 						// and the certificate
-						values.put(Tweets.TWEETS_COLUMNS_CERTIFICATE, cm.getCertificate());
+						values.put(Tweets.COL_CERTIFICATE, cm.getCertificate());
 						
 						// and set the is_verified flag to show that the tweet is signed
-						values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 1);
+						values.put(Tweets.COL_ISVERIFIED, 1);
 					} else {
 						Log.i(TAG, "no certificate, not signing tweet");
-						values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 0);
+						values.put(Tweets.COL_ISVERIFIED, 0);
 					}
 					// if we are in disaster mode, we give the content provider half a 
 					// second to insert the tweet and then schedule a scanning operation
@@ -616,28 +617,28 @@ public class TweetsContentProvider extends ContentProvider {
 					}
 				} else {
 					Log.i(TAG, "not our own tweet!");
-					String certificate = values.getAsString(Tweets.TWEETS_COLUMNS_CERTIFICATE);
+					String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
 					// check validity
-					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.TWEETS_COLUMNS_USER).toString())){
+					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){
 						Log.i(TAG, "certificate is valid!");
 						// check signature
-						String signature = values.getAsString(Tweets.TWEETS_COLUMNS_SIGNATURE);
-						String text = values.getAsString(Tweets.TWEETS_COLUMNS_TEXT) + values.getAsString(Tweets.TWEETS_COLUMNS_USER);
+						String signature = values.getAsString(Tweets.COL_SIGNATURE);
+						String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
 						if(km.checkSinature(cm.parsePem(certificate), signature, text)){
-							values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 1);
+							values.put(Tweets.COL_ISVERIFIED, 1);
 							Log.i(TAG, "signature is valid!");
 						} else {
-							values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 0);
+							values.put(Tweets.COL_ISVERIFIED, 0);
 							Log.i(TAG, "signature is not valid!");
 						}
 					
 					} else {
-						values.put(Tweets.TWEETS_COLUMNS_ISVERIFIED, 0);
+						values.put(Tweets.COL_ISVERIFIED, 0);
 						Log.i(TAG, "certificate is not valid!");
 					}
 					
 					// notify user 
-					notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.TWEETS_COLUMNS_TEXT));
+					notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
 					
 				}
 				c.close();
@@ -710,7 +711,7 @@ public class TweetsContentProvider extends ContentProvider {
 			String sqlWhere;
 			String sql;
 			Cursor c;
-			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
+			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+"=0 AND "+Tweets.COL_MENTIONS+"=0";
 			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
 					+"WHERE "
 					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
@@ -729,7 +730,7 @@ public class TweetsContentProvider extends ContentProvider {
 			 *  - don't have transactional flags 
 			 *  - are beyond the favorites buffer size
 			 */
-			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+">0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+"=0";
+			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+">0 AND "+Tweets.COL_MENTIONS+"=0";
 			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
 					+"WHERE "
 					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
@@ -748,7 +749,7 @@ public class TweetsContentProvider extends ContentProvider {
 			 *  - don't have transactional flags 
 			 *  - are beyond the mentions buffer size
 			 */
-			sqlWhere = Tweets.TWEETS_COLUMNS_FLAGS + "=0 AND "+Tweets.TWEETS_COLUMNS_FAVORITED+"=0 AND "+Tweets.TWEETS_COLUMNS_MENTIONS+">0";
+			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+"=0 AND "+Tweets.COL_MENTIONS+">0";
 			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
 					+"WHERE "
 					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
@@ -767,8 +768,8 @@ public class TweetsContentProvider extends ContentProvider {
 			 *  - are not our own 
 			 *  - are beyond the DTweets buffer size
 			 */
-			sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
-						+Tweets.TWEETS_COLUMNS_USER+"!="+userId;
+			sqlWhere = Tweets.COL_ISDISASTER+"=1 AND "
+						+Tweets.COL_USER+"!="+userId;
 			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
 					+"WHERE "
 					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
@@ -785,8 +786,8 @@ public class TweetsContentProvider extends ContentProvider {
 			 *  - are our own 
 			 *  - are beyond the DTweets buffer size
 			 */
-			sqlWhere = Tweets.TWEETS_COLUMNS_ISDISASTER+"=1 AND "
-						+Tweets.TWEETS_COLUMNS_USER+"="+userId;
+			sqlWhere = Tweets.COL_ISDISASTER+"=1 AND "
+						+Tweets.COL_USER+"="+userId;
 			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
 					+"WHERE "
 					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
@@ -814,12 +815,12 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 		
-		Cursor c = getContext().getContentResolver().query(uri, null, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+localUserId, null, null);
+		Cursor c = getContext().getContentResolver().query(uri, null, TwitterUsers.COL_ID+"="+localUserId, null, null);
 		
 		if(c.getCount() == 0) return null;
 		
 		c.moveToFirst();
-		return c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME));
+		return c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 	}
 	
 	/**
@@ -828,12 +829,12 @@ public class TweetsContentProvider extends ContentProvider {
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
-		String text = cv.getAsString(Tweets.TWEETS_COLUMNS_TEXT);
+		String text = cv.getAsString(Tweets.COL_TEXT);
 		String userId;
-		if(!cv.containsKey(Tweets.TWEETS_COLUMNS_USER) | (cv.getAsString(Tweets.TWEETS_COLUMNS_USER)==null)){
+		if(!cv.containsKey(Tweets.COL_USER) | (cv.getAsString(Tweets.COL_USER)==null)){
 			userId = LoginActivity.getTwitterId(getContext()).toString();
 		} else {
-			userId = cv.getAsString(Tweets.TWEETS_COLUMNS_USER);
+			userId = cv.getAsString(Tweets.COL_USER);
 		}
 		
 		return (new String(text+userId)).hashCode();
@@ -856,28 +857,28 @@ public class TweetsContentProvider extends ContentProvider {
 		if(checkValues(values)){
 			
 			int flags = 0;
-			if(values.containsKey(Tweets.TWEETS_COLUMNS_FLAGS))
-				flags = values.getAsInteger(Tweets.TWEETS_COLUMNS_FLAGS);
+			if(values.containsKey(Tweets.COL_FLAGS))
+				flags = values.getAsInteger(Tweets.COL_FLAGS);
 			
-			if(!values.containsKey(Tweets.TWEETS_COLUMNS_CREATED)){
+			if(!values.containsKey(Tweets.COL_CREATED)){
 				// set the current timestamp
-				values.put(Tweets.TWEETS_COLUMNS_CREATED, System.currentTimeMillis());
+				values.put(Tweets.COL_CREATED, System.currentTimeMillis());
 			}
 			
-			values.put(Tweets.TWEETS_COLUMNS_RECEIVED, System.currentTimeMillis());
+			values.put(Tweets.COL_RECEIVED, System.currentTimeMillis());
 			
 			// the disaster ID must be set for all tweets (normal and disaster)
-			values.put(Tweets.TWEETS_COLUMNS_DISASTERID, getDisasterID(values));
+			values.put(Tweets.COL_DISASTERID, getDisasterID(values));
 			
 			// does it mention the local user?
-			String text = values.getAsString(Tweets.TWEETS_COLUMNS_TEXT);
+			String text = values.getAsString(Tweets.COL_TEXT);
 			String localUserScreenName = getLocalScreenName();
 			if(text.contains("@"+localUserScreenName)){
-				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 1);
+				values.put(Tweets.COL_MENTIONS, 1);
 				// notify user
-				notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.TWEETS_COLUMNS_TEXT));
+				notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 			} else {
-				values.put(Tweets.TWEETS_COLUMNS_MENTIONS, 0);
+				values.put(Tweets.COL_MENTIONS, 0);
 			}
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);

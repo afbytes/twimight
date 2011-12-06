@@ -219,7 +219,7 @@ public class ShowTweetListActivity extends Activity{
 		
 		case OPTIONS_MENU_PROFILE:
 			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-			Cursor c = managedQuery(uri, null, TwitterUsers.TWITTERUSERS_COLUMNS_ID+"="+LoginActivity.getTwitterId(this), null, null);
+			Cursor c = managedQuery(uri, null, TwitterUsers.COL_ID+"="+LoginActivity.getTwitterId(this), null, null);
 			if(c.getCount()!=1) return false;
 			c.moveToFirst();
 			int rowId = c.getInt(c.getColumnIndex("_id"));

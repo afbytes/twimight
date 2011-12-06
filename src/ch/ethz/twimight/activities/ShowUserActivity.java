@@ -104,22 +104,22 @@ public class ShowUserActivity extends Activity{
 		 */
 		
 		// do we have a profile image?
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE))){
-			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_PROFILEIMAGE));
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
 			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		}
-		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_SCREENNAME)); 
+		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
 		screenName.setText(userScreenName);
-		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_NAME)));
+		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 		
-		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LOCATION) >=0){
-			location.setText(c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_LOCATION)));
+		if(c.getColumnIndex(TwitterUsers.COL_LOCATION) >=0){
+			location.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_LOCATION)));
 		} else {
 			location.setVisibility(TextView.GONE);
 		}
 
-		if(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_DESCRIPTION) >=0){
-			String tmp = c.getString(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_DESCRIPTION));
+		if(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION) >=0){
+			String tmp = c.getString(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION));
 			if(tmp != null){
 				description.setText(tmp);
 			} else {
@@ -129,10 +129,10 @@ public class ShowUserActivity extends Activity{
 			description.setVisibility(TextView.GONE);
 		}
 		
-		int tweets = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_STATUSES));
-		int favorites = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FAVORITES));
-		int follows = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FRIENDS));
-		int followed = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWERS));
+		int tweets = c.getInt(c.getColumnIndex(TwitterUsers.COL_STATUSES));
+		int favorites = c.getInt(c.getColumnIndex(TwitterUsers.COL_FAVORITES));
+		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
+		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
 
 		// TODO: refine this text. make it depend on the stats (something funny).
 		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "+favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
@@ -141,7 +141,7 @@ public class ShowUserActivity extends Activity{
 		 * Actions on user (follow/unfollow, mention, send message)
 		 */
 		// if the user we show is the local user, disable the follow button
-		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_ID))))){
+		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
 			showLocalUser();
 		} else {
 			showRemoteUser();
@@ -249,7 +249,7 @@ public class ShowUserActivity extends Activity{
 	 * Sets the UI up to show a remote user (any user except for the local one)
 	 */
 	private void showRemoteUser(){
-		flags = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS));
+		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		Log.i(TAG, "flags: "+ flags);
 		
 		/*
@@ -260,7 +260,7 @@ public class ShowUserActivity extends Activity{
 		 * - the request to follow was sent
 		 * - none of the above, we can follow the user
 		 */
-		following = c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOW))>0;
+		following = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOW))>0;
 		if(following){
 			followButton.setText("Unfollow");
 		} else {
@@ -295,7 +295,7 @@ public class ShowUserActivity extends Activity{
 			followButton.setVisibility(Button.GONE);
 			// show info that the user will be unfollowed upon connectivity
 			unfollowInfo.setVisibility(LinearLayout.VISIBLE);
-		} else if(c.getInt(c.getColumnIndex(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWREQUEST))>0){
+		} else if(c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWREQUEST))>0){
 			// disable follow button
 			followButton.setVisibility(Button.GONE);
 		}
@@ -322,7 +322,7 @@ public class ShowUserActivity extends Activity{
 	private ContentValues setFollowFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		// set follow flag
-		cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, flags | TwitterUsers.FLAG_TO_FOLLOW);
+		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_FOLLOW);
 		return cv;
 	}
 	
@@ -335,7 +335,7 @@ public class ShowUserActivity extends Activity{
 	private ContentValues setUnfollowFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		// set follow flag
-		cv.put(TwitterUsers.TWITTERUSERS_COLUMNS_FLAGS, flags | TwitterUsers.FLAG_TO_UNFOLLOW);
+		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_UNFOLLOW);
 		return cv;
 	}
 }
