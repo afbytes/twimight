@@ -36,7 +36,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DTWEETS = "deleted_dtweets"; /** the list of deleted disaster tweets */
 
-	private static final int DATABASE_VERSION = 30;
+	private static final int DATABASE_VERSION = 31;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -82,6 +82,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_RECEIVED + " integer, "
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer not null default 0, "
+			+ Tweets.COL_BUFFER + " integer not null default 0, "
 			+ Tweets.COL_ISDISASTER + " integer not null default 0, "
 			+ Tweets.COL_DISASTERID + " integer not null, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
@@ -124,8 +125,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	// TODO: DisasterMessages
 	
 	// TODO: MyDisasterMessages
-	
-	// TODO: DeletedDisasterMessages
 	
 	// TODO: SearchResults
 

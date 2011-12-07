@@ -104,10 +104,6 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int NOTIFY_DISASTER = 3;
 	private static final int NOTIFY_TWEET = 4;
 	
-	// for purging the tweets table
-	private static final int PURGE_NORMAL = 1;
-	private static final int PURGE_DISASTER = 2;
-	
 	/**
 	 * onCreate we initialize and open the DB.
 	 */
@@ -185,6 +181,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LAT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LNG + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
@@ -220,7 +217,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -253,7 +250,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =1 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
+					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -283,6 +281,9 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
+					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
+					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 
 				Log.i(TAG, "DB query: " + sql);
@@ -313,10 +314,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
+					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -348,10 +347,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" >0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
+					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -383,9 +380,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ "(" + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED+">0 OR "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_FAVORITE +">0) "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -417,9 +412,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" =0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
+					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -451,9 +445,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 AND "
-					+ DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_ISDISASTER+" >0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
+					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -485,8 +478,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE ("  +DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + "&" +Tweets.FLAG_TO_DELETE +"=0) AND "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS+">0 "
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
@@ -534,7 +526,7 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
-					Log.i(TAG, "PANIIIIIIIIIIIIIIIIIIIIC: "+c.getCount()+" tweets with the same disaster ID");
+					Log.i(TAG, "oops: "+c.getCount()+" tweets with the same disaster ID");
 
 					c.moveToFirst();
 					while(!c.isAfterLast()){
@@ -563,7 +555,7 @@ public class TweetsContentProvider extends ContentProvider {
 				// if none of the before was true, this is a proper new tweet which we now insert
 				insertUri = insertTweet(values);
 				// delete everything that now falls out of the buffer
-				purgeTimeline(LoginActivity.getTwitterId(getContext()), PURGE_NORMAL);
+				purgeTweets(values);
 				
 				break;
 				
@@ -645,7 +637,7 @@ public class TweetsContentProvider extends ContentProvider {
 				insertUri = insertTweet(values);
 				
 				// delete everything that now falls out of the buffer
-				purgeTimeline(LoginActivity.getTwitterId(getContext()), PURGE_DISASTER);
+				purgeTweets(values);
 				break;
 				
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
@@ -691,118 +683,77 @@ public class TweetsContentProvider extends ContentProvider {
 	}
 	
 	/**
-	 * Keeps the timeline table at acceptable size
-	 * TODO: this seems not to work!!
+	 * purges a provided buffer to the provided number of tweets
 	 */
-	private void purgeTimeline(String userId, int whichBuffer){
+	private void purgeBuffer(int buffer, int size){
+		/*
+		 * First, we remove the respective flag
+		 * Second, we delete all tweets which have no more buffer flags
+		 */
 		
-		switch(whichBuffer){
-		case PURGE_NORMAL:
-			Log.i(TAG, "purging buffers "+userId);
-			/*
-			 *  1. Delete all tweets which are 
-			 *  - not favorites 
-			 *  - not mentions
-			 *  - do not have transactional flags
-			 *  - are beyond the buffer size
-			 *  NOTE: DELETE in android does not allow ORDER BY. Hence, the trick with the _id
-			 *  TODO: let the caller select which "buffer" should be purged
-			 */
-			String sqlWhere;
-			String sql;
-			Cursor c;
-			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+"=0 AND "+Tweets.COL_MENTIONS+"=0";
-			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-					+"WHERE "
-					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-					+ " WHERE " + sqlWhere
-					+ " LIMIT -1 OFFSET "
-					+ Constants.TIMELINE_BUFFER_SIZE+");";
-			Log.i(TAG, "Query: " + sql);
-			c = database.rawQuery(sql, null);
+		String sqlWhere;
+		String sql;
+		Cursor c;
+		// NOTE: DELETE in android does not allow ORDER BY. Hence, the trick with the _id
+		sqlWhere = "("+Tweets.COL_BUFFER+"&"+buffer+")!=0";
+		sql = "UPDATE " + DBOpenHelper.TABLE_TWEETS + " "
+				+"SET " + Tweets.COL_BUFFER +"=("+(~buffer)+"&"+Tweets.COL_BUFFER+") "
+				+"WHERE "
+				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+				+ " WHERE " + sqlWhere
+				+ " ORDER BY "+Tweets.DEFAULT_SORT_ORDER+" "
+				+ " LIMIT -1 OFFSET "
+				+ size +");";
+		Log.i(TAG, sql);
+		c = database.rawQuery(sql, null);
+		Log.i(TAG, "UPDATED: "+c.getCount());
+		c.close();
+		
+		// now delete
+		sql = "DELETE FROM "+DBOpenHelper.TABLE_TWEETS+" WHERE "+Tweets.COL_BUFFER+"=0";
+		Log.i(TAG, sql);
+		c = database.rawQuery(sql, null);
+		Log.i(TAG, "DELETED: "+c.getCount());
+		c.close();
+		
+	}
+	
+	/**
+	 * Keeps the tweets table at acceptable size
+	 */
+	private void purgeTweets(ContentValues cv){
+		
+		// in the content values we find which buffer(s) to purge
+		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
+		
+		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
+			Log.i(TAG, "purging timeline buffer");
+			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
+		}
 			
-			c.close();
-			
-			/*
-			 *  2. Delete all tweets which 
-			 *  - are favorites
-			 *  - are not mentions
-			 *  - don't have transactional flags 
-			 *  - are beyond the favorites buffer size
-			 */
-			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+">0 AND "+Tweets.COL_MENTIONS+"=0";
-			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-					+"WHERE "
-					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-					+ " WHERE " + sqlWhere
-					+ " LIMIT -1 OFFSET "
-					+ Constants.FAVORITES_BUFFER_SIZE+");";
-			Log.i(TAG, "Query: " + sql);
-			c = database.rawQuery(sql, null);
-			
-			c.close();
-			
-			/*
-			 *  3. Delete all tweets which
-			 *  - are mentions 
-			 *  - are not favorites  
-			 *  - don't have transactional flags 
-			 *  - are beyond the mentions buffer size
-			 */
-			sqlWhere = Tweets.COL_FLAGS + "=0 AND "+Tweets.COL_FAVORITED+"=0 AND "+Tweets.COL_MENTIONS+">0";
-			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-					+"WHERE "
-					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-					+ " WHERE " + sqlWhere
-					+ " LIMIT -1 OFFSET "
-					+ Constants.MENTIONS_BUFFER_SIZE+");";
-			Log.i(TAG, "Query: " + sql);
-			c = database.rawQuery(sql, null);
-			
-			c.close();
-			break;
-		case PURGE_DISASTER:
+		if((bufferFlags & Tweets.BUFFER_FAVORITES) != 0){
+			Log.i(TAG, "purging favorites buffer");
+			purgeBuffer(Tweets.BUFFER_FAVORITES, Constants.FAVORITES_BUFFER_SIZE);
+		}
 
-			/*
-			 *  4. Delete all disaster tweets which
-			 *  - are not our own 
-			 *  - are beyond the DTweets buffer size
-			 */
-			sqlWhere = Tweets.COL_ISDISASTER+"=1 AND "
-						+Tweets.COL_USER+"!="+userId;
-			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-					+"WHERE "
-					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-					+ " WHERE " + sqlWhere
-					+ " LIMIT -1 OFFSET "
-					+ Constants.DTWEET_BUFFER_SIZE+");";
-			Log.i(TAG, "Query: " + sql);
-			c = database.rawQuery(sql, null);
-			
-			c.close();
-			
-			/*
-			 *  5. Delete all disaster tweets which
-			 *  - are our own 
-			 *  - are beyond the DTweets buffer size
-			 */
-			sqlWhere = Tweets.COL_ISDISASTER+"=1 AND "
-						+Tweets.COL_USER+"="+userId;
-			sql = "DELETE FROM " + DBOpenHelper.TABLE_TWEETS + " "
-					+"WHERE "
-					+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
-					+ " WHERE " + sqlWhere
-					+ " LIMIT -1 OFFSET "
-					+ Constants.MYDTWEET_BUFFER_SIZE+");";
-			Log.i(TAG, "Query: " + sql);
-			c = database.rawQuery(sql, null);
-			
-			c.close();	
-			break;
-		
+		if((bufferFlags & Tweets.BUFFER_MENTIONS) != 0){
+			Log.i(TAG, "purging mentions buffer");
+			purgeBuffer(Tweets.BUFFER_MENTIONS, Constants.MENTIONS_BUFFER_SIZE);
+		}
+
+		if((bufferFlags & Tweets.BUFFER_DISASTER) != 0){
+			Log.i(TAG, "purging disaster buffer");
+			purgeBuffer(Tweets.BUFFER_DISASTER, Constants.DTWEET_BUFFER_SIZE);
+		}
+
+		if((bufferFlags & Tweets.BUFFER_MYDISASTER) != 0){
+			Log.i(TAG, "purging mydisaster buffer");
+			purgeBuffer(Tweets.BUFFER_MYDISASTER, Constants.MYDTWEET_BUFFER_SIZE);
 		}
 		
 	}
+
+
 	
 	/**
 	 * The screenname of the local user
@@ -875,6 +826,12 @@ public class TweetsContentProvider extends ContentProvider {
 			String localUserScreenName = getLocalScreenName();
 			if(text.contains("@"+localUserScreenName)){
 				values.put(Tweets.COL_MENTIONS, 1);
+				// put into mentions buffer
+				if(values.containsKey(Tweets.COL_BUFFER)){
+					values.put(Tweets.COL_BUFFER, values.getAsInteger(Tweets.COL_BUFFER)|Tweets.BUFFER_MENTIONS);
+				} else {
+					values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
+				}
 				// notify user
 				notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 			} else {

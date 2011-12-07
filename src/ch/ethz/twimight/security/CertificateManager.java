@@ -13,19 +13,28 @@
 
 package ch.ethz.twimight.security;
 
-
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Principal;
+import java.security.PublicKey;
 import java.security.Security;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
 import org.spongycastle.jce.provider.X509CertificateObject;
 import org.spongycastle.openssl.PEMReader;
 
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.util.Constants;
 
 import android.content.Context;
@@ -46,15 +55,26 @@ public class CertificateManager {
 	
 	private Context context;
 	
+	private static PublicKey rootkey;
+	
 	static {
 	    Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
 	}
-	
+		
 	/**
 	 * Constructor
 	 */
 	public CertificateManager(Context context){
 		this.context = context;
+	
+	    // read the rootkey from res/raw/rootkey
+		PEMReader pem = new PEMReader(new InputStreamReader(context.getResources().openRawResource(R.raw.rootkey)));
+		try {
+			rootkey = (RSAPublicKey) pem.readObject();
+		} catch (IOException e) {
+			Log.e(TAG, "error reading root key");
+		}
+				
 	}
 	
 	/**
@@ -178,11 +198,43 @@ public class CertificateManager {
 			return false;
 		}
 			
-		// check the signature
-		// TODO
+		// certificate signed by root certificate?
+		if(!checkCertificateSignature(cert)){
+			Log.i(TAG, "wrong certificate signature");
+			return false;
+		}
 		
 		// is it on the revocation list?
-		// TODO
+		RevocationDBHelper dbHelper = new RevocationDBHelper(context);
+		dbHelper.open();
+		if(dbHelper.isRevoked(cert.getSerialNumber().toString())){
+			Log.i(TAG, "key is revoked");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	private boolean checkCertificateSignature(X509CertificateObject cert){
+		try {
+			cert.verify(rootkey);
+		} catch (InvalidKeyException e) {
+			Log.i(TAG, "invalid key exception while verifying certificate signature");
+			return false;
+		} catch (CertificateException e) {
+			Log.i(TAG, "certificate exception while verifying certificate signature");
+			return false;
+		} catch (NoSuchAlgorithmException e) {
+			Log.i(TAG, "no such algorithm exception while verifying certificate signature");
+			return false;
+		} catch (NoSuchProviderException e) {
+			Log.i(TAG, "no such provider exception while verifying certificate signature");
+			return false;
+		} catch (SignatureException e) {
+			Log.i(TAG, "signature exception while verifying certificate signature");
+			return false;
+		}
 		return true;
 	}
 
@@ -193,6 +245,8 @@ public class CertificateManager {
 	 */
 	public boolean checkCertificate(X509CertificateObject cert) {
 
+		if(cert == null) return false;
+		
 		return checkCertificate(cert, LoginActivity.getTwitterId(context));
 	}
 

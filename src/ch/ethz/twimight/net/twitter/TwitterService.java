@@ -524,10 +524,10 @@ public class TwitterService extends Service {
 	/**
 	 * Updates a tweet in the DB (or inserts it if the tweet is new to us)
 	 */
-	private int updateTweet(Twitter.Status tweet){
+	private int updateTweet(Twitter.Status tweet, int buffer){
 		// do we already have the tweet?
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
-		String[] projection = {"_id"};
+		String[] projection = {"_id", Tweets.COL_BUFFER};
 		
 		Cursor c = getContentResolver().query(queryUri, projection, Tweets.COL_TID+"="+tweet.getId(), null, null);
 
@@ -536,20 +536,17 @@ public class TwitterService extends Service {
 		if(c.getCount()==0){
 			// insert URI
 			Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
-			Uri resultUri = getContentResolver().insert(insertUri, getTweetContentValues(tweet));
+			Uri resultUri = getContentResolver().insert(insertUri, getTweetContentValues(tweet, buffer));
 			tweetId = new Integer(resultUri.getLastPathSegment());
 			c.close();
 		} else {
 			c.moveToFirst();
-			if(c.isNull(c.getColumnIndex("_id"))){
-				c.close();
-				throw new IllegalStateException("Error while loading tweet from the DB ");
-			} else {
-				Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + c.getInt(c.getColumnIndex("_id")));
-				getContentResolver().update(updateUri, getTweetContentValues(tweet), null, null);
-				tweetId = c.getInt(c.getColumnIndex("_id"));
-				c.close();
-			}
+			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + c.getInt(c.getColumnIndex("_id")));
+			int updatedBufferFlags = buffer | c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			getContentResolver().update(updateUri, getTweetContentValues(tweet, updatedBufferFlags), null, null);
+			tweetId = c.getInt(c.getColumnIndex("_id"));
+			c.close();
+
 		}
 		
 		return tweetId;
@@ -600,7 +597,7 @@ public class TwitterService extends Service {
 	 * @param tweet
 	 * @return
 	 */
-	private ContentValues getTweetContentValues(Twitter.Status tweet) {
+	private ContentValues getTweetContentValues(Twitter.Status tweet, int buffer) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_TEXT, tweet.getText());
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
@@ -615,7 +612,9 @@ public class TwitterService extends Service {
 			cv.put(Tweets.COL_REPLYTO, tweet.inReplyToStatusId.longValue());
 		}
 		cv.put(Tweets.COL_USER, tweet.getUser().getId());
-		cv.put(Tweets.COL_FLAGS, 0);
+		//cv.put(Tweets.COL_FLAGS, 0);
+		cv.put(Tweets.COL_BUFFER, buffer);
+		
 		// TODO: Location (enter coordinates of tweet)
 		
 		return cv;
@@ -750,7 +749,7 @@ public class TwitterService extends Service {
 						lastId = tweet.getId();
 					
 					updateUser(tweet.getUser());
-					updateTweet(tweet);
+					updateTweet(tweet, Tweets.BUFFER_MENTIONS);
 					
 				}
 				
@@ -805,7 +804,7 @@ public class TwitterService extends Service {
 						lastId = tweet.getId();
 					
 					updateUser(tweet.getUser());
-					updateTweet(tweet);
+					updateTweet(tweet, Tweets.BUFFER_FAVORITES);
 					
 				}
 				
@@ -862,7 +861,7 @@ public class TwitterService extends Service {
 						lastId = tweet.getId();
 					
 					updateUser(tweet.getUser());
-					updateTweet(tweet);
+					updateTweet(tweet, Tweets.BUFFER_TIMELINE);
 					
 				}
 				
@@ -1057,6 +1056,7 @@ public class TwitterService extends Service {
 		
 		long rowId;
 		int flags;
+		int buffer;
 		
 		@Override
 	     protected Twitter.Status doInBackground(Long... rowId) {
@@ -1072,6 +1072,7 @@ public class TwitterService extends Service {
 			}
 			c.moveToFirst();
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 			Twitter.Status tweet = null;
 			
@@ -1119,8 +1120,9 @@ public class TwitterService extends Service {
 
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			
-			ContentValues cv = getTweetContentValues(result);
+			ContentValues cv = getTweetContentValues(result, 0);
 			cv.put(Tweets.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
+			cv.put(Tweets.COL_BUFFER, buffer);
 			
 			getContentResolver().update(queryUri, cv, null, null);
 			ShowTweetListActivity.setLoading(false);
@@ -1416,6 +1418,7 @@ public class TwitterService extends Service {
 		
 		long rowId;
 		int flags;
+		int buffer;
 		
 		@SuppressWarnings("deprecation")
 		@Override
@@ -1443,6 +1446,8 @@ public class TwitterService extends Service {
 
 			// save the flags for clearing the to favorite flag later
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			
 			try {
 				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), true);
 				result = 1;
@@ -1466,6 +1471,8 @@ public class TwitterService extends Service {
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
 			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_FAVORITE);
+			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_FAVORITES);
+			
 			// we get null if there was a problem with favoriting (already a favorite, etc.).
 			if(result!=null) {
 				cv.put(Tweets.COL_FAVORITED, 1);
@@ -1486,6 +1493,7 @@ public class TwitterService extends Service {
 		
 		long rowId;
 		int flags;
+		int buffer;
 		
 		@SuppressWarnings("deprecation")
 		@Override
@@ -1514,6 +1522,8 @@ public class TwitterService extends Service {
 
 			// save the flags for clearing the to favorite flag later
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			
 			try {
 				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), false);
 				result = 1;
@@ -1536,6 +1546,7 @@ public class TwitterService extends Service {
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
 			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_UNFAVORITE);
+			cv.put(Tweets.COL_BUFFER, buffer & ~Tweets.BUFFER_FAVORITES);
 
 			if(result!=null) {
 				cv.put(Tweets.COL_FAVORITED, 0);
@@ -1556,6 +1567,7 @@ public class TwitterService extends Service {
 		
 		long rowId;
 		int flags;
+		int buffer;
 		
 		@SuppressWarnings("deprecation")
 		@Override
@@ -1583,6 +1595,8 @@ public class TwitterService extends Service {
 
 			// save the flags for clearing the to favorite flag later
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			
 			try {
 				twitter.retweet(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null));
 			} catch (Exception ex) {
@@ -1601,6 +1615,7 @@ public class TwitterService extends Service {
 	     protected void onPostExecute(Integer result) {
 			ContentValues cv = new ContentValues();
 			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_RETWEET);
+			cv.put(Tweets.COL_BUFFER, buffer);
 
 			if(result!=null) {
 				cv.put(Tweets.COL_RETWEETED, 1);

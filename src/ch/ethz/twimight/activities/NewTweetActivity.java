@@ -216,11 +216,19 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 		// if no connectivity, notify user that the tweet will be send later
 		try{
 			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){
-				Log.i(TAG, "DISASTER TWEEEEET!!!");
-				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), createContentValues());
+				ContentValues cv = createContentValues();
+
+				// our own tweets go into the my disaster tweets buffer
+				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
+
+				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
 			} else {
-				Log.i(TAG, "NORMAL TWEEEEET!!!");
-				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), createContentValues());
+				
+				ContentValues cv = createContentValues();
+				// our own tweets go into the timeline buffer
+				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
+
+				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG);
@@ -245,8 +253,10 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
 		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
+		
+		// we mark the tweet for posting to twitter
 		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
-
+		
 		if(useLocation){
 			Location loc = getLocation();
 			if(loc!=null){
