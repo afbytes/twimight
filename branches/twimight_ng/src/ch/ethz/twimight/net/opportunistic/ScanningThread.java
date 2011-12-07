@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Base64;
 
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -187,15 +188,22 @@ public class ScanningThread implements Runnable{
 				
 				try {
 					ContentValues cvTweet = getTweetCV(msg.obj.toString());
-					ContentValues cvUser = getUserCV(msg.obj.toString());
+					cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);
 					
-					// insert the tweet
-					Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
-					context.getContentResolver().insert(insertUri, cvTweet);
-					
-					// insert the user
-					Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-					context.getContentResolver().insert(insertUserUri, cvUser);
+					// we don't enter our own tweets into the DB.
+					if(cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(context))){
+						Log.i(TAG, "we received our own tweet");
+					} else {
+						ContentValues cvUser = getUserCV(msg.obj.toString());
+						
+						// insert the tweet
+						Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+						context.getContentResolver().insert(insertUri, cvTweet);
+						
+						// insert the user
+						Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
+						context.getContentResolver().insert(insertUserUri, cvUser);
+					}
 					
 				} catch (JSONException e1) {
 					Log.i(TAG, "Exception while receiving disaster tweet " + e1);

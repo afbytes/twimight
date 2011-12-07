@@ -65,6 +65,7 @@ public class ShowTweetActivity extends Activity{
 	
 	private boolean favorited;
 	int flags;
+	int buffer;
 	int userRowId;
 	int rowId;
 	String text;
@@ -159,6 +160,7 @@ public class ShowTweetActivity extends Activity{
 		}
 		
 		flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+		buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 		// Notifications
 		if((flags & Tweets.FLAG_TO_INSERT) ==0){
@@ -366,6 +368,7 @@ public class ShowTweetActivity extends Activity{
 	private ContentValues setDeleteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_DELETE);
+		cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
 	}
 	
@@ -378,6 +381,7 @@ public class ShowTweetActivity extends Activity{
 	private ContentValues setRetweetFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_RETWEET);
+		cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
 	}
 	
@@ -391,6 +395,8 @@ public class ShowTweetActivity extends Activity{
 		ContentValues cv = new ContentValues();
 		// set favorite flag und clear unfavorite flag
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_FAVORITE & (~Tweets.FLAG_TO_UNFAVORITE));
+		// put in favorites bufer
+		cv.put(Tweets.COL_BUFFER, buffer|Tweets.BUFFER_FAVORITES);
 		return cv;
 	}
 	
@@ -404,6 +410,7 @@ public class ShowTweetActivity extends Activity{
 		ContentValues cv = new ContentValues();
 		// clear favorite flag and set unfavorite flag
 		cv.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_FAVORITE) | Tweets.FLAG_TO_UNFAVORITE);
+		cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
 	}
 }

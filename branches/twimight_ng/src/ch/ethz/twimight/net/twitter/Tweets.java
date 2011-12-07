@@ -59,6 +59,7 @@ public class Tweets implements BaseColumns {
 	public static final String COL_CREATED = "created"; /** the creation timestamp (millisecs since 1970) */
 	public static final String COL_RECEIVED = "received"; /** timestamp we insert the tweet into the DB */
 	public static final String COL_SOURCE = "source"; /** the application with which the tweet was created (as reported by twitter) */
+	public static final String COL_BUFFER = "buffer_flags"; /** which buffer(s) is the tweet in */
 	public static final String COL_FLAGS = "flags"; /** Transactional flags */
 	
 	// for disaster mode
@@ -78,4 +79,10 @@ public class Tweets implements BaseColumns {
 	public static final int FLAG_TO_DELETE = 16; /** The tweet was marked for deletion locally */
 	public static final int FLAG_TO_UPDATE = 32; /** The tweet should be reloaded from twitter */
 	
+	// flags to mark which buffer(s) a tweet belongs to. (Buffer sizes are defined in class Constants)
+	public static final int BUFFER_TIMELINE = 1; /** The normal timeline */
+	public static final int BUFFER_DISASTER = 2; /** Disaster tweets of other users */
+	public static final int BUFFER_MYDISASTER = 4; /** The disaster tweets of the local user */
+	public static final int BUFFER_FAVORITES = 8; /** All favorites of the local user */
+	public static final int BUFFER_MENTIONS = 16; /** All mentions of the local user */
 }
