@@ -122,7 +122,7 @@ public class TDSAlarm extends BroadcastReceiver {
 		if(isTdsEnabled(context)){
 
 			// can we obtain the Bluetooth MAC?
-			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
+			if(BluetoothAdapter.getDefaultAdapter() !=null && BluetoothAdapter.getDefaultAdapter().isEnabled()){
 				getMacFromAdapter(context);
 			}
 			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
@@ -173,7 +173,7 @@ public class TDSAlarm extends BroadcastReceiver {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				if(BluetoothAdapter.getDefaultAdapter().isEnabled()==false){
+				if(BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled()==false){
 					int attempts = 0;
 					while(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null && attempts <= 3){
 						BluetoothAdapter.getDefaultAdapter().enable();
