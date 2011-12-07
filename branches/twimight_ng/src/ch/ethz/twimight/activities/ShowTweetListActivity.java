@@ -337,6 +337,7 @@ public class ShowTweetListActivity extends Activity{
 			b.setTextColor(R.color.headerBarTextOn);
 		}
 
+		// TODO: Does this do what I think it does?		
 		adapter = new TweetAdapter(this, c);		
 		timelineListView.setAdapter(adapter);
 
