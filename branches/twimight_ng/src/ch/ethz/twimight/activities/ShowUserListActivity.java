@@ -20,11 +20,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -124,6 +124,15 @@ public class ShowUserListActivity extends Activity{
 	public void onDestroy(){
 		super.onDestroy();
 		
+		friendsButton.setOnClickListener(null);
+		followersButton.setOnClickListener(null);
+		
+		userListView.setOnItemClickListener(null);
+		
+		if(c!=null) c.close();
+		
+		unbindDrawables(findViewById(R.id.showUsersRoot));
+		
 	}
 
 	/**
@@ -148,6 +157,7 @@ public class ShowUserListActivity extends Activity{
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			break;
 		default:
@@ -197,17 +207,19 @@ public class ShowUserListActivity extends Activity{
 		resetBackgrounds();
 		Button b=null;
 		
+		if(c!=null) c.close();
+		
 		switch(filter) {
 			
 		case SHOW_FRIENDS: 
 			b = friendsButton;
-			c = managedQuery(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FRIENDS), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FRIENDS), null, null, null, null);
 			currentFilter=SHOW_FRIENDS;
 
 			break;
 		case SHOW_FOLLOWERS: 
 			b = followersButton;
-			c = managedQuery(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS), null, null, null, null);
 			currentFilter=SHOW_FOLLOWERS;
 
 			break;
@@ -275,6 +287,26 @@ public class ShowUserListActivity extends Activity{
 			});
 		}
 
+	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
 	}
 	
 }

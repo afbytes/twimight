@@ -6,7 +6,8 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent" android:layout_height="wrap_content">
+	android:layout_width="match_parent" android:layout_height="wrap_content"
+	android:id="@+id/showTweetRoot">
 	<LinearLayout android:id="@+id/showTweetLayout"
 		android:layout_width="match_parent" android:layout_height="wrap_content"
 		android:orientation="vertical" android:padding="10dp">

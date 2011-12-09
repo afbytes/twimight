@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
@@ -125,6 +126,11 @@ public class AboutActivity extends Activity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		
+		revokeButton.setOnClickListener(null);
+		updateButton.setOnClickListener(null);
+		
+		unbindDrawables(findViewById(R.id.showAboutRoot));
 
 
 	}
@@ -151,6 +157,7 @@ public class AboutActivity extends Activity{
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			break;
 		default:
@@ -182,5 +189,25 @@ public class AboutActivity extends Activity{
 		       });
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
 	}
 }

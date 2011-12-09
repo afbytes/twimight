@@ -21,12 +21,12 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -55,6 +55,8 @@ public class ShowUserActivity extends Activity{
 	private TextView stats;
 	private Button followButton;
 	private Button mentionButton;
+	private Button showFollowersButton;
+	private Button showFriendsButton;
 	private LinearLayout followInfo;
 	private LinearLayout unfollowInfo;
 	
@@ -83,6 +85,8 @@ public class ShowUserActivity extends Activity{
 		mentionButton = (Button) findViewById(R.id.showUserMention);
 		followInfo = (LinearLayout) findViewById(R.id.showUserTofollow);
 		unfollowInfo = (LinearLayout) findViewById(R.id.showUserTounfollow);
+		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
+		showFriendsButton = (Button) findViewById(R.id.showUserFriends);
 		
 		
 		
@@ -160,6 +164,13 @@ public class ShowUserActivity extends Activity{
 	public void onDestroy(){
 		super.onDestroy();
 		
+		if(followButton!=null) followButton.setOnClickListener(null);
+		if(mentionButton!=null) mentionButton.setOnClickListener(null);
+		if(showFollowersButton!=null) showFollowersButton.setOnClickListener(null);
+		if(showFriendsButton!=null) showFriendsButton.setOnClickListener(null);
+		
+		unbindDrawables(findViewById(R.id.showUserRoot));
+		
 	}
 
 
@@ -185,6 +196,7 @@ public class ShowUserActivity extends Activity{
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			break;
 		default:
@@ -216,7 +228,6 @@ public class ShowUserActivity extends Activity{
 		localUserButtons.setVisibility(LinearLayout.VISIBLE);
 		
 		// the followers Button
-		Button showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
 		showFollowersButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -231,7 +242,6 @@ public class ShowUserActivity extends Activity{
 		});
 		
 		// the followees Button
-		Button showFriendsButton = (Button) findViewById(R.id.showUserFriends);
 		showFriendsButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -337,5 +347,25 @@ public class ShowUserActivity extends Activity{
 		// set follow flag
 		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_UNFOLLOW);
 		return cv;
+	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
 	}
 }
