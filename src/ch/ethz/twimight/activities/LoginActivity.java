@@ -36,8 +36,10 @@ import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -45,12 +47,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
 /**
- * Logging in to Twitter.
+ * Logging the user in and out.
+ * Different things can happen, depending on whether we have (i) tokens and/or (ii) connectivity:
+ * Tokens, Connectivity: Start the Timeline. In the background verify the tokens and report only on error.
+ * Tokens, no Connectivity: Start the Timeline. Display Toast about lack of connectivity.
+ * No tokens: whether or not we have connectivity, we show the login button.
  * TODO: Dump the state in a file upon logout and read it again when logging in.
  * @author thossmann
  *
@@ -74,62 +81,67 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TWITTER_AUTHORIZE_URL = "http://twitter.com/oauth/authorize";
 	private static final Uri CALLBACK_URI = Uri.parse("my-app://bluetest");
 	
-	public static final String FORCE_FINISH = "force_finish";
+	public static final String LOGIN_RESULT_INTENT = "twitter_login_result_action";
+	public static final String LOGIN_RESULT = "twitter_login_result";
+	public static final int LOGIN_SUCCESS = 1;
+	public static final int LOGIN_FAILURE = 2;
+	
+	// views
+	Button buttonLogin;
+
+	private LoginReceiver loginReceiver;
 	
 	/** 
 	 * Called when the activity is first created. 
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG, "onCreate");
+		Log.e(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
-		// check if we have a finish request in the intent
-		Intent intent = getIntent();
-		if(intent.hasExtra(FORCE_FINISH)) {
-			finish();
-			return;
-		}
-		
-		// if we have token and secret, launch the timeline activity
-		if(hasAccessToken(this) && hasAccessTokenSecret(this)){
-			Log.i(TAG, "we have the tokens, do we have the ID?");
-			
-			// If we have the Twitter Id of the local user, we proceed to the timeline.
-			// Otherwise we verify the credentials to get the twitter ID
-			if(getTwitterId(this)!=null){
-				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-					Toast.makeText(this,"Not connected to the Internet, showing old Tweets!", Toast.LENGTH_LONG).show();
-				}
-				startTimeline(this);
-				finish();
-
-			} else {
-				// call the twitter service to verify the credentials
-				// this call will proceed to the timeline once we have the local twitter id
-				// or show an error otherwise
-				Intent i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
-				startService(i);
-			}
-		}
-		
-		// We get the URI when we are called back from Twitter
-		Uri uri = getIntent().getData();
-		if(uri != null){
-			getAccessTokens(uri);
-			return;
-		}
-		
-		// if we don't have request token and secret, we show the login button
-		Log.i(TAG, "we do not have the tokens, show login button");
 		setContentView(R.layout.login);
-		Button buttonLogin = (Button) findViewById(R.id.buttonLogin);
+		buttonLogin = (Button) findViewById(R.id.buttonLogin);
 		buttonLogin.setOnClickListener(this);
+
+		
+		// which state are we in?
+		if(hasAccessToken(this) && hasAccessTokenSecret(this) && getTwitterId(this)!=null){
+			// if we have token, secret and ID: launch the timeline activity
+			Log.i(TAG, "we have the tokens and ID");
+			// Do we have connectivity?
+			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+			if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+				Toast.makeText(this,"Not connected to the Internet, showing old Tweets!", Toast.LENGTH_LONG).show();
+			}
+			startTimeline(this);
+			
+
+		} else if(hasAccessToken(this) && hasAccessTokenSecret(this)) {
+			// we verify the tokens and retrieve the twitter ID
+			Intent i = new Intent(TwitterService.SYNCH_ACTION);
+			i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
+			startService(i);
+			
+		} else if(hasRequestToken(this) && hasRequestTokenSecret(this)) {
+			// We get the URI when we are called back from Twitter
+			
+			Uri uri = getIntent().getData();
+			if(uri != null){
+				getAccessTokens(uri);
+			}
+		} else {
+			// if we don't have request token and secret, we show the login button
+			Log.i(TAG, "we do not have the tokens, enabling login button");
+			buttonLogin.setEnabled(true);
+		}
+		
+		if (loginReceiver == null) loginReceiver = new LoginReceiver();
+		IntentFilter intentFilter = new IntentFilter(LoginActivity.LOGIN_RESULT_INTENT);
+		registerReceiver(loginReceiver, intentFilter);
 		
 	}
-
+	
+	
 	/**
 	 * When the login button is pressed
 	 */
@@ -140,6 +152,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 		case R.id.buttonLogin:
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()){
+				// disabling button
+				buttonLogin.setEnabled(false);
+
 				getRequestToken();
 			} else {
 				Toast.makeText(this,"Not connected to the Internet, please try again later!", Toast.LENGTH_LONG).show();
@@ -153,8 +168,17 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 */
 	@Override
 	public void onDestroy(){
-		Log.i(TAG, "destroying login");
+		Log.e(TAG, "destroying login");
 		super.onDestroy();
+		
+		if (loginReceiver != null) unregisterReceiver(loginReceiver);
+		
+		// null the onclicklistener of the button
+		if(buttonLogin != null){
+			buttonLogin.setOnClickListener(null);
+		}
+		
+		unbindDrawables(findViewById(R.id.showLoginRoot));
 	}
 	
 	/**
@@ -162,6 +186,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 * @param context
 	 */
 	private void getRequestToken(){
+		
+		Log.e(TAG, "getting reqeuest token");
 
 		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
 		OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
@@ -176,10 +202,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 			
 			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
 			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 			// Show twitter login in Browser.
 			this.startActivity(intent);
+			finish();
 			
 			// now we have the request token.
 		} catch (OAuthMessageSignerException e) {
@@ -205,6 +231,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 * Get an access token and secret from Twitter
 	 */
 	private void getAccessTokens(Uri uri) {
+		Log.e(TAG, "getting access token");
+		
 		String requestToken = getRequestToken(this);
 		String requestSecret = getRequestTokenSecret(this);
 
@@ -222,6 +250,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if(!(requestToken == null || requestSecret == null)) {
 				consumer.setTokenWithSecret(requestToken, requestSecret);
 			}
+			
 			String otoken = uri.getQueryParameter(OAuth.OAUTH_TOKEN);
 			String verifier = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
 
@@ -282,11 +311,12 @@ public class LoginActivity extends Activity implements OnClickListener{
 				
 	}
 
-	public static void startTimeline(Context context) {
+	private void startTimeline(Context context) {
 		startAlarms(context);
 		Intent i = new Intent(context, ShowTweetListActivity.class);
 		i.putExtra("login", true);
 		context.startActivity(i);
+		finish();
 	}
 
 	/**
@@ -534,6 +564,47 @@ public class LoginActivity extends Activity implements OnClickListener{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getString(TWITTER_ID, null)!=null;
 	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
+	}
+	
+	/**
+	 * Listens to login results from the Twitter service (verify credentials)
+	 * @author thossmann
+	 *
+	 */
+	private class LoginReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	        if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_INTENT)) {
+	        	if(intent.hasExtra(LoginActivity.LOGIN_RESULT)){
+	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){
+	        			startTimeline(context);
+	        		} else {
+	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+	        		}
+	        	}
+	        }
+	    }
+	}
+
 	
 	
 }

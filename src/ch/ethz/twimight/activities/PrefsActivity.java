@@ -136,6 +136,7 @@ public class PrefsActivity extends PreferenceActivity{
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			break;
 		default:

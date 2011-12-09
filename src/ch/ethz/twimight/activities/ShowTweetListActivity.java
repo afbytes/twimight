@@ -13,18 +13,15 @@
 package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -73,7 +71,6 @@ public class ShowTweetListActivity extends Activity{
 	private static final int OPTIONS_MENU_PROFILE = 10;
 	private static final int OPTIONS_MENU_MESSAGES = 20;
 	private static final int OPTIONS_MENU_SETTINGS = 40;
-	private static final int OPTIONS_MENU_PAIR = 50;
 	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
 
@@ -92,11 +89,24 @@ public class ShowTweetListActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Log.e(TAG, "creating timeline");
+		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
 		
 		timelineListView = (ListView) findViewById(R.id.tweetList); 
+		
+		// Are we in disaster mode?
+		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
+		} else {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background);
+		}
 
+		Log.i(TAG, "resuming");
+		
 		// Header buttons
 		timelineButton = (Button) findViewById(R.id.headerBarTimelineButton);
 		timelineButton.setOnClickListener(new OnClickListener(){
@@ -150,20 +160,12 @@ public class ShowTweetListActivity extends Activity{
 	public void onResume(){
 		super.onResume();
 		
-		// Are we in disaster mode?
-		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
-		} else {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background);
-		}
-
-		Log.i(TAG, "resuming");
 		
 		// if we just got logged in, we load the timeline
 		Intent i = getIntent();
 		if(i.hasExtra("filter_request")) {
 			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
+			i.removeExtra("filter_request");
 		} else if(i.hasExtra("login")){
 			Log.i(TAG, "just logged in");
 			i.removeExtra("login");
@@ -176,6 +178,15 @@ public class ShowTweetListActivity extends Activity{
 			timelineListView.setSelectionFromTop(positionIndex, positionTop);
 		}
 	}
+	
+	/**
+	 * On pause
+	 */
+	@Override
+	public void onPause(){
+		super.onPause();
+				
+	}
 
 	/**
 	 * Called at the end of the Activity lifecycle
@@ -183,6 +194,19 @@ public class ShowTweetListActivity extends Activity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		
+		timelineButton.setOnClickListener(null);
+		favoritesButton.setOnClickListener(null);
+		mentionsButton.setOnClickListener(null);
+		tweetButton.setOnClickListener(null);
+		searchButton.setOnClickListener(null);
+
+		timelineListView.setOnItemClickListener(null);
+		timelineListView.setAdapter(null);
+
+		if(c!=null) c.close();
+				
+		unbindDrawables(findViewById(R.id.showTweetListRoot));
 		setInstance(null);
 
 	}
@@ -298,26 +322,28 @@ public class ShowTweetListActivity extends Activity{
 	 * @param filter
 	 */
 	private void setFilter(int filter){
-		// set all colors to transparent
+		// set all header button colors to transparent
 		resetBackgrounds();
 		Button b=null;
+		
+		if(c!=null) c.close();
 		
 		switch(filter) {
 		case SHOW_TIMELINE: 
 			b = timelineButton;
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 			break;
 		case SHOW_FAVORITES: 
 			b = favoritesButton;
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_FAVORITES;
 
 			break;
 		case SHOW_MENTIONS: 
 			b = mentionsButton;
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
 
 			break;
@@ -326,7 +352,7 @@ public class ShowTweetListActivity extends Activity{
 			break;
 		default:
 			b= timelineButton;
-			c = managedQuery(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 		}
@@ -337,7 +363,6 @@ public class ShowTweetListActivity extends Activity{
 			b.setTextColor(R.color.headerBarTextOn);
 		}
 
-		// TODO: Does this do what I think it does?		
 		adapter = new TweetAdapter(this, c);		
 		timelineListView.setAdapter(adapter);
 
@@ -416,5 +441,25 @@ public class ShowTweetListActivity extends Activity{
 			});
 		}
 
+	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
 	}
 }

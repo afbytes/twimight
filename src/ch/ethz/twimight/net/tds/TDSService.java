@@ -81,7 +81,7 @@ public class TDSService extends Service {
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.i(TAG, "Error synching: no connectivity");
 			schedulePeriodic(false);
-			return START_STICKY;
+			return START_NOT_STICKY;
 		} else {
 			Log.i(TAG, "We are connected!");
 		}
@@ -95,13 +95,13 @@ public class TDSService extends Service {
 			} catch (JSONException e) {
 				Log.e(TAG, "error while setting up TDS Communication");
 				schedulePeriodic(false);
-				return START_STICKY;
+				return START_NOT_STICKY;
 			}
 		} else {
 			Log.i(TAG, "Error synching: no access token or secret");
 			schedulePeriodic(false);
 			
-			return START_STICKY;
+			return START_NOT_STICKY;
 		}
 
 
@@ -128,7 +128,7 @@ public class TDSService extends Service {
 			throw new IllegalArgumentException("Exception: Unknown synch request");
 		}
 
-		return START_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	/**

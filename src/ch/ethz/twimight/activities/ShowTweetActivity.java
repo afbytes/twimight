@@ -31,6 +31,7 @@ import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -56,6 +57,10 @@ public class ShowTweetActivity extends Activity{
 	private TextView createdWithView;
 	
 	private LinearLayout userInfoView;
+	Button retweetButton;
+	ImageButton deleteButton;
+	Button replyButton;
+	ImageButton favoriteButton;
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
@@ -94,7 +99,8 @@ public class ShowTweetActivity extends Activity{
 		
 		// get data from local DB and mark for update
 		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
-		c = managedQuery(uri, null, null, null, null);
+		//c = managedQuery(uri, null, null, null, null);
+		c = getContentResolver().query(uri, null, null, null, null);
 		
 		if(c.getCount() == 0) finish();
 		
@@ -196,7 +202,7 @@ public class ShowTweetActivity extends Activity{
 		 *  Buttons
 		 */
 		// Retweet Button
-		Button retweetButton = (Button) findViewById(R.id.showTweetRetweet);
+		retweetButton = (Button) findViewById(R.id.showTweetRetweet);
 		// we do not show the retweet button for (1) tweets from the local user, (2) tweets which have been flagged to retweeted and (3) tweets which have been marked as retweeted 
 		if(userString.equals(localUserString) | ((flags & Tweets.FLAG_TO_RETWEET) > 0) | (c.getInt(c.getColumnIndex(Tweets.COL_RETWEETED))>0)){
 			retweetButton.setVisibility(Button.GONE);
@@ -212,7 +218,7 @@ public class ShowTweetActivity extends Activity{
 		}
 		
 		// Delete Button
-		ImageButton deleteButton = (ImageButton) findViewById(R.id.showTweetDelete);
+		deleteButton = (ImageButton) findViewById(R.id.showTweetDelete);
 		if(userString.equals(localUserString)){
 			if((flags & Tweets.FLAG_TO_DELETE) == 0){
 				deleteButton.setOnClickListener(new OnClickListener(){
@@ -229,7 +235,7 @@ public class ShowTweetActivity extends Activity{
 		}
 		
 		// Reply button: we show it only if we have a Tweet ID!
-		Button replyButton = (Button) findViewById(R.id.showTweetReply);
+		replyButton = (Button) findViewById(R.id.showTweetReply);
 		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0){
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -246,7 +252,7 @@ public class ShowTweetActivity extends Activity{
 		
 		// Favorite button
 		favorited = (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
-		ImageButton favoriteButton = (ImageButton) findViewById(R.id.showTweetFavorite);
+		favoriteButton = (ImageButton) findViewById(R.id.showTweetFavorite);
 		if(favorited){
 			favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
 		}
@@ -272,6 +278,23 @@ public class ShowTweetActivity extends Activity{
 		
 		
 	}
+	
+	/**
+	 * On resume
+	 */
+	@Override
+	public void onResume(){
+		super.onResume();
+	}
+	
+	/**
+	 * On Pause
+	 */
+	@Override
+	public void onPause(){
+		super.onPause();
+		
+	}
 
 	/**
 	 * Called at the end of the Activity lifecycle
@@ -279,6 +302,16 @@ public class ShowTweetActivity extends Activity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		
+		userInfoView.setOnClickListener(null);
+		retweetButton.setOnClickListener(null);
+		deleteButton.setOnClickListener(null);
+		replyButton.setOnClickListener(null);
+		favoriteButton.setOnClickListener(null);
+
+		c.close();
+		
+		unbindDrawables(findViewById(R.id.showTweetRoot));
 		
 	}
 
@@ -305,6 +338,7 @@ public class ShowTweetActivity extends Activity{
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			break;
 		default:
@@ -412,5 +446,25 @@ public class ShowTweetActivity extends Activity{
 		cv.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_FAVORITE) | Tweets.FLAG_TO_UNFAVORITE);
 		cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
+	}
+	
+	/**
+	 * Clean up the views
+	 * @param view
+	 */
+	private void unbindDrawables(View view) {
+	    if (view.getBackground() != null) {
+	        view.getBackground().setCallback(null);
+	    }
+	    if (view instanceof ViewGroup) {
+	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+	            unbindDrawables(((ViewGroup) view).getChildAt(i));
+	        }
+	        try{
+	        	((ViewGroup) view).removeAllViews();
+	        } catch(UnsupportedOperationException e){
+	        	// No problem, nothing to do here
+	        }
+	    }
 	}
 }

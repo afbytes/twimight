@@ -96,7 +96,7 @@ public class TwitterService extends Service {
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.i(TAG, "Error synching: no connectivity");
-			return START_STICKY;
+			return START_NOT_STICKY;
 		} else {
 			Log.i(TAG, "We are connected!");
 		}
@@ -110,11 +110,11 @@ public class TwitterService extends Service {
 			twitter = new Twitter(null, client);
 		} else {
 			Log.i(TAG, "Error synching: no access token or secret");
-			return START_STICKY;
+			return START_NOT_STICKY;
 		}
 		
 		
-		// check what we have to synch
+		// check what we are asked to synch
 		int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
 		switch(synchRequest){
 		case SYNCH_LOGIN:
@@ -562,7 +562,7 @@ public class TwitterService extends Service {
 		
 		// do we already have the user?
 		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-		String[] projection = {"_id"};
+		String[] projection = {"_id", TwitterUsers.COL_LASTUPDATE, TwitterUsers.COL_PROFILEIMAGE};
 		
 		Long userId = new Long(0);
 		
@@ -574,19 +574,17 @@ public class TwitterService extends Service {
 			c.close();
 			// get the profile image
 			(new UpdateProfileImageTask()).execute(userId);
+			
 		} else {
 			c.moveToFirst();
-			if(c.isNull(c.getColumnIndex("_id"))){
-				c.close();
-				throw new IllegalStateException("Error while loading user from the DB ");
-			} else {
-				Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
-				getContentResolver().update(updateUri, getUserContentValues(user), null, null);
-				userId = c.getLong(c.getColumnIndex("_id"));
-				c.close();
-				// get the profile image
-				(new UpdateProfileImageTask()).execute(userId);
-			}
+			Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + c.getInt(c.getColumnIndex("_id")));
+			getContentResolver().update(updateUri, getUserContentValues(user), null, null);
+			userId = c.getLong(c.getColumnIndex("_id"));
+			c.close();
+			// get the profile image
+			// TODO: don't get the profile image every time
+			(new UpdateProfileImageTask()).execute(userId);
+
 		}
 		return userId;
 		
@@ -665,8 +663,10 @@ public class TwitterService extends Service {
 				TwitterAccount twitterAcc = new TwitterAccount(twitter);
 				user = twitterAcc.verifyCredentials();
 				
-			} catch (Exception ex) {					
-				Log.e(TAG, "Error while verifying credentials: " + ex);
+			} catch (TwitterException.E401 ex) {
+				// we will take action in the post Execute (after 3 unsuccessful attempts)
+				Log.i(TAG, "Error while verifying credentials: " + ex);
+				
 			}
 	         
 	        return user;
@@ -680,30 +680,24 @@ public class TwitterService extends Service {
 					(new VerifyCredentialsTask()).execute(attempts-1);
 				} else {
 					// tell the user that the login was not successful
-					Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+					Intent timelineIntent = new Intent(LoginActivity.LOGIN_RESULT_INTENT);
+					timelineIntent.putExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE);
+					sendBroadcast(timelineIntent);
+
 				}
 				return;
-			}
+			} else {
+				// update user in DB
+				updateUser(result);
+				// store user Id in shared prefs
+				LoginActivity.setTwitterId(Long.toString(result.getId()), getBaseContext());
+							
+				Intent timelineIntent = new Intent(LoginActivity.LOGIN_RESULT_INTENT);
+				timelineIntent.putExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_SUCCESS);
+				sendBroadcast(timelineIntent);
 
-			// store user Id in shared prefs
-			LoginActivity.setTwitterId(Long.toString(result.getId()), getBaseContext());
-			Log.i(TAG, "Local user id: "+ Long.toString(result.getId()));
-			// update user in DB
-			updateUser(result);
-			
-			// start the timeline activity and the periodic alarms
-			LoginActivity.startAlarms(getBaseContext());
-			
-			Intent timelineIntent = new Intent(getBaseContext(), ShowTweetListActivity.class);
-			timelineIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			timelineIntent.putExtra("login", true);
-			startActivity(timelineIntent);
-			
-			// stop the login activity
-			Intent loginIntent = new Intent(getBaseContext(), LoginActivity.class);
-			loginIntent.putExtra(LoginActivity.FORCE_FINISH, true);
-			loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(loginIntent);
+				
+			}
 	     }
 	}
 	
