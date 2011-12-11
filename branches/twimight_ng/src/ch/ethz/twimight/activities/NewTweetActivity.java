@@ -46,7 +46,7 @@ import android.widget.ToggleButton;
  * @author thossmann
  *
  */
-public class NewTweetActivity extends Activity implements OnClickListener{
+public class NewTweetActivity extends Activity{
 
 	private static final String TAG = "TweetActivity";
 	
@@ -62,20 +62,9 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	private ToggleButton locationButton;
 	private Location loc;
 	private LocationManager lm;
-	private LocationListener locationListener = new LocationListener() {
-		public void onLocationChanged(Location location) {
-			
-			if(loc == null || !loc.hasAccuracy()){
-				loc = location;
-			} else if(location.hasAccuracy() && location.getAccuracy() < loc.getAccuracy()){
-				loc = location;
-			}
-		}
-
-		public void onProviderDisabled(String provider) {}
-		public void onProviderEnabled(String provider) {}
-		public void onStatusChanged(String provider, int status, Bundle extras) {}
-	};
+	private LocationListener locationListener;
+	
+	private TextWatcher textWatcher;
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -86,10 +75,25 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.tweet);
 
 		cancelButton = (Button) findViewById(R.id.tweet_cancel);
-		cancelButton.setOnClickListener(this);
+		cancelButton.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+			
+		});
 		
 		sendButton = (Button) findViewById(R.id.tweet_send);
-		sendButton.setOnClickListener(this);
+		sendButton.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				sendTweet();
+				finish();
+			}
+			
+		});
 		
 		characters = (TextView) findViewById(R.id.tweet_characters);
 		characters.setText(Integer.toString(Constants.TWEET_LENGTH));
@@ -117,8 +121,8 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 			isReplyTo = i.getLongExtra("isReplyTo", 0);
 		}
 		
-		// This makes sure we do not enter more than 140 characters		
-		text.addTextChangedListener(new TextWatcher() {
+		// This makes sure we do not enter more than 140 characters	
+		textWatcher = new TextWatcher(){
 		    public void afterTextChanged(Editable s){
 		    	int nrCharacters = Constants.TWEET_LENGTH-text.getText().length();
 		    	
@@ -145,18 +149,44 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 		    }
 		    public void  beforeTextChanged(CharSequence s, int start, int count, int after){}
 		    public void  onTextChanged (CharSequence s, int start, int before,int count) {} 
-			});
+		};
+		text.addTextChangedListener(textWatcher);
+		text.setSelection(text.getText().length());
 		
+
+		locationListener = new LocationListener() {
+			public void onLocationChanged(Location location) {
+				
+				if(loc == null || !loc.hasAccuracy()){
+					loc = location;
+				} else if(location.hasAccuracy() && location.getAccuracy() < loc.getAccuracy()){
+					loc = location;
+				}
+			}
+
+			public void onProviderDisabled(String provider) {}
+			public void onProviderEnabled(String provider) {}
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+		};
+		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// User settings: do we use location or not?
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
 		locationButton = (ToggleButton) findViewById(R.id.tweet_location);
 		locationButton.setChecked(useLocation);
 		locationButton.setBackgroundDrawable(null);
-		locationButton.setOnClickListener(this);
+		locationButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				useLocation = locationButton.isChecked();
+				if(useLocation){
+					registerLocationListener();
+				} else {
+					unRegisterLocationListener();
+				}
+			}
+		});
 		
-		 lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		
-		text.setSelection(text.getText().length());
 		
 		Log.i(TAG, "onCreated");
 	}
@@ -188,36 +218,24 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		
 		locationButton.setOnClickListener(null);
+		locationButton = null;
+		locationListener = null;
+		lm = null;
+		
 		cancelButton.setOnClickListener(null);
+		cancelButton = null;
+		
 		sendButton.setOnClickListener(null);
+		sendButton = null;
+		
+		text.removeTextChangedListener(textWatcher);
+		text = null;
+		textWatcher = null;
 		
 		unbindDrawables(findViewById(R.id.showNewTweetRoot));
-	}
-	
-	/**
-	 * Reacts to clicks in the UI.
-	 */
-	@Override
-	public void onClick(View view) {
-		Log.i(TAG, "onClick");
-		switch (view.getId()) {		
-		case R.id.tweet_cancel:
-			finish();
-			break;
-		case R.id.tweet_send:
-			sendTweet();
-			break;
-		case R.id.tweet_location:
-			Log.i(TAG, "toggling");
-			useLocation = locationButton.isChecked();
-			if(useLocation){
-				registerLocationListener();
-			} else {
-				unRegisterLocationListener();
-			}
-			break;
-		}
+		Log.e(TAG, "destroying");
 	}
 	
 	/**
@@ -243,14 +261,13 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG);
+					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG).show();
 				}				
 			}
-			finish();
 			
 		} catch (Exception e) {
 			Log.e(TAG, "Exception while inserting tweet into DB: " + e.toString());
-			Toast.makeText(this, "There was an error inserting your tweet into the local database! Please try again.", Toast.LENGTH_LONG);
+			Toast.makeText(this, "There was an error inserting your tweet into the local database! Please try again.", Toast.LENGTH_LONG).show();
 			return;
 		}
 	}
@@ -283,10 +300,11 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	 * Starts listening to location updates
 	 */
 	private void registerLocationListener(){
-		Log.i(TAG, "registerLocationListener");
 		try{
-			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 50, locationListener);
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 50, locationListener);
+			if ((lm != null) && (locationListener != null)) {
+				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, locationListener);
+			}
 		} catch(Exception e) {
 			Log.i(TAG,"Can't request location Updates: " + e.toString());
 			return;
@@ -297,9 +315,11 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	 * Stops listening to location updates
 	 */
 	private void unRegisterLocationListener(){
-		Log.i(TAG, "UNregisterLocationListener");
 		try{
-			lm.removeUpdates(locationListener);
+			if ((lm != null) && (locationListener != null)) {
+		        lm.removeUpdates(locationListener);
+		        Log.i(TAG, "unregistered updates");
+		    }
 		} catch(Exception e) {
 			Log.i(TAG,"Can't unregister location listener: " + e.toString());
 			return;
@@ -311,10 +331,14 @@ public class NewTweetActivity extends Activity implements OnClickListener{
 	 * @return
 	 */
 	private Location getLocation(){
-		if(loc!=null)
+		if(loc!=null){
 			return loc;
-		else
-			return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		}else{
+			if ((lm != null)) {
+				return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			}
+		}
+		return null;
 	}
 	
 	/**

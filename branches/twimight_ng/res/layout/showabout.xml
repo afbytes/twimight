@@ -69,9 +69,7 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="TextView" android:layout_marginRight="20dp" android:textColor="@color/black"/>
 
-			<Button android:id="@+id/showAboutRevoke"
-				android:layout_width="50dp" android:layout_height="40dp"
-				android:padding="2dp" android:text="Revoke" />
+			<Button android:id="@+id/showAboutRevoke" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Revoke" />
 
 		</LinearLayout>
 
@@ -86,9 +84,8 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="TextView" android:layout_marginRight="20dp" android:textColor="@color/black"/>
 
-			<Button android:id="@+id/showAboutUpdate"
-				android:layout_width="50dp" android:layout_height="40dp"
-				android:text="Update" android:padding="2dp" android:visibility="visible" />
+			<Button android:id="@+id/showAboutUpdate" android:text="Update"
+				android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="visible" />
 
 		</LinearLayout>
 

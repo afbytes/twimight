@@ -38,7 +38,6 @@ public class LocationAlarm extends BroadcastReceiver {
 	private static WakeLock wakeLock;
 	private static final String TAG = "LocationAlarm";
 	private static PendingIntent pendingIntent;
-	private static Thread locationThread;
 
 	/**
 	 * This constructor is called the alarm manager.
@@ -108,8 +107,7 @@ public class LocationAlarm extends BroadcastReceiver {
 		
 		if(isLocationEnabled(context)){
 			// Launch a new thread to query the location from location manager
-			locationThread = new LocationThread(context);
-			locationThread.start();
+			new LocationThread(context).start();
 			
 		}
 	}

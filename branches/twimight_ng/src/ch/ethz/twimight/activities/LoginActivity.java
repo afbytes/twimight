@@ -96,7 +96,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.e(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.login);
@@ -147,7 +146,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 */
 	@Override
 	public void onClick(View view) {
-		Log.i(TAG, "onClick");
 		switch (view.getId()) {		
 		case R.id.buttonLogin:
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -187,7 +185,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 */
 	private void getRequestToken(){
 		
-		Log.e(TAG, "getting reqeuest token");
+		Log.i(TAG, "getting reqeuest token");
 
 		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
 		OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
@@ -211,18 +209,22 @@ public class LoginActivity extends Activity implements OnClickListener{
 		} catch (OAuthMessageSignerException e) {
 			e.printStackTrace();
 			Toast.makeText(this,"signing the request failed ", Toast.LENGTH_LONG).show();
+			buttonLogin.setEnabled(true);
 			return;
 		} catch (OAuthNotAuthorizedException e) {
 			e.printStackTrace();
 			Toast.makeText(this,"Twitter is not reachable at the moment, please try again later", Toast.LENGTH_LONG).show();
+			buttonLogin.setEnabled(true);
 			return;
 		} catch (OAuthExpectationFailedException e) {
 			e.printStackTrace();
 			Toast.makeText(this,"required parameters were not correctly set", Toast.LENGTH_LONG).show();
+			buttonLogin.setEnabled(true);
 			return;
 		} catch (OAuthCommunicationException e) {
 			e.printStackTrace();
 			Toast.makeText(this,"server communication failed, check internet connectivity", Toast.LENGTH_SHORT).show();
+			buttonLogin.setEnabled(true);
 			return;
 		}
 	}
@@ -231,7 +233,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 * Get an access token and secret from Twitter
 	 */
 	private void getAccessTokens(Uri uri) {
-		Log.e(TAG, "getting access token");
+		Log.i(TAG, "getting access token");
 		
 		String requestToken = getRequestToken(this);
 		String requestSecret = getRequestTokenSecret(this);

@@ -138,12 +138,8 @@ public class ShowUserActivity extends Activity{
 		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
 		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
 
-		// TODO: refine this text. make it depend on the stats (something funny).
 		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "+favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
 		
-		/*
-		 * Actions on user (follow/unfollow, mention, send message)
-		 */
 		// if the user we show is the local user, disable the follow button
 		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
 			showLocalUser();

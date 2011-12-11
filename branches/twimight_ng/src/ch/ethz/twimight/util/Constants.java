@@ -31,7 +31,7 @@ public final class Constants {
 
 	// TDS configuration
 	public static final int TDS_MESSAGE_VERSION = 1; /** Which message version */
-    public static final long TDS_UPDATE_INTERVAL = 30*60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
+    public static final long TDS_UPDATE_INTERVAL = 60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
     public static final long TDS_UPDATE_RETRY_INTERVAL = 30*1000L; /** Initial interval for re-trying to connect to TDS */
     public static final boolean TDS_DEFAULT_ON = true; /** Opt in or opt out for TDS communication? */
     public static final long WAIT_FOR_CONNECTIVITY = 5*1000L; /** After waking up we have to wait to get connectivity */
@@ -61,7 +61,7 @@ public final class Constants {
 	public static final String PEERS_MET = "peers_met";
 	
 	// Location
-	public static final long LOCATION_UPDATE_TIME = 6*60*60*1000L; /** Location update interval */
+	public static final long LOCATION_UPDATE_TIME = 60*1000L; /** Location update interval */
 	public static final long LOCATION_WAIT = 60*1000L; /** How long should we wait for a location. This MUST NOT be larger than LOCATION_UPDATE_TIME */
 	public static final int LOCATION_ACCURACY = 150; /** What is a satisfying accuracy? */
 	public static final boolean LOCATION_DEFAULT_ON = true; /** Do we send location updates by default? */
@@ -80,7 +80,7 @@ public final class Constants {
 	public static final int CONSUMER_ID = 1;
 	public static final int LOGIN_ATTEMPTS = 5; /** How many times do we attempt to log in before giving up? */
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
-	public static final boolean TWEET_DEFAULT_LOCATION = false; /** Are tweets by default geo-tagged or not? */
+	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
 	
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
 	public static final int NR_FAVORITES = 50; /** how many favorites to request from twitter */

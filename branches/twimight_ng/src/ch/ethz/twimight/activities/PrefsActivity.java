@@ -66,11 +66,11 @@ public class PrefsActivity extends PreferenceActivity{
 				if (key.equals("prefDisasterMode")) { // toggle disaster mode
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 						startService(new Intent(getApplicationContext(), ScanningService.class));
-						startActivity(new Intent(getApplicationContext(), ShowTweetListActivity.class));
+						finish();
 						Log.i(TAG, "start scanning");
 					} else {
 						stopService(new Intent(getApplicationContext(), ScanningService.class));
-						startActivity(new Intent(getApplicationContext(), ShowTweetListActivity.class));
+						finish();
 						Log.i(TAG, "stop scanning");
 					}
 				} else if(key.equals("prefTDSCommunication")){ // toggle TDS communication

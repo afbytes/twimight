@@ -97,14 +97,6 @@ public class ShowTweetListActivity extends Activity{
 		
 		timelineListView = (ListView) findViewById(R.id.tweetList); 
 		
-		// Are we in disaster mode?
-		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
-		} else {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background);
-		}
-
 		Log.i(TAG, "resuming");
 		
 		// Header buttons
@@ -160,7 +152,14 @@ public class ShowTweetListActivity extends Activity{
 	public void onResume(){
 		super.onResume();
 		
-		
+		// Are we in disaster mode?
+		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
+		} else {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background);
+		}
+
 		// if we just got logged in, we load the timeline
 		Intent i = getIntent();
 		if(i.hasExtra("filter_request")) {
@@ -243,7 +242,7 @@ public class ShowTweetListActivity extends Activity{
 		
 		case OPTIONS_MENU_PROFILE:
 			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-			Cursor c = managedQuery(uri, null, TwitterUsers.COL_ID+"="+LoginActivity.getTwitterId(this), null, null);
+			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_ID+"="+LoginActivity.getTwitterId(this), null, null);
 			if(c.getCount()!=1) return false;
 			c.moveToFirst();
 			int rowId = c.getInt(c.getColumnIndex("_id"));
@@ -254,6 +253,7 @@ public class ShowTweetListActivity extends Activity{
 				i.putExtra("rowId", rowId);
 				startActivity(i);
 			}
+			c.close();
 			break;
 		
 		case OPTIONS_MENU_MESSAGES:
@@ -323,7 +323,7 @@ public class ShowTweetListActivity extends Activity{
 	 */
 	private void setFilter(int filter){
 		// set all header button colors to transparent
-		resetBackgrounds();
+		resetButtons();
 		Button b=null;
 		
 		if(c!=null) c.close();
@@ -359,8 +359,7 @@ public class ShowTweetListActivity extends Activity{
 		
 		// style button
 		if(b!=null){
-			b.setBackgroundColor(R.color.black);
-			b.setTextColor(R.color.headerBarTextOn);
+			b.setEnabled(false);
 		}
 
 		adapter = new TweetAdapter(this, c);		
@@ -376,20 +375,20 @@ public class ShowTweetListActivity extends Activity{
 				Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				startActivity(i);
+				c.close();
 			}
 		});
 	}
 	
 	/**
-	 * Set all backgrounds of header buttons to transparent.
+	 * Enables all header buttons
 	 */
-	private void resetBackgrounds(){
-		timelineButton.setBackgroundResource(R.color.transparent);
-		timelineButton.setTextColor(R.color.headerBarTextOff);
-		favoritesButton.setBackgroundResource(R.color.transparent);
-		favoritesButton.setTextColor(R.color.headerBarTextOff);
-		mentionsButton.setBackgroundResource(R.color.transparent);
-		mentionsButton.setTextColor(R.color.headerBarTextOff);
+	private void resetButtons(){
+		timelineButton.setEnabled(true);
+		favoritesButton.setEnabled(true);
+		mentionsButton.setEnabled(true);
+		searchButton.setEnabled(true);
+		tweetButton.setEnabled(true);
 	}
 	
 	/**
