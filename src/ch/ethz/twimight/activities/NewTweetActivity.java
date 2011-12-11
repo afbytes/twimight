@@ -235,7 +235,6 @@ public class NewTweetActivity extends Activity{
 		textWatcher = null;
 		
 		unbindDrawables(findViewById(R.id.showNewTweetRoot));
-		Log.e(TAG, "destroying");
 	}
 	
 	/**

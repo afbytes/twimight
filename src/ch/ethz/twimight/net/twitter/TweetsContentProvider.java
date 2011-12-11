@@ -526,7 +526,7 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
-					Log.i(TAG, "oops: "+c.getCount()+" tweets with the same disaster ID");
+					Log.i(TAG, c.getCount()+" tweets with the same disaster ID");
 
 					c.moveToFirst();
 					while(!c.isAfterLast()){
@@ -539,13 +539,16 @@ public class TweetsContentProvider extends ContentProvider {
 								return updateUri;
 							}
 						} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
-							// check if the text is the same
-							if(c.getString(c.getColumnIndex(Tweets.COL_TEXT)).equals(values.getAsString(Tweets.COL_TEXT))){
-								Log.i(TAG, "Normal tweet with same text and disaster ID");
-								Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
-								update(updateUri, values, null, null);
-								return updateUri;
-							}
+							
+							Log.i(TAG, "Normal tweet with same text and disaster ID");
+							
+							// clear the to insert flag
+							int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+							values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
+							
+							Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+							update(updateUri, values, null, null);
+							return updateUri;
 						}
 						c.moveToNext();
 					}
@@ -776,11 +779,22 @@ public class TweetsContentProvider extends ContentProvider {
 	
 	/**
 	 * Computes the java String object hash code (32 bit) as the disaster ID of the tweet
+	 * TODO: For security reasons (to prevent intentional hash collisions), this should be a cryptographic hash function instead of the string hash.
+	 * TODO: Find a better way to account for URLS (e.g., using the real URL from the tweet entities).
 	 * @param cv
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
 		String text = cv.getAsString(Tweets.COL_TEXT);
+		
+		/*
+		 *  This is a hack: Twitter "shortens" even links which are already shortened.
+		 *  E.g., http://t.co/asdf is replaced by http://t.co/fdas.
+		 *  To recognize the same tweet (e.g., in case of an old style retweet), we
+		 *  do not include URLs in the disaster ID. 
+		 */
+		text = text.replaceAll("http://t.co/[0-9a-zA-Z]*", "url");
+		
 		String userId;
 		if(!cv.containsKey(Tweets.COL_USER) | (cv.getAsString(Tweets.COL_USER)==null)){
 			userId = LoginActivity.getTwitterId(getContext()).toString();

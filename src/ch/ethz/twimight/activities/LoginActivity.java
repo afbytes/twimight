@@ -166,7 +166,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 */
 	@Override
 	public void onDestroy(){
-		Log.e(TAG, "destroying login");
 		super.onDestroy();
 		
 		if (loginReceiver != null) unregisterReceiver(loginReceiver);
