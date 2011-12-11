@@ -50,7 +50,6 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * The service to send all kinds of API calls to Twitter. 
@@ -640,8 +639,8 @@ public class TwitterService extends Service {
 			userContentValues.put(TwitterUsers.COL_STATUSES, user.statusesCount);
 			userContentValues.put(TwitterUsers.COL_VERIFIED, user.verified);
 			userContentValues.put(TwitterUsers.COL_PROTECTED, user.protectedUser);
-			//userContentValues.put(TwitterUsers.TWITTERUSERS_COLUMNS_FOLLOWING, user.isFollowingYou()?1:0);
-			userContentValues.put(TwitterUsers.COL_FOLLOWREQUEST, user.followRequestSent);
+			userContentValues.put(TwitterUsers.COL_FOLLOWING, user.isFollowingYou()?1:0);
+			userContentValues.put(TwitterUsers.COL_FOLLOW, user.isFollowedByYou()?1:0);
 			userContentValues.put(TwitterUsers.COL_IMAGEURL, user.getProfileImageUrl().toString());
 		}
 		return userContentValues;
@@ -937,10 +936,7 @@ public class TwitterService extends Service {
 								toLookup.add((Long) userId);
 							}
 						}
-
 					}
-					
-					
 					c.close();
 				}
 			}

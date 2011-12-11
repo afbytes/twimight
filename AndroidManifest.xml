@@ -18,7 +18,8 @@
 	<application 
 	    android:icon="@drawable/ic_launcher_twimight" 
 	    android:label="@string/app_name"
-	    android:debuggable="true">
+	    android:debuggable="true"
+	    android:theme="@style/CustomButton">
 
      	<activity 
    		    android:name=".activities.TwimightActivity" 
@@ -50,7 +51,7 @@
 		<activity android:name=".activities.ShowUserActivity" android:label="Twimight" />
 		<activity android:name=".activities.ShowUserListActivity" android:label="Twimight" android:launchMode="singleTop" />
 		<activity android:name=".activities.NewTweetActivity" android:label="Twimight" android:theme="@style/Theme.Transparent" android:windowSoftInputMode="stateAlwaysVisible" />
-	    <activity android:name=".activities.PrefsActivity" android:label="Twimight Settings" />
+	    <activity android:name=".activities.PrefsActivity" android:label="Twimight Settings"/>
 	    <activity android:name=".activities.AboutActivity" android:label="About Twimight" />
 
 	    <service android:enabled="true" android:name=".net.tds.TDSService" />

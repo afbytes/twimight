@@ -11,28 +11,46 @@
       Theus Hossmann - Implementation
       Dominik Schatzmann - Message specification
 -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout 
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent" 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/showLoginRoot">
+<LinearLayout
+    android:id="@+id/showLoginLayout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:id="@+id/showLoginRoot"
-    >
+    android:layout_height="wrap_content"
+    android:background="@drawable/bird"
+    android:orientation="vertical" >
+</LinearLayout>
+<LinearLayout
+	    android:id="@+id/showLogo"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="bottom"
+	    android:orientation="vertical"
+	    android:background="@drawable/about_background"
+	    android:layout_alignParentBottom="true"
+	    android:layout_margin="10dp">
 <TextView 
     android:layout_width="wrap_content" 
-    android:id="@+id/textView1" 
-    android:textAppearance="?android:attr/textAppearanceLarge" 
+    android:id="@+id/textView1"  
     android:text="Press the button below to log in with Twitter. Note that we will not see your Twitter password." 
     android:layout_height="wrap_content" 
-    android:layout_marginTop="100px" />
+    android:layout_gravity="center"
+    android:gravity="center" 
+    android:textColor="@color/black"
+    android:textSize="14sp"/>
 
 <Button
     android:id="@+id/buttonLogin"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_marginTop="100dp"
+    android:layout_marginTop="20dp"
+    android:layout_marginBottom="20dp"
     android:text="Login" />
 
 </LinearLayout>
+</RelativeLayout>
 

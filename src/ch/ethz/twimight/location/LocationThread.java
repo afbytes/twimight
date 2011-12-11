@@ -41,25 +41,7 @@ public class LocationThread extends HandlerThread{
 	private LocationManager lm;
 	private static Location loc;
 
-	private LocationListener locationListener=new LocationListener() {
-		public void onLocationChanged(Location location) {
-			
-			// is the fix good enough to stop listening?
-			if(location.hasAccuracy() && location.getAccuracy() <= Constants.LOCATION_ACCURACY){
-				
-				// stop the timeout thread
-				handler.removeCallbacks(timeOutRunnable);
-
-				loc = location;
-				Log.i(TAG,"received a satisfying fix");
-				quit();
-			}
-		}
-
-		public void onProviderDisabled(String provider) {}
-		public void onProviderEnabled(String provider) {}
-		public void onStatusChanged(String provider, int status, Bundle extras) {}
-	};
+	private LocationListener locationListener;
 
 	private Handler handler=new Handler();
 
@@ -80,6 +62,27 @@ public class LocationThread extends HandlerThread{
 
 		// get a location manager
 		lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+		
+		locationListener = new LocationListener() {
+			public void onLocationChanged(Location location) {
+
+				// is the fix good enough to stop listening?
+				if(location.hasAccuracy() && location.getAccuracy() <= Constants.LOCATION_ACCURACY){
+
+					// stop the timeout thread
+					handler.removeCallbacks(timeOutRunnable);
+
+					loc = location;
+					
+					Log.i(TAG,"received a satisfying fix");
+					quit();
+				}
+			}
+
+			public void onProviderDisabled(String provider) {}
+			public void onProviderEnabled(String provider) {}
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+		};
 
 	}
 
@@ -98,20 +101,26 @@ public class LocationThread extends HandlerThread{
 		}
 
 	}
-	
-	@Override
-	  protected void onLooperPrepared() {
-	    try {
-	      onPreExecute();
-	    }
-	    catch (RuntimeException e) {
-	      onPostExecute();
-	      throw(e);
-	    }
-	  }
 
+	/**
+	 * Is triggered once the looper is set up.
+	 */
+	@Override
+	protected void onLooperPrepared() {
+		try {
+			onPreExecute();
+		}
+		catch (RuntimeException e) {
+			onPostExecute();
+			throw(e);
+		}
+	}
+
+	/**
+	 * Here we prepare everything
+	 */
 	private void onPreExecute() {
-		
+
 		Log.i(TAG, "starting timeout");
 		timeOutRunnable = new Runnable() {
 			public void run() {
@@ -124,13 +133,13 @@ public class LocationThread extends HandlerThread{
 
 		// request location updates from both GPS and Wifi. In the callback we will decide when we are happy with a location and remove the update listener
 		try{
-			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
+			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, locationListener);
 		} catch(Exception e) {
 			Log.i(TAG,"Can't request location Updates: " + e.toString());
 			return;
 		}
-		
+
 	}
 
 	/**
@@ -139,23 +148,34 @@ public class LocationThread extends HandlerThread{
 	private void onPostExecute(){
 
 		Log.i(TAG, "cleaning up");
-		
+
 		// stop listening
-		lm.removeUpdates(locationListener);
+		if ((lm != null) && (locationListener != null)) {
+	        lm.removeUpdates(locationListener);
+	    }
+		locationListener = null;
+		lm = null;
 
 		// insert into DB
 		if(loc != null){
-			//TODO
 			dbHelper.insertLocation(loc);
 		}
-		
+
 		//randomize interval until next location update
 		LocationAlarm.scheduleLocationUpdate(context, Math.round(Math.random()*2*Constants.LOCATION_UPDATE_TIME));
+
+		// release everything
+		context = null;
+		loc = null;
+		timeOutRunnable = null;
+		dbHelper = null;
+		handler = null;
 		
+
 		// finally, release the wake lock
 		LocationAlarm.releaseWakeLock();
 
-
+		Log.i(TAG, "done");
 	}
 
 };

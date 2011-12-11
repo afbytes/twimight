@@ -133,6 +133,8 @@ public class ShowUserListActivity extends Activity{
 		
 		unbindDrawables(findViewById(R.id.showUsersRoot));
 		
+		setInstance(null);
+		
 	}
 
 	/**
@@ -204,7 +206,7 @@ public class ShowUserListActivity extends Activity{
 	 */
 	private void setFilter(int filter){
 		// set all colors to transparent
-		resetBackgrounds();
+		resetButtons();
 		Button b=null;
 		
 		if(c!=null) c.close();
@@ -229,8 +231,7 @@ public class ShowUserListActivity extends Activity{
 		
 		// style button
 		if(b!=null){
-			b.setBackgroundColor(R.color.black);
-			b.setTextColor(R.color.headerBarTextOn);
+			b.setEnabled(false);
 		}
 
 		adapter = new UserAdapter(this, c);		
@@ -251,13 +252,11 @@ public class ShowUserListActivity extends Activity{
 	}
 	
 	/**
-	 * Set all backgrounds of header buttons to transparent.
+	 * Enables all header buttons
 	 */
-	private void resetBackgrounds(){
-		friendsButton.setBackgroundResource(R.color.transparent);
-		friendsButton.setTextColor(R.color.headerBarTextOff);
-		followersButton.setBackgroundResource(R.color.transparent);
-		followersButton.setTextColor(R.color.headerBarTextOff);
+	private void resetButtons(){
+		friendsButton.setEnabled(true);
+		followersButton.setEnabled(true);
 	}
 	
 	/**
