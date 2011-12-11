@@ -89,15 +89,11 @@ public class ShowTweetListActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		Log.e(TAG, "creating timeline");
-		
+				
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
 		
 		timelineListView = (ListView) findViewById(R.id.tweetList); 
-		
-		Log.i(TAG, "resuming");
 		
 		// Header buttons
 		timelineButton = (Button) findViewById(R.id.headerBarTimelineButton);

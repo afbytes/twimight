@@ -31,7 +31,7 @@ public final class Constants {
 
 	// TDS configuration
 	public static final int TDS_MESSAGE_VERSION = 1; /** Which message version */
-    public static final long TDS_UPDATE_INTERVAL = 60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
+    public static final long TDS_UPDATE_INTERVAL = 24*60*60*1000L; /** Interval (millisec) for updating MAC list from the TDS */
     public static final long TDS_UPDATE_RETRY_INTERVAL = 30*1000L; /** Initial interval for re-trying to connect to TDS */
     public static final boolean TDS_DEFAULT_ON = true; /** Opt in or opt out for TDS communication? */
     public static final long WAIT_FOR_CONNECTIVITY = 5*1000L; /** After waking up we have to wait to get connectivity */
@@ -40,7 +40,7 @@ public final class Constants {
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     
     // Bluetooth scanning configuration
-    public static final long SCANNING_INTERVAL = 30*1000L; /** Interval for Bluetooth scans */
+    public static final long SCANNING_INTERVAL = 60*1000L; /** Interval for Bluetooth scans */
     public static final long MIN_LISTEN_TIME = 10*1000L; /** Interval for Bluetooth scans */
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */
@@ -61,7 +61,7 @@ public final class Constants {
 	public static final String PEERS_MET = "peers_met";
 	
 	// Location
-	public static final long LOCATION_UPDATE_TIME = 60*1000L; /** Location update interval */
+	public static final long LOCATION_UPDATE_TIME = 6*60*60*1000L; /** Location update interval */
 	public static final long LOCATION_WAIT = 60*1000L; /** How long should we wait for a location. This MUST NOT be larger than LOCATION_UPDATE_TIME */
 	public static final int LOCATION_ACCURACY = 150; /** What is a satisfying accuracy? */
 	public static final boolean LOCATION_DEFAULT_ON = true; /** Do we send location updates by default? */
