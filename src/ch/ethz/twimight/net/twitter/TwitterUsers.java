@@ -98,8 +98,8 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_PROTECTED = "protected";
 	public static final String COL_VERIFIED = "verified";
 	
-	public static final String COL_FOLLOWING = "following"; /** is the user following us? */
-	public static final String COL_FOLLOW = "follow"; /** are we following the user? */
+	public static final String COL_ISFOLLOWER = "following"; /** is the user following us? */
+	public static final String COL_ISFRIEND = "follow"; /** are we following the user? */
 	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
 	public static final String COL_PROFILEIMAGE = "profile_image";
 	

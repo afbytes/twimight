@@ -110,8 +110,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 			case USERS_FOLLOWERS:
 				Log.i(TAG, "query matched... FOLLOWERS");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_FOLLOWING+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
-				c.setNotificationUri(getContext().getContentResolver(),uri);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c.setNotificationUri(getContext().getContentResolver(), uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				
 				// start synch service with a synch followers request
@@ -122,7 +122,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				break;
 			case USERS_FRIENDS:
 				Log.i(TAG, "query matched... FRIENDS");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_FOLLOW+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				// start synch service with a synch friends request
@@ -155,8 +155,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 			if(rowId >= 0){
-				if(values.containsKey(TwitterUsers.COL_FLAGS))
-				if(values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
+				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
 				{
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USER);
@@ -165,8 +164,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				}
 
 				Uri insertUri = ContentUris.withAppendedId(TwitterUsers.CONTENT_URI, rowId);
-				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-				//getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+				
 				purge(DBOpenHelper.TABLE_USERS);
 				Log.i(TAG, "User inserted! " + values);
 				
@@ -197,6 +196,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
 					getContext().startService(i);
 				}
+
+				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 
 				Log.i(TAG, "User updated! " + values);
 				return nrRows;

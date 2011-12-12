@@ -266,7 +266,7 @@ public class ShowUserActivity extends Activity{
 		 * - the request to follow was sent
 		 * - none of the above, we can follow the user
 		 */
-		following = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOW))>0;
+		following = c.getInt(c.getColumnIndex(TwitterUsers.COL_ISFRIEND))>0;
 		if(following){
 			followButton.setText("Unfollow");
 		} else {
