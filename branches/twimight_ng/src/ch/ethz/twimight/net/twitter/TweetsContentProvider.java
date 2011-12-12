@@ -39,7 +39,7 @@ import android.util.Log;
 
 /**
  * The content provider for all kinds of tweets (normal, disaster, favorites, mentions). 
- * The URIs and column names are defined int class Tweets.
+ * The URIs and column names are defined in class Tweets.
  * @author thossmann
  *
  */
@@ -662,11 +662,13 @@ public class TweetsContentProvider extends ContentProvider {
 			getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			Log.i(TAG, "Tweet updated! " + values);
 			
-			// Trigger synch
-			Intent i = new Intent(TwitterService.SYNCH_ACTION);
-			i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-			i.putExtra("rowId", new Long(uri.getLastPathSegment()));
-			getContext().startService(i);
+			// Trigger synch if needed
+			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
+				Intent i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+				i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+				getContext().startService(i);
+			}
 
 			return nrRows;
 		} else {
@@ -756,26 +758,6 @@ public class TweetsContentProvider extends ContentProvider {
 		
 	}
 
-
-	
-	/**
-	 * The screenname of the local user
-	 * @return
-	 */
-	private String getLocalScreenName() {
-		if(LoginActivity.getTwitterId(getContext()) == null) return null;
-		
-		Long localUserId = new Long(LoginActivity.getTwitterId(getContext()));
-		
-		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-		
-		Cursor c = getContext().getContentResolver().query(uri, null, TwitterUsers.COL_ID+"="+localUserId, null, null);
-		
-		if(c.getCount() == 0) return null;
-		
-		c.moveToFirst();
-		return c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-	}
 	
 	/**
 	 * Computes the java String object hash code (32 bit) as the disaster ID of the tweet
@@ -837,7 +819,8 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			// does it mention the local user?
 			String text = values.getAsString(Tweets.COL_TEXT);
-			String localUserScreenName = getLocalScreenName();
+			String localUserScreenName = LoginActivity.getTwitterScreenname(getContext());
+			
 			if(text.contains("@"+localUserScreenName)){
 				values.put(Tweets.COL_MENTIONS, 1);
 				// put into mentions buffer

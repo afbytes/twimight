@@ -49,7 +49,7 @@ import android.widget.Toast;
  */
 public class ShowTweetListActivity extends Activity{
 
-	private static final String TAG = "BluetestActivity";
+	private static final String TAG = "ShowTweetListActivity";
 	
 	private static ShowTweetListActivity instance;
 
@@ -92,6 +92,7 @@ public class ShowTweetListActivity extends Activity{
 				
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
+		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
 		timelineListView = (ListView) findViewById(R.id.tweetList); 
 		
@@ -253,7 +254,9 @@ public class ShowTweetListActivity extends Activity{
 			break;
 		
 		case OPTIONS_MENU_MESSAGES:
-			Toast.makeText(this, "DIRECT MESSAGES NOT YET AVAILABLE", Toast.LENGTH_LONG).show();
+			// Launch User Messages
+			i = new Intent(this, ShowDMUsersListActivity.class);
+			startActivity(i);    
 			break;
 		
 		case OPTIONS_MENU_SETTINGS:

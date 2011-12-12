@@ -68,6 +68,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	
 	// shared preferences
 	private static final String TWITTER_ID = "twitter_id"; /** Name of Twitter ID in shared preferences */
+	private static final String TWITTER_SCREENNAME = "twitter_screenname"; /** Name of Twitter screenname in shared preferences */
 	
 	private static final String TWITTER_ACCESS_TOKEN = "twitter_access_token"; /** Name of access token in preference */
 	private static final String TWITTER_ACCESS_TOKEN_SECRET = "twitter_access_token_secret"; /** Name of secret in preferences */
@@ -369,14 +370,19 @@ public class LoginActivity extends Activity implements OnClickListener{
 		TwitterService.setLastTimelineUpdate(null, context);
 		TwitterService.setLastFriendsUpdate(null, context);
 		TwitterService.setLastFollowerUpdate(null, context);
+		TwitterService.setLastDMsInUpdate(null, context);
+		TwitterService.setLastDMsOutUpdate(null, context);
+		TwitterService.setDMsOutSinceId(null, context);
+		TwitterService.setDMsInSinceId(null, context);
 		
 		// Stop all alarms
 		stopAlarms(context);
 		TDSService.resetLastUpdate(context);
 		TDSService.resetUpdateInterval(context);
 		
-		// Delete our Twitter ID
+		// Delete our Twitter ID and screenname
 		setTwitterId(null, context);
+		setTwitterScreenname(null, context);
 		
 		// Delete Access token and secret
 		setAccessToken(null, context);
@@ -565,6 +571,29 @@ public class LoginActivity extends Activity implements OnClickListener{
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getString(TWITTER_ID, null)!=null;
 	}
+	
+	/**
+	 * Stores the local Twitter screenname in the shared preferences
+	 * @param id
+	 * @param context
+	 */
+	public static void setTwitterScreenname(String screenname, Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putString(TWITTER_SCREENNAME, screenname);
+		prefEditor.commit();
+	}
+	
+	/**
+	 * Gets the Twitter screenname from shared preferences
+	 * @param context
+	 * @return
+	 */
+	public static String getTwitterScreenname(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getString(TWITTER_SCREENNAME, null);
+	}
+	
 	
 	/**
 	 * Clean up the views

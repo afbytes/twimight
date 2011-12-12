@@ -85,6 +85,7 @@ public final class Constants {
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
 	public static final int NR_FAVORITES = 50; /** how many favorites to request from twitter */
 	public static final int NR_MENTIONS = 50; /** how many mentions to request from twitter */
+	public static final int NR_DMS = 50; /** how many direct messages to request from twitter */
 	
 	public static final long TIMELINE_MIN_SYNCH = 60*1000L; /** Minimum time between two timeline updates */
 	public static final long FAVORITES_MIN_SYNCH = 60*1000L; /** Minimum time between two favorite updates */
@@ -92,11 +93,16 @@ public final class Constants {
 	public static final long FRIENDS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the friends list */
 	public static final long FOLLOWERS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the list of followers */
 	public static final long USERS_MIN_SYNCH = 24*3600*1000L; /** Minmum time between two updates of a user profile */
+	public static final long DMS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the direct messages */
 	
 	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
 	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
 	public static final int DTWEET_BUFFER_SIZE = 100; /** How many disaster tweets of other users */
 	public static final int MYDTWEET_BUFFER_SIZE = 100; /** How many of our own disaster tweets */
+	public static final int MESSAGES_BUFFER_SIZE = 100; /** How many direct messages to and from the local user do we buffer? */
+	public static final int DISASTERDM_BUFFER_SIZE = 100; /** How many disaster direct messages of remote users do we carry? */
+	public static final int MYDISASTERDM_BUFFER_SIZE = 100; /** How many disaster messages sent by the local user do we carry? */
+ 
 	
 }
