@@ -86,8 +86,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
-		Log.i(TAG, "query: " + uri);
-		
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = TwitterUsers.DEFAULT_SORT_ORDER;
 		
 		Intent i;
@@ -95,7 +93,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		Cursor c = null;
 		switch(twitterusersUriMatcher.match(uri)){
 			case USERS: 
-				Log.i(TAG, "query matched... USERS");
+				Log.i(TAG, "Query USERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, where, whereArgs, null, null, sortOrder);
 				// TODO: Notification URI
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
@@ -103,13 +101,13 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 			
 			case USERS_ID: 
-				Log.i(TAG, "query matched... USERS_ID");
+				Log.i(TAG, "Query USERS_ID " + uri.getLastPathSegment());
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id="+uri.getLastPathSegment(), whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				break;
 			
 			case USERS_FOLLOWERS:
-				Log.i(TAG, "query matched... FOLLOWERS");
+				Log.i(TAG, "Query USERS_FOLLOWERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
@@ -121,7 +119,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 				break;
 			case USERS_FRIENDS:
-				Log.i(TAG, "query matched... FRIENDS");
+				Log.i(TAG, "Query USERS_FRIENDS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
@@ -140,7 +138,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		Log.i(TAG, "insert: " + uri);
+		Log.i(TAG, "Insert USER");
 
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
@@ -149,7 +147,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			String[] projection = {"_id"};
 			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ID+"="+values.getAsLong(TwitterUsers.COL_ID), null, null, null, null);
 			if(c.getCount()>0){
-				Log.i(TAG, "already have user!");
 				return null;
 			}
 			
@@ -167,7 +164,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 				
 				purge(DBOpenHelper.TABLE_USERS);
-				Log.i(TAG, "User inserted! " + values);
 				
 				return insertUri;
 			} else {
@@ -180,16 +176,14 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		Log.i(TAG, "update: " + uri);
-
+		Log.i(TAG, "Update USERS");
 		if(twitterusersUriMatcher.match(uri) != USERS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
 			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
 			if(nrRows > 0){
 				
-				if(values.containsKey(TwitterUsers.COL_FLAGS))
-				if(values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
+				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
 				{
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USER);
@@ -199,7 +193,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 
-				Log.i(TAG, "User updated! " + values);
 				return nrRows;
 			} else {
 				throw new IllegalStateException("Could not insert user into database " + values);

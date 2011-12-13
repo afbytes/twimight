@@ -151,8 +151,6 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
-		Log.i(TAG, "query: " + uri);
-		
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = Tweets.DEFAULT_SORT_ORDER;
 		
 		Cursor c;
@@ -160,12 +158,13 @@ public class TweetsContentProvider extends ContentProvider {
 		Intent i;
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS: 
-				Log.i(TAG, "query matched... TWEETS");
+				Log.i(TAG, "Query TWEETS");
 				c = database.query(DBOpenHelper.TABLE_TWEETS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				break;
 			
 			case TWEETS_ID: 
+				Log.i(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
@@ -193,13 +192,14 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 
 				break;
 						
 			case TWEETS_TIMELINE_NORMAL:
+				Log.i(TAG, "Query TIMELINE_NORMAL");
+
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -219,7 +219,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
@@ -230,6 +229,7 @@ public class TweetsContentProvider extends ContentProvider {
 				getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_DISASTER: 
+				Log.i(TAG, "Query TIMELINE_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -253,7 +253,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
@@ -264,6 +263,7 @@ public class TweetsContentProvider extends ContentProvider {
 				getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_ALL:
+				Log.i(TAG, "Query TIMELINE_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -286,7 +286,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				
@@ -297,6 +296,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 			
 			case TWEETS_FAVORITES_NORMAL: 
+				Log.i(TAG, "Query FAVORITES_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -317,7 +317,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -330,6 +329,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_FAVORITES_DISASTER: 
+				Log.i(TAG, "Query FAVORITES_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -350,7 +350,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -363,6 +362,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_FAVORITES_ALL: 
+				Log.i(TAG, "Query FAVORITES_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -382,7 +382,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -395,6 +394,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_MENTIONS_NORMAL: 
+				Log.i(TAG, "Query MENTIONS_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -415,7 +415,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -428,6 +427,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_DISASTER: 
+				Log.i(TAG, "Query MENTIONS_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -448,7 +448,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -461,6 +460,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_ALL: 
+				Log.i(TAG, "Query MENTIONS_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -480,7 +480,6 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
@@ -503,13 +502,13 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		Log.i(TAG, "insert: " + uri);
 		int disasterId;
 		Cursor c;
 		Uri insertUri = null; // the return value;
 		
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:
+				Log.i(TAG, "Insert TWEETS_TIMELINE_NORMAL");
 				/*
 				 *  First, we check if we already have a tweets with the same disaster ID.
 				 *  If yes, three cases are possible
@@ -526,22 +525,18 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
-					Log.i(TAG, c.getCount()+" tweets with the same disaster ID");
 
 					c.moveToFirst();
 					while(!c.isAfterLast()){
 						if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
 							// check if the text is the same
 							if(c.getString(c.getColumnIndex(Tweets.COL_TEXT)).equals(values.getAsString(Tweets.COL_TEXT))){
-								Log.i(TAG, "Disaster tweet with same text and disaster ID");
 								Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 								update(updateUri, values, null, null);
 								return updateUri;
 							}
 						} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
-							
-							Log.i(TAG, "Normal tweet with same text and disaster ID");
-							
+														
 							// clear the to insert flag
 							int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 							values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
@@ -563,6 +558,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_TIMELINE_DISASTER:
+				Log.i(TAG, "Insert TWEETS_TIMELINE_DISASTER");
 				// in disaster mode, we set the is disaster flag 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(Tweets.COL_ISDISASTER, 1);
@@ -573,7 +569,6 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId+" AND "+Tweets.COL_ISDISASTER+">0", null, null, null, null);
 				if(c.getCount()>0){
 					c.moveToFirst();
-					Log.i(TAG, "already have disaster tweet");
 					Uri oldUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));
 					c.close();
 					return oldUri; 
@@ -582,10 +577,7 @@ public class TweetsContentProvider extends ContentProvider {
 				CertificateManager cm = new CertificateManager(getContext());
 				KeyManager km = new KeyManager(getContext());
 				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
-					Log.i(TAG, "our own tweet!");
 					if(cm.hasCertificate()){
-						Log.i(TAG, "signing tweet");
-						
 						// we put the signature
 						String text = values.getAsString(Tweets.COL_TEXT);
 						String userId = LoginActivity.getTwitterId(getContext()).toString();
@@ -599,7 +591,6 @@ public class TweetsContentProvider extends ContentProvider {
 						// and set the is_verified flag to show that the tweet is signed
 						values.put(Tweets.COL_ISVERIFIED, 1);
 					} else {
-						Log.i(TAG, "no certificate, not signing tweet");
 						values.put(Tweets.COL_ISVERIFIED, 0);
 					}
 					// if we are in disaster mode, we give the content provider half a 
@@ -611,25 +602,20 @@ public class TweetsContentProvider extends ContentProvider {
 						getContext().startService(i);
 					}
 				} else {
-					Log.i(TAG, "not our own tweet!");
 					String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
 					// check validity
 					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){
-						Log.i(TAG, "certificate is valid!");
 						// check signature
 						String signature = values.getAsString(Tweets.COL_SIGNATURE);
 						String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
 						if(km.checkSinature(cm.parsePem(certificate), signature, text)){
 							values.put(Tweets.COL_ISVERIFIED, 1);
-							Log.i(TAG, "signature is valid!");
 						} else {
 							values.put(Tweets.COL_ISVERIFIED, 0);
-							Log.i(TAG, "signature is not valid!");
 						}
 					
 					} else {
 						values.put(Tweets.COL_ISVERIFIED, 0);
-						Log.i(TAG, "certificate is not valid!");
 					}
 					
 					// notify user 
@@ -656,11 +642,12 @@ public class TweetsContentProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
+		Log.i(TAG, "Update TWEETS_ID");
+		
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){
 			getContext().getContentResolver().notifyChange(uri, null);
 			getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-			Log.i(TAG, "Tweet updated! " + values);
 			
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
@@ -682,6 +669,9 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public int delete(Uri uri, String arg1, String[] arg2) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
+		
+		Log.i(TAG, "Delete TWEETS_ID");
+		
 		int nrRows = database.delete(DBOpenHelper.TABLE_TWEETS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 		return nrRows;
@@ -709,16 +699,12 @@ public class TweetsContentProvider extends ContentProvider {
 				+ " ORDER BY "+Tweets.DEFAULT_SORT_ORDER+" "
 				+ " LIMIT -1 OFFSET "
 				+ size +");";
-		Log.i(TAG, sql);
 		c = database.rawQuery(sql, null);
-		Log.i(TAG, "UPDATED: "+c.getCount());
 		c.close();
 		
 		// now delete
 		sql = "DELETE FROM "+DBOpenHelper.TABLE_TWEETS+" WHERE "+Tweets.COL_BUFFER+"=0";
-		Log.i(TAG, sql);
 		c = database.rawQuery(sql, null);
-		Log.i(TAG, "DELETED: "+c.getCount());
 		c.close();
 		
 	}
@@ -732,27 +718,27 @@ public class TweetsContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
 		
 		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
-			Log.i(TAG, "purging timeline buffer");
+			Log.i(TAG, "Purging timeline buffer");
 			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
 		}
 			
 		if((bufferFlags & Tweets.BUFFER_FAVORITES) != 0){
-			Log.i(TAG, "purging favorites buffer");
+			Log.i(TAG, "Purging favorites buffer");
 			purgeBuffer(Tweets.BUFFER_FAVORITES, Constants.FAVORITES_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_MENTIONS) != 0){
-			Log.i(TAG, "purging mentions buffer");
+			Log.i(TAG, "Purging mentions buffer");
 			purgeBuffer(Tweets.BUFFER_MENTIONS, Constants.MENTIONS_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_DISASTER) != 0){
-			Log.i(TAG, "purging disaster buffer");
+			Log.i(TAG, "Purging disaster buffer");
 			purgeBuffer(Tweets.BUFFER_DISASTER, Constants.DTWEET_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_MYDISASTER) != 0){
-			Log.i(TAG, "purging mydisaster buffer");
+			Log.i(TAG, "Purging mydisaster buffer");
 			purgeBuffer(Tweets.BUFFER_MYDISASTER, Constants.MYDTWEET_BUFFER_SIZE);
 		}
 		
@@ -841,7 +827,6 @@ public class TweetsContentProvider extends ContentProvider {
 				Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
 				
-				Log.i(TAG, "Tweet inserted! ");
 				if(flags>0){
 					// start synch service with a synch tweet request
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
