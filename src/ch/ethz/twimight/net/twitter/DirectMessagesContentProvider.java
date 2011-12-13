@@ -121,9 +121,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 */
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
-		
-		Log.i(TAG, "query: " + uri);
-		
+				
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = Tweets.DEFAULT_SORT_ORDER;
 		
 		Cursor c = null;
@@ -132,21 +130,22 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		switch(dmUriMatcher.match(uri)){
 			
 			case DMS: 
-				Log.i(TAG, "query matched... DMS");
+				Log.i(TAG, "Query DMS");
 				c = database.query(DBOpenHelper.TABLE_DMS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				break;
 
 			case DM_ID: 
+				Log.i(TAG, "Query DM_ID");
 				sql = "SELECT  * "
 					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				break;
 						
 			case USER:
+				Log.i(TAG, "Query USER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_DMS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_SENDER + ", "
@@ -164,13 +163,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ "WHERE "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"=" + LoginActivity.getTwitterId(getContext())+" "
 					+ "OR "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"=" + LoginActivity.getTwitterId(getContext())+" "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				
 				break;
 			case USERS: 
+				Log.i(TAG, "Query USERS");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_DMS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_SENDER + ", "
@@ -190,7 +189,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ "WHERE "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"=" + LoginActivity.getTwitterId(getContext())+" "
 					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME +" "
 					+ "ORDER BY " + DirectMessages.DEFAULT_SORT_ORDER +";";
-				Log.i(TAG, "DB query: " + sql);
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
@@ -224,13 +222,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 */
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		Log.i(TAG, "insert: " + uri);
 		int disasterId;
 		Cursor c = null;
 		Uri insertUri = null; // the return value;
 		
 		switch(dmUriMatcher.match(uri)){
 			case LIST_NORMAL:
+				Log.i(TAG, "Insert LIST_NORMAL");
 				/*
 				 *  First, we check if we already have a direct messages with the same disaster ID.
 				 *  If yes, two cases are possible
@@ -244,7 +242,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				
 				c = database.query(DBOpenHelper.TABLE_DMS, null, DirectMessages.COL_DISASTERID+"="+disasterId, null, null, null, null);
 				if(c.getCount()>0){
-					Log.i(TAG, c.getCount()+" direct messages with the same disaster ID");
 
 					c.moveToFirst();
 					while(!c.isAfterLast()){
@@ -274,6 +271,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 				
 			case LIST_DISASTER:
+				Log.i(TAG, "Insert LIST_DISASTER");
 				// in disaster mode, we set the is disaster flag, encrypt and sign the message 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(DirectMessages.COL_ISDISASTER, 1);
@@ -294,12 +292,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
+
+		Log.i(TAG, "Update DM_ID");
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_DMS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){
 			getContext().getContentResolver().notifyChange(uri, null);
 			getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
-			Log.i(TAG, "DM updated! " + values);
 			
 			return nrRows;
 		} else {
@@ -313,6 +312,9 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	@Override
 	public int delete(Uri uri, String arg1, String[] arg2) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
+		
+		Log.i(TAG, "Delete DM_ID");
+		
 		int nrRows = database.delete(DBOpenHelper.TABLE_DMS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 		return nrRows;
@@ -340,13 +342,11 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				+ " ORDER BY "+Tweets.DEFAULT_SORT_ORDER+" "
 				+ " LIMIT -1 OFFSET "
 				+ size +");";
-		Log.i(TAG, sql);
 		c = database.rawQuery(sql, null);
 		c.close();
 		
 		// now delete
 		sql = "DELETE FROM "+DBOpenHelper.TABLE_DMS+" WHERE "+DirectMessages.COL_BUFFER+"=0";
-		Log.i(TAG, sql);
 		c = database.rawQuery(sql, null);
 		c.close();
 		
@@ -436,7 +436,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
 				
-				Log.i(TAG, "Direct Message inserted! ");
 				return insertUri;
 			} else {
 				throw new IllegalStateException("Could not insert direct message into DB " + values);

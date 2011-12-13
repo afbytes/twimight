@@ -112,6 +112,7 @@ public class TwitterUsers implements BaseColumns {
 	public static final int FLAG_TO_UPDATE = 1;
 	public static final int FLAG_TO_FOLLOW = 2;
 	public static final int FLAG_TO_UNFOLLOW = 4;
+	public static final int FLAG_TO_UPDATEIMAGE = 8;
 
 
 	
