@@ -55,6 +55,7 @@ public class ShowUserActivity extends Activity{
 	private TextView stats;
 	private Button followButton;
 	private Button mentionButton;
+	private Button messageButton;
 	private Button showFollowersButton;
 	private Button showFriendsButton;
 	private LinearLayout followInfo;
@@ -83,6 +84,7 @@ public class ShowUserActivity extends Activity{
 		stats = (TextView) findViewById(R.id.showUserStats);
 		followButton = (Button) findViewById(R.id.showUserFollow);
 		mentionButton = (Button) findViewById(R.id.showUserMention);
+		messageButton = (Button) findViewById(R.id.showUserMessage);
 		followInfo = (LinearLayout) findViewById(R.id.showUserTofollow);
 		unfollowInfo = (LinearLayout) findViewById(R.id.showUserTounfollow);
 		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
@@ -162,6 +164,7 @@ public class ShowUserActivity extends Activity{
 		
 		if(followButton!=null) followButton.setOnClickListener(null);
 		if(mentionButton!=null) mentionButton.setOnClickListener(null);
+		if(messageButton!=null) messageButton.setOnClickListener(null);
 		if(showFollowersButton!=null) showFollowersButton.setOnClickListener(null);
 		if(showFriendsButton!=null) showFriendsButton.setOnClickListener(null);
 		
@@ -314,6 +317,18 @@ public class ShowUserActivity extends Activity{
 			public void onClick(View v) {
 				Intent i = new Intent(getBaseContext(),NewTweetActivity.class);
 				i.putExtra("text", "@"+userScreenName+" ");
+				startActivity(i);
+			}
+		});
+		
+		/*
+		 * Message button
+		 */
+		messageButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getBaseContext(),NewDMActivity.class);
+				i.putExtra("recipient", userScreenName);
 				startActivity(i);
 			}
 		});
