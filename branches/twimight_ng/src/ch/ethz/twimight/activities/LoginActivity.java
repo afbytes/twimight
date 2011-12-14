@@ -102,7 +102,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.login);
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
 		buttonLogin.setOnClickListener(this);
-
+		buttonLogin.setEnabled(false);
 		
 		// which state are we in?
 		if(hasAccessToken(this) && hasAccessTokenSecret(this) && getTwitterId(this)!=null){

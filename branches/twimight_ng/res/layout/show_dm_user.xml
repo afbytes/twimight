@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent" android:layout_width="fill_parent"
-	android:orientation="vertical" android:id="@+id/showDMUsersListRoot">
+	android:orientation="vertical" android:id="@+id/showDMUserListRoot">
 
-	<LinearLayout android:id="@+id/headerBarDMUsers"
+	<LinearLayout android:id="@+id/headerBarDMUser"
 		android:layout_height="50dp" android:layout_width="match_parent"
 		android:orientation="horizontal" android:background="@drawable/top_bar_background"
 		android:gravity="right">
-		<ImageButton android:id="@+id/headerBarMessageButtonDMUsers"
+		<ImageButton android:id="@+id/headerBarMessageButtonDMUser"
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
 			android:src="@android:drawable/ic_menu_edit"
 			android:layout_marginRight="10dp" />
 	</LinearLayout>
 	<ListView android:layout_height="fill_parent"
-		android:layout_width="fill_parent" android:id="@+id/dmUsersList"
+		android:layout_width="fill_parent" android:id="@+id/dmUserList"
 		android:fastScrollEnabled="true" android:scrollingCache="true" />
 
 	<TextView android:id="@+id/dmListEmpty" android:layout_width="fill_parent"

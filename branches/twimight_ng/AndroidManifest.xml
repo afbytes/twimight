@@ -51,7 +51,9 @@
 		<activity android:name=".activities.ShowUserActivity" android:label="User" />
 		<activity android:name=".activities.ShowUserListActivity" android:label="Twimight" android:launchMode="singleTop" />
 		<activity android:name=".activities.ShowDMUsersListActivity" android:label="Direct Messages" android:launchMode="singleTop" />
+		<activity android:name=".activities.ShowDMListActivity" android:label="Direct Messages" />
 		<activity android:name=".activities.NewTweetActivity" android:label="Twimight" android:theme="@style/Theme.Transparent" android:windowSoftInputMode="stateAlwaysVisible" />
+		<activity android:name=".activities.NewDMActivity" android:label="Twimight" android:theme="@style/Theme.Transparent" android:windowSoftInputMode="stateAlwaysVisible" />
 	    <activity android:name=".activities.PrefsActivity" android:label="Settings"/>
 	    <activity android:name=".activities.AboutActivity" android:label="About Twimight" />
 

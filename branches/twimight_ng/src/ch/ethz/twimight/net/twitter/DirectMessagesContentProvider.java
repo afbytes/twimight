@@ -139,30 +139,43 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				Log.i(TAG, "Query DM_ID");
 				sql = "SELECT  * "
 					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
-					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
+					+ "WHERE " + DBOpenHelper.TABLE_DMS+ "._id=" + uri.getLastPathSegment() + ";";
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				break;
 						
 			case USER:
 				Log.i(TAG, "Query USER");
-				sql = "SELECT "
-					+ DBOpenHelper.TABLE_DMS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_SENDER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_RECEIVER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_TEXT + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_CREATED + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_FLAGS + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
-					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_DMS+"." +DirectMessages.COL_SENDER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"=" + LoginActivity.getTwitterId(getContext())+" "
-					+ "OR "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"=" + LoginActivity.getTwitterId(getContext())+" "
-					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
+				// get the twitter user id
+				sql = "SELECT "+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID + " "
+				+ "FROM "+ DBOpenHelper.TABLE_USERS+" "
+				+ "WHERE _id=" +uri.getLastPathSegment() +";";
+				c = database.rawQuery(sql, null);
+				
+				if(c.getCount()==0) return null; // this should not happen
+				c.moveToFirst();
+				long userId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ID));
+				c.close();
+				
+				// get the direct messages
+				sql = "SELECT " + DBOpenHelper.TABLE_DMS+"._id, "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_TEXT + ", "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER + ", "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED + ", "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_ISDISASTER + ", "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_FLAGS + ", "
+				+ DBOpenHelper.TABLE_USERS+"._id AS userRowId, "
+				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_SCREENNAME + ", "
+				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_NAME + ", "
+				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_PROFILEIMAGE + " "
+				+ "FROM " + DBOpenHelper.TABLE_DMS + " "
+				+ "LEFT JOIN "+DBOpenHelper.TABLE_USERS+" "
+				+ "ON "+ DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+" "				
+				+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+userId+" "
+				+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+userId+" "
+				+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
+				+ "LIMIT 100";
+
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
@@ -170,30 +183,45 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 			case USERS: 
 				Log.i(TAG, "Query USERS");
-				sql = "SELECT "
-					+ DBOpenHelper.TABLE_DMS + "." + "_id AS _id, "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_SENDER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_RECEIVER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_TEXT + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_CREATED + ", "
-					+ "MAX("+DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_CREATED + "), "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_FLAGS + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_ISDISASTER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." +DirectMessages.COL_ISVERIFIED + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_NAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
-					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_DMS+"." +DirectMessages.COL_SENDER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"=" + LoginActivity.getTwitterId(getContext())+" "
-					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME +" "
-					+ "ORDER BY " + DirectMessages.DEFAULT_SORT_ORDER +";";
+				// selects the last DM of which the given user is either a sender or recepient
+				String subQuery1 = "SELECT " + DirectMessages.COL_TEXT + " " 
+					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
+					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
+					+ "LIMIT 1";
+				// selects the timestamp of the last DM of which the given user is either a sender or recepient
+				String subQuery2 = "SELECT " + DirectMessages.COL_CREATED + " " 
+					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
+					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
+					+ "LIMIT 1";
+
+				// selects all users who have sent or received at least one DM
+				sql= "SELECT "
+					+ DBOpenHelper.TABLE_USERS + "._id, "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+ ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME+ ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME+ ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE+ ", "
+					+ "("+ subQuery1 + ") AS text, "
+					+ "("+ subQuery2 + ") AS created "
+					+ "FROM " + DBOpenHelper.TABLE_USERS + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS sent ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID +"=sent." +DirectMessages.COL_SENDER + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS received ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID +"=received." +DirectMessages.COL_RECEIVER + " "
+					+ "WHERE "+"(sent."+DirectMessages.COL_TEXT+" IS NOT NULL OR "+"received."+DirectMessages.COL_TEXT+" IS NOT NULL) "
+					+ "AND "+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+"<>"+LoginActivity.getTwitterId(getContext())+" "
+					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID + " "
+					+ "ORDER BY created DESC LIMIT 100;";
+				
+					Log.e(TAG, sql);
+				
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				
-				// start synch service with a synch timeline request
+				// start synch service with a synch DMs request
 				i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_DMS);
 				getContext().startService(i);
@@ -411,6 +439,11 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 */
 	private Uri insertDM(ContentValues values){
 		if(checkValues(values)){
+			
+			int flags = 0;
+			if(values.containsKey(Tweets.COL_FLAGS))
+				flags = values.getAsInteger(Tweets.COL_FLAGS);
+
 						
 			if(!values.containsKey(DirectMessages.COL_CREATED)){
 				// set the current timestamp
@@ -424,8 +457,21 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				values.put(DirectMessages.COL_DISASTERID, getDisasterID(values));
 			}
 			
+			// for our own new messages, we have a receiver screenname but no ID.
+			// Check if we have a corresponding ID in the TwitterUsers
+			if(!values.containsKey(DirectMessages.COL_RECEIVER) && values.containsKey(DirectMessages.COL_RECEIVER_SCREENNAME)){
+				String [] projection = {TwitterUsers.COL_ID};
+				String where = TwitterUsers.COL_SCREENNAME+"='"+values.getAsString(DirectMessages.COL_RECEIVER_SCREENNAME)+"'";
+				Cursor c = getContext().getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS), projection, where, null, null);
+				if(c.getCount()>0){
+					c.moveToFirst();
+					values.put(DirectMessages.COL_RECEIVER, c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+				}
+				c.close();
+			}
+			
 			// are we the receiver?
-			if(Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
+			if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
 				// notify user
 				notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
 			}
@@ -435,6 +481,14 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
+				
+				if(flags>0){
+					// start synch service with a synch tweet request
+					Intent i = new Intent(TwitterService.SYNCH_ACTION);
+					i.putExtra("synch_request", TwitterService.SYNCH_DM);
+					i.putExtra("rowId", rowId);
+					getContext().startService(i);
+				}
 				
 				return insertUri;
 			} else {

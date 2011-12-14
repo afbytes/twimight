@@ -94,7 +94,8 @@ public class ShowTweetListActivity extends Activity{
 		setContentView(R.layout.main);
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
-		timelineListView = (ListView) findViewById(R.id.tweetList); 
+		timelineListView = (ListView) findViewById(R.id.tweetList);
+		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
 		// Header buttons
 		timelineButton = (Button) findViewById(R.id.headerBarTimelineButton);
@@ -163,12 +164,12 @@ public class ShowTweetListActivity extends Activity{
 			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
 			i.removeExtra("filter_request");
 		} else if(i.hasExtra("login")){
-			Log.i(TAG, "just logged in");
 			i.removeExtra("login");
 			setFilter(SHOW_TIMELINE);
 		} else {
 			setFilter(currentFilter);	
 		}
+		
 		
 		if(positionIndex != 0 | positionTop !=0){
 			timelineListView.setSelectionFromTop(positionIndex, positionTop);
@@ -180,6 +181,7 @@ public class ShowTweetListActivity extends Activity{
 	 */
 	@Override
 	public void onPause(){
+		
 		super.onPause();
 				
 	}
@@ -360,9 +362,10 @@ public class ShowTweetListActivity extends Activity{
 		if(b!=null){
 			b.setEnabled(false);
 		}
-
+		
 		adapter = new TweetAdapter(this, c);		
 		timelineListView.setAdapter(adapter);
+
 
 		// Click listener when the user clicks on a tweet
 		timelineListView.setClickable(true);
@@ -374,7 +377,7 @@ public class ShowTweetListActivity extends Activity{
 				Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				startActivity(i);
-				c.close();
+				//c.close();
 			}
 		});
 	}
