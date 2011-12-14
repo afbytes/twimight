@@ -122,6 +122,7 @@ public class TwitterService extends Service {
 			break;
 		case SYNCH_ALL:
 			synchTransactionalTweets();
+			synchTransactionalMessages();
 			synchTransactionalUsers();
 			synchTimeline();
 			synchMentions();
@@ -227,6 +228,25 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 			while(!c.isAfterLast()){
 				synchTweet(c.getLong(c.getColumnIndex("_id")));
+				c.moveToNext();
+			}
+		}
+		c.close();
+	}
+	
+	/**
+	 * Syncs all messages which have transactional flags set
+	 */
+	private void synchTransactionalMessages(){
+		Log.i(TAG, "SYNCH_TRANSACTIONAL_MESSAGES");
+		// get the flagged messages
+		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS);
+		Cursor c = getContentResolver().query(queryUri, null, DirectMessages.COL_FLAGS+"!=0", null, null);
+		Log.i(TAG, c.getCount()+" transactional messages to synch");
+		if(c.getCount() >= 0){
+			c.moveToFirst();
+			while(!c.isAfterLast()){
+				synchMessage(c.getLong(c.getColumnIndex("_id")));
 				c.moveToNext();
 			}
 		}
@@ -2414,6 +2434,7 @@ public class TwitterService extends Service {
 					i.putExtra("text", text);
 					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					getBaseContext().startActivity(i);
+					getContentResolver().delete(queryUri, null, null);
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}
