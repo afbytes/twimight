@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 /** 
  * Cursor adapter for a cursor containing tweets.
- * TODO: How do we handle empty cursors? 
  */
 public class TweetAdapter extends SimpleCursorAdapter {
 	
@@ -47,7 +46,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		// Find views by id
 		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
-		TextView textCreatedAt = (TextView) row.findViewById(R.id.textCreatedAt);
+		TextView textCreatedAt = (TextView) row.findViewById(R.id.tweetCreatedAt);
 		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 		
 		// Profile image

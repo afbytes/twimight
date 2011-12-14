@@ -18,5 +18,9 @@
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/userList"
 		android:fastScrollEnabled="true" android:scrollingCache="true" />
+	<TextView android:id="@+id/userListEmpty"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:text="No users (loading..)" android:textSize="16sp" android:layout_gravity="center"
+		android:paddingTop="20dp"/>
 
 </LinearLayout>

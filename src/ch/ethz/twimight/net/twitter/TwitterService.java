@@ -35,6 +35,7 @@ import winterwell.jtwitter.Twitter.User;
 
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.NewDMActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
@@ -121,9 +122,11 @@ public class TwitterService extends Service {
 			break;
 		case SYNCH_ALL:
 			synchTransactionalTweets();
+			synchTransactionalUsers();
 			synchTimeline();
 			synchMentions();
 			synchFavorites();
+			synchMessages();
 			break;
 		case SYNCH_TIMELINE:
 			synchTimeline();
@@ -165,7 +168,9 @@ public class TwitterService extends Service {
 			break;
 		case SYNCH_DM:
 			Log.i(TAG, "SYNCH_DM");
-			// TODO
+			if(intent.getLongExtra("rowId", 0) != 0){
+				synchMessage(intent.getLongExtra("rowId", 0));
+			}
 			break;
 		default:
 			throw new IllegalArgumentException("Exception: Unknown synch request");
@@ -381,6 +386,34 @@ public class TwitterService extends Service {
 
 		
 	}
+	
+	/**
+	 * Checks the transactional flags of the direct message with the given _id and performs the corresponding actions
+	 */
+	private void synchMessage(long rowId) {
+		Log.i(TAG, "SYNCH_DM");
+		// get the flags
+		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+rowId);
+		Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+		
+		if(c.getCount() == 0){
+			Log.w(TAG, "Synch Message: Message not found " + rowId);
+			return;
+		}
+		c.moveToFirst();
+		
+		int flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
+		if((flags & DirectMessages.FLAG_TO_DELETE)>0) {
+			// Delete the DM from twitter
+			// TODO
+			//(new DestroyMessageTask()).execute(rowId);
+		} else if((flags & DirectMessages.FLAG_TO_INSERT)>0) {
+			// post the DM to twitter
+			(new SendMessageTask()).execute(rowId);
+		} 
+		c.close();
+	}
+	
 	/**
 	 * Reads the ID of the last tweet from shared preferences.
 	 * @return
@@ -590,22 +623,24 @@ public class TwitterService extends Service {
 	/**
 	 * Reads the ID of the last incoming direct message
 	 */
-	public Long getDMsInSinceId(Context context) {
+	public BigInteger getDMsInSinceId(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		return prefs.getLong("DMsInSinceId", 0);
-	}
+		String sinceIdString = prefs.getString("DMsInSinceId", null); 
+		if(sinceIdString==null)
+			return null;
+		else
+			return new BigInteger(sinceIdString);	}
 
 	/**
 	 * Stores the provided ID as the last incoming DM
 	 * @param lastId
 	 * @param baseContext
 	 */
-	public static void setDMsInSinceId(Long lastId, Context context) {
+	public static void setDMsInSinceId(BigInteger sinceId, Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
-		prefEditor.putLong("DMsInSinceId", lastId==null?0:lastId);
-		prefEditor.commit();
-		
+		prefEditor.putString("DMsInSinceId",sinceId==null?null:sinceId.toString());
+		prefEditor.commit();		
 	}
 	
 	/**
@@ -632,24 +667,26 @@ public class TwitterService extends Service {
 	}
 	
 	/**
-	 * Reads the ID of the last incoming direct message
+	 * Reads the ID of the last outgoing direct message
 	 */
-	public Long getDMsOutSinceId(Context context) {
+	public BigInteger getDMsOutSinceId(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		return prefs.getLong("DMsOutSinceId", 0);
-	}
+		String sinceIdString = prefs.getString("DMsOutSinceId", null); 
+		if(sinceIdString==null)
+			return null;
+		else
+			return new BigInteger(sinceIdString);	}
 
 	/**
-	 * Stores the provided ID as the last incoming DM
+	 * Stores the provided ID as the last outgoing DM
 	 * @param lastId
 	 * @param baseContext
 	 */
-	public static void setDMsOutSinceId(Long lastId, Context context) {
+	public static void setDMsOutSinceId(BigInteger sinceId, Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
-		prefEditor.putLong("DMsOutSinceId", lastId==null?0:lastId);
-		prefEditor.commit();
-		
+		prefEditor.putString("DMsOutSinceId",sinceId==null?null:sinceId.toString());
+		prefEditor.commit();		
 	}
 	
 	/**
@@ -802,6 +839,7 @@ public class TwitterService extends Service {
 		
 		cv.put(DirectMessages.COL_SENDER, dm.getSender().getId());
 		cv.put(DirectMessages.COL_RECEIVER, dm.getRecipient().getId());
+		cv.put(DirectMessages.COL_RECEIVER_SCREENNAME, dm.getRecipient().getScreenName());
 		cv.put(Tweets.COL_BUFFER, buffer);
 		
 		return cv;
@@ -2159,15 +2197,13 @@ public class TwitterService extends Service {
 			attempts = params[0];
 			
 			List<Twitter.Message> dms = null;
+
+			twitter.setCount(Constants.NR_DMS);
+			twitter.setSinceId(getDMsInSinceId(getBaseContext()));
+
 			
 			try {
-				twitter.setCount(Constants.NR_DMS);
-
-				long sinceId = getDMsInSinceId(getBaseContext());
-				if(sinceId>0) twitter.setSinceId(sinceId);
-				
 				dms = twitter.getDirectMessages();
-
 			} catch (Exception ex) {					
 				// save the expcetion for handling it in on post execute
 				this.ex = ex;
@@ -2207,11 +2243,12 @@ public class TwitterService extends Service {
 					if(lastId == null){
 						lastId = dm.getId();
 						// save the id of the last DM (comes first from twitter) for future synchs
-						setDMsInSinceId(lastId, getBaseContext());
+						setDMsInSinceId(new BigInteger(lastId.toString()), getBaseContext());
 					}
 					
 					updateUser(dm.getSender());
 					updateMessage(dm, DirectMessages.BUFFER_MESSAGES);
+					Log.e(TAG, "Message: "+dm.getText());
 					
 				}
 				
@@ -2245,14 +2282,11 @@ public class TwitterService extends Service {
 			
 			List<Twitter.Message> dms = null;
 			
+			twitter.setCount(Constants.NR_DMS);
+			twitter.setSinceId(getDMsOutSinceId(getBaseContext()));
+			
 			try {
-				twitter.setCount(Constants.NR_DMS);
-				
-				long sinceId = getDMsOutSinceId(getBaseContext());
-				if(sinceId>0) twitter.setSinceId(sinceId);
-				
 				dms = twitter.getDirectMessagesSent();
-
 			} catch (Exception ex) {					
 				// save the expcetion for handling it in on post execute
 				this.ex = ex;
@@ -2292,11 +2326,12 @@ public class TwitterService extends Service {
 					if(lastId == null){
 						lastId = dm.getId();
 						// save the id of the last DM (comes first from twitter) for future synchs
-						setDMsOutSinceId(lastId, getBaseContext());
+						setDMsOutSinceId(new BigInteger(lastId.toString()), getBaseContext());
 					}
 					
 					updateUser(dm.getRecipient());
 					updateMessage(dm, DirectMessages.BUFFER_MESSAGES);
+					Log.e(TAG, "Message: "+dm.getText());
 					
 				}
 				
@@ -2307,6 +2342,99 @@ public class TwitterService extends Service {
 			
 			// save the timestamp of the last update
 			setLastDMsOutUpdate(new Date(), getBaseContext());
+	     }
+
+	 }
+	
+	/**
+	 * Post a DM to twitter
+	 * @author thossmann
+	 */
+	private class SendMessageTask extends AsyncTask<Long, Void, Twitter.Message> {
+		
+		long rowId;
+		int flags;
+		int buffer;
+		String text;
+		String rec;
+		
+		Exception ex;
+		
+		@Override
+	     protected Twitter.Message doInBackground(Long... rowId) {
+			Log.i(TAG, "AsynchTask: SendMessageTask");
+			this.rowId = rowId[0];
+			
+			Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+this.rowId);
+			Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+			
+			if(c.getCount() == 0){
+				Log.w(TAG, "SendMessageTask: Message not found " + this.rowId);
+				return null;
+			}
+			c.moveToFirst();
+			flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
+			buffer = c.getInt(c.getColumnIndex(DirectMessages.COL_BUFFER));
+
+			Twitter.Message msg = null;
+			
+			try {
+				text = c.getString(c.getColumnIndex(DirectMessages.COL_TEXT));
+				rec = c.getString(c.getColumnIndex(DirectMessages.COL_RECEIVER_SCREENNAME));
+				Log.e(TAG, "sending: " + text + " to " + rec);
+				msg = twitter.sendMessage(rec, text);
+				
+			} catch(Exception ex) { 
+				this.ex = ex;
+			} finally {
+				c.close();
+			}
+	        return msg;
+	     }
+
+		/**
+		 * Clear to insert flag and update the message with the information from twitter
+		 */
+		@Override
+	     protected void onPostExecute(Twitter.Message result) {
+			
+			Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+this.rowId);
+			
+			// error handling
+			if(ex != null){
+				if(ex instanceof TwitterException.Repetition){
+					Toast.makeText(getBaseContext(), "Message already posted!", Toast.LENGTH_SHORT).show();
+					getContentResolver().delete(queryUri, null, null);
+					Log.w(TAG, "Error: "+ex);
+					return;
+				}  else {
+					Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you?", Toast.LENGTH_SHORT).show();
+					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
+					i.putExtra("recipient", rec);
+					i.putExtra("text", text);
+					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					getBaseContext().startActivity(i);
+					Log.w(TAG, "Error: "+ex);
+					return;
+				}
+			}
+
+			
+			
+			ContentValues cv = new ContentValues();
+			cv.put(DirectMessages.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
+			cv.put(DirectMessages.COL_BUFFER, buffer);
+			cv.put(DirectMessages.COL_TEXT, result.getText());
+			cv.put(DirectMessages.COL_CREATED, result.getCreatedAt().getTime());
+			cv.put(DirectMessages.COL_DMID, result.getId().longValue());
+			cv.put(DirectMessages.COL_SENDER, result.getSender().getId());
+			cv.put(DirectMessages.COL_RECEIVER, result.getRecipient().getId());
+			cv.put(DirectMessages.COL_RECEIVER_SCREENNAME, result.getRecipient().getScreenName());
+
+			
+			getContentResolver().update(queryUri, cv, null, null);
+			Toast.makeText(getBaseContext(), "Message sent.", Toast.LENGTH_SHORT).show();
+			
 	     }
 
 	 }

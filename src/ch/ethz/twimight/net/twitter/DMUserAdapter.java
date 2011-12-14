@@ -41,7 +41,7 @@ public class DMUserAdapter extends SimpleCursorAdapter {
 		super.bindView(userrow, context, cursor);
 			
 		// Profile image
-		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
+		ImageView picture = (ImageView) userrow.findViewById(R.id.showMDUserProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));

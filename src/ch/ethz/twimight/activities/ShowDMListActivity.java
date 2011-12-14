@@ -13,9 +13,8 @@
 package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DMUserAdapter;
+import ch.ethz.twimight.net.twitter.DMAdapter;
 import ch.ethz.twimight.net.twitter.DirectMessages;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -29,8 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -41,18 +38,19 @@ import android.widget.ListView;
  * @author thossmann
  *
  */
-public class ShowDMUsersListActivity extends Activity{
+public class ShowDMListActivity extends Activity{
 
-	private static final String TAG = "ShowDMUsersListActivity";
+	private static final String TAG = "ShowDMListActivity";
 	
-	private static ShowDMUsersListActivity instance;
-
 	// Views
-	private ListView dmUsersListView;
+	private ListView dmUserListView;
 	private ImageButton messageButton;
 
-	private DMUserAdapter adapter;
+	private DMAdapter adapter;
 	private Cursor c;
+	
+	private int rowId;
+	private String screenname;
 
 	// handler
 	static Handler handler;
@@ -70,39 +68,33 @@ public class ShowDMUsersListActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 				
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.show_dm_users);
+		setContentView(R.layout.show_dm_user);
 		
-		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
-		c = getContentResolver().query(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_USERS), null, null, null, null);
+		rowId = getIntent().getIntExtra("rowId", 0);
+		screenname = getIntent().getStringExtra("screenname");
 		
-		Log.e(TAG, "Users: " +c.getCount());
+		// If we don't know which user to show, we stop the activity
+		if(rowId == 0 || screenname == null) finish();
+
+		setTitle("Direct Messages - @" + screenname);
 		
-		adapter = new DMUserAdapter(this, c);		
-		dmUsersListView.setAdapter(adapter);
-		dmUsersListView.setEmptyView(findViewById(R.id.dmListEmpty));
+		dmUserListView = (ListView) findViewById(R.id.dmUserList);
+		c = getContentResolver().query(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_USER + "/" + rowId), null, null, null, null);
+				
+		adapter = new DMAdapter(this, c);		
+		dmUserListView.setAdapter(adapter);
+		dmUserListView.setEmptyView(findViewById(R.id.dmListEmpty));
 		// Click listener when the user clicks on a user
-		dmUsersListView.setClickable(true);
-		dmUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-				Cursor c = (Cursor) dmUsersListView.getItemAtPosition(position);
-				Intent i = new Intent(getBaseContext(), ShowDMListActivity.class);
-				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-				i.putExtra("screenname", c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
-				startActivity(i);
-			}
-		});
 		
-		messageButton = (ImageButton) findViewById(R.id.headerBarMessageButtonDMUsers);
+		messageButton = (ImageButton) findViewById(R.id.headerBarMessageButtonDMUser);
 		messageButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(getBaseContext(), NewDMActivity.class));
+				Intent i = new Intent(getBaseContext(), NewDMActivity.class);
+				i.putExtra("recipient", screenname);
+				startActivity(i);
 			}
 		});
-		
-		setInstance(this);
 		
 		Log.i(TAG, "created");
 
@@ -116,7 +108,7 @@ public class ShowDMUsersListActivity extends Activity{
 		super.onResume();
 		
 		// Are we in disaster mode?
-		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarDMUsers);
+		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarDMUser);
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
 		} else {
@@ -124,7 +116,7 @@ public class ShowDMUsersListActivity extends Activity{
 		}
 		
 		if(positionIndex != 0 | positionTop !=0){
-			dmUsersListView.setSelectionFromTop(positionIndex, positionTop);
+			dmUserListView.setSelectionFromTop(positionIndex, positionTop);
 		}
 	}
 	
@@ -146,13 +138,11 @@ public class ShowDMUsersListActivity extends Activity{
 		
 		messageButton.setOnClickListener(null);
 
-		dmUsersListView.setOnItemClickListener(null);
-		dmUsersListView.setAdapter(null);
+		dmUserListView.setAdapter(null);
 
 		if(c!=null) c.close();
 				
-		unbindDrawables(findViewById(R.id.showDMUsersListRoot));
-		setInstance(null);
+		unbindDrawables(findViewById(R.id.showDMUserListRoot));
 
 	}
 
@@ -194,8 +184,8 @@ public class ShowDMUsersListActivity extends Activity{
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 
-	  positionIndex = dmUsersListView.getFirstVisiblePosition();
-	  View v = dmUsersListView.getChildAt(0);
+	  positionIndex = dmUserListView.getFirstVisiblePosition();
+	  View v = dmUserListView.getChildAt(0);
 	  positionTop = (v == null) ? 0 : v.getTop();
 	  savedInstanceState.putInt("positionIndex", positionIndex);
 	  savedInstanceState.putInt("positionTop", positionTop);
@@ -216,35 +206,6 @@ public class ShowDMUsersListActivity extends Activity{
 	  positionTop = savedInstanceState.getInt("positionTop");
 	  
 	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
-	}
-	
-	/**
-	 * @param instance the instance to set
-	 */
-	public static void setInstance(ShowDMUsersListActivity instance) {
-		ShowDMUsersListActivity.instance = instance;
-	}
-
-	/**
-	 * @return the instance
-	 */
-	public static ShowDMUsersListActivity getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Turns the loading icon on and off
-	 * @param isLoading
-	 */
-	public static void setLoading(final boolean isLoading) {
-		if(getInstance()!=null){
-			getInstance().runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 getInstance().setProgressBarIndeterminateVisibility(isLoading);
-			     }
-			});
-		}
-
 	}
 	
 	/**

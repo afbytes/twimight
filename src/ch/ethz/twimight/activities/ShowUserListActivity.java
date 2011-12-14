@@ -236,6 +236,7 @@ public class ShowUserListActivity extends Activity{
 
 		adapter = new TwitterUserAdapter(this, c);		
 		userListView.setAdapter(adapter);
+		userListView.setEmptyView(findViewById(R.id.userListEmpty));
 
 		// Click listener when the user clicks on a user
 		userListView.setClickable(true);

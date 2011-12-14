@@ -49,6 +49,7 @@ public class DirectMessages implements BaseColumns {
 	public static final String COL_TEXT = "text"; /** the dm text */
 	public static final String COL_SENDER = "sender"; /** the user id of the sender */
 	public static final String COL_RECEIVER = "receiver"; /** the user id of the receiver */
+	public static final String COL_RECEIVER_SCREENNAME = "receiver_screenname"; /** the screenname of the receiver (required for sending messages) */
 	public static final String COL_DMID = "dm_id"; /** the "official" message ID from twitter */
 	public static final String COL_CREATED = "created"; /** the creation timestamp (millisecs since 1970) */
 	public static final String COL_RECEIVED = "received"; /** timestamp we insert the tweet into the DB */
@@ -67,9 +68,12 @@ public class DirectMessages implements BaseColumns {
 	
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_INSERT = 1; /** The message is new and should be posted to twitter */
+	public static final int FLAG_TO_DELETE = 2; /** Delete the message from Twitter */
+
 	
 	// flags to mark which buffer(s) a tweet belongs to. (Buffer sizes are defined in class Constants)
 	public static final int BUFFER_MESSAGES = 1; /** Holds all messages of the local user (to and from) */
 	public static final int BUFFER_DISASTER = 2; /** Disaster messages of other users */
 	public static final int BUFFER_MYDISASTER = 4; /** The disaster messages of the local user */
+
 }

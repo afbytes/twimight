@@ -37,7 +37,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 
-	private static final int DATABASE_VERSION = 32;
+	private static final int DATABASE_VERSION = 34;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -121,9 +121,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	// Direct Messages (including disaster messages)
 	private static final String TABLE_DMS_CREATE = "create table "+TABLE_DMS+" ("
 			+ "_id integer primary key autoincrement not null, "
-			+ DirectMessages.COL_TEXT + " string not null, "
-			+ DirectMessages.COL_SENDER + " bigint not null, "
-			+ DirectMessages.COL_RECEIVER + " bigint not null, "
+			+ DirectMessages.COL_TEXT + " string, "
+			+ DirectMessages.COL_SENDER + " bigint, "
+			+ DirectMessages.COL_RECEIVER + " bigint, "
+			+ DirectMessages.COL_RECEIVER_SCREENNAME + " string, "
 			+ DirectMessages.COL_DMID + " bigint unique, "
 			+ DirectMessages.COL_CREATED + " integer, "
 			+ DirectMessages.COL_RECEIVED + " integer, "
