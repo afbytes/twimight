@@ -192,6 +192,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				}
 
 				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+				getContext().getContentResolver().notifyChange(uri, null);
 
 				return nrRows;
 			} else {

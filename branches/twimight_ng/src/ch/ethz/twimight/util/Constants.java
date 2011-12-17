@@ -103,6 +103,7 @@ public final class Constants {
 	public static final int MESSAGES_BUFFER_SIZE = 100; /** How many direct messages to and from the local user do we buffer? */
 	public static final int DISASTERDM_BUFFER_SIZE = 100; /** How many disaster direct messages of remote users do we carry? */
 	public static final int MYDISASTERDM_BUFFER_SIZE = 100; /** How many disaster messages sent by the local user do we carry? */
+	public static final int USERTWEETS_BUFFER_SIZE = 200; /** How many tweets to cache for showing user profiles */
  
 	
 }

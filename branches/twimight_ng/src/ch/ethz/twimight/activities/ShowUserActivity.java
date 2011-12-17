@@ -17,10 +17,12 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -41,11 +43,12 @@ import android.widget.TextView;
 public class ShowUserActivity extends Activity{
 
 	private static final String TAG = "ShowTwitterUserActivity";
-	
+
 	Uri uri;
 	Cursor c;
 	int flags;
-	
+	int rowId;
+
 	// Views
 	private ImageView profileImage;
 	private TextView screenName;
@@ -60,14 +63,17 @@ public class ShowUserActivity extends Activity{
 	private Button showFriendsButton;
 	private LinearLayout followInfo;
 	private LinearLayout unfollowInfo;
-	
+	private Button showUserTweetsButton;
+
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
 
-	
+
 	private boolean following;
 	String userScreenName;
-		
+	Handler handler;
+	ContentObserver observer;
+
 	/** 
 	 * Called when the activity is first created. 
 	 */
@@ -75,7 +81,7 @@ public class ShowUserActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showuser);
-		
+
 		profileImage = (ImageView) findViewById(R.id.showUserProfileImage);
 		screenName = (TextView) findViewById(R.id.showUserScreenName);
 		realName = (TextView) findViewById(R.id.showUserRealName);
@@ -89,86 +95,82 @@ public class ShowUserActivity extends Activity{
 		unfollowInfo = (LinearLayout) findViewById(R.id.showUserTounfollow);
 		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
 		showFriendsButton = (Button) findViewById(R.id.showUserFriends);
-		
-		
-		
-		int rowId = getIntent().getIntExtra("rowId", 0);
-		
-		// If we don't know which tweet to show, we stop the activity
-		if(rowId == 0) finish();
-		
-		// get data from local DB and mark for update
-		uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
-		c = managedQuery(uri, null, null, null, null);
-		
-		if(c.getCount() == 0) finish();
-		
-		c.moveToFirst();
+		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
 
-		/*
-		 * User info
-		 */
-		
-		// do we have a profile image?
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-		}
-		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
-		screenName.setText(userScreenName);
-		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
-		
-		if(c.getColumnIndex(TwitterUsers.COL_LOCATION) >=0){
-			location.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_LOCATION)));
-		} else {
-			location.setVisibility(TextView.GONE);
-		}
+		if(getIntent().hasExtra("rowId")){
+			rowId = getIntent().getIntExtra("rowId", 0);
 
-		if(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION) >=0){
-			String tmp = c.getString(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION));
-			if(tmp != null){
-				description.setText(tmp);
-			} else {
-				description.setVisibility(TextView.GONE);
+			// get data from local DB
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+			c = getContentResolver().query(uri, null, null, null, null);
+
+			if(c.getCount() == 0) finish();
+
+			c.moveToFirst();
+
+		} else if(getIntent().hasExtra("screenname")){
+
+			Log.e(TAG, getIntent().getStringExtra("screenname"));
+			
+			// get data from local DB
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+			c = getContentResolver().query(uri, null, TwitterUsers.COL_SCREENNAME+" LIKE '"+getIntent().getStringExtra("screenname")+"'", null, null);
+
+			if(c.getCount() == 0) {
+				Log.w(TAG, "USER NOT FOUND " + getIntent().getStringExtra("screenname"));
+				finish();
+				return;
 			}
-		} else {
-			description.setVisibility(TextView.GONE);
-		}
-		
-		int tweets = c.getInt(c.getColumnIndex(TwitterUsers.COL_STATUSES));
-		int favorites = c.getInt(c.getColumnIndex(TwitterUsers.COL_FAVORITES));
-		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
-		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
 
-		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "+favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
-		
-		// if the user we show is the local user, disable the follow button
-		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
-			showLocalUser();
+			c.moveToFirst();
+			rowId = c.getInt(c.getColumnIndex("_id"));
+
 		} else {
-			showRemoteUser();
+			// if we don't know which user to show
+			Log.w(TAG, "WHICH USER??");
+			finish();
+			return;
 		}
-				
-		/*
-		 * Recent tweets
-		 */
-		// TODO
+
+		// mark the user for updating
+		uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+		ContentValues cv = new ContentValues();
+		cv.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATEIMAGE|TwitterUsers.FLAG_TO_UPDATE|c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS)));
+		getContentResolver().update(uri, cv, null, null);
+		
+		// register content observer to refresh when user was updated
+		handler = new Handler();
+		observer = new UserContentObserver(handler);
+		c.registerContentObserver(observer);
+
+		// show the views
+		showUserInfo();
+		
 	}
-	
+
 	/**
 	 * Called at the end of the Activity lifecycle
 	 */
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+
 		if(followButton!=null) followButton.setOnClickListener(null);
 		if(mentionButton!=null) mentionButton.setOnClickListener(null);
 		if(messageButton!=null) messageButton.setOnClickListener(null);
 		if(showFollowersButton!=null) showFollowersButton.setOnClickListener(null);
 		if(showFriendsButton!=null) showFriendsButton.setOnClickListener(null);
+		if(showUserTweetsButton!=null) showUserTweetsButton.setOnClickListener(null);
+
 		
 		unbindDrawables(findViewById(R.id.showUserRoot));
+
+		if(c!=null){
+			if(observer != null) c.unregisterContentObserver(observer);
+			c.close();
+		}
+		observer = null;
+		handler = null;
 		
 	}
 
@@ -191,7 +193,7 @@ public class ShowUserActivity extends Activity{
 
 		Intent i;
 		switch(item.getItemId()){
-		
+
 		case OPTIONS_MENU_HOME:
 			// show the timeline
 			i = new Intent(this, ShowTweetListActivity.class);
@@ -203,7 +205,7 @@ public class ShowUserActivity extends Activity{
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Compare the argument with the local user ID.
 	 * @param userString
@@ -215,17 +217,86 @@ public class ShowUserActivity extends Activity{
 	}
 	
 	/**
+	 * Fills the views
+	 */
+	private void showUserInfo(){
+		/*
+		 * User info
+		 */
+
+		// do we have a profile image?
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
+			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
+		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
+		screenName.setText(userScreenName);
+		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
+
+		if(c.getColumnIndex(TwitterUsers.COL_LOCATION) >=0){
+			location.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_LOCATION)));
+			location.setVisibility(TextView.VISIBLE);
+		} else {
+			location.setVisibility(TextView.GONE);
+		}
+
+		if(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION) >=0){
+			String tmp = c.getString(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION));
+			if(tmp != null){
+				description.setText(tmp);
+				description.setVisibility(TextView.VISIBLE);
+			} else {
+				description.setVisibility(TextView.GONE);
+			}
+		} else {
+			description.setVisibility(TextView.GONE);
+		}
+
+		int tweets = c.getInt(c.getColumnIndex(TwitterUsers.COL_STATUSES));
+		int favorites = c.getInt(c.getColumnIndex(TwitterUsers.COL_FAVORITES));
+		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
+		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
+
+		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "+favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
+
+		// if the user we show is the local user, disable the follow button
+		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
+			showLocalUser();
+		} else {
+			showRemoteUser();
+		}
+		
+		// if we have a user ID we show the recent tweets
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_ID))){
+			showUserTweetsButton.setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View v) {
+					Intent i = new Intent(getBaseContext(), ShowUserTweetListActivity.class);
+					i.putExtra("userId", c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+					startActivity(i);
+
+				}
+
+			});
+			showUserTweetsButton.setVisibility(Button.VISIBLE);
+		} else {
+			showUserTweetsButton.setVisibility(Button.GONE);
+		}
+	}
+
+	/**
 	 * Sets the user interface up to show the local user's profile
 	 */
 	private void showLocalUser(){
 		// disable the normal user buttons
 		LinearLayout remoteUserButtons = (LinearLayout) findViewById(R.id.showUserButtons);
 		remoteUserButtons.setVisibility(LinearLayout.GONE);
-		
+
 		// enable the show followers and show followee's buttons
 		LinearLayout localUserButtons = (LinearLayout) findViewById(R.id.showLocalUserButtons);
 		localUserButtons.setVisibility(LinearLayout.VISIBLE);
-		
+
 		// the followers Button
 		showFollowersButton.setOnClickListener(new OnClickListener(){
 
@@ -237,9 +308,9 @@ public class ShowUserActivity extends Activity{
 				startActivity(i);
 
 			}
-			
+
 		});
-		
+
 		// the followees Button
 		showFriendsButton.setOnClickListener(new OnClickListener(){
 
@@ -250,17 +321,17 @@ public class ShowUserActivity extends Activity{
 				i.putExtra("filter", ShowUserListActivity.SHOW_FRIENDS);
 				startActivity(i);
 			}
-			
+
 		});
 	}
-	
+
 	/**
 	 * Sets the UI up to show a remote user (any user except for the local one)
 	 */
 	private void showRemoteUser(){
 		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		Log.i(TAG, "flags: "+ flags);
-		
+
 		/*
 		 * Regarding the following situation, the following cases are possible: 
 		 * - the user was marked for following
@@ -291,7 +362,7 @@ public class ShowUserActivity extends Activity{
 				}
 				finish();
 			}
-			
+
 		});
 
 		if((flags & TwitterUsers.FLAG_TO_FOLLOW)>0){
@@ -308,7 +379,7 @@ public class ShowUserActivity extends Activity{
 			// disable follow button
 			followButton.setVisibility(Button.GONE);
 		}
-		
+
 		/*
 		 * Mention button
 		 */
@@ -320,7 +391,7 @@ public class ShowUserActivity extends Activity{
 				startActivity(i);
 			}
 		});
-		
+
 		/*
 		 * Message button
 		 */
@@ -346,8 +417,8 @@ public class ShowUserActivity extends Activity{
 		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_FOLLOW);
 		return cv;
 	}
-	
-	
+
+
 	/**
 	 * Returns content values with the to unfollow flag set
 	 * @param flags
@@ -359,24 +430,61 @@ public class ShowUserActivity extends Activity{
 		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_UNFOLLOW);
 		return cv;
 	}
-	
+
 	/**
 	 * Clean up the views
 	 * @param view
 	 */
 	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
+		if (view.getBackground() != null) {
+			view.getBackground().setCallback(null);
+		}
+		if (view instanceof ViewGroup) {
+			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+				unbindDrawables(((ViewGroup) view).getChildAt(i));
+			}
+			try{
+				((ViewGroup) view).removeAllViews();
+			} catch(UnsupportedOperationException e){
+				// No problem, nothing to do here
+			}
+		}
+	}
+
+	class UserContentObserver extends ContentObserver {
+		public UserContentObserver(Handler h) {
+			super(h);
+		}
+
+		@Override
+		public boolean deliverSelfNotifications() {
+			return true;
+		}
+
+		@Override
+		public void onChange(boolean selfChange) {
+			Log.d(TAG, "UserContentObserver.onChange( " + selfChange+ ")");
+			super.onChange(selfChange);
+			
+			// close the old cursor
+			if(c!=null) {
+				if(observer!= null) c.unregisterContentObserver(observer);
+				c.close();
+			}
+			
+			// and get a new one
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+			c = getContentResolver().query(uri, null, null, null, null);
+			if(c.getCount() == 0) finish();
+			c.moveToFirst();
+			
+			observer = new UserContentObserver(handler);
+			c.registerContentObserver(observer);
+
+			
+			// update the views
+			showUserInfo();
+
+		}
 	}
 }

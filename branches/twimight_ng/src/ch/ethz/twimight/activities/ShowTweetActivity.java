@@ -18,16 +18,20 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.TweetTagHandler;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -112,13 +116,17 @@ public class ShowTweetActivity extends Activity{
 			i.putExtra("rowId", new Long(uri.getLastPathSegment()));
 			startService(i);
 		}
+		
+		
 
 		// The tweet info
 		screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 		screenNameView.setText(screenName);
 		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-		tweetTextView.setText(text);
+		tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
+		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
 		createdTextView.setText(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED))).toString());
 		if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
 			createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
@@ -467,4 +475,5 @@ public class ShowTweetActivity extends Activity{
 	        }
 	    }
 	}
+
 }
