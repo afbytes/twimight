@@ -50,7 +50,7 @@
 				android:textSize="14sp" />
 		</LinearLayout>
 
-		<LinearLayout android:id="@+id/showLocalUserButtons"
+		<LinearLayout android:id="@+id/showUserTweetsButtons"
 			android:orientation="horizontal" android:layout_width="match_parent"
 			android:layout_height="wrap_content" android:layout_marginTop="20dp">
 
@@ -58,6 +58,20 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="Recent Tweets" android:layout_marginRight="20dp"
 				android:visibility="visible" />
+		</LinearLayout>
+		
+				<LinearLayout android:id="@+id/showLocalUserButtons"
+			android:orientation="horizontal" android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:layout_marginTop="20dp"
+			android:visibility="gone">
+			<Button android:id="@+id/showUserFollowers"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="Followers" android:layout_marginRight="20dp" 
+				android:visibility="visible"/>
+			<Button android:id="@+id/showUserFriends"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="Friends" android:layout_marginRight="20dp" 
+				android:visibility="visible"/>
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showUserButtons"
@@ -104,18 +118,6 @@
 					android:text="Direct Message" android:layout_marginRight="20dp"
 					android:visibility="visible" />
 			</LinearLayout>
-		</LinearLayout>
-
-		<LinearLayout android:id="@+id/showLocalUserButtons"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="20dp"
-			android:visibility="gone">
-			<Button android:id="@+id/showUserFollowers"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Followers" android:layout_marginRight="20dp" />
-			<Button android:id="@+id/showUserFriends"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Friends" android:layout_marginRight="20dp" />
 		</LinearLayout>
 
 	</LinearLayout>
