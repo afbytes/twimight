@@ -8,6 +8,9 @@
         <color name="text">#000000</color>
         <color name="white">#FFFFFF</color>
         <color name="black">#000000</color>
+        
+        <color name="tweet_link">#0000FF</color>
+        
         <color name="headerBarTextOn">#FFFFFF</color>
         <color name="headerBarTextOff">#00000000</color>
         <color name="titlenormalbackgroundcolor">#939393</color>

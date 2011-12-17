@@ -77,6 +77,7 @@ public class ShowTweetListActivity extends Activity{
 	public static final int SHOW_TIMELINE = 1;
 	public static final int SHOW_FAVORITES = 2;
 	public static final int SHOW_MENTIONS = 3;
+	public static final int SHOW_USERTWEETS = 4;
 	public static final int SHOW_SEARCH = 5;
 	
 	private int currentFilter = 0;
@@ -346,6 +347,13 @@ public class ShowTweetListActivity extends Activity{
 			b = mentionsButton;
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
+
+			break;
+			
+		case SHOW_USERTWEETS:
+			long userId = getIntent().getLongExtra("userId", 0);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +"/" + Tweets.TWEETS_TABLE_USER + "/" + userId), null, null, null, null);
+			currentFilter=SHOW_USERTWEETS;
 
 			break;
 		case SHOW_SEARCH: 

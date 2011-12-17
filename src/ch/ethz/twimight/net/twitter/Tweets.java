@@ -39,6 +39,7 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_TABLE_TIMELINE = "timeline"; /** the timeline filter */
 	public static final String TWEETS_TABLE_FAVORITES = "favorites"; /** the favorites filter */
 	public static final String TWEETS_TABLE_MENTIONS = "mentions"; /** the mentions filter */
+	public static final String TWEETS_TABLE_USER = "user"; /** the mentions filter */
 	
 	public static final String TWEETS_SOURCE_NORMAL = "normal"; /** only normal tweets (no disaster tweets) */
 	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */
@@ -85,4 +86,5 @@ public class Tweets implements BaseColumns {
 	public static final int BUFFER_MYDISASTER = 4; /** The disaster tweets of the local user */
 	public static final int BUFFER_FAVORITES = 8; /** All favorites of the local user */
 	public static final int BUFFER_MENTIONS = 16; /** All mentions of the local user */
+	public static final int BUFFER_USERS = 32; /** All mentions of the local user */
 }

@@ -16,6 +16,8 @@ package ch.ethz.twimight.net.twitter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -28,12 +30,15 @@ import org.apache.http.util.EntityUtils;
 
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
+import winterwell.jtwitter.Twitter.KEntityType;
 import winterwell.jtwitter.Twitter.Message;
+import winterwell.jtwitter.Twitter.TweetEntity;
 import winterwell.jtwitter.TwitterAccount;
 import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.Twitter.User;
 
 import ch.ethz.bluetest.credentials.Obfuscator;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewDMActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
@@ -79,6 +84,7 @@ public class TwitterService extends Service {
 	public static final int SYNCH_TWEET = 10;
 	public static final int SYNCH_DMS = 11;
 	public static final int SYNCH_DM = 12;
+	public static final int SYNCH_USERTWEETS = 13;
 	
 	Twitter twitter;
 
@@ -113,6 +119,7 @@ public class TwitterService extends Service {
 			return START_NOT_STICKY;
 		}
 		
+		twitter.setIncludeTweetEntities(true);
 		
 		// check what we are asked to synch
 		int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
@@ -126,7 +133,6 @@ public class TwitterService extends Service {
 			synchTransactionalUsers();
 			synchTimeline();
 			synchMentions();
-			synchFavorites();
 			synchMessages();
 			break;
 		case SYNCH_TIMELINE:
@@ -171,6 +177,12 @@ public class TwitterService extends Service {
 			Log.i(TAG, "SYNCH_DM");
 			if(intent.getLongExtra("rowId", 0) != 0){
 				synchMessage(intent.getLongExtra("rowId", 0));
+			}
+			break;
+		case SYNCH_USERTWEETS:
+			Log.i(TAG, "SYNCH_USERTWEETS");
+			if(intent.getStringExtra("screenname") != null){
+				synchUserTweets(intent.getStringExtra("screenname"));
 			}
 			break;
 		default:
@@ -293,7 +305,8 @@ public class TwitterService extends Service {
 			(new DestroyStatusTask()).execute(rowId);
 		} else if((flags & Tweets.FLAG_TO_INSERT)>0) {
 			// post the tweet to twitter
-			(new UpdateStatusTask()).execute(rowId);
+			Long[] params = {rowId, 3L}; // three attempts
+			(new UpdateStatusTask()).execute(params);
 		} else if((flags & Tweets.FLAG_TO_FAVORITE)>0) {
 			// post favorite to twitter
 			(new FavoriteStatusTask()).execute(rowId);
@@ -432,6 +445,16 @@ public class TwitterService extends Service {
 			(new SendMessageTask()).execute(rowId);
 		} 
 		c.close();
+	}
+	
+	/**
+	 * Starts a thread to load the tweets of a user
+	 */
+	private void synchUserTweets(String screenname) {
+		
+		Log.i(TAG, "SYNCH_USERTWEETS");
+		(new UpdateUserTweetsTask()).execute(screenname);
+		
 	}
 	
 	/**
@@ -726,16 +749,17 @@ public class TwitterService extends Service {
 			Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
 			Uri resultUri = getContentResolver().insert(insertUri, getTweetContentValues(tweet, buffer));
 			tweetId = new Integer(resultUri.getLastPathSegment());
-			c.close();
+			
+
+			
 		} else {
 			c.moveToFirst();
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + c.getInt(c.getColumnIndex("_id")));
 			int updatedBufferFlags = buffer | c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 			getContentResolver().update(updateUri, getTweetContentValues(tweet, updatedBufferFlags), null, null);
 			tweetId = c.getInt(c.getColumnIndex("_id"));
-			c.close();
-
 		}
+		c.close();
 		
 		return tweetId;
 	}
@@ -822,7 +846,7 @@ public class TwitterService extends Service {
 	 */
 	private ContentValues getTweetContentValues(Twitter.Status tweet, int buffer) {
 		ContentValues cv = new ContentValues();
-		cv.put(Tweets.COL_TEXT, tweet.getText());
+		cv.put(Tweets.COL_TEXT, createSpans(tweet));
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
 		cv.put(Tweets.COL_TID, tweet.getId().longValue());
@@ -839,10 +863,102 @@ public class TwitterService extends Service {
 		cv.put(Tweets.COL_BUFFER, buffer);
 		
 		// TODO: Location (enter coordinates of tweet)
-		Log.e(TAG, "Location: "+ tweet.getLocation());
+		//Log.e(TAG, "Location: "+ tweet.getLocation());
 		
 		return cv;
 	}
+	
+	/**
+	 * Creates spans for entities (mentions, urls, hashtags).
+	 * @param tweet
+	 * @return The tweet text with the spans
+	 */
+	@SuppressWarnings("unchecked")
+	private String createSpans(Twitter.Status tweet){
+		
+		if(tweet==null) return null;
+		
+		String originalText = (String) tweet.getText();
+        
+		// we need one list with all entities, sorted by their start
+		List<TweetEntity> allEntities = new ArrayList<TweetEntity>();
+		
+		List<TweetEntity> entities = tweet.getTweetEntities(Twitter.KEntityType.hashtags);
+		if(entities != null){
+			for (TweetEntity entity: entities) {
+				allEntities.add(entity);
+			}
+		}
+		entities = tweet.getTweetEntities(Twitter.KEntityType.user_mentions);
+		if(entities != null){
+			for (TweetEntity entity: entities) {
+				allEntities.add(entity);
+				
+				// we add the user to the local DB. TODO: Merge this with updateUser function
+				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+				String[] projection = {"_id", TwitterUsers.COL_LASTUPDATE, TwitterUsers.COL_FLAGS};
+				String screenname = tweet.getText().substring(entity.start+1, entity.end);
+				Cursor c = getContentResolver().query(uri, projection, TwitterUsers.COL_SCREENNAME+" LIKE '"+screenname+"'", null, null);
+							
+				if(c.getCount() == 0){ // we don't have the local user in the DB yet!
+					Log.e(TAG, "Dont have user " + screenname + ", inserting now");
+
+					ContentValues cv = new ContentValues();
+					cv.put(TwitterUsers.COL_NAME, entity.displayVersion());
+					cv.put(TwitterUsers.COL_SCREENNAME, screenname);
+
+					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+					getContentResolver().insert(insertUri, cv);
+
+				} 
+				c.close();
+			}
+		}
+		entities = tweet.getTweetEntities(Twitter.KEntityType.urls);
+		if(entities != null){
+			for (TweetEntity entity: entities) {
+				allEntities.add(entity);
+			}
+		}
+		
+		// do we have entities at all?
+		if(allEntities.isEmpty()) return tweet.getText();
+		
+		// sort according to start character
+		Collections.sort(allEntities, new Comparator(){
+			@Override
+			public int compare(Object object1, Object object2) {
+				TweetEntity entity1 = (TweetEntity) object1;
+				TweetEntity entity2 = (TweetEntity) object2;
+				return entity1.start - entity2.start;
+			}
+		});
+		
+		// assemble the text
+		StringBuilder replacedText = new StringBuilder();
+		int lastIndex = 0;
+		for (TweetEntity curEntity: allEntities) {
+			// append everything before the start of this entity
+			replacedText.append("<tweet>"+originalText.substring(lastIndex, curEntity.start));
+			// append the entity
+			if(curEntity.type == KEntityType.hashtags){
+				replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
+			} else if(curEntity.type == KEntityType.urls){
+				replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
+			} else if(curEntity.type == KEntityType.user_mentions){
+				replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
+			}
+			lastIndex = curEntity.end;
+		}
+		// append the rest of the original text
+		replacedText.append(originalText.substring(lastIndex,originalText.length())+"</tweet>");
+			
+		Log.e(TAG, originalText);
+		Log.e(TAG, replacedText.toString());
+		
+		return replacedText.toString();
+	}
+	
 	
 	/**
 	 * Creates content values for a DM from Twitter
@@ -1013,8 +1129,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading mentions: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while loading mentions.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading mentions: " + ex);
 				} else {
 					Toast.makeText(getBaseContext(), "Something went wrong when loading your mentions. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading mentions: " + ex);
 				}
 				return;
 			}
@@ -1082,8 +1203,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while loading favorites: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while loading favorites.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading favorites: " + ex);
+				}else {
 					Toast.makeText(getBaseContext(), "Something went wrong when loading your favorites. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading favorites: " + ex);
 				}
 				return;
 			}
@@ -1151,8 +1277,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while loading timeline: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while loading timeline.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading timeline: " + ex);
+				}else {
 					Toast.makeText(getBaseContext(), "Something went wrong when loading your timeline. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading timeline: " + ex);
 				}
 				return;
 			}
@@ -1219,8 +1350,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while loading friends: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while loading friends.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading friends: " + ex);
+				}else {
 					Toast.makeText(getBaseContext(), "Something went wrong when loading your friends. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading friends: " + ex);
 				}
 				return;
 			}
@@ -1315,8 +1451,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while loading followers: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while loading followers.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading followers: " + ex);
+				}else {
 					Toast.makeText(getBaseContext(), "Something went wrong when loading your followers. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while loading followers: " + ex);
 				}
 				return;
 			}
@@ -1381,6 +1522,7 @@ public class TwitterService extends Service {
 	 */
 	private class UpdateStatusTask extends AsyncTask<Long, Void, Twitter.Status> {
 		
+		long attempts;
 		long rowId;
 		int flags;
 		int buffer;
@@ -1392,6 +1534,7 @@ public class TwitterService extends Service {
 			Log.i(TAG, "AsynchTask: UpdateStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
+			this.attempts = rowId[1];
 			
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			Cursor c = getContentResolver().query(queryUri, null, null, null, null);
@@ -1439,17 +1582,42 @@ public class TwitterService extends Service {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
-					Toast.makeText(getBaseContext(), "Tweet already posted!", Toast.LENGTH_SHORT).show();
-					return;
+					Toast.makeText(getBaseContext(), "Tweet already posted", Toast.LENGTH_SHORT).show();
+					Log.w(TAG, "exception while posting tweet: " + ex);
+					// we stil clear the flag
+				} else if(ex instanceof TwitterException.Unexplained){
+					// we get unexplained exceptions if what twitter returns does not match what we have sent.
+					// this does not have to be an error, it happens if we post a url, for example.
+					Log.w(TAG, "unexplained exception while posting tweet (maybe it contained a url): " + ex);
+					// here we update the timeline to fetch the new tweet from twitter
+					(new UpdateTimelineTask()).execute();
+				} else if(ex instanceof TwitterException.Timeout){
+					Log.w(TAG, "exception while posting tweet: " + ex);
+					// try again?
+					if(attempts>0){
+						Long[] params = {rowId, --attempts};
+						(new UpdateStatusTask()).execute(params);
+						return;
+					} else {
+						Toast.makeText(getBaseContext(), "Timeout while posting tweet.", Toast.LENGTH_SHORT).show();
+						return;
+					}
 				} else {
 					Toast.makeText(getBaseContext(), "Something went wrong when posting your tweet. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
 				}
 			}
 
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			
-			ContentValues cv = getTweetContentValues(result, 0);
+			ContentValues cv = null;
+			// if we had a result, we get the new values. Otherwise we simply clear the flags.
+			if(result != null){
+				cv = getTweetContentValues(result, 0);
+			} else {
+				cv = new ContentValues();
+			}
 			cv.put(Tweets.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
 			cv.put(Tweets.COL_BUFFER, buffer);
 			
@@ -1572,7 +1740,12 @@ public class TwitterService extends Service {
 			Twitter.User user = null;
 			
 			try {
-				user = twitter.show(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+				// we need a user id or a screenname
+				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_ID))){
+					user = twitter.show(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+				} else if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
+					user = twitter.show(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+				}
 
 			} catch (Exception ex) {
 				this.ex = ex;
@@ -1762,9 +1935,14 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
 					Toast.makeText(getBaseContext(), "Already deleted!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while deleting tweet: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while deleting.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while deleting tweet: " + ex);
+				}else {
 					// an exception happended, we notify the user					
 					Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while deleting tweet: " + ex);
 					return;
 				}
 			}
@@ -1850,9 +2028,14 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
 					Toast.makeText(getBaseContext(), "Already not a favorite!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while unfavoriting: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while unfavoriting.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while unfavoriting: " + ex);
+				}else {
 					// an exception happended, we notify the user					
 					Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while unfavoriting: " + ex);
 					return;
 				}
 			}
@@ -1940,9 +2123,14 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
 					Toast.makeText(getBaseContext(), "Already not a favorite!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while favoriting: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while favoriting.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while favoriting: " + ex);
+				}else {
 					// an exception happended, we notify the user					
 					Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
 				}
 			}
@@ -2028,9 +2216,14 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
 					Toast.makeText(getBaseContext(), "Already retweeted!", Toast.LENGTH_SHORT).show();
-				} else {
+					Log.e(TAG, "exception while retweeting: " + ex);
+				} else if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while retweeting.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while retweeting: " + ex);
+				}else {
 					// an exception happended, we notify the user					
 					Toast.makeText(getBaseContext(), "Something went wrong while retweeting. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while retweeting: " + ex);
 					return;
 				}
 			}
@@ -2100,9 +2293,15 @@ public class TwitterService extends Service {
 			ShowUserListActivity.setLoading(false);
 			// error handling
 			if(ex != null){
-				// an exception happended, we notify the user					
-				Toast.makeText(getBaseContext(), "Something went wrong while sending the follow request. We will try again later!", Toast.LENGTH_LONG).show();
-				return;
+				if(ex instanceof TwitterException.Timeout){
+					Toast.makeText(getBaseContext(), "Timeout while sending follow request.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while following: " + ex);
+				} else {
+					// an exception happended, we notify the user					
+					Toast.makeText(getBaseContext(), "Something went wrong while sending the follow request. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while following: " + ex);
+					return;
+				}
 			}
 
 			// we get null if: the user does not exist or is protected
@@ -2176,6 +2375,7 @@ public class TwitterService extends Service {
 			if(ex != null){
 				// an exception happended, we notify the user					
 				Toast.makeText(getBaseContext(), "Something went wrong while sending the unfollow request. We will try again later!", Toast.LENGTH_LONG).show();
+				Log.e(TAG, "exception while unfollowing: " + ex);
 				return;
 			}
 			
@@ -2241,6 +2441,7 @@ public class TwitterService extends Service {
 				// an exception happended, we try again or notify the user
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while loading incoming DMs: " + ex);
 					return;
 				} else {
 					if(attempts>0) {
@@ -2249,6 +2450,7 @@ public class TwitterService extends Service {
 						return;
 					} else {
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
+						Log.e(TAG, "exception while loading incoming DMs: " + ex);
 						return;
 					}
 				}
@@ -2324,6 +2526,7 @@ public class TwitterService extends Service {
 				// an exception happended, we try again or notify the user
 				if(ex instanceof TwitterException.RateLimit){
 					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while loading outgoing DMs: " + ex);
 					return;
 				} else {
 					if(attempts>0) {
@@ -2332,6 +2535,7 @@ public class TwitterService extends Service {
 						return;
 					} else {
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
+						Log.e(TAG, "exception while loading outgoing DMs: " + ex);
 						return;
 					}
 				}
@@ -2424,11 +2628,13 @@ public class TwitterService extends Service {
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
 					Toast.makeText(getBaseContext(), "Message already posted!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while sending DM: " + ex);
 					getContentResolver().delete(queryUri, null, null);
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}  else {
 					Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you?", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
 					i.putExtra("recipient", rec);
 					i.putExtra("text", text);
@@ -2459,6 +2665,62 @@ public class TwitterService extends Service {
 	     }
 
 	 }
+	
+	
+	/**
+	 * Loads the most recent tweets of a user
+	 * @author thossmann
+	 *
+	 */
+	private class UpdateUserTweetsTask extends AsyncTask<String, Void, List<Twitter.Status>> {
+		
+		Exception ex;
+		
+		@Override
+	     protected List<Twitter.Status> doInBackground(String... params) {
+			Log.i(TAG, "AsynchTask: UpdateUserTweetsTask");
+			
+			String screenname = params[0];
+			
+			List<Twitter.Status> userTweets = null;
+			twitter.setCount(null);
+			twitter.setSinceId(null);
 
+			
+			try {
+				userTweets = twitter.getUserTimeline(screenname);
+			} catch (Exception ex) {
+				this.ex = ex;
+			}
+	         
+	        return userTweets;
+	     }
+
+		@Override
+	     protected void onPostExecute(List<Twitter.Status> result) {
+			
+			// error handling
+			if(ex != null){
+				if(ex instanceof TwitterException.RateLimit){
+					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while updating user: " + ex);
+				} else {
+					Toast.makeText(getBaseContext(), "Something went wrong while loading your timeline. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while updating user: " + ex);
+				}
+				return;
+			}
+
+			// no tweets to insert
+			if(result==null) return;
+			
+			if(!result.isEmpty()){
+				for (Twitter.Status tweet: result) {
+					updateTweet(tweet, Tweets.BUFFER_USERS);
+				}
+				
+			}
+	     }
+	 }
 
 }

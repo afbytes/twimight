@@ -19,6 +19,7 @@ import ch.ethz.twimight.activities.LoginActivity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.text.Html;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,8 +32,8 @@ import android.widget.TextView;
  */
 public class TweetAdapter extends SimpleCursorAdapter {
 	
-	static final String[] from = {TwitterUsers.COL_SCREENNAME, Tweets.COL_TEXT};
-	static final int[] to = {R.id.textUser, R.id.textText};
+	static final String[] from = {TwitterUsers.COL_SCREENNAME};
+	static final int[] to = {R.id.textUser};
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
@@ -44,10 +45,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	public void bindView(View row, Context context, Cursor cursor) {
 		super.bindView(row, context, cursor);
 		
-		// Find views by id
 		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
 		TextView textCreatedAt = (TextView) row.findViewById(R.id.tweetCreatedAt);
 		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
+
+		TextView tweetText = (TextView) row.findViewById(R.id.textText);
+		// here, we don't want the entities to be clickable, so we use the standard tag handler
+		tweetText.setText(Html.fromHtml(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT))));
 		
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);

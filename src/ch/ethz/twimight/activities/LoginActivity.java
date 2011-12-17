@@ -102,7 +102,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.login);
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
 		buttonLogin.setOnClickListener(this);
-		buttonLogin.setEnabled(false);
+		
 		
 		// which state are we in?
 		if(hasAccessToken(this) && hasAccessTokenSecret(this) && getTwitterId(this)!=null){
@@ -115,7 +115,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}
 			startTimeline(this);
 			
-
 		} else if(hasAccessToken(this) && hasAccessTokenSecret(this)) {
 			// we verify the tokens and retrieve the twitter ID
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);
@@ -129,6 +128,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if(uri != null){
 				getAccessTokens(uri);
 			}
+
 		} else {
 			// if we don't have request token and secret, we show the login button
 			Log.i(TAG, "we do not have the tokens, enabling login button");

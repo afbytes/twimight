@@ -34,6 +34,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -70,6 +71,8 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int TWEETS_MENTIONS_NORMAL = 12;
 	private static final int TWEETS_MENTIONS_DISASTER = 13;
 	private static final int TWEETS_MENTIONS_ALL = 14;
+	
+	private static final int TWEETS_USER_ID = 15;
 		
 	// Here we define all the URIs this provider knows
 	static{
@@ -81,6 +84,8 @@ public class TweetsContentProvider extends ContentProvider {
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE, TWEETS_TIMELINE);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES, TWEETS_FAVORITES);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS, TWEETS_MENTIONS);
+		
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_USER + "/#", TWEETS_USER_ID);
 		
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL, TWEETS_TIMELINE_NORMAL);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER, TWEETS_TIMELINE_DISASTER);
@@ -127,6 +132,8 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS_TIMELINE: return Tweets.TWEETS_CONTENT_TYPE;
 			case TWEETS_FAVORITES: return Tweets.TWEETS_CONTENT_TYPE;
 			case TWEETS_MENTIONS: return Tweets.TWEETS_CONTENT_TYPE;
+			
+			case TWEETS_USER_ID: return Tweets.TWEETS_CONTENT_TYPE;
 			
 			case TWEETS_TIMELINE_NORMAL: return Tweets.TWEETS_CONTENT_TYPE;
 			case TWEETS_TIMELINE_DISASTER: return Tweets.TWEETS_CONTENT_TYPE;
@@ -293,6 +300,48 @@ public class TweetsContentProvider extends ContentProvider {
 				i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
 				getContext().startService(i);
+				break;
+				
+			case TWEETS_USER_ID:
+				Log.i(TAG, "Query TWEETS_USER_ID");
+				sql = "SELECT "
+					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
+					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "WHERE "+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+" "
+					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
+
+				c = database.rawQuery(sql, null);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				
+				// get the screenname for updating user tweets
+				Uri userUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+				String[] userProjection = {TwitterUsers.COL_SCREENNAME};
+				Cursor userCursor = getContext().getContentResolver().query(userUri, userProjection, TwitterUsers.COL_ID+"="+uri.getLastPathSegment(), null, null);
+
+				if(userCursor.getCount()>0){
+					userCursor.moveToFirst();
+					// start synch service with a synch user tweets request
+					i = new Intent(TwitterService.SYNCH_ACTION);
+					i.putExtra("synch_request", TwitterService.SYNCH_USERTWEETS);
+					i.putExtra("screenname", userCursor.getString(userCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+					getContext().startService(i); 
+				}
+				userCursor.close();
+
 				break;
 			
 			case TWEETS_FAVORITES_NORMAL: 
@@ -527,26 +576,16 @@ public class TweetsContentProvider extends ContentProvider {
 				if(c.getCount()>0){
 
 					c.moveToFirst();
-					while(!c.isAfterLast()){
-						if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
-							// check if the text is the same
-							if(c.getString(c.getColumnIndex(Tweets.COL_TEXT)).equals(values.getAsString(Tweets.COL_TEXT))){
-								Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
-								update(updateUri, values, null, null);
-								return updateUri;
-							}
-						} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
-														
-							// clear the to insert flag
-							int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-							values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
-							
-							Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
-							update(updateUri, values, null, null);
-							return updateUri;
-						}
-						c.moveToNext();
+					if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
+						// clear the to insert flag
+						int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+						values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
 					}
+					Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+					update(updateUri, values, null, null);
+					c.close();
+					
+					return updateUri;
 					
 				}
 				c.close();
@@ -742,6 +781,11 @@ public class TweetsContentProvider extends ContentProvider {
 			purgeBuffer(Tweets.BUFFER_MYDISASTER, Constants.MYDTWEET_BUFFER_SIZE);
 		}
 		
+		if((bufferFlags & Tweets.BUFFER_USERS) != 0){
+			Log.i(TAG, "Purging user tweets buffer");
+			purgeBuffer(Tweets.BUFFER_USERS, Constants.USERTWEETS_BUFFER_SIZE);
+		}
+
 	}
 
 	
@@ -753,7 +797,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
-		String text = cv.getAsString(Tweets.COL_TEXT);
+		String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
 		
 		/*
 		 *  This is a hack: Twitter "shortens" even links which are already shortened.
@@ -761,7 +805,10 @@ public class TweetsContentProvider extends ContentProvider {
 		 *  To recognize the same tweet (e.g., in case of an old style retweet), we
 		 *  do not include URLs in the disaster ID. 
 		 */
-		text = text.replaceAll("http://t.co/[0-9a-zA-Z]*", "url");
+		//text = text.replaceAll("http://t.co/[0-9a-zA-Z]*", "url");
+		Log.e(TAG, "before: " + text);
+		text = text.replaceAll("([A-Za-z]+://[A-Za-z0-9-_]+.[A-Za-z0-9-_:&;?/.=]+)","url");
+		Log.e(TAG, "after: " + text);
 		
 		String userId;
 		if(!cv.containsKey(Tweets.COL_USER) | (cv.getAsString(Tweets.COL_USER)==null)){
@@ -807,7 +854,8 @@ public class TweetsContentProvider extends ContentProvider {
 			String text = values.getAsString(Tweets.COL_TEXT);
 			String localUserScreenName = LoginActivity.getTwitterScreenname(getContext());
 			
-			if(text.contains("@"+localUserScreenName)){
+			// we convert to lower case to check if it's a mention
+			if(text.toLowerCase().contains("@"+localUserScreenName.toLowerCase())){
 				values.put(Tweets.COL_MENTIONS, 1);
 				// put into mentions buffer
 				if(values.containsKey(Tweets.COL_BUFFER)){
@@ -852,7 +900,7 @@ public class TweetsContentProvider extends ContentProvider {
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();
-		Notification notification = new Notification(icon, tickerText, when);
+		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 		
 		Context context = getContext().getApplicationContext();

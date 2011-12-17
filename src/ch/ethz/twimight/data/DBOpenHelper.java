@@ -34,10 +34,13 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_LOCATIONS = "locations";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
 	public static final String TABLE_TWEETS = "tweets";
+	public static final String TABLE_TWEET_MENTIONS = "tweet_mentions";
+	public static final String TABLE_TWEET_HASHTAGS = "tweet_hashtags";
+	public static final String TABLE_TWEET_URLS = "tweet_urls";
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 
-	private static final int DATABASE_VERSION = 34;
+	private static final int DATABASE_VERSION = 35;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -89,12 +92,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_ISVERIFIED + " integer, "
 			+ Tweets.COL_SIGNATURE + " string, "
 			+ Tweets.COL_CERTIFICATE + " string);";
-	
+
 	// Twitter Users
 	private static final String TABLE_USERS_CREATE = "create table "+TABLE_USERS+" ("
 			+ "_id integer primary key autoincrement not null, "
 			+ TwitterUsers.COL_SCREENNAME + " string, "
-			+ TwitterUsers.COL_ID + " bigint unique not null, "
+			+ TwitterUsers.COL_ID + " bigint unique, "
 			+ TwitterUsers.COL_NAME + " string, "
 			+ TwitterUsers.COL_LANG + " string, "
 			+ TwitterUsers.COL_DESCRIPTION + " string, "
