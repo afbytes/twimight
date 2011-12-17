@@ -289,6 +289,7 @@ public class ShowUserActivity extends Activity{
 	 * Sets the user interface up to show the local user's profile
 	 */
 	private void showLocalUser(){
+		Log.e(TAG, "LOCAL");
 		// disable the normal user buttons
 		LinearLayout remoteUserButtons = (LinearLayout) findViewById(R.id.showUserButtons);
 		remoteUserButtons.setVisibility(LinearLayout.GONE);
@@ -298,6 +299,7 @@ public class ShowUserActivity extends Activity{
 		localUserButtons.setVisibility(LinearLayout.VISIBLE);
 
 		// the followers Button
+		showFollowersButton.setOnClickListener(null);
 		showFollowersButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -312,6 +314,7 @@ public class ShowUserActivity extends Activity{
 		});
 
 		// the followees Button
+		showFriendsButton.setOnClickListener(null);
 		showFriendsButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -347,6 +350,7 @@ public class ShowUserActivity extends Activity{
 			followButton.setText("Follow");
 		}
 		// listen to clicks
+		followButton.setOnClickListener(null);
 		followButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -383,6 +387,7 @@ public class ShowUserActivity extends Activity{
 		/*
 		 * Mention button
 		 */
+		mentionButton.setOnClickListener(null);
 		mentionButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
@@ -395,6 +400,7 @@ public class ShowUserActivity extends Activity{
 		/*
 		 * Message button
 		 */
+		messageButton.setOnClickListener(null);
 		messageButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
