@@ -31,11 +31,12 @@ import org.apache.http.util.EntityUtils;
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.Twitter.KEntityType;
-import winterwell.jtwitter.Twitter.Message;
+import winterwell.jtwitter.Message;
 import winterwell.jtwitter.Twitter.TweetEntity;
-import winterwell.jtwitter.TwitterAccount;
+import winterwell.jtwitter.Twitter_Account;
 import winterwell.jtwitter.TwitterException;
-import winterwell.jtwitter.Twitter.User;
+import winterwell.jtwitter.User;
+import winterwell.jtwitter.Status;
 
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
@@ -734,7 +735,7 @@ public class TwitterService extends Service {
 	/**
 	 * Updates a tweet in the DB (or inserts it if the tweet is new to us)
 	 */
-	private int updateTweet(Twitter.Status tweet, int buffer){
+	private int updateTweet(Status tweet, int buffer){
 		// do we already have the tweet?
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 		String[] projection = {"_id", Tweets.COL_BUFFER};
@@ -766,7 +767,7 @@ public class TwitterService extends Service {
 	/**
 	 * Updates a direct message in the DB (or inserts it if the message is new to us)
 	 */
-	private int updateMessage(Twitter.Message dm, int buffer){
+	private int updateMessage(winterwell.jtwitter.Message dm, int buffer){
 		// do we already have the tweet?
 		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS);
 		String[] projection = {"_id", DirectMessages.COL_BUFFER};
@@ -798,7 +799,7 @@ public class TwitterService extends Service {
 	 * Updates the user profile in the DB. Flags the users for updating their profile images.
 	 * @param user
 	 */
-	private long updateUser(Twitter.User user) {
+	private long updateUser(User user) {
 
 		if(user==null || user.getId()==null) return 0;
 
@@ -843,7 +844,7 @@ public class TwitterService extends Service {
 	 * @param tweet
 	 * @return
 	 */
-	private ContentValues getTweetContentValues(Twitter.Status tweet, int buffer) {
+	private ContentValues getTweetContentValues(Status tweet, int buffer) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_TEXT, createSpans(tweet));
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
@@ -873,7 +874,7 @@ public class TwitterService extends Service {
 	 * @return The tweet text with the spans
 	 */
 	@SuppressWarnings("unchecked")
-	private String createSpans(Twitter.Status tweet){
+	private String createSpans(Status tweet){
 
 		if(tweet==null) return null;
 
@@ -1015,19 +1016,19 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class VerifyCredentialsTask extends AsyncTask<Integer, Void, Twitter.User> {
+	private class VerifyCredentialsTask extends AsyncTask<Integer, Void, User> {
 
 		int attempts;
 		Exception ex;
 
 		@Override
-		protected Twitter.User doInBackground(Integer... params) {
+		protected User doInBackground(Integer... params) {
 			Log.i(TAG, "AsynchTask: VerifyCredentialsTask");
 			attempts = params[0];
-			Twitter.User user = null;
+			User user = null;
 
 			try {
-				TwitterAccount twitterAcc = new TwitterAccount(twitter);
+				Twitter_Account twitterAcc = new Twitter_Account(twitter);
 				user = twitterAcc.verifyCredentials();
 
 			} catch (Exception ex) {
@@ -1039,7 +1040,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(Twitter.User result) {
+		protected void onPostExecute(User result) {
 
 			// error handling
 			if(ex != null){
@@ -1096,16 +1097,16 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateMentionsTask extends AsyncTask<Void, Void, List<Twitter.Status>> {
+	private class UpdateMentionsTask extends AsyncTask<Void, Void, List<Status>> {
 
 		Exception ex;
 
 		@Override
-		protected List<Twitter.Status> doInBackground(Void... params) {
+		protected List<winterwell.jtwitter.Status> doInBackground(Void... params) {
 			Log.i(TAG, "AsynchTask: UpdateMentionsTask");
 			ShowTweetListActivity.setLoading(true);
 
-			List<Twitter.Status> mentions = null;
+			List<winterwell.jtwitter.Status> mentions = null;
 
 			twitter.setCount(Constants.NR_MENTIONS);			
 			twitter.setSinceId(getMentionsSinceId(getBaseContext()));
@@ -1120,7 +1121,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Status> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Status> result) {
 
 			// error handling
 			if(ex != null){
@@ -1148,15 +1149,15 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertMentionsTask extends AsyncTask<List<Twitter.Status>, Void, Void> {
+	private class InsertMentionsTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
 
 		@Override
-		protected Void doInBackground(List<Twitter.Status>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 
-			List<Twitter.Status> tweetList = params[0];
+			List<winterwell.jtwitter.Status> tweetList = params[0];
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null;
-				for (Twitter.Status tweet: tweetList) {
+				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();
 
@@ -1190,15 +1191,15 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateFavoritesTask extends AsyncTask<Void, Void, List<Twitter.Status>> {
+	private class UpdateFavoritesTask extends AsyncTask<Void, Void, List<winterwell.jtwitter.Status>> {
 
 		Exception ex;
 
 		@Override
-		protected List<Twitter.Status> doInBackground(Void... params) {
+		protected List<winterwell.jtwitter.Status> doInBackground(Void... params) {
 			Log.i(TAG, "AsynchTask: UpdateFavoritesTask");
 			ShowTweetListActivity.setLoading(true);
-			List<Twitter.Status> favorites = null;
+			List<winterwell.jtwitter.Status> favorites = null;
 
 			twitter.setCount(Constants.NR_FAVORITES);			
 			twitter.setSinceId(getFavoritesSinceId(getBaseContext()));
@@ -1214,7 +1215,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Status> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Status> result) {
 
 			// error handling
 			if(ex != null){
@@ -1241,15 +1242,15 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertFavoritesTask extends AsyncTask<List<Twitter.Status>, Void, Void> {
+	private class InsertFavoritesTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
 
 		@Override
-		protected Void doInBackground(List<Twitter.Status>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 
-			List<Twitter.Status> tweetList = params[0];
+			List<winterwell.jtwitter.Status> tweetList = params[0];
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null;
-				for (Twitter.Status tweet: tweetList) {
+				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();
 
@@ -1283,16 +1284,16 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateTimelineTask extends AsyncTask<Void, Void, List<Twitter.Status>> {
+	private class UpdateTimelineTask extends AsyncTask<Void, Void, List<winterwell.jtwitter.Status>> {
 
 		Exception ex;
 
 		@Override
-		protected List<Twitter.Status> doInBackground(Void... params) {
+		protected List<winterwell.jtwitter.Status> doInBackground(Void... params) {
 			Log.i(TAG, "AsynchTask: UpdateTimelineTask");
 			ShowTweetListActivity.setLoading(true);
 
-			List<Twitter.Status> timeline = null;
+			List<winterwell.jtwitter.Status> timeline = null;
 			twitter.setCount(Constants.NR_TWEETS);
 			twitter.setSinceId(getTimelineSinceId(getBaseContext()));
 
@@ -1307,7 +1308,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Status> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Status> result) {
 
 
 			// error handling
@@ -1339,15 +1340,15 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertTimelineTask extends AsyncTask<List<Twitter.Status>, Void, Void> {
+	private class InsertTimelineTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
 
 		@Override
-		protected Void doInBackground(List<Twitter.Status>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 
-			List<Twitter.Status> tweetList = params[0];
+			List<winterwell.jtwitter.Status> tweetList = params[0];
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null;
-				for (Twitter.Status tweet: tweetList) {
+				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();
 
@@ -1381,17 +1382,17 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateUserTweetsTask extends AsyncTask<String, Void, List<Twitter.Status>> {
+	private class UpdateUserTweetsTask extends AsyncTask<String, Void, List<winterwell.jtwitter.Status>> {
 
 		Exception ex;
 
 		@Override
-		protected List<Twitter.Status> doInBackground(String... params) {
+		protected List<winterwell.jtwitter.Status> doInBackground(String... params) {
 			Log.i(TAG, "AsynchTask: UpdateUserTweetsTask");
 
 			String screenname = params[0];
 
-			List<Twitter.Status> userTweets = null;
+			List<winterwell.jtwitter.Status> userTweets = null;
 			twitter.setCount(null);
 			twitter.setSinceId(null);
 
@@ -1406,7 +1407,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Status> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Status> result) {
 
 			// error handling
 			if(ex != null){
@@ -1429,15 +1430,15 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertUserTweetsTask extends AsyncTask<List<Twitter.Status>, Void, Void> {
+	private class InsertUserTweetsTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
 
 		@Override
-		protected Void doInBackground(List<Twitter.Status>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 
-			List<Twitter.Status> tweetList = params[0];
+			List<winterwell.jtwitter.Status> tweetList = params[0];
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null;
-				for (Twitter.Status tweet: tweetList) {
+				for (winterwell.jtwitter.Status tweet: tweetList) {
 					updateTweet(tweet, Tweets.BUFFER_USERS);					
 				}
 
@@ -1698,7 +1699,7 @@ public class TwitterService extends Service {
 	 * Post a tweet to twitter
 	 * @author thossmann
 	 */
-	private class UpdateStatusTask extends AsyncTask<Long, Void, Twitter.Status> {
+	private class UpdateStatusTask extends AsyncTask<Long, Void, winterwell.jtwitter.Status> {
 
 		long attempts;
 		long rowId;
@@ -1708,7 +1709,7 @@ public class TwitterService extends Service {
 		Exception ex;
 
 		@Override
-		protected Twitter.Status doInBackground(Long... rowId) {
+		protected winterwell.jtwitter.Status doInBackground(Long... rowId) {
 			Log.i(TAG, "AsynchTask: UpdateStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
@@ -1725,7 +1726,7 @@ public class TwitterService extends Service {
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
-			Twitter.Status tweet = null;
+			winterwell.jtwitter.Status tweet = null;
 
 			try {
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
@@ -1754,7 +1755,7 @@ public class TwitterService extends Service {
 		 * Clear to insert flag and update the tweet with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(Twitter.Status result) {
+		protected void onPostExecute(winterwell.jtwitter.Status result) {
 			ShowTweetListActivity.setLoading(false);
 
 			// error handling
@@ -1767,8 +1768,9 @@ public class TwitterService extends Service {
 					// we get unexplained exceptions if what twitter returns does not match what we have sent.
 					// this does not have to be an error, it happens if we post a url, for example.
 					Log.w(TAG, "unexplained exception while posting tweet (maybe it contained a url): " + ex);
-					// here we update the timeline to fetch the new tweet from twitter
-					(new UpdateTimelineTask()).execute();
+					// in this case, we 
+					Log.e(TAG, "Message: " + ex.getMessage());
+					
 				} else if(ex instanceof TwitterException.Timeout){
 					Log.w(TAG, "exception while posting tweet: " + ex);
 					// try again?
@@ -1809,16 +1811,16 @@ public class TwitterService extends Service {
 	 * Gets user info for a list of users from twitter
 	 * @author thossmann
 	 */
-	private class UpdateUserListTask extends AsyncTask<List<Long>, Void, List<Twitter.User>> {
+	private class UpdateUserListTask extends AsyncTask<List<Long>, Void, List<User>> {
 
 		Exception ex;
 
 		@Override
-		protected List<Twitter.User> doInBackground(List<Long>... userIds) {
+		protected List<User> doInBackground(List<Long>... userIds) {
 			Log.i(TAG, "AsynchTask: UpdateUserListTask");
 			ShowUserListActivity.setLoading(true);
 
-			List<Twitter.User> userList = null;
+			List<User> userList = null;
 			try {
 				userList = twitter.bulkShowById(userIds[0]);
 
@@ -1832,7 +1834,7 @@ public class TwitterService extends Service {
 		 * Clear to update flag and update the user with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(List<Twitter.User> result) {
+		protected void onPostExecute(List<User> result) {
 
 			new InsertUserListTask().execute(result);
 
@@ -1845,19 +1847,19 @@ public class TwitterService extends Service {
 	 * @author theus
 	 *
 	 */
-	private class InsertUserListTask extends AsyncTask<List<Twitter.User>, Void, Void>{
+	private class InsertUserListTask extends AsyncTask<List<User>, Void, Void>{
 
 		@Override
 		protected Void doInBackground(List<User>... params) {
 
-			List<Twitter.User> result = params[0];
+			List<User> result = params[0];
 
 			if(result==null || result.isEmpty()){
 				return null;
 			}
 
 			ContentValues cv = new ContentValues();
-			for (Twitter.User user: result) {
+			for (User user: result) {
 
 				long rowId = 0;
 
@@ -1912,7 +1914,7 @@ public class TwitterService extends Service {
 	 * Gets user info from twitter
 	 * @author thossmann
 	 */
-	private class UpdateUserTask extends AsyncTask<Long, Void, Twitter.User> {
+	private class UpdateUserTask extends AsyncTask<Long, Void, User> {
 
 		long rowId;
 		int flags;
@@ -1920,7 +1922,7 @@ public class TwitterService extends Service {
 		Exception ex;
 
 		@Override
-		protected Twitter.User doInBackground(Long... rowId) {
+		protected User doInBackground(Long... rowId) {
 			Log.i(TAG, "AsynchTask: UpdateUserTask");
 			ShowUserListActivity.setLoading(true);
 			this.rowId = rowId[0];
@@ -1936,7 +1938,7 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
-			Twitter.User user = null;
+			User user = null;
 
 			try {
 				// we need a user id or a screenname
@@ -1958,7 +1960,7 @@ public class TwitterService extends Service {
 		 * Clear to update flag and update the user with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(Twitter.User result) {
+		protected void onPostExecute(User result) {
 			ShowUserListActivity.setLoading(false);
 
 			// we get null if something went wrong
@@ -2226,7 +2228,7 @@ public class TwitterService extends Service {
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 			try {
-				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), true);
+				twitter.setFavorite(new winterwell.jtwitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), true);
 				result = 1;
 			} catch (Exception ex){
 				this.ex = ex;
@@ -2323,7 +2325,7 @@ public class TwitterService extends Service {
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 			try {
-				twitter.setFavorite(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), false);
+				twitter.setFavorite(new winterwell.jtwitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null), false);
 				result = 1;
 			} catch (Exception ex){
 				this.ex = ex;
@@ -2417,7 +2419,7 @@ public class TwitterService extends Service {
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 			try {
-				twitter.retweet(new Twitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null));
+				twitter.retweet(new winterwell.jtwitter.Status(null, null, c.getLong(c.getColumnIndex(Tweets.COL_TID)), null));
 			} catch (Exception ex) {
 				this.ex = ex;
 			} finally {
@@ -2469,7 +2471,7 @@ public class TwitterService extends Service {
 	 * Send a follow request to Twitter
 	 * @author thossmann
 	 */
-	private class FollowUserTask extends AsyncTask<Long, Void, Twitter.User> {
+	private class FollowUserTask extends AsyncTask<Long, Void, User> {
 
 		long rowId;
 		int flags;
@@ -2477,7 +2479,7 @@ public class TwitterService extends Service {
 		Exception ex;
 
 		@Override
-		protected Twitter.User doInBackground(Long... rowId) {
+		protected User doInBackground(Long... rowId) {
 			Log.i(TAG, "AsynchTask: FollowUserTask");
 
 			ShowUserListActivity.setLoading(true);
@@ -2494,7 +2496,7 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
-			Twitter.User user = null;
+			User user = null;
 
 			try {
 				user = twitter.follow(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
@@ -2510,7 +2512,7 @@ public class TwitterService extends Service {
 		 * Clear to follow flag and update the user with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(Twitter.User result) {
+		protected void onPostExecute(User result) {
 			ShowUserListActivity.setLoading(false);
 			// error handling
 			if(ex != null){
@@ -2548,7 +2550,7 @@ public class TwitterService extends Service {
 	 * Unfollow a user on Twitter
 	 * @author thossmann
 	 */
-	private class UnfollowUserTask extends AsyncTask<Long, Void, Twitter.User> {
+	private class UnfollowUserTask extends AsyncTask<Long, Void, User> {
 
 		long rowId;
 		int flags;
@@ -2556,7 +2558,7 @@ public class TwitterService extends Service {
 		Exception ex;
 
 		@Override
-		protected Twitter.User doInBackground(Long... rowId) {
+		protected User doInBackground(Long... rowId) {
 
 			Log.i(TAG, "AsynchTask: UnfollowUserTask");
 
@@ -2574,7 +2576,7 @@ public class TwitterService extends Service {
 			c.moveToFirst();
 			flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 
-			Twitter.User user = null;
+			User user = null;
 
 			try {
 				user = twitter.stopFollowing(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
@@ -2590,7 +2592,7 @@ public class TwitterService extends Service {
 		 * Clear to unfollow flag and update the user with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(Twitter.User result) {
+		protected void onPostExecute(User result) {
 			ShowUserListActivity.setLoading(false);
 			// error handling
 			if(ex != null){
@@ -2625,19 +2627,19 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateDMsInTask extends AsyncTask<Integer, Void, List<Twitter.Message>> {
+	private class UpdateDMsInTask extends AsyncTask<Integer, Void, List<winterwell.jtwitter.Message>> {
 
 		int attempts;
 		Exception ex;
 
 		@Override
-		protected List<Twitter.Message> doInBackground(Integer... params) {
+		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
 			Log.i(TAG, "AsynchTask: UpdateDMsInTask");
 
 			ShowDMUsersListActivity.setLoading(true);
 			attempts = params[0];
 
-			List<Twitter.Message> dms = null;
+			List<winterwell.jtwitter.Message> dms = null;
 
 			twitter.setCount(Constants.NR_DMS);
 			twitter.setSinceId(getDMsInSinceId(getBaseContext()));
@@ -2654,7 +2656,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Message> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Message> result) {
 
 
 			// error handling
@@ -2688,7 +2690,7 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertDMsInTask extends AsyncTask<List<Twitter.Message>, Void, Void>{
+	private class InsertDMsInTask extends AsyncTask<List<winterwell.jtwitter.Message>, Void, Void>{
 
 		@Override
 		protected Void doInBackground(List<Message>... params) {
@@ -2700,7 +2702,7 @@ public class TwitterService extends Service {
 			if(!result.isEmpty()){
 				Long lastId = null;
 
-				for (Twitter.Message dm: result) {
+				for (winterwell.jtwitter.Message dm: result) {
 					if(lastId == null){
 						lastId = dm.getId();
 						// save the id of the last DM (comes first from twitter) for future synchs
@@ -2733,18 +2735,18 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateDMsOutTask extends AsyncTask<Integer, Void, List<Twitter.Message>> {
+	private class UpdateDMsOutTask extends AsyncTask<Integer, Void, List<winterwell.jtwitter.Message>> {
 		int attempts;
 		Exception ex;
 		@Override
-		protected List<Twitter.Message> doInBackground(Integer... params) {
+		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
 
 			Log.i(TAG, "AsynchTask: UpdateDMsOutTask");
 			ShowDMUsersListActivity.setLoading(true);
 
 			attempts = params[0];
 
-			List<Twitter.Message> dms = null;
+			List<winterwell.jtwitter.Message> dms = null;
 
 			twitter.setCount(Constants.NR_DMS);
 			twitter.setSinceId(getDMsOutSinceId(getBaseContext()));
@@ -2760,7 +2762,7 @@ public class TwitterService extends Service {
 		}
 
 		@Override
-		protected void onPostExecute(List<Twitter.Message> result) {
+		protected void onPostExecute(List<winterwell.jtwitter.Message> result) {
 
 			// error handling
 			if(ex != null){
@@ -2791,7 +2793,7 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class InsertDMsOutTask extends AsyncTask<List<Twitter.Message>, Void, Void>{
+	private class InsertDMsOutTask extends AsyncTask<List<winterwell.jtwitter.Message>, Void, Void>{
 
 		@Override
 		protected Void doInBackground(List<Message>... params) {
@@ -2803,7 +2805,7 @@ public class TwitterService extends Service {
 			if(!result.isEmpty()){
 				Long lastId = null;
 
-				for (Twitter.Message dm: result) {
+				for (winterwell.jtwitter.Message dm: result) {
 					if(lastId == null){
 						lastId = dm.getId();
 						// save the id of the last DM (comes first from twitter) for future synchs
@@ -2834,7 +2836,7 @@ public class TwitterService extends Service {
 	 * Post a DM to twitter
 	 * @author thossmann
 	 */
-	private class SendMessageTask extends AsyncTask<Long, Void, Twitter.Message> {
+	private class SendMessageTask extends AsyncTask<Long, Void, winterwell.jtwitter.Message> {
 
 		long rowId;
 		int flags;
@@ -2845,7 +2847,7 @@ public class TwitterService extends Service {
 		Exception ex;
 
 		@Override
-		protected Twitter.Message doInBackground(Long... rowId) {
+		protected winterwell.jtwitter.Message doInBackground(Long... rowId) {
 			Log.i(TAG, "AsynchTask: SendMessageTask");
 			this.rowId = rowId[0];
 
@@ -2860,7 +2862,7 @@ public class TwitterService extends Service {
 			flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
 			buffer = c.getInt(c.getColumnIndex(DirectMessages.COL_BUFFER));
 
-			Twitter.Message msg = null;
+			winterwell.jtwitter.Message msg = null;
 
 			try {
 				text = c.getString(c.getColumnIndex(DirectMessages.COL_TEXT));
@@ -2880,7 +2882,7 @@ public class TwitterService extends Service {
 		 * Clear to insert flag and update the message with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(Twitter.Message result) {
+		protected void onPostExecute(winterwell.jtwitter.Message result) {
 
 			Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+this.rowId);
 
