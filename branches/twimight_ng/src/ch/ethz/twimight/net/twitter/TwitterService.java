@@ -1131,7 +1131,7 @@ public class TwitterService extends Service {
 					Toast.makeText(getBaseContext(), "Timeout while loading mentions.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading mentions: " + ex);
 				} else {
-					Toast.makeText(getBaseContext(), "Something went wrong when loading your mentions. Please try again later!", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(getBaseContext(), "Something went wrong when loading your mentions. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading mentions: " + ex);
 				}
 				return;
@@ -1225,7 +1225,7 @@ public class TwitterService extends Service {
 					Toast.makeText(getBaseContext(), "Timeout while loading favorites.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading favorites: " + ex);
 				}else {
-					Toast.makeText(getBaseContext(), "Something went wrong when loading your favorites. Please try again later!", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(getBaseContext(), "Something went wrong when loading your favorites. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading favorites: " + ex);
 				}
 				return;
@@ -1319,7 +1319,7 @@ public class TwitterService extends Service {
 					Toast.makeText(getBaseContext(), "Timeout while loading timeline.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading timeline: " + ex);
 				}else {
-					Toast.makeText(getBaseContext(), "Something went wrong when loading your timeline. Please try again later!", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(getBaseContext(), "Something went wrong when loading your timeline. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading timeline: " + ex);
 				}
 				return;
@@ -2248,15 +2248,15 @@ public class TwitterService extends Service {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){
-					Toast.makeText(getBaseContext(), "Already not a favorite!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while unfavoriting: " + ex);
+					Toast.makeText(getBaseContext(), "Already a favorite!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while favoriting: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
-					Toast.makeText(getBaseContext(), "Timeout while unfavoriting.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while unfavoriting: " + ex);
+					Toast.makeText(getBaseContext(), "Timeout while favoriting.", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while favoriting: " + ex);
 				}else {
 					// an exception happended, we notify the user					
-					Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while unfavoriting: " + ex);
+					Toast.makeText(getBaseContext(), "Something went wrong while favoriting. We will try again later!", Toast.LENGTH_LONG).show();
+					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
 				}
 			}
