@@ -457,6 +457,11 @@ public class ShowUserActivity extends Activity{
 		}
 	}
 
+	/**
+	 * Calls showUserInfo if the user data has been updated
+	 * @author thossmann
+	 *
+	 */
 	class UserContentObserver extends ContentObserver {
 		public UserContentObserver(Handler h) {
 			super(h);
