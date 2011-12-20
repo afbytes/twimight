@@ -227,6 +227,7 @@ public class ShowTweetActivity extends Activity{
 		
 		// Delete Button
 		deleteButton = (ImageButton) findViewById(R.id.showTweetDelete);
+		deleteButton.setBackgroundColor(R.color.transparent);
 		if(userString.equals(localUserString)){
 			if((flags & Tweets.FLAG_TO_DELETE) == 0){
 				deleteButton.setOnClickListener(new OnClickListener(){
@@ -261,6 +262,7 @@ public class ShowTweetActivity extends Activity{
 		// Favorite button
 		favorited = (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		favoriteButton = (ImageButton) findViewById(R.id.showTweetFavorite);
+		favoriteButton.setBackgroundColor(R.color.transparent);
 		if(favorited){
 			favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
 		}

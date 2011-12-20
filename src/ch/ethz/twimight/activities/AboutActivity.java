@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +59,9 @@ public class AboutActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showabout);
+		
+		LinearLayout showAboutLogo = (LinearLayout) findViewById(R.id.showAboutLogo);
+		showAboutLogo.setBackgroundResource(R.drawable.about_background);
 		
 		keyOk = (TextView) findViewById(R.id.showAboutKeys);
 		revokeButton = (Button) findViewById(R.id.showAboutRevoke);
