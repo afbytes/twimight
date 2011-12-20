@@ -629,6 +629,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	        			startTimeline(context);
 	        		} else {
 	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+	        			
+	        			finish();
 	        		}
 	        	}
 	        }

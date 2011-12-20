@@ -161,7 +161,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				}
 
 				Uri insertUri = ContentUris.withAppendedId(TwitterUsers.CONTENT_URI, rowId);
-				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 				
 				purge(DBOpenHelper.TABLE_USERS);
 				
@@ -191,7 +191,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 					getContext().startService(i);
 				}
 
-				getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 				getContext().getContentResolver().notifyChange(uri, null);
 
 				return nrRows;
