@@ -10,15 +10,16 @@
 	android:layout_height="fill_parent" 
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/showAboutRoot">
-<LinearLayout
+<ImageView
     android:id="@+id/showAboutLayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bird"
-    android:orientation="vertical" >
-</LinearLayout>
+    android:src="@drawable/bird"
+    android:orientation="vertical" 
+    android:layout_gravity="center">
+</ImageView>
 <LinearLayout
-	    android:id="@+id/showLogo"
+	    android:id="@+id/showAboutLogo"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="bottom"
