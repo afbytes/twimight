@@ -863,7 +863,7 @@ public class TwitterService extends Service {
 		cv.put(Tweets.COL_BUFFER, buffer);
 
 		// TODO: Location (enter coordinates of tweet)
-		//Log.e(TAG, "Location: "+ tweet.getLocation());
+		Log.e(TAG, "Location: "+ tweet.getLocation());
 
 		return cv;
 	}
@@ -1005,7 +1005,7 @@ public class TwitterService extends Service {
 			userContentValues.put(TwitterUsers.COL_VERIFIED, user.verified);
 			userContentValues.put(TwitterUsers.COL_PROTECTED, user.protectedUser);
 			//userContentValues.put(TwitterUsers.COL_ISFOLLOWER, user.isFollowingYou()?1:0);
-			userContentValues.put(TwitterUsers.COL_ISFRIEND, user.isFollowedByYou()?1:0);
+			//userContentValues.put(TwitterUsers.COL_ISFRIEND, user.isFollowedByYou()?1:0);
 			userContentValues.put(TwitterUsers.COL_IMAGEURL, user.getProfileImageUrl().toString());
 		}
 		return userContentValues;

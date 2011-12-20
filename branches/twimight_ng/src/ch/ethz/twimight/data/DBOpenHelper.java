@@ -85,10 +85,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_CREATED + " integer, "
 			+ Tweets.COL_RECEIVED + " integer, "
 			+ Tweets.COL_SOURCE + " string, "
-			+ Tweets.COL_FLAGS + " integer not null default 0, "
-			+ Tweets.COL_BUFFER + " integer not null default 0, "
-			+ Tweets.COL_ISDISASTER + " integer not null default 0, "
-			+ Tweets.COL_DISASTERID + " integer not null, "
+			+ Tweets.COL_FLAGS + " integer default 0, "
+			+ Tweets.COL_BUFFER + " integer default 0, "
+			+ Tweets.COL_ISDISASTER + " integer default 0, "
+			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
 			+ Tweets.COL_SIGNATURE + " string, "
 			+ Tweets.COL_CERTIFICATE + " string);";
@@ -119,7 +119,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_FOLLOWREQUEST + " integer, "
 			+ TwitterUsers.COL_PROFILEIMAGE + " blob,"
 			+ TwitterUsers.COL_LASTUPDATE + " integer,"
-			+ TwitterUsers.COL_FLAGS + " integer not null default 0);";
+			+ TwitterUsers.COL_FLAGS + " integer default 0);";
 
 	// Direct Messages (including disaster messages)
 	private static final String TABLE_DMS_CREATE = "create table "+TABLE_DMS+" ("
@@ -131,10 +131,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ DirectMessages.COL_DMID + " bigint unique, "
 			+ DirectMessages.COL_CREATED + " integer, "
 			+ DirectMessages.COL_RECEIVED + " integer, "
-			+ DirectMessages.COL_FLAGS + " integer not null default 0, "
-			+ DirectMessages.COL_BUFFER + " integer not null default 0, "
-			+ DirectMessages.COL_ISDISASTER + " integer not null default 0, "
-			+ DirectMessages.COL_DISASTERID + " integer not null, "
+			+ DirectMessages.COL_FLAGS + " integer default 0, "
+			+ DirectMessages.COL_BUFFER + " integer default 0, "
+			+ DirectMessages.COL_ISDISASTER + " integer default 0, "
+			+ DirectMessages.COL_DISASTERID + " integer, "
 			+ DirectMessages.COL_ISVERIFIED + " integer, "
 			+ DirectMessages.COL_SIGNATURE + " string, "
 			+ DirectMessages.COL_CRYPTEXT + " string, "
