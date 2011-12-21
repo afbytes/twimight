@@ -73,6 +73,8 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int TWEETS_MENTIONS_ALL = 14;
 	
 	private static final int TWEETS_USER_ID = 15;
+	
+	private static final int TWEETS_SEARCH = 16;
 		
 	// Here we define all the URIs this provider knows
 	static{
@@ -80,6 +82,8 @@ public class TweetsContentProvider extends ContentProvider {
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS, TWEETS);
 		
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/#", TWEETS_ID);
+		
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.SEARCH, TWEETS_SEARCH);
 		
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE, TWEETS_TIMELINE);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES, TWEETS_FAVORITES);
@@ -197,13 +201,53 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 
 				break;
 						
+			case TWEETS_SEARCH: // the search query must be given in the where argument
+				Log.i(TAG, "Query SEARCH");
+				sql = "SELECT "
+					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_SOURCE + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETCOUNT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LAT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_LNG + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_BUFFER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_NAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
+					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' "
+					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
+				c = database.rawQuery(sql, null);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				
+				// start synch service with a synch timeline request
+				i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_SEARCH_TWEETS);
+				i.putExtra("query", where);
+				getContext().startService(i);
+				break;
+				
 			case TWEETS_TIMELINE_NORMAL:
 				Log.i(TAG, "Query TIMELINE_NORMAL");
 
@@ -223,7 +267,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -256,7 +300,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -287,7 +331,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
@@ -320,7 +364,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE "+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+" "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 
@@ -362,7 +406,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -395,7 +439,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -428,7 +472,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -460,7 +504,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -493,7 +537,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -526,7 +570,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -785,6 +829,11 @@ public class TweetsContentProvider extends ContentProvider {
 			Log.i(TAG, "Purging user tweets buffer");
 			purgeBuffer(Tweets.BUFFER_USERS, Constants.USERTWEETS_BUFFER_SIZE);
 		}
+		
+		if((bufferFlags & Tweets.BUFFER_SEARCH) != 0){
+			Log.i(TAG, "Purging search tweets buffer");
+			purgeBuffer(Tweets.BUFFER_SEARCH, Constants.SEARCHTWEETS_BUFFER_SIZE);
+		}
 
 	}
 
@@ -792,23 +841,11 @@ public class TweetsContentProvider extends ContentProvider {
 	/**
 	 * Computes the java String object hash code (32 bit) as the disaster ID of the tweet
 	 * TODO: For security reasons (to prevent intentional hash collisions), this should be a cryptographic hash function instead of the string hash.
-	 * TODO: Find a better way to account for URLS (e.g., using the real URL from the tweet entities).
 	 * @param cv
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
 		String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
-		
-		/*
-		 *  This is a hack: Twitter "shortens" even links which are already shortened.
-		 *  E.g., http://t.co/asdf is replaced by http://t.co/fdas.
-		 *  To recognize the same tweet (e.g., in case of an old style retweet), we
-		 *  do not include URLs in the disaster ID. 
-		 */
-		//text = text.replaceAll("http://t.co/[0-9a-zA-Z]*", "url");
-		Log.e(TAG, "before: " + text);
-		text = text.replaceAll("([A-Za-z]+://[A-Za-z0-9-_]+.[A-Za-z0-9-_:&;?/.=]+)","url");
-		Log.e(TAG, "after: " + text);
 		
 		String userId;
 		if(!cv.containsKey(Tweets.COL_USER) | (cv.getAsString(Tweets.COL_USER)==null)){

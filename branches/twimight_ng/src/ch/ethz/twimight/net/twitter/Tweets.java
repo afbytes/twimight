@@ -45,10 +45,12 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */
 	public static final String TWEETS_SOURCE_ALL = "all"; /** both, normal and disaster tweets */
 	public static final String TWEETS_ID = "id"; /** a specific tweet */
+	public static final String SEARCH = "search"; /** a search request */
 	
 	// here start the column names
 	public static final String COL_TEXT = "text"; /** the tweet text */
-	public static final String COL_USER = "user"; /** the user id of the sender */
+	public static final String COL_USER = "user"; /** the user id of the author */
+	public static final String COL_SCREENNAME = "user_screenname"; /** the user screenname of the author */
 	public static final String COL_TID = "t_id"; /** the "official" tweet ID from twitter */
 	public static final String COL_REPLYTO = "reply_to"; /** the tweet ID to which this tweet replies */
 	public static final String COL_FAVORITED = "favorited"; /** is it a favorite? */
@@ -87,4 +89,6 @@ public class Tweets implements BaseColumns {
 	public static final int BUFFER_FAVORITES = 8; /** All favorites of the local user */
 	public static final int BUFFER_MENTIONS = 16; /** All mentions of the local user */
 	public static final int BUFFER_USERS = 32; /** All mentions of the local user */
+	public static final int BUFFER_SEARCH = 64; /** Results obtained from searching on Twitter */
+
 }

@@ -13,6 +13,7 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -86,7 +87,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
-		if(TextUtils.isEmpty(sortOrder)) sortOrder = TwitterUsers.DEFAULT_SORT_ORDER;
+		//if(TextUtils.isEmpty(sortOrder)) sortOrder = TwitterUsers.DEFAULT_SORT_ORDER;
 		
 		Intent i;
 		
@@ -143,22 +144,28 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
-			// if we already have the user, we discard the request
+			// if we already have the user, we update with the new info
 			String[] projection = {"_id"};
-			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ID+"="+values.getAsLong(TwitterUsers.COL_ID), null, null, null, null);
+			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" LIKE '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
 			if(c.getCount()>0){
-				return null;
+				c.moveToFirst();
+				Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+				update(updateUri, values, null, null);
+				c.close();
+				return updateUri;
 			}
+			c.close();
+			
+			// we flag new users for updating their profile image
+			values.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATEIMAGE);
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 			if(rowId >= 0){
-				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
-				{
-					Intent i = new Intent(TwitterService.SYNCH_ACTION);
-					i.putExtra("synch_request", TwitterService.SYNCH_USER);
-					i.putExtra("rowId", rowId);
-					getContext().startService(i);
-				}
+				
+				Intent i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_USER);
+				i.putExtra("rowId", rowId);
+				getContext().startService(i);
 
 				Uri insertUri = ContentUris.withAppendedId(TwitterUsers.CONTENT_URI, rowId);
 				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
@@ -183,7 +190,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
 			if(nrRows > 0){
 				
-				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)>0)
+				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)!=0)
 				{
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USER);

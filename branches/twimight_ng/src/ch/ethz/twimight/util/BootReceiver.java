@@ -12,6 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.util;
 
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
@@ -24,34 +25,39 @@ import android.util.Log;
 /**
  * Starts the updater service after the boot process.
  * @author pcarta
+ * @author thossmann
  *
  */
 public class BootReceiver extends BroadcastReceiver {
 	private static final String TAG = "BootBroadcastReceiver";
 	
 	/**
-	 * Starts the updater service upon receiving a boot Intent.
+	 * Starts the twimight services upon receiving a boot Intent.
 	 * @param context
 	 * @param intent
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i(TAG,"starting app at boot time");
 		
-		// Start the service for communication with the TDS
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
-		}
-		
-		
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-			context.startService(new Intent(context, ScanningService.class));
-		}
-		
-		
-		// Start the location update service
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
-			new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
+		// we only start the services if we are logged in (i.e., we have the tokens from twitter)
+		if(LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
+			Log.i(TAG,"starting twimight services at boot time");
+			
+			// Start the service for communication with the TDS
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
+				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+			}
+			
+			
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
+				context.startService(new Intent(context, ScanningService.class));
+			}
+			
+			
+			// Start the location update service
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
+				new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
+			}
 		}
 
 	}

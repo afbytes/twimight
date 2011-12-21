@@ -12,8 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.util;
 
-import java.util.Date;
-
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 
@@ -39,23 +38,24 @@ public class CommunicationReceiver extends BroadcastReceiver {
 		
 		// connectivity changed!
 		NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-		Log.i(TAG, "Connectivity changed: " + currentNetworkInfo.toString() + " " + (new Date()).toString());
 		
-		// are we connected?
-		try{
-			// TDS communication
-			if(currentNetworkInfo.isConnected() && TDSAlarm.isTdsEnabled(context)){
-				// remove currently scheduled updates and schedule an immediate one
-				new TDSAlarm();
+		// are we connected and logged in?
+		if(currentNetworkInfo.isConnected() && LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
+			try{
+				// TDS communication
+				if(TDSAlarm.isTdsEnabled(context)){
+					// remove currently scheduled updates and schedule an immediate one
+					new TDSAlarm();
+				}
+				
+				// Trigger Twitter synch
+				Intent i = new Intent(context, TwitterService.class);
+				i.putExtra("synch_request", TwitterService.SYNCH_ALL);
+				context.startService(i);
+				
+			} catch (Exception e) {
+				Log.e(TAG, "Error on connectivity change");
 			}
-			
-			// Trigger Twitter synch
-			Intent i = new Intent(context, TwitterService.class);
-			i.putExtra("synch_request", TwitterService.SYNCH_ALL);
-			context.startService(i);
-			
-		} catch (Exception e) {
-			Log.e(TAG, "Error on connectivity change");
 		}
 			
 		
