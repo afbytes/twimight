@@ -280,6 +280,7 @@ public class NewTweetActivity extends Activity{
 		
 		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
 		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
+		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
 		tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
 		
 		// we mark the tweet for posting to twitter

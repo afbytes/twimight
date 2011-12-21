@@ -86,6 +86,7 @@ public final class Constants {
 	public static final int NR_FAVORITES = 50; /** how many favorites to request from twitter */
 	public static final int NR_MENTIONS = 50; /** how many mentions to request from twitter */
 	public static final int NR_DMS = 50; /** how many direct messages to request from twitter */
+	public static final int NR_SEARCH_TWEETS = 20; /** how many tweets to request from twitter in search */
 	
 	public static final long TIMELINE_MIN_SYNCH = 60*1000L; /** Minimum time between two timeline updates */
 	public static final long FAVORITES_MIN_SYNCH = 60*1000L; /** Minimum time between two favorite updates */
@@ -103,7 +104,8 @@ public final class Constants {
 	public static final int MESSAGES_BUFFER_SIZE = 100; /** How many direct messages to and from the local user do we buffer? */
 	public static final int DISASTERDM_BUFFER_SIZE = 100; /** How many disaster direct messages of remote users do we carry? */
 	public static final int MYDISASTERDM_BUFFER_SIZE = 100; /** How many disaster messages sent by the local user do we carry? */
-	public static final int USERTWEETS_BUFFER_SIZE = 200; /** How many tweets to cache for showing user profiles */
+	public static final int USERTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache for showing user profiles */
+	public static final int SEARCHTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache from searching Twitter */
  
 	
 }

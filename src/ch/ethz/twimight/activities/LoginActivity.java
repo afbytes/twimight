@@ -352,19 +352,27 @@ public class LoginActivity extends Activity implements OnClickListener{
 	/**
 	 * Stop all the alarms and services
 	 */
-	private static void stopAlarms(Context context) {
+	private static void stopServices(Context context) {
 
 		TDSAlarm.stopTDSCommuniction(context);
+		context.stopService(new Intent(context, TDSService.class));
 		
 		ScanningService.stopScanning();
+		context.stopService(new Intent(context, ScanningService.class));
 		
-		LocationAlarm.stopLocationUpdate(context);				
+		context.stopService(new Intent(context, TwitterService.class));
+		
+		LocationAlarm.stopLocationUpdate(context);		
 	}
 	
 	/**
 	 * Deleting all the state
 	 */
 	public static void logout(Context context){
+		
+		// Stop all services and pending alarms
+		stopServices(context);
+
 		
 		// Delete persistent Twitter update information
 		TwitterService.setFavoritesSinceId(null, context);
@@ -380,8 +388,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 		TwitterService.setDMsOutSinceId(null, context);
 		TwitterService.setDMsInSinceId(null, context);
 		
-		// Stop all alarms
-		stopAlarms(context);
 		TDSService.resetLastUpdate(context);
 		TDSService.resetUpdateInterval(context);
 		

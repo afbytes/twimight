@@ -78,7 +78,6 @@ public class ShowTweetListActivity extends Activity{
 	public static final int SHOW_FAVORITES = 2;
 	public static final int SHOW_MENTIONS = 3;
 	public static final int SHOW_USERTWEETS = 4;
-	public static final int SHOW_SEARCH = 5;
 	
 	private int currentFilter = 0;
 	private int positionIndex;
@@ -133,8 +132,7 @@ public class ShowTweetListActivity extends Activity{
 		searchButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getBaseContext(), "SEARCH NOT YET AVAILABLE", Toast.LENGTH_LONG).show();
-				//setFilter(SHOW_SEARCH);
+				onSearchRequested();
 			}
 		});
 		
@@ -355,9 +353,6 @@ public class ShowTweetListActivity extends Activity{
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +"/" + Tweets.TWEETS_TABLE_USER + "/" + userId), null, null, null, null);
 			currentFilter=SHOW_USERTWEETS;
 
-			break;
-		case SHOW_SEARCH: 
-			
 			break;
 		default:
 			b= timelineButton;
