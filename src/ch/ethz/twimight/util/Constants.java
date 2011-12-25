@@ -83,9 +83,9 @@ public final class Constants {
 	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
 	
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
-	public static final int NR_FAVORITES = 50; /** how many favorites to request from twitter */
-	public static final int NR_MENTIONS = 50; /** how many mentions to request from twitter */
-	public static final int NR_DMS = 50; /** how many direct messages to request from twitter */
+	public static final int NR_FAVORITES = 20; /** how many favorites to request from twitter */
+	public static final int NR_MENTIONS = 20; /** how many mentions to request from twitter */
+	public static final int NR_DMS = 20; /** how many direct messages to request from twitter */
 	public static final int NR_SEARCH_TWEETS = 20; /** how many tweets to request from twitter in search */
 	
 	public static final long TIMELINE_MIN_SYNCH = 60*1000L; /** Minimum time between two timeline updates */
