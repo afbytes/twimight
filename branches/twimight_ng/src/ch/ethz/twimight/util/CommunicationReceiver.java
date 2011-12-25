@@ -42,19 +42,20 @@ public class CommunicationReceiver extends BroadcastReceiver {
 		// are we connected and logged in?
 		if(currentNetworkInfo.isConnected() && LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
 			try{
+				
 				// TDS communication
 				if(TDSAlarm.isTdsEnabled(context)){
 					// remove currently scheduled updates and schedule an immediate one
 					new TDSAlarm();
 				}
 				
-				// Trigger Twitter synch
-				Intent i = new Intent(context, TwitterService.class);
-				i.putExtra("synch_request", TwitterService.SYNCH_ALL);
+				Intent i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_VERIFY);
 				context.startService(i);
+
 				
 			} catch (Exception e) {
-				Log.e(TAG, "Error on connectivity change");
+				Log.e(TAG, "Exception on connectivity change");
 			}
 		}
 			

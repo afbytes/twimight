@@ -51,6 +51,7 @@ public class TweetsContentProvider extends ContentProvider {
 	
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
+	private static String localScreenName;
 	
 	private static UriMatcher tweetUriMatcher;
 		
@@ -120,6 +121,7 @@ public class TweetsContentProvider extends ContentProvider {
 	public boolean onCreate() {
 		dbHelper = DBOpenHelper.getInstance(getContext());
 		database = dbHelper.getWritableDatabase();
+		localScreenName = LoginActivity.getTwitterScreenname(getContext());
 		return true;
 	}
 
@@ -637,7 +639,7 @@ public class TweetsContentProvider extends ContentProvider {
 				insertUri = insertTweet(values);
 				// delete everything that now falls out of the buffer
 				purgeTweets(values);
-				
+
 				break;
 				
 			case TWEETS_TIMELINE_DISASTER:
@@ -889,7 +891,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			// does it mention the local user?
 			String text = values.getAsString(Tweets.COL_TEXT);
-			String localUserScreenName = LoginActivity.getTwitterScreenname(getContext());
+			String localUserScreenName = this.localScreenName;
 			
 			// we convert to lower case to check if it's a mention
 			if(text.toLowerCase().contains("@"+localUserScreenName.toLowerCase())){

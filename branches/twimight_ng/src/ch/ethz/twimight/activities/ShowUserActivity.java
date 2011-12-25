@@ -13,6 +13,7 @@
 package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -47,7 +48,7 @@ public class ShowUserActivity extends Activity{
 	Uri uri;
 	Cursor c;
 	int flags;
-	int rowId;
+	long rowId;
 
 	// Views
 	private ImageView profileImage;
@@ -98,7 +99,7 @@ public class ShowUserActivity extends Activity{
 		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
 
 		if(getIntent().hasExtra("rowId")){
-			rowId = getIntent().getIntExtra("rowId", 0);
+			rowId = (long) getIntent().getIntExtra("rowId", 0);
 
 			// get data from local DB
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
@@ -123,7 +124,7 @@ public class ShowUserActivity extends Activity{
 			}
 
 			c.moveToFirst();
-			rowId = c.getInt(c.getColumnIndex("_id"));
+			rowId = c.getLong(c.getColumnIndex("_id"));
 
 		} else {
 			// if we don't know which user to show
@@ -138,14 +139,39 @@ public class ShowUserActivity extends Activity{
 		cv.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATEIMAGE|TwitterUsers.FLAG_TO_UPDATE|c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS)));
 		getContentResolver().update(uri, cv, null, null);
 		
+		// trigger the update
+		Intent i = new Intent(this, TwitterService.class);
+		i.putExtra("synch_request", TwitterService.SYNCH_USER);
+		i.putExtra("rowId", rowId);
+		startService(i);
+		
 		// register content observer to refresh when user was updated
 		handler = new Handler();
 		observer = new UserContentObserver(handler);
-		c.registerContentObserver(observer);
 
 		// show the views
 		showUserInfo();
 		
+	}
+	
+	/**
+	 * We listen to updates from the content provider
+	 */
+	@Override
+	public void onResume(){
+		super.onResume();
+		c.registerContentObserver(observer);
+	}
+	
+	/**
+	 * We pause listening for updates from the content provider
+	 */
+	@Override
+	public void onPause(){
+		super.onPause();
+		if(c!=null){
+			if(observer != null) c.unregisterContentObserver(observer);
+		}
 	}
 
 	/**
@@ -166,7 +192,6 @@ public class ShowUserActivity extends Activity{
 		unbindDrawables(findViewById(R.id.showUserRoot));
 
 		if(c!=null){
-			if(observer != null) c.unregisterContentObserver(observer);
 			c.close();
 		}
 		observer = null;
