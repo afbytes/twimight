@@ -12,14 +12,12 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 /**
- * This merely starts the login activity.
+ * This activity only starts the login activity.
  * @author thossmann
  *
  */

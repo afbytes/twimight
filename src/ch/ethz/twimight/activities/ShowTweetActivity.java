@@ -19,23 +19,17 @@ import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.TweetTagHandler;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -48,7 +42,7 @@ import android.widget.TextView;
  * @author thossmann
  *
  */
-public class ShowTweetActivity extends Activity{
+public class ShowTweetActivity extends TwimightBaseActivity{
 
 	
 	Cursor c;
@@ -65,10 +59,6 @@ public class ShowTweetActivity extends Activity{
 	ImageButton deleteButton;
 	Button replyButton;
 	ImageButton favoriteButton;
-	
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
-
 	
 	Uri uri;
 	
@@ -324,38 +314,6 @@ public class ShowTweetActivity extends Activity{
 		unbindDrawables(findViewById(R.id.showTweetRoot));
 		
 	}
-
-
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-		
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
 	
 	/**
 	 * Asks the user if she wants to delete a tweet.
@@ -458,24 +416,4 @@ public class ShowTweetActivity extends Activity{
 		return cv;
 	}
 	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
-
 }

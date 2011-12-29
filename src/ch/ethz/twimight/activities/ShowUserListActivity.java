@@ -15,16 +15,12 @@ package ch.ethz.twimight.activities;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -36,7 +32,7 @@ import android.widget.ListView;
  * @author thossmann
  *
  */
-public class ShowUserListActivity extends Activity{
+public class ShowUserListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowUsersActivity";
 	
@@ -44,12 +40,7 @@ public class ShowUserListActivity extends Activity{
 	private ListView userListView;
 	private Button friendsButton;
 	private Button followersButton;
-	
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
-
-	
-	
+		
 	static final int SHOW_FRIENDS = 1;
 	static final int SHOW_FOLLOWERS = 2;
 
@@ -59,9 +50,6 @@ public class ShowUserListActivity extends Activity{
 	private int currentFilter = SHOW_FRIENDS;
 	private int positionIndex;
 	private int positionTop;
-	
-	private static ShowUserListActivity instance;
-
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -90,7 +78,6 @@ public class ShowUserListActivity extends Activity{
 			}
 		});
 
-		setInstance(this);
 	}
 	
 	/**
@@ -99,9 +86,7 @@ public class ShowUserListActivity extends Activity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		
-		Log.i(TAG, "resuming");
-		
+				
 		// if we just got logged in, we load the timeline
 		Intent i = getIntent();
 		if(i.hasExtra("filter")){
@@ -133,39 +118,6 @@ public class ShowUserListActivity extends Activity{
 		
 		unbindDrawables(findViewById(R.id.showUsersRoot));
 		
-		setInstance(null);
-		
-	}
-
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-		
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
 	}
 	
 	/**
@@ -259,55 +211,6 @@ public class ShowUserListActivity extends Activity{
 	private void resetButtons(){
 		friendsButton.setEnabled(true);
 		followersButton.setEnabled(true);
-	}
-	
-	/**
-	 * @param instance the instance to set
-	 */
-	public static void setInstance(ShowUserListActivity instance) {
-		ShowUserListActivity.instance = instance;
-	}
-
-	/**
-	 * @return the instance
-	 */
-	public static ShowUserListActivity getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Turns the loading icon on and off
-	 * @param isLoading
-	 */
-	public static void setLoading(final boolean isLoading) {
-		if(getInstance()!=null){
-			getInstance().runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 getInstance().setProgressBarIndeterminateVisibility(isLoading);
-			     }
-			});
-		}
-
-	}
-	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
 	}
 	
 }

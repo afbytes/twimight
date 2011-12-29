@@ -15,8 +15,8 @@ package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.util.Constants;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +33,6 @@ import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,7 +45,7 @@ import android.widget.ToggleButton;
  * @author thossmann
  *
  */
-public class NewTweetActivity extends Activity{
+public class NewTweetActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "TweetActivity";
 	
@@ -188,7 +187,7 @@ public class NewTweetActivity extends Activity{
 		});
 		
 		
-		Log.i(TAG, "onCreated");
+		Log.v(TAG, "onCreated");
 	}
 	
 	/**
@@ -244,31 +243,43 @@ public class NewTweetActivity extends Activity{
 		Log.i(TAG, "send tweet!");
 		// if no connectivity, notify user that the tweet will be send later
 		try{
+			Uri insertUri = null;
+			
 			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){
 				ContentValues cv = createContentValues();
 
 				// our own tweets go into the my disaster tweets buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
-				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
+				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
 			} else {
 				
 				ContentValues cv = createContentValues();
 				// our own tweets go into the timeline buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
 
-				getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
+				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG).show();
-				}				
+				}
 			}
+
+			if(insertUri != null){
+				// schedule the tweet for uploading to twitter
+				Intent i = new Intent(this, TwitterService.class);
+				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+				i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
+				startService(i);
+			}
+
 			
 		} catch (Exception e) {
 			Log.e(TAG, "Exception while inserting tweet into DB: " + e.toString());
 			Toast.makeText(this, "There was an error inserting your tweet into the local database! Please try again.", Toast.LENGTH_LONG).show();
 			return;
 		}
+		
 	}
 
 	/**
@@ -341,23 +352,4 @@ public class NewTweetActivity extends Activity{
 		return null;
 	}
 	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
 }

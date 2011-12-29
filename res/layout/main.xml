@@ -33,12 +33,12 @@
 				android:src="@android:drawable/ic_menu_search" />
 		</LinearLayout>
 	</LinearLayout>
-	<ListView android:layout_height="fill_parent"
+	<ch.ethz.twimight.net.twitter.TweetListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/tweetList"
 		android:fastScrollEnabled="true" android:scrollingCache="true" />
 	<TextView android:id="@+id/tweetListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="No tweets (loading..)" android:textSize="16sp" android:layout_gravity="center"
+		android:text="loading.." android:textSize="16sp" android:gravity="center"
 		android:paddingTop="20dp" />
 
 </LinearLayout>

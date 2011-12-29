@@ -875,10 +875,6 @@ public class TweetsContentProvider extends ContentProvider {
 	private Uri insertTweet(ContentValues values){
 		if(checkValues(values)){
 			
-			int flags = 0;
-			if(values.containsKey(Tweets.COL_FLAGS))
-				flags = values.getAsInteger(Tweets.COL_FLAGS);
-			
 			if(!values.containsKey(Tweets.COL_CREATED)){
 				// set the current timestamp
 				values.put(Tweets.COL_CREATED, System.currentTimeMillis());
@@ -910,17 +906,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);
 			if(rowId >= 0){
-				
 				Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
-				getContext().getContentResolver().notifyChange(insertUri, null);
-				
-				if(flags>0){
-					// start synch service with a synch tweet request
-					Intent i = new Intent(TwitterService.SYNCH_ACTION);
-					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-					i.putExtra("rowId", rowId);
-					getContext().startService(i);
-				}
 				return insertUri;
 			} else {
 				throw new IllegalStateException("Could not insert tweet into timeline " + values);
