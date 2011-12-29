@@ -16,7 +16,6 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.DMUserAdapter;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,11 +23,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -41,12 +37,10 @@ import android.widget.ListView;
  * @author thossmann
  *
  */
-public class ShowDMUsersListActivity extends Activity{
+public class ShowDMUsersListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowDMUsersListActivity";
 	
-	private static ShowDMUsersListActivity instance;
-
 	// Views
 	private ListView dmUsersListView;
 	private ImageButton messageButton;
@@ -56,9 +50,6 @@ public class ShowDMUsersListActivity extends Activity{
 
 	// handler
 	static Handler handler;
-
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
 
 	private int positionIndex;
 	private int positionTop;
@@ -101,9 +92,7 @@ public class ShowDMUsersListActivity extends Activity{
 				startActivity(new Intent(getBaseContext(), NewDMActivity.class));
 			}
 		});
-		
-		setInstance(this);
-		
+				
 		Log.i(TAG, "created");
 
 	}
@@ -152,42 +141,8 @@ public class ShowDMUsersListActivity extends Activity{
 		if(c!=null) c.close();
 				
 		unbindDrawables(findViewById(R.id.showDMUsersListRoot));
-		setInstance(null);
-
 	}
 
-
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-		
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
-	
 	/**
 	 * Saves the current selection
 	 */
@@ -218,52 +173,4 @@ public class ShowDMUsersListActivity extends Activity{
 	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
 	}
 	
-	/**
-	 * @param instance the instance to set
-	 */
-	public static void setInstance(ShowDMUsersListActivity instance) {
-		ShowDMUsersListActivity.instance = instance;
-	}
-
-	/**
-	 * @return the instance
-	 */
-	public static ShowDMUsersListActivity getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Turns the loading icon on and off
-	 * @param isLoading
-	 */
-	public static void setLoading(final boolean isLoading) {
-		if(getInstance()!=null){
-			getInstance().runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 getInstance().setProgressBarIndeterminateVisibility(isLoading);
-			     }
-			});
-		}
-
-	}
-	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
 }

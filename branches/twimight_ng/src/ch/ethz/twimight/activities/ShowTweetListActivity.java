@@ -14,10 +14,11 @@ package ch.ethz.twimight.activities;
 
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
+import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,30 +32,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 /**
  * The main Twimight view showing the Timeline, favorites and mentions
- * TODO: Refresh and load older tweets on overscroll.
- * TODO: Show a message when the cursor is empty.
+ * TODO: load older tweets on overscroll.
  * @author thossmann
  *
  */
-public class ShowTweetListActivity extends Activity{
+public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowTweetListActivity";
 	
-	private static ShowTweetListActivity instance;
-
 	// Views
-	private ListView timelineListView;
+	private TweetListView timelineListView;
 	private Button timelineButton;
 	private Button favoritesButton;
 	private Button mentionsButton;
@@ -90,11 +85,10 @@ public class ShowTweetListActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 				
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main);
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
-		timelineListView = (ListView) findViewById(R.id.tweetList);
+		timelineListView = (TweetListView) findViewById(R.id.tweetList);
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
 		// Header buttons
@@ -136,9 +130,7 @@ public class ShowTweetListActivity extends Activity{
 			}
 		});
 		
-		setInstance(this);
-		
-		Log.i(TAG, "created");
+		Log.v(TAG, "created");
 
 	}
 	
@@ -204,7 +196,6 @@ public class ShowTweetListActivity extends Activity{
 		if(c!=null) c.close();
 				
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
-		setInstance(null);
 
 	}
 
@@ -318,44 +309,50 @@ public class ShowTweetListActivity extends Activity{
 	}
 	
 	/**
-	 * Which tweets do we show? Timeline, favorites, mentions, messages, search?
+	 * Which tweets do we show? Timeline, favorites, mentions?
 	 * @param filter
 	 */
 	private void setFilter(int filter){
 		// set all header button colors to transparent
 		resetButtons();
 		Button b=null;
+		Intent overscrollIntent = null;
 		
 		if(c!=null) c.close();
 		
 		switch(filter) {
 		case SHOW_TIMELINE: 
 			b = timelineButton;
+			overscrollIntent = new Intent(this, TwitterService.class); 
+			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
+			overscrollIntent.putExtra("force", true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 			break;
 		case SHOW_FAVORITES: 
 			b = favoritesButton;
+			overscrollIntent = new Intent(this, TwitterService.class); 
+			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_FAVORITES);
+			overscrollIntent.putExtra("force", true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_FAVORITES;
 
 			break;
 		case SHOW_MENTIONS: 
 			b = mentionsButton;
+			overscrollIntent = new Intent(this, TwitterService.class); 
+			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);
+			overscrollIntent.putExtra("force", true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
 
 			break;
-			
-		case SHOW_USERTWEETS:
-			long userId = getIntent().getLongExtra("userId", 0);
-			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +"/" + Tweets.TWEETS_TABLE_USER + "/" + userId), null, null, null, null);
-			currentFilter=SHOW_USERTWEETS;
-
-			break;
 		default:
 			b= timelineButton;
+			overscrollIntent = new Intent(this, TwitterService.class); 
+			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
+			overscrollIntent.putExtra("force", true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
@@ -368,6 +365,7 @@ public class ShowTweetListActivity extends Activity{
 		
 		adapter = new TweetAdapter(this, c);		
 		timelineListView.setAdapter(adapter);
+		timelineListView.setOverscrollIntent(overscrollIntent);
 
 
 		// Click listener when the user clicks on a tweet
@@ -376,11 +374,9 @@ public class ShowTweetListActivity extends Activity{
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 				Cursor c = (Cursor) timelineListView.getItemAtPosition(position);
-				//c.moveToFirst();
 				Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				startActivity(i);
-				//c.close();
 			}
 		});
 	}
@@ -417,53 +413,5 @@ public class ShowTweetListActivity extends Activity{
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
-
-	/**
-	 * @param instance the instance to set
-	 */
-	public static void setInstance(ShowTweetListActivity instance) {
-		ShowTweetListActivity.instance = instance;
-	}
-
-	/**
-	 * @return the instance
-	 */
-	public static ShowTweetListActivity getInstance() {
-		return instance;
-	}
 	
-	/**
-	 * Turns the loading icon on and off
-	 * @param isLoading
-	 */
-	public static void setLoading(final boolean isLoading) {
-		if(getInstance()!=null){
-			getInstance().runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 getInstance().setProgressBarIndeterminateVisibility(isLoading);
-			     }
-			});
-		}
-
-	}
-	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
 }

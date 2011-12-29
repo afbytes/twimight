@@ -15,7 +15,6 @@ package ch.ethz.twimight.activities;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -26,10 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -41,7 +37,7 @@ import android.widget.TextView;
  * @author thossmann
  *
  */
-public class ShowUserActivity extends Activity{
+public class ShowUserActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowTwitterUserActivity";
 
@@ -65,9 +61,6 @@ public class ShowUserActivity extends Activity{
 	private LinearLayout followInfo;
 	private LinearLayout unfollowInfo;
 	private Button showUserTweetsButton;
-
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
 
 
 	private boolean following;
@@ -197,38 +190,6 @@ public class ShowUserActivity extends Activity{
 		observer = null;
 		handler = null;
 		
-	}
-
-
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -361,7 +322,7 @@ public class ShowUserActivity extends Activity{
 		Log.i(TAG, "flags: "+ flags);
 
 		/*
-		 * Regarding the following situation, the following cases are possible: 
+		 * The following cases are possible: 
 		 * - the user was marked for following
 		 * - the user was marked for unfollowing
 		 * - we follow the user
@@ -389,7 +350,14 @@ public class ShowUserActivity extends Activity{
 					followButton.setVisibility(Button.GONE);
 					followInfo.setVisibility(LinearLayout.VISIBLE);
 				}
-				finish();
+				
+				// trigger the update
+				Intent i = new Intent(getBaseContext(), TwitterService.class);
+				i.putExtra("synch_request", TwitterService.SYNCH_USER);
+				i.putExtra("rowId", rowId);
+				startService(i);
+
+				//finish();
 			}
 
 		});
@@ -463,26 +431,6 @@ public class ShowUserActivity extends Activity{
 	}
 
 	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-		if (view.getBackground() != null) {
-			view.getBackground().setCallback(null);
-		}
-		if (view instanceof ViewGroup) {
-			for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-				unbindDrawables(((ViewGroup) view).getChildAt(i));
-			}
-			try{
-				((ViewGroup) view).removeAllViews();
-			} catch(UnsupportedOperationException e){
-				// No problem, nothing to do here
-			}
-		}
-	}
-
-	/**
 	 * Calls showUserInfo if the user data has been updated
 	 * @author thossmann
 	 *
@@ -514,10 +462,9 @@ public class ShowUserActivity extends Activity{
 			if(c.getCount() == 0) finish();
 			c.moveToFirst();
 			
-			observer = new UserContentObserver(handler);
-			c.registerContentObserver(observer);
+			//observer = new UserContentObserver(handler);
+			c.registerContentObserver(this);
 
-			
 			// update the views
 			showUserInfo();
 

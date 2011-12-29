@@ -13,17 +13,14 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -94,7 +91,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			case USERS: 
 				Log.i(TAG, "Query USERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, where, whereArgs, null, null, sortOrder);
-				// TODO: Notification URI
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 
@@ -102,7 +98,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			case USERS_ID: 
 				Log.i(TAG, "Query USERS_ID " + uri.getLastPathSegment());
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id="+uri.getLastPathSegment(), whereArgs, null, null, sortOrder);
-				c.setNotificationUri(getContext().getContentResolver(),uri);
+				//c.setNotificationUri(getContext().getContentResolver(),uri);
+				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 			
 			case USERS_FOLLOWERS:
@@ -169,16 +166,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 			if(rowId >= 0){
 				
-				/*
-				Intent i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_USER);
-				i.putExtra("rowId", rowId);
-				getContext().startService(i);
-				*/
-				
-				Uri insertUri = ContentUris.withAppendedId(TwitterUsers.CONTENT_URI, rowId);
-				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-				
+				Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);				
 				purge(DBOpenHelper.TABLE_USERS);
 				
 				return insertUri;
@@ -198,20 +186,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(checkValues(values)){
 			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
 			if(nrRows > 0){
-				
-				
-				if(values.containsKey(TwitterUsers.COL_FLAGS) && values.getAsInteger(TwitterUsers.COL_FLAGS)!=0)
-				{
-					Intent i = new Intent(TwitterService.SYNCH_ACTION);
-					i.putExtra("synch_request", TwitterService.SYNCH_USER);
-					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
-					getContext().startService(i);
-				}
-				
-
-				//getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-				getContext().getContentResolver().notifyChange(uri, null);
-
 				return nrRows;
 			} else {
 				throw new IllegalStateException("Could not insert user into database " + values);
@@ -223,7 +197,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	
 	@Override
 	public int delete(Uri uri, String arg1, String[] arg2) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	

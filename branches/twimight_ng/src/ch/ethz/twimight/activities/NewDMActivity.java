@@ -16,7 +16,6 @@ package ch.ethz.twimight.activities;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.util.Constants;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +29,6 @@ import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,7 +40,7 @@ import android.widget.Toast;
  * @author thossmann
  *
  */
-public class NewDMActivity extends Activity{
+public class NewDMActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "NewDMActivity";
 	
@@ -148,7 +146,7 @@ public class NewDMActivity extends Activity{
 			recepient.requestFocus();
 		}
 		
-		Log.i(TAG, "onCreated");
+		Log.v(TAG, "onCreated");
 	}
 	
 	/**
@@ -234,25 +232,5 @@ public class NewDMActivity extends Activity{
 		dmContentValues.put(DirectMessages.COL_FLAGS, DirectMessages.FLAG_TO_INSERT);
 		
 		return dmContentValues;
-	}
-	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
 	}
 }

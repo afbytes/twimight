@@ -15,16 +15,12 @@ package ch.ethz.twimight.activities;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -33,7 +29,7 @@ import android.widget.ListView;
  * @author thossmann
  *
  */
-public class ShowUserTweetListActivity extends Activity{
+public class ShowUserTweetListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowUserTweetListActivity";
 	
@@ -42,9 +38,6 @@ public class ShowUserTweetListActivity extends Activity{
 
 	private TweetAdapter adapter;
 	private Cursor c;
-
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
 	
 	private int positionIndex;
 	private int positionTop;
@@ -86,7 +79,7 @@ public class ShowUserTweetListActivity extends Activity{
 			}
 		});
 		
-		Log.i(TAG, "created");
+		Log.v(TAG, "created");
 
 	}
 	
@@ -129,37 +122,6 @@ public class ShowUserTweetListActivity extends Activity{
 
 	}
 
-
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
 	
 	/**
 	 * Saves the current selection
@@ -191,24 +153,4 @@ public class ShowUserTweetListActivity extends Activity{
 	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
 	}
 	
-	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
 }

@@ -17,7 +17,6 @@ import java.util.Date;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.security.CertificateManager;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,10 +24,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -40,7 +36,7 @@ import android.widget.Toast;
  * @author thossmann
  *
  */
-public class AboutActivity extends Activity{
+public class AboutActivity extends TwimightBaseActivity{
 
 	public static final String TAG = "AboutActivity";
 	Button revokeButton;
@@ -49,9 +45,6 @@ public class AboutActivity extends Activity{
 	TextView keyOk;
 	TextView versionName;
 	
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
-
 	/** 
 	 * Called when the activity is first created. 
 	 */
@@ -140,37 +133,6 @@ public class AboutActivity extends Activity{
 	}
 	
 	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-		
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
-	
-	/**
 	 * Asks the user if she really wants to revoke the key
 	 */
 	private void showRevokeDialog(){
@@ -195,23 +157,4 @@ public class AboutActivity extends Activity{
 		alert.show();
 	}
 	
-	/**
-	 * Clean up the views
-	 * @param view
-	 */
-	private void unbindDrawables(View view) {
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
-	}
 }
