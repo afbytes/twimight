@@ -73,15 +73,14 @@
 
 		<LinearLayout android:id="@+id/showTweetTosend"
 			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/border">
+			android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/border" android:padding="10dp">
 			<ImageView android:id="@+id/showTweetInfo1"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
 			<TextView android:id="@+id/showTweetInfoText1"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with posting this Tweet (maybe no Internet connection?). We will re-try soon." />
+				android:text="Something went wrong with posting this Tweet (maybe no Internet connection?). We will re-try soon."/>
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetTodelete"
@@ -144,9 +143,8 @@
 				android:src="@android:drawable/star_big_off" android:background="@color/transparent"
 				android:layout_marginRight="20dp" />
 			<ImageButton android:id="@+id/showTweetDelete"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_menu_delete" android:background="@color/transparent"
-				android:layout_marginRight="20dp" />			
+				android:layout_width="wrap_content" android:src="@android:drawable/ic_menu_delete" android:background="@color/transparent"
+				android:layout_marginRight="20dp" android:layout_height="50dp" android:visibility="visible"/>			
 			<Button android:id="@+id/showTweetRetweet"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="RT"

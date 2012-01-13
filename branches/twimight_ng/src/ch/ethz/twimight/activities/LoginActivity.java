@@ -23,8 +23,27 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
-import ch.ethz.twimight.R;
+import winterwell.jtwitter.User;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.location.LocationAlarm;
@@ -35,23 +54,6 @@ import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.Uri;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 /**
  * Logging the user in and out.
@@ -103,10 +105,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.login);
 		
 		LinearLayout showLoginLogo = (LinearLayout) findViewById(R.id.showLoginLogo);
-		showLoginLogo.setBackgroundResource(R.drawable.about_background);
-		
-		buttonLogin = (Button) findViewById(R.id.buttonLogin);
-		buttonLogin.setOnClickListener(this);
+		showLoginLogo.setBackgroundResource(R.drawable.about_background);		
 		
 		
 		// which state are we in?
@@ -137,7 +136,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 		} else {
 			// if we don't have request token and secret, we show the login button
 			Log.i(TAG, "we do not have the tokens, enabling login button");
-			buttonLogin.setEnabled(true);
+			buttonLogin = (Button) findViewById(R.id.buttonLogin);
+			buttonLogin.setEnabled(true);	
+			buttonLogin.setOnClickListener(this);
 		}
 		
 		if (loginReceiver == null) loginReceiver = new LoginReceiver();
@@ -159,7 +160,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				// disabling button
 				buttonLogin.setEnabled(false);
 
-				getRequestToken();
+				new GetRequestTokenTask().execute();
 			} else {
 				Toast.makeText(this,"Not connected to the Internet, please try again later!", Toast.LENGTH_LONG).show();
 			}
@@ -188,51 +189,63 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 * Upon pressing the login button, we first get Request tokens from Twitter.
 	 * @param context
 	 */
-	private void getRequestToken(){
-		
-		Log.i(TAG, "getting reqeuest token");
+	
+	private class GetRequestTokenTask extends AsyncTask<Void,Void,String> {
 
-		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
-		OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
+		@Override
+		protected String doInBackground(Void... params) {
+			Log.i(TAG, "getting reqeuest token");
 
-		provider.setOAuth10a(true);
-		
-		try {
-			// TODO: This has to be done in a Thread!
-			String authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URI.toString());
-			setRequestToken(consumer.getToken(), this);
-			setRequestTokenSecret(consumer.getTokenSecret(), this);
+			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
+			OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
+
+			provider.setOAuth10a(true);
 			
-			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
-			intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			try {
+				// TODO: This has to be done in a Thread!
+				String authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URI.toString());
+				setRequestToken(consumer.getToken(), LoginActivity.this);
+				setRequestTokenSecret(consumer.getTokenSecret(), LoginActivity.this);
+				
+				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
+				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY); //@author pcarta
 
-			// Show twitter login in Browser.
-			this.startActivity(intent);
-			finish();
+				// Show twitter login in Browser.
+			    startActivity(intent);
+				finish();
+				
+				// now we have the request token.
+			} catch (OAuthMessageSignerException e) {
+				e.printStackTrace();						
+				return "signing the request failed ";
+				
+			} catch (OAuthNotAuthorizedException e) {
+				e.printStackTrace();		
+				return "Twitter is not reachable at the moment, please try again later";
+						
+			} catch (OAuthExpectationFailedException e) {
+				e.printStackTrace();							
+				return "required parameters were not correctly set" ;
+						
+			} catch (OAuthCommunicationException e) {
+				e.printStackTrace();						
+				return "server communication failed, check internet connectivity";
+			}
 			
-			// now we have the request token.
-		} catch (OAuthMessageSignerException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"signing the request failed ", Toast.LENGTH_LONG).show();
-			buttonLogin.setEnabled(true);
-			return;
-		} catch (OAuthNotAuthorizedException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Twitter is not reachable at the moment, please try again later", Toast.LENGTH_LONG).show();
-			buttonLogin.setEnabled(true);
-			return;
-		} catch (OAuthExpectationFailedException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"required parameters were not correctly set", Toast.LENGTH_LONG).show();
-			buttonLogin.setEnabled(true);
-			return;
-		} catch (OAuthCommunicationException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"server communication failed, check internet connectivity", Toast.LENGTH_SHORT).show();
-			buttonLogin.setEnabled(true);
-			return;
+			return null;
 		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			if (result != null) {
+				Toast.makeText(LoginActivity.this, result, Toast.LENGTH_LONG).show();
+				buttonLogin.setEnabled(true);
+			}
+		}
+		
 	}
+	
+	
 	
 	/**
 	 * Get an access token and secret from Twitter

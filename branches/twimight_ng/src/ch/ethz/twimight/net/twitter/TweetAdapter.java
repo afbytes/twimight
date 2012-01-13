@@ -79,8 +79,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView favoriteStar = (ImageView) row.findViewById(R.id.favorite);
 
 		boolean favorited = ((cursor.getInt(cursor.getColumnIndex(Tweets.COL_FAVORITED)) > 0) 
-							&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
-							|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
+								&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
+								|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		if(favorited){
 			favoriteStar.setImageResource(android.R.drawable.star_off);
 		} else {

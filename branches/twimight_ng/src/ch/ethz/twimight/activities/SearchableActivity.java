@@ -12,19 +12,21 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TweetAdapter;
-import ch.ethz.twimight.net.twitter.Tweets;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TweetAdapter;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
  * Shows the most recent tweets of a user
@@ -62,11 +64,18 @@ public class SearchableActivity extends TwimightBaseActivity{
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
 			String query = intent.getStringExtra(SearchManager.QUERY);
+			
+			//@author pcarta
+			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
+	        suggestions.saveRecentQuery(query, null);
+
 			Log.e(TAG, query);
 
 			// TODO : check input
 			Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
 			c = getContentResolver().query(uri, null, query, null, null);
+			startManagingCursor(c); //@author pcarta
 
 			adapter = new TweetAdapter(this, c);		
 			searchListView.setAdapter(adapter);

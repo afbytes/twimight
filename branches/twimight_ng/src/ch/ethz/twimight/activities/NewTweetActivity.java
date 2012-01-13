@@ -167,6 +167,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			public void onProviderEnabled(String provider) {}
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
 		};
+		
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// User settings: do we use location or not?
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
@@ -244,21 +245,24 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		// if no connectivity, notify user that the tweet will be send later
 		try{
 			Uri insertUri = null;
+			ContentValues cv = createContentValues(); //@author pcarta
 			
 			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){
-				ContentValues cv = createContentValues();
+				//ContentValues cv = createContentValues();
 
 				// our own tweets go into the my disaster tweets buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
-				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
+				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+															+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
 			} else {
 				
-				ContentValues cv = createContentValues();
+				//ContentValues cv = createContentValues();
 				// our own tweets go into the timeline buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
 
-				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
+				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
+															Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG).show();
@@ -313,8 +317,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private void registerLocationListener(){
 		try{
 			if ((lm != null) && (locationListener != null)) {
-				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
-				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, locationListener);
+				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 100, locationListener);
+				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 200, locationListener);
 			}
 		} catch(Exception e) {
 			Log.i(TAG,"Can't request location Updates: " + e.toString());
