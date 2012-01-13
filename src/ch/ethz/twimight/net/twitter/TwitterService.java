@@ -336,13 +336,14 @@ public class TwitterService extends Service {
 
 	/**
 	 * Syncs all users which have transactional flags set
+	 * @author pcarta removed the try catch since it does not throw exceptions
 	 */
 	private void synchTransactionalUsers(){
 		Log.i(TAG, "SYNCH_TRANSACTIONAL_USERS");
 		// get the flagged users
 		Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
 		Cursor c = null;
-		try{
+	
 			c = getContentResolver().query(queryUri, null, TwitterUsers.COL_FLAGS+"!=0", null, null);
 			Log.i(TAG, c.getCount()+" transactional users to synch");
 			if(c.getCount() >= 0){
@@ -352,12 +353,9 @@ public class TwitterService extends Service {
 					c.moveToNext();
 				}
 			}
-
-		} catch(Exception ex){
-			Log.e(TAG, "Exception while querying transactional users " + ex);
-		} finally {
+		
 			c.close();
-		}
+		
 	}
 
 	/**
@@ -2067,7 +2065,7 @@ public class TwitterService extends Service {
 			try{
 				queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
 				getContentResolver().update(queryUri, cv, null, null);
-			} catch(Exception ex){
+			} catch(NullPointerException ex){
 				Log.e(TAG, "Exception while inserting profile image into DB");
 			}
 			
@@ -2803,7 +2801,7 @@ public class TwitterService extends Service {
 			try{
 				getContentResolver().update(queryUri, cv, null, null);
 				Toast.makeText(getBaseContext(), "Follow request sent.", Toast.LENGTH_LONG).show();
-			} catch(Exception ex){
+			} catch(NullPointerException ex){
 				Log.e(TAG, "Exception while updating tweet in DB");
 			}
 			

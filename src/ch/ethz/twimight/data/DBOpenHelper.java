@@ -34,9 +34,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_LOCATIONS = "locations";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
 	public static final String TABLE_TWEETS = "tweets";
-	public static final String TABLE_TWEET_MENTIONS = "tweet_mentions";
-	public static final String TABLE_TWEET_HASHTAGS = "tweet_hashtags";
-	public static final String TABLE_TWEET_URLS = "tweet_urls";
+    //public static final String TABLE_TWEET_MENTIONS = "tweet_mentions";
+	//public static final String TABLE_TWEET_HASHTAGS = "tweet_hashtags";
+	//public static final String TABLE_TWEET_URLS = "tweet_urls";
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 

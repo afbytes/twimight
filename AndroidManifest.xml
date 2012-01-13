@@ -121,6 +121,9 @@
 
 		<provider android:name="ch.ethz.twimight.net.twitter.DirectMessagesContentProvider"
 			android:authorities="ch.ethz.twimight.DMs" />
+		<provider android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
+              android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
+		
 
 	</application>
 

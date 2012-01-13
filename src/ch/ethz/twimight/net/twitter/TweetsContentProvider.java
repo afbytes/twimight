@@ -162,7 +162,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * TODO: Create the queries more elegantly..
 	 */
 	@Override
-	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
+	public synchronized Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = Tweets.DEFAULT_SORT_ORDER;
 		
@@ -596,7 +596,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Insert a tweet into the DB
 	 */
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
+	public synchronized Uri insert(Uri uri, ContentValues values) {
 		int disasterId;
 		Cursor c;
 		Uri insertUri = null; // the return value;
@@ -619,7 +619,7 @@ public class TweetsContentProvider extends ContentProvider {
 				disasterId = getDisasterID(values);
 				
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
-				if(c.getCount()>0){
+				if(c.getCount() == 1){   //@author pcarta before was > 0
 
 					c.moveToFirst();
 					if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
@@ -661,6 +661,8 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				CertificateManager cm = new CertificateManager(getContext());
 				KeyManager km = new KeyManager(getContext());
+				
+				//verify whether I was the author or not
 				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
 					if(cm.hasCertificate()){
 						// we put the signature
@@ -724,7 +726,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Update a tweet
 	 */
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		Log.i(TAG, "Update TWEETS_ID");
@@ -752,7 +754,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Delete a local tweet from the DB
 	 */
 	@Override
-	public int delete(Uri uri, String arg1, String[] arg2) {
+	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		Log.i(TAG, "Delete TWEETS_ID");

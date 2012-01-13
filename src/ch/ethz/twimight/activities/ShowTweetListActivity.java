@@ -326,7 +326,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
 			overscrollIntent.putExtra("force", true);
-			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+											+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 			break;
@@ -335,7 +336,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_FAVORITES);
 			overscrollIntent.putExtra("force", true);
-			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+											+ Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_FAVORITES;
 
 			break;
@@ -344,7 +346,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);
 			overscrollIntent.putExtra("force", true);
-			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+											+ Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
 
 			break;
@@ -353,7 +356,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
 			overscrollIntent.putExtra("force", true);
-			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+											+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
 
 		}
@@ -363,8 +367,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b.setEnabled(false);
 		}
 		
+		startManagingCursor(c); // @author pcarta
 		adapter = new TweetAdapter(this, c);		
-		timelineListView.setAdapter(adapter);
+		timelineListView.setAdapter(adapter);		
 		timelineListView.setOverscrollIntent(overscrollIntent);
 
 
