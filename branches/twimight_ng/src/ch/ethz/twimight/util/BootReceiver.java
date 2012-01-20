@@ -12,15 +12,15 @@
  ******************************************************************************/
 package ch.ethz.twimight.util;
 
-import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.location.LocationAlarm;
-import ch.ethz.twimight.net.opportunistic.ScanningService;
-import ch.ethz.twimight.net.tds.TDSAlarm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
+import ch.ethz.twimight.net.tds.TDSAlarm;
+import ch.ethz.twimight.net.twitter.TwitterAlarm;
 
 /**
  * Starts the updater service after the boot process.
@@ -50,13 +50,12 @@ public class BootReceiver extends BroadcastReceiver {
 			
 			
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-				context.startService(new Intent(context, ScanningService.class));
+				new ScanningAlarm(context,0,false);
 			}
 			
-			
-			// Start the location update service
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
-				new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
+						
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
+				new TwitterAlarm(context,false);
 			}
 		}
 

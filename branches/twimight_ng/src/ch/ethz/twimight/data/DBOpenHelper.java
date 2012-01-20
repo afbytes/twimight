@@ -40,16 +40,16 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 
-	private static final int DATABASE_VERSION = 35;
+	private static final int DATABASE_VERSION = 36;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
 			+ "_id integer primary key autoincrement not null, "
-			+ "mac bigint not null, "
-			+ "attempts integer, "
-			+ "successful integer, "
-			+ "active integer, "
-			+ "last_update integer);";
+			+ MacsDBHelper.KEY_MAC + " string, "
+			+ MacsDBHelper.KEY_ATTEMPTS+ " integer, "
+			+ MacsDBHelper.KEY_SUCCESSFUL +" integer, "
+			+ MacsDBHelper.KEY_ACTIVE + " integer, "
+			+ MacsDBHelper.KEY_LAST +" integer);";
 	
 	private static final String TABLE_LOCATIONS_CREATE = "create table "+TABLE_LOCATIONS+" ("
 			+ "_id integer primary key autoincrement not null, "
@@ -166,11 +166,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		
 	}
 	
-	/**
-	 * Called when creating the DB
-	 */
-	@Override
-	public void onCreate(SQLiteDatabase database) {
+	private void createTables(SQLiteDatabase database) {
 		database.execSQL(TABLE_MACS_CREATE);
 		database.execSQL(TABLE_LOCATIONS_CREATE);
 		database.execSQL(TABLE_REVOCATION_CREATE);
@@ -178,6 +174,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_TWEETS_CREATE);
 		database.execSQL(TABLE_USERS_CREATE);
 		database.execSQL(TABLE_DMS_CREATE);
+	}
+	
+	/**
+	 * Called when creating the DB
+	 */
+	@Override
+	public void onCreate(SQLiteDatabase database) {
+		createTables(database);
 	}
 
 	/**
@@ -196,7 +200,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DMS);
-		onCreate(database);
+		createTables(database);
 	}
 	
 	/**

@@ -60,7 +60,7 @@ public class TDSAlarm extends BroadcastReceiver {
 
 		AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 		
-		Intent intent = new Intent(context, TDSAlarm.class);
+		Intent intent = new Intent(context, TDSAlarm.class);		
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// cancel scheduled alarms
@@ -110,6 +110,8 @@ public class TDSAlarm extends BroadcastReceiver {
 
 	/**
 	 * This is executed when the alarm goes off.
+	 * @author thossmann
+	 * @author pcarta
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -120,23 +122,30 @@ public class TDSAlarm extends BroadcastReceiver {
 		getWakeLock(context);
 
 		if(isTdsEnabled(context)){
-
-			// can we obtain the Bluetooth MAC?
-			if(BluetoothAdapter.getDefaultAdapter() !=null && BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				getMacFromAdapter(context);
-			}
-			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
-			if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null){
-	
-				Log.d(TAG, "No MAC address, enabling Bluetooth");
-				enableBluetooth(context); // this will also schedule a TDSThread, once bluetooth is done.
-				
-			} else {
+			
+			if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) != null){ 
 				// Request the sync
 				Intent synchIntent = new Intent(context, TDSService.class);
 				synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
 				context.startService(synchIntent);
 			}
+			
+			// can we obtain the Bluetooth MAC?
+			else if(BluetoothAdapter.getDefaultAdapter() !=null && BluetoothAdapter.getDefaultAdapter().isEnabled()){
+				
+				getMacFromAdapter(context);
+				//@author pcarta
+				Intent synchIntent = new Intent(context, TDSService.class);
+				synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
+				context.startService(synchIntent);
+			}
+			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
+			else {	
+				
+				Log.d(TAG, "No MAC address, enabling Bluetooth");
+				enableBluetooth(context); // this will also schedule a TDSThread, once bluetooth is done.
+				
+			} 
 		}
 
 	}
@@ -150,7 +159,7 @@ public class TDSAlarm extends BroadcastReceiver {
 		releaseWakeLock();
 		
 		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		wakeLock = mgr.newWakeLock(PowerManager.FULL_WAKE_LOCK, WAKE_LOCK);
+		wakeLock = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK , WAKE_LOCK); //@author pcarta
 		wakeLock.acquire();
 	}
 
@@ -172,8 +181,7 @@ public class TDSAlarm extends BroadcastReceiver {
 
 		new Thread(new Runnable() {
 			@Override
-			public void run() {
-				if(BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled()==false){
+			public void run() {				
 					int attempts = 0;
 					while(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null && attempts <= 3){
 						BluetoothAdapter.getDefaultAdapter().enable();
@@ -190,7 +198,8 @@ public class TDSAlarm extends BroadcastReceiver {
 					}
 					BluetoothAdapter.getDefaultAdapter().disable();
 
-					if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) != null &&PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON) == true ){
+					if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) != null && 
+							PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON) == true ){
 						// Request the sync
 						Intent synchIntent = new Intent(context, TDSService.class);
 						synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
@@ -199,7 +208,7 @@ public class TDSAlarm extends BroadcastReceiver {
 						Log.e(TAG, "Sometimes everything goes wrong. Can't obtain a MAC address, rescheduling now.");
 						scheduleCommunication(context, Constants.TDS_UPDATE_INTERVAL);
 					}
-				}
+				
 			}
 		}).start();
 

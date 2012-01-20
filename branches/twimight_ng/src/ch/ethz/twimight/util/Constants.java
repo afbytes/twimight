@@ -40,7 +40,7 @@ public final class Constants {
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     
     // Bluetooth scanning configuration
-    public static final long SCANNING_INTERVAL = 60*1000L; /** Interval for Bluetooth scans */
+    public static final long SCANNING_INTERVAL = 2*60*1000L; /** Interval for Bluetooth scans */
     public static final long MIN_LISTEN_TIME = 10*1000L; /** Interval for Bluetooth scans */
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */
@@ -81,6 +81,8 @@ public final class Constants {
 	public static final int LOGIN_ATTEMPTS = 5; /** How many times do we attempt to log in before giving up? */
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
 	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
+	public static final boolean TWEET_DEFAULT_RUN_AT_BOOT = true; /** Are the updates started at boot time ? */
+	public static final long UPDATER_UPDATE_PERIOD = 2 * 60 * 1000L; /** frequency of background updates */
 	
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
 	public static final int NR_FAVORITES = 20; /** how many favorites to request from twitter */

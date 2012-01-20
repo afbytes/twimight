@@ -93,7 +93,8 @@
 				android:layout_marginRight="10dp" />
 			<TextView android:id="@+id/showTweetInfoText2"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with deleting this Tweet (maybe no Internet connection?). We will re-try soon." />
+				android:text="Something went wrong with deleting this Tweet (maybe no Internet connection?). We will re-try soon.
+				Press to abort operation" />
 		</LinearLayout>
 		
   		<LinearLayout android:id="@+id/showTweetTofavorite"

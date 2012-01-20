@@ -283,7 +283,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		// enable the show followers and show followee's buttons
 		LinearLayout localUserButtons = (LinearLayout) findViewById(R.id.showLocalUserButtons);
 		localUserButtons.setVisibility(LinearLayout.VISIBLE);
-
+		
 		// the followers Button
 		showFollowersButton.setOnClickListener(null);
 		showFollowersButton.setOnClickListener(new OnClickListener(){
@@ -336,7 +336,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			followButton.setText("Follow");
 		}
 		// listen to clicks
-		followButton.setOnClickListener(null);
+		//followButton.setOnClickListener(null);
 		followButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -355,9 +355,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 				Intent i = new Intent(getBaseContext(), TwitterService.class);
 				i.putExtra("synch_request", TwitterService.SYNCH_USER);
 				i.putExtra("rowId", rowId);
-				startService(i);
-
-				//finish();
+				startService(i);				
 			}
 
 		});
@@ -412,6 +410,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	private ContentValues setFollowFlag(int flags) {
 		ContentValues cv = new ContentValues();
+		flags = flags & (~TwitterUsers.FLAG_TO_UNFOLLOW);
 		// set follow flag
 		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_FOLLOW);
 		return cv;
@@ -425,6 +424,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	private ContentValues setUnfollowFlag(int flags) {
 		ContentValues cv = new ContentValues();
+		flags = flags & (~TwitterUsers.FLAG_TO_FOLLOW);
 		// set follow flag
 		cv.put(TwitterUsers.COL_FLAGS, flags | TwitterUsers.FLAG_TO_UNFOLLOW);
 		return cv;
@@ -459,14 +459,18 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			// and get a new one
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
 			c = getContentResolver().query(uri, null, null, null, null);
-			if(c.getCount() == 0) finish();
-			c.moveToFirst();
-			
-			//observer = new UserContentObserver(handler);
-			c.registerContentObserver(this);
+			if(c.getCount() == 0) 
+				finish();
+			else {
+				c.moveToFirst();
+				
+				//observer = new UserContentObserver(handler);
+				c.registerContentObserver(this);
 
-			// update the views
-			showUserInfo();
+				// update the views
+				showUserInfo();
+			}
+			
 
 		}
 	}

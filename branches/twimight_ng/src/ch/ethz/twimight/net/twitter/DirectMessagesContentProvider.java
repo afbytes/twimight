@@ -120,7 +120,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * TODO: Create the queries more elegantly..
 	 */
 	@Override
-	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
+	public synchronized Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 				
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = Tweets.DEFAULT_SORT_ORDER;
 		
@@ -249,7 +249,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Insert a direct message into the DB
 	 */
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
+	public synchronized Uri insert(Uri uri, ContentValues values) {
 		int disasterId;
 		Cursor c = null;
 		Uri insertUri = null; // the return value;
@@ -318,7 +318,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Update a direct message
 	 */
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 
 		Log.i(TAG, "Update DM_ID");
@@ -338,7 +338,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Delete a local direct message from the DB
 	 */
 	@Override
-	public int delete(Uri uri, String arg1, String[] arg2) {
+	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		Log.i(TAG, "Delete DM_ID");

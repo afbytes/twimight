@@ -25,8 +25,7 @@ public class TweetListView extends ListView {
 		this.context = context;
 	}
 	
-	public void setOverscrollIntent(Intent i){
-		Log.e(TAG, "SEEEEEEEEEEEET");
+	public void setOverscrollIntent(Intent i){		
 		overscrollIntent = i;
 	}
 

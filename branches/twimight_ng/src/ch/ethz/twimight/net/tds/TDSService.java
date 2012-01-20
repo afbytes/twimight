@@ -405,8 +405,8 @@ public class TDSService extends Service {
 					while(iterator.hasNext()) {
 
 						String mac = iterator.next();
-						if(dbHelper.createMac(dbHelper.mac2long(mac), 1) == -1){
-							dbHelper.updateMacActive(dbHelper.mac2long(mac), 1);
+						if(dbHelper.createMac(mac, 1) == -1){
+							dbHelper.updateMacActive(mac, 1);
 							Log.i(TAG, "Already have MAC: " + mac);
 						} else {
 							Log.i(TAG,"New MAC: " + mac);
