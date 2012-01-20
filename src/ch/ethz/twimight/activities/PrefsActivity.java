@@ -12,25 +12,26 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.location.LocationAlarm;
-import ch.ethz.twimight.net.opportunistic.ScanningService;
-import ch.ethz.twimight.net.tds.TDSAlarm;
-import ch.ethz.twimight.util.Constants;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.location.LocationAlarm;
+import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
+import ch.ethz.twimight.net.tds.TDSAlarm;
+import ch.ethz.twimight.net.twitter.TwitterAlarm;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * Shows the preferences.
  * @author thossmann
+ * @author pcarta
  */
 public class PrefsActivity extends PreferenceActivity{
 
@@ -52,12 +53,6 @@ public class PrefsActivity extends PreferenceActivity{
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
-		// If the phone does not support Bluetooth, disable all options from the DisasterMode
-		if(!ScanningService.isDisasterModeSupported()){
-			PreferenceCategory preferenceCategoryDisasterMode = (PreferenceCategory) findPreference("prefCategoryDisasterMode");
-			preferenceCategoryDisasterMode.setEnabled(false);
-		}
-
 		prefListener = new OnSharedPreferenceChangeListener() {
 
 			// this is where we take action after the user changes a setting!
@@ -65,11 +60,11 @@ public class PrefsActivity extends PreferenceActivity{
 
 				if (key.equals("prefDisasterMode")) { // toggle disaster mode
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
-						startService(new Intent(getApplicationContext(), ScanningService.class));
+						new ScanningAlarm(getBaseContext(),0,true);
 						finish();
 						Log.i(TAG, "start scanning");
 					} else {
-						stopService(new Intent(getApplicationContext(), ScanningService.class));
+						ScanningAlarm.stopScanning(getBaseContext());
 						finish();
 						Log.i(TAG, "stop scanning");
 					}
@@ -89,6 +84,13 @@ public class PrefsActivity extends PreferenceActivity{
 					} else {
 						LocationAlarm.stopLocationUpdate(getApplicationContext());
 						Log.i(TAG, "stop location service");
+					}
+				} else if (key.equals("prefRunAtBoot")) {
+					if (preferences.getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true ) {
+						new TwitterAlarm(getBaseContext(),false);
+						Log.i(TAG, "start background updater");
+					} else {
+						TwitterAlarm.stopTwitterAlarm(getBaseContext());
 					}
 				}
 			}

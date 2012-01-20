@@ -12,13 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TweetAdapter;
-import ch.ethz.twimight.net.twitter.TweetListView;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.Constants;
+import java.lang.Thread.UncaughtExceptionHandler;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,10 +32,16 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TweetAdapter;
+import ch.ethz.twimight.net.twitter.TweetListView;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * The main Twimight view showing the Timeline, favorites and mentions
- * TODO: load older tweets on overscroll.
  * @author thossmann
  *
  */
@@ -74,7 +75,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public static final int SHOW_MENTIONS = 3;
 	public static final int SHOW_USERTWEETS = 4;
 	
-	private int currentFilter = 0;
+	private int currentFilter = SHOW_TIMELINE;
 	private int positionIndex;
 	private int positionTop;
 
@@ -131,6 +132,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		});
 		
 		Log.v(TAG, "created");
+		
+	   // Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+
 
 	}
 	
@@ -209,10 +213,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile");
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages");
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings");
-		/*
-		if(ScanningService.isDisasterModeSupported()){
+		/*		
 			menu.add(1,OPTIONS_MENU_PAIR, 2, "Pair");
-		}
+		
 		 */
 		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About");
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout");
@@ -308,6 +311,15 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
 	}
 	
+	
+	public class CustomExceptionHandler implements UncaughtExceptionHandler {
+
+		@Override
+		public void uncaughtException(Thread t, Throwable e) {		
+			 Log.e(TAG, "error ", e);
+		}
+	}
+	
 	/**
 	 * Which tweets do we show? Timeline, favorites, mentions?
 	 * @param filter
@@ -325,7 +337,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b = timelineButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
-			overscrollIntent.putExtra("force", true);
+			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 											+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;
@@ -335,7 +347,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b = favoritesButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_FAVORITES);
-			overscrollIntent.putExtra("force", true);
+			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
 											+ Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_FAVORITES;
@@ -345,7 +357,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b = mentionsButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);
-			overscrollIntent.putExtra("force", true);
+			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 											+ Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_MENTIONS;
@@ -355,7 +367,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b= timelineButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
-			overscrollIntent.putExtra("force", true);
+			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
 			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
 											+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			currentFilter=SHOW_TIMELINE;

@@ -35,7 +35,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
 	
-	private static UriMatcher twitterusersUriMatcher;
+	private static final UriMatcher twitterusersUriMatcher;
 	
 	private static final int USERS = 1;
 	private static final int USERS_ID = 2;
@@ -82,28 +82,28 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
+	public synchronized Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 				
 		Intent i;
 		
 		Cursor c = null;
 		switch(twitterusersUriMatcher.match(uri)){
 			case USERS: 
-				Log.i(TAG, "Query USERS");
+				Log.d(TAG, "Query USERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 
 			
 			case USERS_ID: 
-				Log.i(TAG, "Query USERS_ID " + uri.getLastPathSegment());
+				Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id="+uri.getLastPathSegment(), whereArgs, null, null, sortOrder);
 				//c.setNotificationUri(getContext().getContentResolver(),uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 			
 			case USERS_FOLLOWERS:
-				Log.i(TAG, "Query USERS_FOLLOWERS");
+				Log.d(TAG, "Query USERS_FOLLOWERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
@@ -115,7 +115,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 				break;
 			case USERS_FRIENDS:
-				Log.i(TAG, "Query USERS_FRIENDS");
+				Log.d(TAG, "Query USERS_FRIENDS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
@@ -133,8 +133,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
-		Log.i(TAG, "Insert USER");
+	public synchronized Uri insert(Uri uri, ContentValues values) {
+		Log.d(TAG, "Insert USER");
 
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
@@ -179,8 +179,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		Log.i(TAG, "Update USERS");
+	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+		Log.d(TAG, "Update USERS");
 		if(twitterusersUriMatcher.match(uri) != USERS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
@@ -196,7 +196,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	}
 	
 	@Override
-	public int delete(Uri uri, String arg1, String[] arg2) {
+	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		return 0;
 	}
 	

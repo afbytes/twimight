@@ -13,6 +13,8 @@
 
 package ch.ethz.twimight.activities;
 
+import java.util.Date;
+
 import junit.framework.Assert;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
@@ -23,8 +25,8 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
-import winterwell.jtwitter.User;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,9 +49,10 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.location.LocationAlarm;
-import ch.ethz.twimight.net.opportunistic.ScanningService;
+import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.tds.TDSService;
+import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -85,14 +88,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TWITTER_AUTHORIZE_URL = "http://twitter.com/oauth/authorize";
 	private static final Uri CALLBACK_URI = Uri.parse("my-app://bluetest");
 	
-	public static final String LOGIN_RESULT_INTENT = "twitter_login_result_action";
+	public static final String LOGIN_RESULT_ACTION = "twitter_login_result_action";
 	public static final String LOGIN_RESULT = "twitter_login_result";
 	public static final int LOGIN_SUCCESS = 1;
 	public static final int LOGIN_FAILURE = 2;
 	
 	// views
 	Button buttonLogin;
+	LinearLayout showLoginLayout;
 
+	private ProgressDialog progressDialog;
 	private LoginReceiver loginReceiver;
 	
 	/** 
@@ -123,6 +128,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			// we verify the tokens and retrieve the twitter ID
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);
 			i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
+			registerLoginReceiver();
 			startService(i);
 			
 		} else if(hasRequestToken(this) && hasRequestTokenSecret(this)) {
@@ -130,7 +136,12 @@ public class LoginActivity extends Activity implements OnClickListener{
 			
 			Uri uri = getIntent().getData();
 			if(uri != null){
-				getAccessTokens(uri);
+				buttonLogin = (Button) findViewById(R.id.buttonLogin);
+				showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
+				buttonLogin.setVisibility(Button.GONE);
+				showLoginLayout.setVisibility(LinearLayout.GONE);
+				
+				new GetAccessTokensTask().execute(uri);
 			}
 
 		} else {
@@ -141,12 +152,19 @@ public class LoginActivity extends Activity implements OnClickListener{
 			buttonLogin.setOnClickListener(this);
 		}
 		
-		if (loginReceiver == null) loginReceiver = new LoginReceiver();
-		IntentFilter intentFilter = new IntentFilter(LoginActivity.LOGIN_RESULT_INTENT);
-		registerReceiver(loginReceiver, intentFilter);
+		
 		
 	}
 	
+	/**
+	 * Method used to register a login Receiver
+	 * @author pcarta	 
+	 */
+	private void registerLoginReceiver() {
+		if (loginReceiver == null) loginReceiver = new LoginReceiver();
+		IntentFilter intentFilter = new IntentFilter(LoginActivity.LOGIN_RESULT_ACTION);
+		registerReceiver(loginReceiver, intentFilter);
+	}
 	
 	/**
 	 * When the login button is pressed
@@ -201,14 +219,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 			provider.setOAuth10a(true);
 			
-			try {
-				// TODO: This has to be done in a Thread!
+			try {				
 				String authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URI.toString());
 				setRequestToken(consumer.getToken(), LoginActivity.this);
 				setRequestTokenSecret(consumer.getTokenSecret(), LoginActivity.this);
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
-				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY); //@author pcarta
+				intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY); 
 
 				// Show twitter login in Browser.
 			    startActivity(intent);
@@ -245,91 +262,117 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 	}
 	
-	
-	
-	/**
-	 * Get an access token and secret from Twitter
-	 */
-	private void getAccessTokens(Uri uri) {
-		Log.i(TAG, "getting access token");
-		
-		String requestToken = getRequestToken(this);
-		String requestSecret = getRequestTokenSecret(this);
-
-		OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
-		OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
-
-		provider.setOAuth10a(true);
-
+	private class GetAccessTokensTask extends AsyncTask<Uri,Void,String> {
 		boolean success = false;
 		
-		String accessToken = null;
-		String accessSecret = null;
 		
-		try {
-			if(!(requestToken == null || requestSecret == null)) {
-				consumer.setTokenWithSecret(requestToken, requestSecret);
+
+		@Override
+		protected void onPreExecute() {
+			
+			super.onPreExecute();
+			progressDialog=ProgressDialog.show(LoginActivity.this, "In progress", "Loading data from Twitter");
+		}
+
+		@Override
+		protected String doInBackground(Uri... params) {
+			Log.i(TAG, "getting access token");
+			
+			
+
+			Uri uri = params[0];
+			
+			String requestToken = getRequestToken(LoginActivity.this);
+			String requestSecret = getRequestTokenSecret(LoginActivity.this);
+
+			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
+			OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
+
+			provider.setOAuth10a(true);			
+			
+			String accessToken = null;
+			String accessSecret = null;
+			
+			try {
+				if(!(requestToken == null || requestSecret == null)) {
+					consumer.setTokenWithSecret(requestToken, requestSecret);
+				}
+				
+				String otoken = uri.getQueryParameter(OAuth.OAUTH_TOKEN);
+				String verifier = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
+
+				// This is a sanity check which should never fail - hence the assertion
+				Assert.assertEquals(otoken, consumer.getToken());
+
+				// This is the moment of truth - we could throw here				
+				provider.retrieveAccessToken(consumer, verifier);
+				
+				// Now we can retrieve the goodies
+				accessToken = consumer.getToken();
+				accessSecret = consumer.getTokenSecret();
+				
+				success = true;
+				
+			} catch (OAuthMessageSignerException e) {
+				e.printStackTrace();				
+				success = false;
+				finish();
+				return "Error authenticating";
+				
+			} catch (OAuthNotAuthorizedException e) {
+				e.printStackTrace();				
+				success = false;
+				finish();
+				return "Error authenticating";
+				
+			} catch (OAuthExpectationFailedException e) {
+				e.printStackTrace();				
+				success = false;
+				finish();
+				return "Error authenticating";
+				
+			} catch (OAuthCommunicationException e) {
+				e.printStackTrace();			
+				success = false;
+				finish();
+				return "Error authenticating";
+				
+			} finally {
+			
+				// save the access token and secret
+				setAccessToken(accessToken, LoginActivity.this);
+				setAccessTokenSecret(accessSecret, LoginActivity.this);
+
+				// Clear the request token and secret
+				setRequestToken(null, LoginActivity.this);
+				setRequestTokenSecret(null, LoginActivity.this);
+				
 			}
 			
-			String otoken = uri.getQueryParameter(OAuth.OAUTH_TOKEN);
-			String verifier = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
-
-			// This is a sanity check which should never fail - hence the assertion
-			Assert.assertEquals(otoken, consumer.getToken());
-
-			// This is the moment of truth - we could throw here
-			// TODO: This should be done in a thread!
-			provider.retrieveAccessToken(consumer, verifier);
+			return null;
 			
-			// Now we can retrieve the goodies
-			accessToken = consumer.getToken();
-			accessSecret = consumer.getTokenSecret();
-			
-			success = true;
-
-		} catch (OAuthMessageSignerException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
-			success = false;
-			finish();
-		} catch (OAuthNotAuthorizedException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
-			success = false;
-			finish();
-		} catch (OAuthExpectationFailedException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
-			success = false;
-			finish();
-		} catch (OAuthCommunicationException e) {
-			e.printStackTrace();
-			Toast.makeText(this,"Error authenticating" , Toast.LENGTH_LONG).show();
-			success = false;
-			finish();
-			
-		} finally {
+		}
 		
-			// save the access token and secret
-			setAccessToken(accessToken, this);
-			setAccessTokenSecret(accessSecret, this);
-
-			// Clear the request token and secret
-			setRequestToken(null, this);
-			setRequestTokenSecret(null, this);
-
+		@Override
+		protected void onPostExecute(String result) {
+			if (result != null) {
+				Toast.makeText(LoginActivity.this, result, Toast.LENGTH_LONG).show();
+				
+			}
 			// As a last step, we verify the correctness of the credentials and retrieve our Twitter ID
 			if(success){
 				// call the twitter service to verify the credentials
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
+				registerLoginReceiver();
 				startService(i);
 				
 			}
 		}
 		
-				
 	}
+	
+	
 
 	private void startTimeline(Context context) {
 		startAlarms(context);
@@ -350,16 +393,21 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-			context.startService(new Intent(context, ScanningService.class));
-		}
-		
+			new ScanningAlarm(context,0,false);
+		}		
 		
 		// Start the location update alarm
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
 			new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
 		}
-				
+		
+		//start the twitter update alarm
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
+			Log.i(TAG, "creating TwitterAlarm");
+			new TwitterAlarm(context,true);
+		}
+						
 	}
 	
 	/**
@@ -370,12 +418,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 		TDSAlarm.stopTDSCommuniction(context);
 		context.stopService(new Intent(context, TDSService.class));
 		
-		ScanningService.stopScanning();
-		context.stopService(new Intent(context, ScanningService.class));
+		ScanningAlarm.stopScanning(context);
 		
 		context.stopService(new Intent(context, TwitterService.class));
 		
 		LocationAlarm.stopLocationUpdate(context);		
+		
+		TwitterAlarm.stopTwitterAlarm(context);
 	}
 	
 	/**
@@ -647,9 +696,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private class LoginReceiver extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	        if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_INTENT)) {
+	        if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_ACTION)) {
 	        	if(intent.hasExtra(LoginActivity.LOGIN_RESULT)){
-	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){
+	        		progressDialog.dismiss();
+	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){	        			
 	        			startTimeline(context);
 	        		} else {
 	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();

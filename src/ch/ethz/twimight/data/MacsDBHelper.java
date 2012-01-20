@@ -76,7 +76,7 @@ public class MacsDBHelper {
 	 * @param mac MAC address to be inserted in the DB
 	 * @return the row ID of the newly inserted row, or -1 for failure
 	 */
-	public long createMac(long mac, int active) {
+	public long createMac(String mac, int active) {
 		
 		Cursor mCursor = fetchMac(mac);
 		if(mCursor.moveToFirst())
@@ -97,13 +97,13 @@ public class MacsDBHelper {
 	/**
 	 * Update the active status of a MAC address entry
 	 */
-	public boolean updateMacActive(long mac, int active) {
+	public boolean updateMacActive(String mac, int active) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_ACTIVE, active);
 		
 		int result = 0;
 		try{
-			result = database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "=" + mac, null);
+			result = database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac +"'", null);
 		} catch (SQLiteException e){
 			Log.e(TAG, "SQLiteException " +e.toString());
 			return false;
@@ -140,7 +140,7 @@ public class MacsDBHelper {
 	/**
 	 * Update the number of attempts of a MAC address entry
 	 */
-	public boolean updateMacAttempts(long mac, int attempts) {
+	public boolean updateMacAttempts(String mac, int attempts) {
 		
 		Cursor tmpCursor = fetchMac(mac);
 		if(tmpCursor.moveToFirst()){
@@ -150,7 +150,7 @@ public class MacsDBHelper {
 			
 			int resultCode = 0;
 			try{
-				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "=" + mac, null);
+				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 			} catch (SQLiteException e){
 				Log.e(TAG, "SQLiteException: " + e.toString());
 			}
@@ -169,7 +169,7 @@ public class MacsDBHelper {
 	/**
 	 * Returns the number of attempts of a MAC address entry
 	 */
-	public int fetchMacAttempts(long mac) {
+	public int fetchMacAttempts(String mac) {
 		
 		
 		Cursor tmpCursor = fetchMac(mac);
@@ -186,7 +186,7 @@ public class MacsDBHelper {
 	/**
 	 * Update the number of successful connections of a MAC address entry
 	 */
-	public boolean updateMacSuccessful(long mac, int successful) {
+	public boolean updateMacSuccessful(String mac, int successful) {
 		
 		Cursor tmpCursor = fetchMac(mac);
 		if(tmpCursor.moveToFirst()){
@@ -196,7 +196,7 @@ public class MacsDBHelper {
 			
 			int resultCode = 0;
 			try{
-				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "=" + mac, null);
+				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 			} catch (SQLiteException e){
 				Log.e(TAG, "SQLiteException: " + e.toString());
 			}
@@ -215,13 +215,13 @@ public class MacsDBHelper {
 	/**
 	 * Update the timestamp of the last successful connection
 	 */
-	public void setLastSuccessful(long mac, Date date) {
+	public void setLastSuccessful(String mac, Date date) {
 
 		ContentValues values = new ContentValues();
 		values.put(KEY_LAST, date.getTime());
 
 		try{
-			database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "=" + mac, null);
+			database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 		} catch (SQLiteException e){
 			Log.e(TAG, "SQLiteException: " + e.toString());
 		}
@@ -230,10 +230,10 @@ public class MacsDBHelper {
 	/**
 	 * Get the timestamp of the last successful connection
 	 */
-	public Long getLastSuccessful(long mac) {
+	public Long getLastSuccessful(String mac) {
 
 		String[] where = {KEY_LAST};
-		Cursor c = database.query(DBOpenHelper.TABLE_MACS, where, KEY_MAC+"="+mac,null,null,null,null);
+		Cursor c = database.query(DBOpenHelper.TABLE_MACS, where, KEY_MAC+"='"+mac + "'",null,null,null,null);
 		if(c.getCount()>0){
 			c.moveToFirst();
 			long last = c.getLong(c.getColumnIndex(KEY_LAST));
@@ -248,7 +248,7 @@ public class MacsDBHelper {
 	/**
 	 * Returns the number of successful connections to a MAC address entry
 	 */
-	public int fetchMacSuccessful(long mac) {
+	public int fetchMacSuccessful(String mac) {
 		
 		
 		Cursor tmpCursor = fetchMac(mac);
@@ -265,8 +265,8 @@ public class MacsDBHelper {
 	/**
 	 * Deletes a MAC address from list
 	 */
-	public boolean deleteMac(long mac) {
-		return database.delete(DBOpenHelper.TABLE_MACS, KEY_MAC + "=" + mac, null) > 0;
+	public boolean deleteMac(String mac) {
+		return database.delete(DBOpenHelper.TABLE_MACS, KEY_MAC + "='" + mac + "'", null) > 0;
 	}
 
 
@@ -299,11 +299,11 @@ public class MacsDBHelper {
 	/**
 	 * Return a Cursor positioned at the defined Mac
 	 */
-	public Cursor fetchMac(long mac) throws SQLException {
+	public Cursor fetchMac(String mac) throws SQLException {
 		
 		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_MACS, new String[] {
 				KEY_MAC, KEY_ATTEMPTS, KEY_SUCCESSFUL, KEY_ACTIVE},
-				KEY_MAC + "=" + mac, null, null, null, null, null);
+				KEY_MAC + "='" + mac + "'", null, null, null, null, null);
 		
 		
 		if (mCursor != null) {
@@ -321,7 +321,7 @@ public class MacsDBHelper {
 	 * @param active is the MAC address activated for scanning?
 	 * @return
 	 */
-	private ContentValues createContentValues(long mac, int attempts, int successful, int active) {
+	private ContentValues createContentValues(String mac, int attempts, int successful, int active) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_MAC, mac);
 		values.put(KEY_ATTEMPTS, attempts);
@@ -334,7 +334,7 @@ public class MacsDBHelper {
 	 * Helper to convert human readable MAC address to long
 	 * @param MAC address in human readable form 00:00:00...
 	 * @return long representation of the MAC address
-	 */
+	
 	public long mac2long(String mac){
 		
 		return Long.parseLong(mac.replace(":", ""), 16);
@@ -344,7 +344,7 @@ public class MacsDBHelper {
 	 * Helper to convert long to human readable MAC address
 	 * @param macLong long
 	 * @return human readable MAC address
-	 */
+	 
 	public String long2mac(long macLong){
 		String addressHex = Long.toHexString(macLong);
 		StringBuilder buffer = new StringBuilder("000000000000".substring(addressHex.length()) + addressHex);
@@ -354,4 +354,5 @@ public class MacsDBHelper {
 		
 		return buffer.toString().toUpperCase();
 	}
+	*/
 }

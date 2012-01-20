@@ -56,12 +56,11 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.showusers);
-		
+		super.onCreate(savedInstanceState);		
+		setContentView(R.layout.showusers);		
 
 		userListView = (ListView) findViewById(R.id.userList);
+		userListView.setEmptyView(findViewById(R.id.userListEmpty));
 		friendsButton = (Button) findViewById(R.id.headerBarFriendsButton);		
 		friendsButton.setOnClickListener(new OnClickListener(){
 			@Override
@@ -167,13 +166,15 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 			
 		case SHOW_FRIENDS: 
 			b = friendsButton;
-			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FRIENDS), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + 
+														"/" + TwitterUsers.TWITTERUSERS_FRIENDS), null, null, null, null);
 			currentFilter=SHOW_FRIENDS;
 
 			break;
 		case SHOW_FOLLOWERS: 
 			b = followersButton;
-			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS), null, null, null, null);
+			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
+														+ "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS), null, null, null, null);
 			currentFilter=SHOW_FOLLOWERS;
 
 			break;
@@ -188,7 +189,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 
 		adapter = new TwitterUserAdapter(this, c);		
 		userListView.setAdapter(adapter);
-		userListView.setEmptyView(findViewById(R.id.userListEmpty));
+		
 
 		// Click listener when the user clicks on a user
 		userListView.setClickable(true);

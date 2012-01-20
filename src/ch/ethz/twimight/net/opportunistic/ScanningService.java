@@ -12,190 +12,354 @@
  ******************************************************************************/
 package ch.ethz.twimight.net.opportunistic;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.Date;
 
-import ch.ethz.twimight.util.Constants;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.spongycastle.util.encoders.Base64;
+
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.data.MacsDBHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.Constants;
 
 /**
- * Service to scan for Bluetooth peers
- * @author thossmann
+ * This is the thread for scanning for Bluetooth peers.
+ * @author theus
+ * @author pcarta
  */
-public class ScanningService extends Service {
-	// Class constants
-	static final String TAG = "ScanningService"; /** for logging */
-	
-	private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+public class ScanningService extends Service{
 
-	private static ScheduledFuture scanningThreadHandle; /** we need this to cancel the periodic scanning */
-
-	protected static Context context;
 	
-	private static PowerManager.WakeLock wakeLock; 
-	private static final String WAKE_LOCK = "ScanningWakeLock";
-
-	public static final String FORCE_SCAN = "force_scan"; /** To force a scan, put this extra in the starting intent */
-	public static final String FORCE_SCAN_DELAY = "force_scan_delay"; /** To force a scan after a given delay, put this extra in the starting intent */
+	private static final String TAG = "ScanningService"; /** For Debugging */
 	
-	private boolean isRunning = false;
-		
-	/**
-	 * Create function, sets the service up
-	 */
-	@Override
-	public void onCreate() {
-		
-		ScanningService.context = getApplicationContext();
-		Log.d(TAG, "onCreate");	
-		
-
-	}
 	
-	/**
-	 * Starts the updating threads. If the service is running and we have extras in the intent asking for an immediate scan, we start scanning.
-	 */
+	public Handler handler; /** Handler for delayed execution of the thread */
+	
+	// manage bluetooth communication
+	static BluetoothComms bluetoothHelper = null;
+
+	//private Date lastScan;
+			
+	private MacsDBHelper dbHelper;
+	
+	private static Context context = null;
+	
+	private Cursor cursor;
+	
+	private Date scanStartTime;
+	
+	
+	
+	
+	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
-		if(!isRunning){
+		super.onStartCommand(intent, flags, startId);
+		ScanningAlarm.releaseWakeLock();
 		
-			// DisasterService returns false if the phone does not support the disaster mode
-			if(!isDisasterModeSupported()){
-				Log.d(TAG, "Disaster mode not supported! Not starting Scanning Service.");
-				return START_NOT_STICKY;
-			}
+		if (context == null) {
+			context = getBaseContext();
+			handler = new Handler();		
+	        // set up Bluetooth
+	        bluetoothHelper = new BluetoothComms(this, mHandler);
+	        bluetoothHelper.start();
+			dbHelper = new MacsDBHelper(this);
+			dbHelper.open();
+		}
+		startScanning();
+		
+		return START_STICKY; 
+		
+	}
+
 	
 	
-			// if Bluetooth is already enabled, start scanning. otherwise enable it now.
-			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				scheduleScanning(0);
-			} else {
-				enableBluetooth();
-			}
-			
-			// We don't want to fall asleep and forget abuot scanning!
-			PowerManager mgr = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-			PowerManager.WakeLock wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK);
-			wakeLock.acquire();
-				
-			isRunning = true;
-			
-			Log.d(TAG, "onStart'ed"); 
+	/**
+	 * Start the scanning.
+	 * @return true if the connection with the TDS was successful, false otherwise.
+	 */
+	private boolean startScanning(){
+		
+		// Get a cursor over all "active" MACs in the DB
+		cursor = dbHelper.fetchActiveMacs();
+		//TODO: obtain also paired peers around
+		
+		// Stop listening mode
+		bluetoothHelper.stop();
+		
+		// Log the date for later rescheduling of the next scanning
+		scanStartTime = new Date();
+		
+		if (cursor.moveToFirst()) {
+            // Get the field values
+            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
+            Log.i(TAG, "Scanning for: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+            bluetoothHelper.connect(mac);
+            
+        } else {
+        	stopScanning();
+        }
+		
+		return false;
+	}
+	
+	/**
+	 * Proceed to the next MAC address
+	 */
+	private void nextScanning() {
+		if(cursor == null || bluetoothHelper.getState()==BluetoothComms.STATE_CONNECTED){
+			stopScanning();
 		} else {
-			
-			if(intent.hasExtra(FORCE_SCAN)){
-				scheduleScanning(intent.getLongExtra(FORCE_SCAN_DELAY, 0));
+			// do we have another MAC in the cursor?
+			if(cursor.moveToNext()){
+	            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
+	            Log.i(TAG, "Scanning for: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+	            bluetoothHelper.connect(mac);
+			} else {
+				stopScanning();
 			}
 		}
-
 		
-		return START_STICKY;
 	}
 	
 	/**
-	 * Stop scheduled ScanningThread
+	 * Terminates one round of scanning: cleans up and reschedules next scan
 	 */
-	public static void stopScanning() {
-		if(scanningThreadHandle != null){
-			scanningThreadHandle.cancel(true);
+	private void stopScanning() {
+		cursor = null;
+		
+		if(isDisasterMode()){
+			bluetoothHelper.stop();
+			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
+			
+			// reschedule next scan (randomized)			
+		    ScanningAlarm.scheduleScanning(getBaseContext(),scanStartTime.getTime() + delay + Constants.SCANNING_INTERVAL);		 			
+			
+			// start listening mode
+			bluetoothHelper.start();
+			Log.i(TAG, "Listening...");
 		}
-		
-		
+	 }
+	
+	
+	/**
+	 * Cancel all Bluetooth actions
+	 */
+	public void stopOperation(){
+		bluetoothHelper.stop();
 	}
 
 	/**
-	 * Schedules a Scanning communication
-	 * @param delay after how many milliseconds (0 for immediately)?
+	 *  The Handler that gets information back from the BluetoothService
 	 */
-	public static void scheduleScanning(long delay) {
-		
-		// cancel previously scheduled scans
-		ScanningService.stopScanning();
+	private final Handler mHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {          
+
+			case Constants.MESSAGE_READ:         	 
+				Log.i(TAG, msg.obj.toString());
 				
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
-			
-			// is bluetooth on??
-			if(!BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				enableBluetooth();
-				return;
+				try {
+					ContentValues cvTweet = getTweetCV(msg.obj.toString());
+					cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);
+					
+					// we don't enter our own tweets into the DB.
+					if(cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(context))){
+						Log.i(TAG, "we received our own tweet");
+					} else {
+						ContentValues cvUser = getUserCV(msg.obj.toString());
+						
+						// insert the tweet
+						Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+						getContentResolver().insert(insertUri, cvTweet);
+						
+						// insert the user
+						Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
+						getContentResolver().insert(insertUserUri, cvUser);
+					}
+					
+				} catch (JSONException e1) {
+					Log.e(TAG, "Exception while receiving disaster tweet " , e1);
+				}
+				break;             
+				
+			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
+				Log.i(TAG, "connection succeeded");   
+				
+				// Cancel future scans
+				//ScanningService.stopScanning();
+				
+				// Insert successful connection into DB
+				dbHelper.updateMacSuccessful(msg.obj.toString(), 1);
+				
+				// Here starts the protocol for Tweet exchange.
+				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
+				
+				// get disaster tweets
+				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+				Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
+				
+				if(c.getCount()>0){
+					c.moveToFirst();
+					while(!c.isAfterLast()){
+						
+						if(last != null && (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))>last)){
+							JSONObject toSend;
+							try {
+								
+								toSend = getJSON(c);
+								Log.i(TAG, toSend.toString(5));
+								bluetoothHelper.write(toSend.toString());
+								
+							} catch (JSONException e) {								
+								Log.e(TAG,"exception ", e);
+							}
+							
+						}
+						c.moveToNext();
+					}
+				}
+				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());				
+				c.close();					
+				
+				break;   
+			case Constants.MESSAGE_CONNECTION_FAILED:             
+				Log.i(TAG, "connection failed");
+				
+				// Insert failed connection into DB
+				dbHelper.updateMacAttempts(msg.obj.toString(), 1);
+				
+				// Next scan
+				nextScanning();
+				break;
+				
+			case Constants.MESSAGE_CONNECTION_LOST:         	 
+				Log.i(TAG, "connection lost");  				
+				// Next scan
+				nextScanning();
+				
+				break;
 			}
-
 			
-			Log.d(TAG, "scheduling a new Bluetooth scanning in " + Long.toString(delay));
-			scanningThreadHandle = scheduler.schedule(ScanningThread.getInstance(context), delay, TimeUnit.MILLISECONDS);
-		} 
+		}
+
+	};
+	
+	/**
+	 * True if the disaster mode is on
+	 */
+	private boolean isDisasterMode(){
+		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true);
+	}
+
+	/**
+	 * Creates a JSON Object from a Tweet
+	 * TODO: Move this where it belongs!
+	 * @param c
+	 * @return
+	 * @throws JSONException 
+	 */
+	protected JSONObject getJSON(Cursor c) throws JSONException {
+		JSONObject o = new JSONObject();
+		if(c.getColumnIndex(Tweets.COL_CERTIFICATE) >=0)
+			o.put(Tweets.COL_CERTIFICATE, c.getString(c.getColumnIndex(Tweets.COL_CERTIFICATE)));
+		if(c.getColumnIndex(Tweets.COL_SIGNATURE) >=0)
+			o.put(Tweets.COL_SIGNATURE, c.getString(c.getColumnIndex(Tweets.COL_SIGNATURE)));
+		if(c.getColumnIndex(Tweets.COL_CREATED) >=0)
+			o.put(Tweets.COL_CREATED, c.getLong(c.getColumnIndex(Tweets.COL_CREATED)));
+		if(c.getColumnIndex(Tweets.COL_TEXT) >=0)
+			o.put(Tweets.COL_TEXT, c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
+		if(c.getColumnIndex(Tweets.COL_USER) >=0)
+			o.put(Tweets.COL_USER, c.getLong(c.getColumnIndex(Tweets.COL_USER)));
+		if(c.getColumnIndex(Tweets.COL_REPLYTO) >=0)
+			o.put(Tweets.COL_REPLYTO, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+		if(c.getColumnIndex(Tweets.COL_LAT) >=0)
+			o.put(Tweets.COL_LAT, c.getDouble(c.getColumnIndex(Tweets.COL_LAT)));
+		if(c.getColumnIndex(Tweets.COL_LNG) >=0)
+			o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
+		if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
+			o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));
+		if(c.getColumnIndex(TwitterUsers.COL_SCREENNAME) >=0)
+			o.put(TwitterUsers.COL_SCREENNAME, c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+		if(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE) >=0)
+			o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)))));
+		return o;
 	}
 	
-
 	/**
-	 * onDestroy
+	 * Creates content values for a Tweet from a JSON object
+	 * TODO: Move this to where it belongs
+	 * @param o
+	 * @return
+	 * @throws JSONException
 	 */
-	@Override
-	public void onDestroy() {
+	protected ContentValues getTweetCV(String msgString) throws JSONException{
+		JSONObject o = new JSONObject(msgString);
+		ContentValues cv = new ContentValues();
+		if(o.has(Tweets.COL_CERTIFICATE))
+			cv.put(Tweets.COL_CERTIFICATE, o.getString(Tweets.COL_CERTIFICATE));
+		if(o.has(Tweets.COL_SIGNATURE))
+			cv.put(Tweets.COL_SIGNATURE, o.getString(Tweets.COL_SIGNATURE));
+		if(o.has(Tweets.COL_CREATED))
+			cv.put(Tweets.COL_CREATED, o.getLong(Tweets.COL_CREATED));
+		if(o.has(Tweets.COL_TEXT))
+			cv.put(Tweets.COL_TEXT, o.getString(Tweets.COL_TEXT));
+		if(o.has(Tweets.COL_USER))
+			cv.put(Tweets.COL_USER, o.getLong(Tweets.COL_USER));
+		if(o.has(Tweets.COL_REPLYTO))
+			cv.put(Tweets.COL_REPLYTO, o.getLong(Tweets.COL_REPLYTO));
+		if(o.has(Tweets.COL_LAT))
+			cv.put(Tweets.COL_LAT, o.getDouble(Tweets.COL_LAT));
+		if(o.has(Tweets.COL_LNG))
+			cv.put(Tweets.COL_LNG, o.getDouble(Tweets.COL_LNG));
+		if(o.has(Tweets.COL_SOURCE))
+			cv.put(Tweets.COL_SOURCE, o.getString(Tweets.COL_SOURCE));
 
-		super.onDestroy();
+		return cv;
+	}
+	
+	/**
+	 * Creates content values for a User from a JSON object
+	 * TODO: Move this to where it belongs
+	 * @param o
+	 * @return
+	 * @throws JSONException
+	 */
+	protected ContentValues getUserCV(String msgString) throws JSONException{
+		JSONObject o = new JSONObject(msgString);
 
-		ScanningThread.getInstance(context).stopOperation();
-		stopScanning();
-		
-		// TODO: We should ask the user to switch off Bluetooth
-		//BluetoothAdapter.getDefaultAdapter().disable();
+		// create the content values for the user
+		ContentValues cv = new ContentValues();
+		if(o.has(TwitterUsers.COL_SCREENNAME))
+			cv.put(TwitterUsers.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));
+		if(o.has(TwitterUsers.COL_PROFILEIMAGE))
+			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE)));
+		if(o.has(Tweets.COL_USER))
+			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
 
-		
-		if(wakeLock != null) 
-			if(wakeLock.isHeld())
-				wakeLock.release();
-		
-		isRunning = false;
-		
-		Log.d(TAG, "onDestroy'd");
-		
+		return cv;
 	}
 
-	/**
-	 * onBind ..
-	 */
 	@Override
 	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	
-	/**
-	 * Enable Bluetooth for scanning
-	 */
-	protected static void enableBluetooth() {
-		
-		// as long as we are in disaster mode we turn bluetooth on if we find it off (is this evil?)
-		BluetoothAdapter.getDefaultAdapter().enable();
-		
-		// schedule a new scan
-		stopScanning();
-		scanningThreadHandle = scheduler.schedule(ScanningThread.getInstance(context), Constants.WAIT_FOR_BLUETOOTH, TimeUnit.MILLISECONDS);
-		
-	}
-	
-	/**
-	 * Checks if the phone fulfills all requirements for the disaster mode.
-	 * @return
-	 */
-	public static boolean isDisasterModeSupported(){
-		if(BluetoothAdapter.getDefaultAdapter() == null)
-			return false;
-		if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.GINGERBREAD)
-			return false;
-		
-		return true;
-	}
-		
-}
+};

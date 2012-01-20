@@ -14,11 +14,6 @@ package ch.ethz.twimight.activities;
 
 import java.util.Date;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.TweetTagHandler;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -29,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -36,11 +32,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.TweetTagHandler;
 
 /**
  * Display a tweet
  * @author thossmann
- *
+ * @author pcarta
  */
 public class ShowTweetActivity extends TwimightBaseActivity{
 
@@ -69,6 +70,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	int rowId;
 	String text;
 	String screenName;
+
+	protected String TAG = "ShowTweetActivity";
 	
 		
 	/** 
@@ -89,120 +92,75 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		rowId = getIntent().getIntExtra("rowId", 0);
 		
 		// If we don't know which tweet to show, we stop the activity
-		if(rowId == 0) finish();
-		
-		// get data from local DB and mark for update
-		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
-		//c = managedQuery(uri, null, null, null, null);
-		c = getContentResolver().query(uri, null, null, null, null);
-		
-		if(c.getCount() == 0) finish();
-		
-		c.moveToFirst();
-		// If there are any flags, schedule the Tweet for synch
-		if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
-			Intent i = new Intent(TwitterService.SYNCH_ACTION);
-			i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-			i.putExtra("rowId", new Long(uri.getLastPathSegment()));
-			startService(i);
-		}
-		
-		
-
-		// The tweet info
-		screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-		screenNameView.setText(screenName);
-		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
-		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-		tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
-		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
-
-		createdTextView.setText(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED))).toString());
-		if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
-			createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
-		} else {
-			createdWithView.setVisibility(TextView.GONE);
-		}
-		
-		// The user info
-		userRowId = c.getInt(c.getColumnIndex("userRowId"));
-		userInfoView = (LinearLayout) findViewById(R.id.showTweetUserInfo);
-		
-		userInfoView.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				userInfoView.setBackgroundResource(android.R.drawable.list_selector_background);
-				Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
-				i.putExtra("rowId", userRowId);
-				startActivity(i);
-			}
+		if(rowId != 0) {
 			
-		});
-		
-		
-		// Profile image
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
-			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-		}
-		
-		// Tweet background and disaster info
-		if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
-			tweetTextView.setBackgroundResource(R.drawable.disaster_tweet_background);
-			if(c.getInt(c.getColumnIndex(Tweets.COL_ISVERIFIED))==0){
-				LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
-				unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
-			}
-		} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(this))) {
-			tweetTextView.setBackgroundResource(R.drawable.own_tweet_background);
-		} else if((c.getColumnIndex(Tweets.COL_MENTIONS)>=0) && (c.getInt(c.getColumnIndex(Tweets.COL_MENTIONS))>0)){
-			tweetTextView.setBackgroundResource(R.drawable.mention_tweet_background);
-		} else {
-			tweetTextView.setBackgroundResource(R.drawable.normal_tweet_background);
-		}
-		
-		flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-		buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
-
-		// Notifications
-		if((flags & Tweets.FLAG_TO_INSERT) ==0){
-			LinearLayout toSendNotification = (LinearLayout) findViewById(R.id.showTweetTosend);
-			toSendNotification.setVisibility(LinearLayout.GONE);
-		}
-		
-		if((flags & Tweets.FLAG_TO_DELETE) ==0){
-			LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
-			toDeleteNotification.setVisibility(LinearLayout.GONE);
-		}
-		
-		if((flags & Tweets.FLAG_TO_FAVORITE) ==0){
-			LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
-			toFavoriteNotification.setVisibility(LinearLayout.GONE);
-		}
-
-		if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){
-			LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
-			toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
-		}
-
-		if((flags & Tweets.FLAG_TO_RETWEET) ==0){
-			LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
-			toRetweetNotification.setVisibility(LinearLayout.GONE);
-		}
-
+			// get data from local DB and mark for update
+			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
+			c = getContentResolver().query(uri, null, null, null, null);
 			
+			if(c.getCount() == 0) 
+				finish();
+			
+			else {
+				
+				c.moveToFirst();
+				// If there are any flags, schedule the Tweet for synch
+				if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
+					Intent i = new Intent(TwitterService.SYNCH_ACTION);
+					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+					startService(i);
+				}
+				
+				
+				setTweetInfo();
+				setUserInfo();			
+				setProfilePicture();		
+				
+				// Tweet background and disaster info
+				if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
+					tweetTextView.setBackgroundResource(R.drawable.disaster_tweet_background);
+					if(c.getInt(c.getColumnIndex(Tweets.COL_ISVERIFIED))==0){
+						LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
+						unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
+					}
+				} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(this))) {
+					tweetTextView.setBackgroundResource(R.drawable.own_tweet_background);
+				} else if((c.getColumnIndex(Tweets.COL_MENTIONS)>=0) && (c.getInt(c.getColumnIndex(Tweets.COL_MENTIONS))>0)){
+					tweetTextView.setBackgroundResource(R.drawable.mention_tweet_background);
+				} else {
+					tweetTextView.setBackgroundResource(R.drawable.normal_tweet_background);
+				}
+				
+				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+				
+				handleTweetFlags();					
+				setupButtons();			
+			}		
+		}
+		else 
+			finish();
+		
+		
+		
+		
+	}
+	
+	
+	/**
+	 *  Buttons
+	 */
+	private void setupButtons() {
+		
+		
 		String userString = Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
-		String localUserString = LoginActivity.getTwitterId(this);
-
-		/*
-		 *  Buttons
-		 */
+		String localUserString = LoginActivity.getTwitterId(this);		
+		
 		// Retweet Button
 		retweetButton = (Button) findViewById(R.id.showTweetRetweet);
 		// we do not show the retweet button for (1) tweets from the local user, (2) tweets which have been flagged to retweeted and (3) tweets which have been marked as retweeted 
-		if(userString.equals(localUserString) | ((flags & Tweets.FLAG_TO_RETWEET) > 0) | (c.getInt(c.getColumnIndex(Tweets.COL_RETWEETED))>0)){
+		if(userString.equals(localUserString) || ((flags & Tweets.FLAG_TO_RETWEET) > 0) || (c.getInt(c.getColumnIndex(Tweets.COL_RETWEETED))>0)){
 			retweetButton.setVisibility(Button.GONE);
 		} else {
 			retweetButton.setOnClickListener(new OnClickListener(){
@@ -217,8 +175,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 		// Delete Button
 		deleteButton = (ImageButton) findViewById(R.id.showTweetDelete);
-		deleteButton.setBackgroundColor(R.color.transparent);
-		if(userString.equals(localUserString)){
+		if(userString.equals(localUserString)){			
+			
+			deleteButton.setBackgroundColor(R.color.transparent);
+			deleteButton.setVisibility(ImageButton.VISIBLE);			
 			if((flags & Tweets.FLAG_TO_DELETE) == 0){
 				deleteButton.setOnClickListener(new OnClickListener(){
 					@Override
@@ -226,13 +186,15 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 						showDeleteDialog();
 					}
 				});
+				
+				
 			} else {
 				deleteButton.setVisibility(ImageButton.GONE);
 			}
 		} else {
 			deleteButton.setVisibility(ImageButton.GONE);
 		}
-		
+	
 		// Reply button: we show it only if we have a Tweet ID!
 		replyButton = (Button) findViewById(R.id.showTweetReply);
 		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0){
@@ -276,9 +238,125 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			
 		});
 		
+	}
+
+	/**
+	 *  method to handle tweet's flags
+	 *  
+	 */
+	private void handleTweetFlags() {
+		
+					if((flags & Tweets.FLAG_TO_INSERT) ==0){
+						LinearLayout toSendNotification = (LinearLayout) findViewById(R.id.showTweetTosend);
+						toSendNotification.setVisibility(LinearLayout.GONE);
+					} else {
+						
+					}				
+					
+					if((flags & Tweets.FLAG_TO_DELETE) ==0){
+						LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
+						toDeleteNotification.setVisibility(LinearLayout.GONE);
+						
+					} else{
+						LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
+						toDeleteNotification.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								 LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
+								 int num = getContentResolver().update(uri, removeDeleteFlag(flags), null, null);
+								 toDeleteNotification.setVisibility(LinearLayout.GONE);
+								 if (num > 0) {
+									 c = getContentResolver().query(uri, null, null, null, null);
+									 c.moveToFirst();
+									 flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+									 setupButtons();
+								 }
+								 
+							}							
+							
+						});
+					}
+					
+					if((flags & Tweets.FLAG_TO_FAVORITE) ==0){
+						LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
+						toFavoriteNotification.setVisibility(LinearLayout.GONE);
+					}
+
+					if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){
+						LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
+						toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
+					}
+
+					if((flags & Tweets.FLAG_TO_RETWEET) ==0){
+						LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
+						toRetweetNotification.setVisibility(LinearLayout.GONE);
+					}
 		
 	}
-	
+
+
+	/**
+	 *  method to set the profile picture
+	 *  
+	 */
+	private void setProfilePicture() {
+		// Profile image
+					if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+						ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
+						byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
+						picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+					}
+		
+	}
+
+	/**
+	 *  The user info
+	 *  
+	 */
+	private void setUserInfo() {
+		
+					userRowId = c.getInt(c.getColumnIndex("userRowId")); 
+					userInfoView = (LinearLayout) findViewById(R.id.showTweetUserInfo);
+					
+					userInfoView.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							userInfoView.setBackgroundResource(android.R.drawable.list_selector_background);
+							Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
+							i.putExtra("rowId", userRowId);
+							i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //@author pcarta
+							startActivity(i);
+						}
+						
+					});
+		
+	}
+
+
+	/**
+	 *  The tweet info
+	 *  
+	 */
+	private void setTweetInfo() {
+		
+					screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+					screenNameView.setText(screenName);
+					realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
+					text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+					tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
+					tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+					createdTextView.setText(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED))).toString());
+					if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
+						createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
+					} else {
+						createdWithView.setVisibility(TextView.GONE);
+					}
+		
+	}
+
 	/**
 	 * On resume
 	 */
@@ -324,7 +402,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		       .setCancelable(false)
 		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
-		        	   getContentResolver().update(uri, setDeleteFlag(flags), null, null);
+		        	   uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
+		        	   
+		        	   Log.i(TAG ,"deleting the tweet from the table");
+		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
+		        	   if (tid != null && tid != 0)
+		        		   getContentResolver().update(uri, setDeleteFlag(flags), null, null);
+		        	   else
+		        		   getContentResolver().delete(uri,null,null );
 		        	   finish();
 		           }
 		       })
@@ -348,6 +433,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   Intent i = new Intent(getBaseContext(), NewTweetActivity.class);
 		        	   i.putExtra("text", "RT @"+screenName+" " +text);
+		        	   i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		        	   startActivity(i);
 		           }
 		       })
@@ -359,6 +445,19 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		       });
 		AlertDialog alert = builder.create();
 		alert.show();
+	}
+	
+	/**
+	 * Removes the delete flag and returns the flags in a content value structure 
+	 * to send to the content provider 
+	 * @param flags
+	 * @return
+	 */
+	private ContentValues removeDeleteFlag(int flags) {
+		ContentValues cv = new ContentValues();
+		cv.put(Tweets.COL_FLAGS, flags & (~ Tweets.FLAG_TO_DELETE) );
+		cv.put(Tweets.COL_BUFFER, buffer);
+		return cv;
 	}
 	
 	/**

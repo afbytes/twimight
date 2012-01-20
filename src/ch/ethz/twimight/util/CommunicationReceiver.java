@@ -36,6 +36,7 @@ public class CommunicationReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		
+		Log.i(TAG,"CALLED");
 		// connectivity changed!
 		NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 		
@@ -50,7 +51,11 @@ public class CommunicationReceiver extends BroadcastReceiver {
 				}
 				
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_VERIFY);
+				if (!LoginActivity.hasTwitterId(context)) {					
+					i.putExtra("synch_request", TwitterService.SYNCH_VERIFY);					
+				} else {					
+					i.putExtra("synch_request", TwitterService.SYNCH_TRANSACTIONAL);
+				}
 				context.startService(i);
 
 				
