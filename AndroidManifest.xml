@@ -57,7 +57,7 @@
 				android:value=".activities.SearchableActivity" />
 		</activity>
 		<activity android:name=".activities.ShowUserActivity"
-			android:label="User">
+			android:label="User" android:launchMode="singleTop">
 			<meta-data android:name="android.app.default_searchable"
 				android:value=".activities.SearchableActivity" />
 		</activity>
@@ -78,7 +78,7 @@
 		</activity>
 		<activity android:name=".activities.NewTweetActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
-			android:windowSoftInputMode="stateAlwaysVisible" />
+			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop"/>
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />
@@ -100,7 +100,7 @@
 			<intent-filter>
 				<action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
 			</intent-filter>
-		</receiver>
+		</receiver>		
 		<receiver android:name=".util.BootReceiver"
 			android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
 			android:enabled="true">
@@ -110,9 +110,11 @@
 				<category android:name="android.intent.category.HOME" />
 			</intent-filter>
 		</receiver>
+		
+		<receiver android:name=".net.opportunistic.ScanningAlarm" android:enabled="true" />
 		<receiver android:name=".net.tds.TDSAlarm" android:enabled="true" />
-		<receiver android:name=".location.LocationAlarm"
-			android:enabled="true" />
+		<receiver android:name=".location.LocationAlarm" android:enabled="true" />
+		<receiver android:name="ch.ethz.twimight.net.twitter.TwitterAlarm" android:enabled="true" />
 
 		<provider android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
 			android:authorities="ch.ethz.twimight.Tweets" />
