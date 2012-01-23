@@ -72,10 +72,10 @@ public class ScanningService extends Service{
 		ScanningAlarm.releaseWakeLock();
 		
 		if (context == null) {
-			context = getBaseContext();
+			context = this;
 			handler = new Handler();		
 	        // set up Bluetooth
-	        bluetoothHelper = new BluetoothComms(this, mHandler);
+	        bluetoothHelper = new BluetoothComms(getApplicationContext(), mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
 			dbHelper.open();
@@ -147,7 +147,7 @@ public class ScanningService extends Service{
 			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
 			
 			// reschedule next scan (randomized)			
-		    ScanningAlarm.scheduleScanning(getBaseContext(),scanStartTime.getTime() + delay + Constants.SCANNING_INTERVAL);		 			
+		    ScanningAlarm.scheduleScanning(this,scanStartTime.getTime() + delay + Constants.SCANNING_INTERVAL);		 			
 			
 			// start listening mode
 			bluetoothHelper.start();

@@ -37,11 +37,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 	private static final String WAKE_LOCK = "ScanningWakeLock";
 
 	public static final String FORCE_SCAN = "force_scan"; /** To force a scan, put this extra in the starting intent */
-	public static final String FORCE_SCAN_DELAY = "force_scan_delay"; /** To force a scan after a given delay, put this extra in the starting intent */
-	
-	private static boolean isRunning = false;
-
-	
+	public static final String FORCE_SCAN_DELAY = "force_scan_delay"; /** To force a scan after a given delay, put this extra in the starting intent */	
 	
 
 	/**
@@ -53,9 +49,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 * Starts the alarm.
 	 */
 
-	public ScanningAlarm(Context context, long delay, boolean forceScan) {	
-		
-		if(!isRunning){				
+	public ScanningAlarm(Context context, long delay, boolean forceScan) {						
 			
 			// if Bluetooth is already enabled, start scanning. otherwise enable it now.
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
@@ -63,17 +57,10 @@ public class ScanningAlarm extends BroadcastReceiver {
 				scheduleScanning(context,0);
 			} else {
 				enableBluetooth(context);
-			}	
-				
-			isRunning = true;
+			}			
 			
 			Log.d(TAG, "instantiated"); 
-		} else {
-			
-			if(forceScan){
-				scheduleScanning(context,System.currentTimeMillis() + delay);
-			}
-		}
+		
 	}	
 	
 		
@@ -84,8 +71,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			prefEditor.commit();		 
 		
 	}
-		
-		
+				
 
 		/**
 		 * Acquire the Wake Lock
@@ -124,8 +110,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 			alarmMgr.cancel(pendingIntent);
 			BluetoothAdapter.getDefaultAdapter().disable();
-			releaseWakeLock();
-			isRunning = false;
+			releaseWakeLock();			
 			
 			if (getBluetoothInitialState(context) == false) {
 				BluetoothAdapter.getDefaultAdapter().disable();
@@ -143,10 +128,8 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 * Schedules a Scanning communication
 	 * @param delay after how many milliseconds (0 for immediately)?
 	 */
-	public static void scheduleScanning(Context context, long time) {
+	public static void scheduleScanning(Context context, long time) {		
 		
-		// cancel previously scheduled scans
-		stopScanning(context);
 				
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 			
@@ -155,7 +138,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			
 			Intent intent = new Intent(context, ScanningAlarm.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			//alarmMgr.cancel(pendingIntent);
+			alarmMgr.cancel(pendingIntent);
 			
 			alarmMgr.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
 			Log.i(TAG, "alarm set");
@@ -172,10 +155,8 @@ public class ScanningAlarm extends BroadcastReceiver {
 	protected void enableBluetooth(Context context) {
 		
 		// as long as we are in disaster mode we turn bluetooth on if we find it off (is this evil?)
-		BluetoothAdapter.getDefaultAdapter().enable();
+		BluetoothAdapter.getDefaultAdapter().enable();	
 		
-		// schedule a new scan
-		stopScanning(context);
 		scheduleScanning(context,0);
 		
 	}
