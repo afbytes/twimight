@@ -68,7 +68,7 @@ public class BluetoothComms {
 
 	// Unique UUID for this application   
 	private static final UUID MY_UUID_INSECURE =
-		UUID.fromString("54a0d176-f32b-4f86-81bc-657c0e9f45e4");    	
+		UUID.fromString("8113ac40-438f-11e1-b86c-0800200c9a66");    	
 
 	// Member fields
 	private static BluetoothComms instance = null;
@@ -297,13 +297,37 @@ public class BluetoothComms {
 			BluetoothServerSocket tmp = null;            
 
 			// Create a new listening server socket
-			
+     
+				int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+				if (currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD){
 				    // from API level 10 we have an API call for insecure RFCOMM connections
 					try {
 						tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);
 					} catch (IOException e) {
 						Log.e(TAG, "Unable to listen for Insecure RFCOMM connection");
-					}				
+					}
+				} else{
+				    // before Gingerbread, we can try with reflection
+					try {
+						Method m = mAdapter.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+						tmp = (BluetoothServerSocket) m.invoke(NAME_INSECURE, MY_UUID_INSECURE);
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+				}
 				                
 			mmServerSocket = tmp;
 		}
@@ -394,10 +418,38 @@ public class BluetoothComms {
 			mmDevice = device;
 			BluetoothSocket tmp = null;
 			// Get a BluetoothSocket for a connection with the
-			// given BluetoothDevice			
-			try { 					
-				 // from API level 10 we have an API call for insecure RFCOMM connections
-				tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+			// given BluetoothDevice
+			
+			try { 
+				int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+				if (currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD){
+				    // from API level 10 we have an API call for insecure RFCOMM connections
+					tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+				} else{
+				    // before Gingerbread, we can try with reflection
+					Method m;
+					try {
+						m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
+						tmp = (BluetoothSocket) m.invoke(MY_UUID_INSECURE);
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+					
+				}
+
 				                
 			} catch (IOException e) {
 				Log.e(TAG,  "create() failed", e);
@@ -428,8 +480,8 @@ public class BluetoothComms {
 				
 
 				Log.i(TAG,"connection attempt succeded");
-			} catch (IOException e) {            	
-				//Log.e(TAG, "connection attempt failed", e);
+			} catch (Exception e) {            	
+				Log.e(TAG, "connection attempt failed", e);
 				
 				Date end = new Date();
 				try {
