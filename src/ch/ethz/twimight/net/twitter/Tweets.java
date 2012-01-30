@@ -19,7 +19,7 @@ import android.provider.BaseColumns;
 /**
  * Tweet definitions: Column names for the DB and MIME types, columns and URIs for the content provider
  * @author thossmann
- *
+ * @author pcarta
  */
 public class Tweets implements BaseColumns {
 
@@ -56,6 +56,8 @@ public class Tweets implements BaseColumns {
 	public static final String COL_FAVORITED = "favorited"; /** is it a favorite? */
 	public static final String COL_RETWEETED = "retweeted"; /** did we retweet the tweet? */
 	public static final String COL_RETWEETCOUNT = "retweet_count"; /** how many retweets does twitter report for this tweet */
+	//public static final String COL_ISRETWEET = "isRetweet"; /** is it a retweet ? */
+	public static final String COL_RETWEETED_BY = "retweetedBy"; /** has been retweeted by */
 	public static final String COL_MENTIONS = "mentions"; /** does the tweet mention the local user */
 	public static final String COL_LAT = "lat"; /** latitude in case of geo-tagging */
 	public static final String COL_LNG = "lng"; /** longitude in case of geo-tagging */

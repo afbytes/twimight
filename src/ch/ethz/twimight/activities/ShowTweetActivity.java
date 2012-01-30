@@ -18,10 +18,12 @@ import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -33,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.ShowUserActivity.UserContentObserver;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -62,6 +65,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	ImageButton favoriteButton;
 	
 	Uri uri;
+	ContentObserver observer;
+	Handler handler;
 	
 	private boolean favorited;
 	int flags;
@@ -96,22 +101,17 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			
 			// get data from local DB and mark for update
 			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
-			c = getContentResolver().query(uri, null, null, null, null);
+			c = getContentResolver().query(uri, null, null, null, null);			
 			
 			if(c.getCount() == 0) 
 				finish();
 			
 			else {
 				
+				// register content observer to refresh when user was updated
 				c.moveToFirst();
-				// If there are any flags, schedule the Tweet for synch
-				if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
-					Intent i = new Intent(TwitterService.SYNCH_ACTION);
-					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
-					startService(i);
-				}
-				
+				startManagingCursor(c);	
+				handler = new Handler();											
 				
 				setTweetInfo();
 				setUserInfo();			
@@ -136,7 +136,16 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 				
 				handleTweetFlags();					
-				setupButtons();			
+				setupButtons();					
+		
+				// If there are any flags, schedule the Tweet for synch
+				if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
+					Log.i(TAG,"requesting tweet update to twitter");
+					Intent i = new Intent(TwitterService.SYNCH_ACTION);
+					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+					startService(i);
+				}
 			}		
 		}
 		else 
@@ -222,17 +231,20 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 			@Override
 			public void onClick(View v) {
+				Log.i(TAG,"inside click listener");
 				if(favorited){
 					// unfavorite
 					getContentResolver().update(uri, clearFavoriteFlag(flags), null, null);
 					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_off);
 					favorited=false;
+					
 				} else {
 					// favorite
 					getContentResolver().update(uri, setFavoriteFlag(flags), null, null);
 					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_on);
 					favorited=true;
 				}
+				
 				
 			}
 			
@@ -245,22 +257,26 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 *  
 	 */
 	private void handleTweetFlags() {
+		LinearLayout toSendNotification = (LinearLayout) findViewById(R.id.showTweetTosend);
+		LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
+		LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
+		LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
+		LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
 		
-					if((flags & Tweets.FLAG_TO_INSERT) ==0){
-						LinearLayout toSendNotification = (LinearLayout) findViewById(R.id.showTweetTosend);
-						toSendNotification.setVisibility(LinearLayout.GONE);
-					} else {
-						
-					}				
+					if((flags & Tweets.FLAG_TO_INSERT) ==0){						
+						toSendNotification.setVisibility(LinearLayout.GONE);						
+					} else
+						toSendNotification.setVisibility(LinearLayout.VISIBLE);	
 					
-					if((flags & Tweets.FLAG_TO_DELETE) ==0){
-						LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
-						toDeleteNotification.setVisibility(LinearLayout.GONE);
+					if((flags & Tweets.FLAG_TO_DELETE) ==0){						
+						toDeleteNotification.setVisibility(LinearLayout.GONE);						
 						
 					} else{
-						LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
-						toDeleteNotification.setOnClickListener(new OnClickListener() {
-
+						toDeleteNotification.setVisibility(LinearLayout.VISIBLE);
+						TextView toDeleteText = (TextView) findViewById(R.id.showTweetInfoText2);						
+						toDeleteText.setBackgroundResource(android.R.drawable.list_selector_background);						
+						toDeleteText.setOnClickListener(new OnClickListener() {
+					   
 							@Override
 							public void onClick(View v) {
 								 LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
@@ -271,27 +287,28 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 									 c.moveToFirst();
 									 flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 									 setupButtons();
-								 }
-								 
+								 }								 
 							}							
-							
 						});
 					}
 					
-					if((flags & Tweets.FLAG_TO_FAVORITE) ==0){
-						LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
+					if((flags & Tweets.FLAG_TO_FAVORITE) ==0){						
 						toFavoriteNotification.setVisibility(LinearLayout.GONE);
-					}
-
-					if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){
-						LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
+						
+					} else
+						toFavoriteNotification.setVisibility(LinearLayout.VISIBLE);
+						
+					if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){						
 						toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
-					}
+						
+					} else
+						toUnfavoriteNotification.setVisibility(LinearLayout.VISIBLE);
 
-					if((flags & Tweets.FLAG_TO_RETWEET) ==0){
-						LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
+					if((flags & Tweets.FLAG_TO_RETWEET) ==0){						
 						toRetweetNotification.setVisibility(LinearLayout.GONE);
-					}
+						
+					} else
+						toRetweetNotification.setVisibility(LinearLayout.VISIBLE);
 		
 	}
 
@@ -326,7 +343,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 							userInfoView.setBackgroundResource(android.R.drawable.list_selector_background);
 							Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
 							i.putExtra("rowId", userRowId);
-							i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //@author pcarta
+							i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
 							startActivity(i);
 						}
 						
@@ -354,6 +371,13 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 					} else {
 						createdWithView.setVisibility(TextView.GONE);
 					}
+					
+					String retweeted_by = c.getString(c.getColumnIndex(Tweets.COL_RETWEETED_BY));
+					TextView textRetweeted_by = (TextView) findViewById(R.id.showTweetRetweeted_by);
+					if (retweeted_by != null) {
+						textRetweeted_by.append(retweeted_by);		
+						textRetweeted_by.setVisibility(View.VISIBLE);					
+					}					
 		
 	}
 
@@ -363,6 +387,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
+		
+		observer = new TweetContentObserver(handler);
+		c.registerContentObserver(observer);
+		
 	}
 	
 	/**
@@ -370,7 +398,16 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onPause(){
+		Log.i(TAG, "on pause");
 		super.onPause();
+		if(c!=null){
+			if(observer != null) 
+				try {
+					c.unregisterContentObserver(observer);
+				} catch (IllegalStateException ex) {
+					Log.e(TAG,"error unregistering observer",ex);
+				}
+		}
 		
 	}
 
@@ -385,8 +422,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		retweetButton.setOnClickListener(null);
 		deleteButton.setOnClickListener(null);
 		replyButton.setOnClickListener(null);
-		favoriteButton.setOnClickListener(null);
-
+		favoriteButton.setOnClickListener(null);	
 		c.close();
 		
 		unbindDrawables(findViewById(R.id.showTweetRoot));
@@ -440,7 +476,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   getContentResolver().update(uri, setRetweetFlag(flags), null, null);
-		                dialog.cancel();
+		        	   c.requery();
+		               dialog.cancel();
 		           }
 		       });
 		AlertDialog alert = builder.create();
@@ -495,7 +532,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private ContentValues setFavoriteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		// set favorite flag und clear unfavorite flag
-		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_FAVORITE & (~Tweets.FLAG_TO_UNFAVORITE));
+		cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE) & (~Tweets.FLAG_TO_UNFAVORITE));
 		// put in favorites bufer
 		cv.put(Tweets.COL_BUFFER, buffer|Tweets.BUFFER_FAVORITES);
 		return cv;
@@ -510,9 +547,52 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private ContentValues clearFavoriteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		// clear favorite flag and set unfavorite flag
-		cv.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_FAVORITE) | Tweets.FLAG_TO_UNFAVORITE);
+		cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)) | Tweets.FLAG_TO_UNFAVORITE);
 		cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
+	}
+	
+	/**
+	 * Calls methods if tweet data has been updated
+	 * @author pcarta
+	 *
+	 */
+	class TweetContentObserver extends ContentObserver {
+		public TweetContentObserver(Handler h) {
+			super(h);
+		}
+
+		@Override
+		public boolean deliverSelfNotifications() {
+			Log.i(TAG, "Test");
+			return true;
+		}
+
+		@Override
+		public void onChange(boolean selfChange) {
+			Log.i(TAG, "TweetContentObserver.onChange( " + selfChange+ ")");
+			super.onChange(selfChange);
+
+			/* close the old cursor
+			if(c!=null) {				
+				c.close();
+			}*/
+			
+			// and get a new one
+			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
+			c = getContentResolver().query(uri, null, null, null, null);		
+			if(c.getCount() == 1) {
+				
+				
+				c.moveToFirst();
+				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+				// update the views
+				handleTweetFlags();				
+			}
+			
+			
+
+		}
 	}
 	
 }

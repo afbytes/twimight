@@ -69,6 +69,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private static final int OPTIONS_MENU_SETTINGS = 40;
 	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
+	private static final int OPTIONS_MENU_PAIR= 80;
 
 	public static final int SHOW_TIMELINE = 1;
 	public static final int SHOW_FAVORITES = 2;
@@ -131,8 +132,19 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			}
 		});
 		
-		Log.v(TAG, "created");
+		// if we just got logged in, we load the timeline
+				Intent i = getIntent();
+				if(i.hasExtra("filter_request")) {
+					setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
+					i.removeExtra("filter_request");
+				} else if(i.hasExtra("login")){
+					i.removeExtra("login");
+					setFilter(SHOW_TIMELINE);
+				} else {
+					setFilter(currentFilter);	
+				}
 		
+		Log.v(TAG, "created");		
 	   // Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
 
 
@@ -153,17 +165,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			headerBar.setBackgroundResource(R.drawable.top_bar_background);
 		}
 
-		// if we just got logged in, we load the timeline
-		Intent i = getIntent();
-		if(i.hasExtra("filter_request")) {
-			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
-			i.removeExtra("filter_request");
-		} else if(i.hasExtra("login")){
-			i.removeExtra("login");
-			setFilter(SHOW_TIMELINE);
-		} else {
-			setFilter(currentFilter);	
-		}
+		
 		
 		
 		if(positionIndex != 0 | positionTop !=0){
@@ -212,11 +214,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		super.onCreateOptionsMenu(menu);
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile");
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages");
-		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings");
-		/*		
-			menu.add(1,OPTIONS_MENU_PAIR, 2, "Pair");
-		
-		 */
+		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings");				
+		menu.add(1,OPTIONS_MENU_PAIR, 3, "Pair");				 
 		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About");
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout");
 
@@ -272,6 +271,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			// Launch AboutActivity
 			i = new Intent(this, AboutActivity.class);
 			startActivity(i);    
+			break;
+		case OPTIONS_MENU_PAIR:
+			//TODO: handle pairing
 			break;
 		default:
 			return false;

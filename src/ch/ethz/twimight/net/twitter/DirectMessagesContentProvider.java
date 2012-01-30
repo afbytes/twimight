@@ -30,6 +30,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -130,13 +131,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		switch(dmUriMatcher.match(uri)){
 			
 			case DMS: 
-				Log.i(TAG, "Query DMS");
+				Log.d(TAG, "Query DMS");
 				c = database.query(DBOpenHelper.TABLE_DMS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				break;
 
 			case DM_ID: 
-				Log.i(TAG, "Query DM_ID");
+				Log.d(TAG, "Query DM_ID");
 				sql = "SELECT  * "
 					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
 					+ "WHERE " + DBOpenHelper.TABLE_DMS+ "._id=" + uri.getLastPathSegment() + ";";
@@ -145,7 +146,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 						
 			case USER:
-				Log.i(TAG, "Query USER");
+				Log.d(TAG, "Query USER");
 				// get the twitter user id
 				sql = "SELECT "+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID + " "
 				+ "FROM "+ DBOpenHelper.TABLE_USERS+" "
@@ -182,7 +183,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				
 				break;
 			case USERS: 
-				Log.i(TAG, "Query USERS");
+				Log.d(TAG, "Query USERS");
 				// selects the last DM of which the given user is either a sender or recepient
 				String subQuery1 = "SELECT " + DirectMessages.COL_TEXT + " " 
 					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
@@ -256,7 +257,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		
 		switch(dmUriMatcher.match(uri)){
 			case LIST_NORMAL:
-				Log.i(TAG, "Insert LIST_NORMAL");
+				Log.d(TAG, "Insert LIST_NORMAL");
 				/*
 				 *  First, we check if we already have a direct messages with the same disaster ID.
 				 *  If yes, two cases are possible
@@ -299,7 +300,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 				
 			case LIST_DISASTER:
-				Log.i(TAG, "Insert LIST_DISASTER");
+				Log.d(TAG, "Insert LIST_DISASTER");
 				// in disaster mode, we set the is disaster flag, encrypt and sign the message 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(DirectMessages.COL_ISDISASTER, 1);
@@ -321,7 +322,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 
-		Log.i(TAG, "Update DM_ID");
+		Log.d(TAG, "Update DM_ID");
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_DMS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){
@@ -341,7 +342,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
-		Log.i(TAG, "Delete DM_ID");
+		Log.d(TAG, "Delete DM_ID");
 		
 		int nrRows = database.delete(DBOpenHelper.TABLE_DMS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
@@ -389,17 +390,17 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(DirectMessages.COL_BUFFER);
 		
 		if((bufferFlags & DirectMessages.BUFFER_MESSAGES) != 0){
-			Log.i(TAG, "purging local direct messages buffer");
+			Log.d(TAG, "purging local direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_MESSAGES, Constants.MESSAGES_BUFFER_SIZE);
 		}
 			
 		if((bufferFlags & DirectMessages.BUFFER_DISASTER) != 0){
-			Log.i(TAG, "purging relay direct messages buffer");
+			Log.d(TAG, "purging relay direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_DISASTER, Constants.DISASTERDM_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & DirectMessages.BUFFER_MYDISASTER) != 0){
-			Log.i(TAG, "purging local direct messages buffer");
+			Log.d(TAG, "purging local direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_MYDISASTER, Constants.MYDISASTERDM_BUFFER_SIZE);
 		}
 		
@@ -472,8 +473,10 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			
 			// are we the receiver?
 			if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
-				// notify user
-				notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
+				if (!isFirstLogin()) {
+					// notify user
+					notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
+				}
 			}
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
@@ -498,6 +501,11 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			throw new IllegalArgumentException("Illegal direct message: " + values);
 		}
 	}
+	
+	private boolean isFirstLogin() {
+		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
+	}
+
 
 	
 	/**

@@ -271,14 +271,12 @@ public class LoginActivity extends Activity implements OnClickListener{
 		protected void onPreExecute() {
 			
 			super.onPreExecute();
-			progressDialog=ProgressDialog.show(LoginActivity.this, "In progress", "Loading data from Twitter");
+			progressDialog=ProgressDialog.show(LoginActivity.this, "In progress", "Veryfing credentials");
 		}
 
 		@Override
 		protected String doInBackground(Uri... params) {
-			Log.i(TAG, "getting access token");
-			
-			
+			Log.i(TAG, "getting access token");		
 
 			Uri uri = params[0];
 			
@@ -361,6 +359,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}
 			// As a last step, we verify the correctness of the credentials and retrieve our Twitter ID
 			if(success){
+				SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit();
+				edit.putBoolean("isFirstLogin", true);
+				edit.commit();
 				// call the twitter service to verify the credentials
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
@@ -389,8 +390,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		// Start the alarm for communication with the TDS
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
 			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
-		}
-		
+		}		
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
 			new ScanningAlarm(context,0,false);
@@ -403,8 +403,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}
 		
 		//start the twitter update alarm
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
-			Log.i(TAG, "creating TwitterAlarm");
+		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
 			new TwitterAlarm(context,true);
 		}
 						
@@ -696,18 +695,24 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private class LoginReceiver extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	        if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_ACTION)) {
-	        	if(intent.hasExtra(LoginActivity.LOGIN_RESULT)){
-	        		progressDialog.dismiss();
-	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){	        			
-	        			startTimeline(context);
-	        		} else {
-	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
-	        			
-	        			finish();
-	        		}
-	        	}
-	        }
+	    	if (intent != null)
+	    		if(intent.getAction() != null) {
+	    			
+	    			if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_ACTION)) {
+	    	        	
+	    	        	if(intent.hasExtra(LoginActivity.LOGIN_RESULT)){
+	    	        		progressDialog.dismiss();
+	    	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){	        			
+	    	        			startTimeline(context);
+	    	        		} else {
+	    	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+	    	        			
+	    	        			//finish();
+	    	        		}
+	    	        	}
+	    	        }
+	    		}
+	        
 	    }
 	}
 

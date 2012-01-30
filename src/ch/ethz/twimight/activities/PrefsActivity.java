@@ -60,11 +60,12 @@ public class PrefsActivity extends PreferenceActivity{
 
 				if (key.equals("prefDisasterMode")) { // toggle disaster mode
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
-						new ScanningAlarm(getBaseContext(),0,true);
+						new ScanningAlarm(getApplicationContext(),0,true);
 						finish();
 						Log.i(TAG, "start scanning");
+						Log.i(TAG, PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null) );
 					} else {
-						ScanningAlarm.stopScanning(getBaseContext());
+						ScanningAlarm.stopScanning(getApplicationContext());
 						finish();
 						Log.i(TAG, "stop scanning");
 					}

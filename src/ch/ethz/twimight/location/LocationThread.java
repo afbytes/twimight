@@ -74,7 +74,7 @@ public class LocationThread extends HandlerThread{
 
 					loc = location;
 					
-					Log.i(TAG,"received a satisfying fix");
+					Log.d(TAG,"received a satisfying fix");
 					quit();
 				}
 			}
@@ -92,7 +92,7 @@ public class LocationThread extends HandlerThread{
 	@Override
 	public void run() {
 
-		Log.i(TAG, "running");
+		Log.d(TAG, "running");
 
 		try {
 			super.run();
@@ -121,10 +121,10 @@ public class LocationThread extends HandlerThread{
 	 */
 	private void onPreExecute() {
 
-		Log.i(TAG, "starting timeout");
+		Log.d(TAG, "starting timeout");
 		timeOutRunnable = new Runnable() {
 			public void run() {
-				Log.i(TAG, "timeout expired");
+				Log.d(TAG, "timeout expired");
 				quit();
 			}
 		};
@@ -136,7 +136,7 @@ public class LocationThread extends HandlerThread{
 			lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);
 			lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, locationListener);
 		} catch(Exception e) {
-			Log.i(TAG,"Can't request location Updates: " + e.toString());
+			Log.d(TAG,"Can't request location Updates: " + e.toString());
 			return;
 		}
 
@@ -147,7 +147,7 @@ public class LocationThread extends HandlerThread{
 	 */
 	private void onPostExecute(){
 
-		Log.i(TAG, "cleaning up");
+		Log.d(TAG, "cleaning up");
 
 		// stop listening
 		if ((lm != null) && (locationListener != null)) {
@@ -175,7 +175,7 @@ public class LocationThread extends HandlerThread{
 		// finally, release the wake lock
 		LocationAlarm.releaseWakeLock();
 
-		Log.i(TAG, "done");
+		Log.d(TAG, "done");
 	}
 
 };

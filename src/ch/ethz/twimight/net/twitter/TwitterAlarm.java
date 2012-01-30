@@ -22,8 +22,10 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.util.Constants;
 
@@ -38,7 +40,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 	private static final String TAG = "TwitterAlarm";
 	private static WakeLock wakeLock;
 	Intent intent;
-	private static boolean isLogin;
+	private static boolean isLogin = false;
 	
 	public TwitterAlarm(){}
 	
@@ -63,9 +65,15 @@ public class TwitterAlarm extends BroadcastReceiver {
 			
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);
 			i.putExtra("synch_request", TwitterService.SYNCH_ALL);
+			
 			if (isLogin) {
 				i.putExtra("isLogin",true );
 				isLogin=false;
+				Log.i(TAG,"this is the login");
+			} else {
+				SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(context).edit();
+				edit.putBoolean("isFirstLogin", false);
+				edit.commit();
 			}
 			context.startService(i);			
 			

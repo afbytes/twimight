@@ -54,7 +54,11 @@
 			<TextView android:id="@+id/showTweetCreatedWith"
 				android:text="Created with.." android:layout_width="match_parent"
 				android:textColor="@color/grey"
-				android:layout_height="wrap_content" android:textSize="16sp" />
+				android:layout_height="wrap_content" android:textSize="16sp" android:textStyle="italic"/>
+			<TextView android:id="@+id/showTweetRetweeted_by"
+				android:text="Retweeted by " android:layout_width="match_parent"
+				android:textColor="@color/grey"
+				android:layout_height="wrap_content" android:textSize="14sp" android:textStyle="italic" android:layout_marginTop="5dp" android:layout_marginBottom="5dp" android:visibility="gone"/>
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetUnverified"

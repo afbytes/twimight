@@ -68,14 +68,14 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 		// Click listener when the user clicks on a tweet
 		userTweetListView.setClickable(true);
 		userTweetListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-				Cursor c = (Cursor) userTweetListView.getItemAtPosition(position);
-				//c.moveToFirst();
+				Cursor c = (Cursor) userTweetListView.getItemAtPosition(position);				
 				Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				startActivity(i);
-				//c.close();
+				
 			}
 		});
 		

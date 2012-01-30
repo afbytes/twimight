@@ -13,9 +13,6 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
@@ -26,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.LoginActivity;
 
 /** 
  * Cursor adapter for a cursor containing tweets.
@@ -43,15 +42,30 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	/** This is where data is mapped to its view */
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
-		super.bindView(row, context, cursor);
+		super.bindView(row, context, cursor);		
 		
 		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
 		TextView textCreatedAt = (TextView) row.findViewById(R.id.tweetCreatedAt);
-		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
+		textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));		
 
 		TextView tweetText = (TextView) row.findViewById(R.id.textText);
 		// here, we don't want the entities to be clickable, so we use the standard tag handler
 		tweetText.setText(Html.fromHtml(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT))));
+		
+		//add the retweet message in case it is a retweet
+		int col = cursor.getColumnIndex(Tweets.COL_RETWEETED_BY);
+		if (col > -1) {
+			String retweeted_by = cursor.getString(col);
+			TextView textRetweeted_by = (TextView) row.findViewById(R.id.textRetweeted_by);
+			if (retweeted_by != null) {
+				textRetweeted_by.setText("retweeted by " + retweeted_by);		
+				textRetweeted_by.setVisibility(View.VISIBLE);					
+			}
+			else {
+				//textRetweeted_by.setText("");
+				textRetweeted_by.setVisibility(View.GONE);		
+			}
+		}		
 		
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
@@ -90,6 +104,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		// tweet background and disaster info
 		LinearLayout rowLayout = (LinearLayout) row.findViewById(R.id.rowLayout);
 		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
+		
 		if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISDISASTER))>0){
 			rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
 			verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);

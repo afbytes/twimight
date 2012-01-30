@@ -60,6 +60,7 @@ public class ScanningService extends Service{
 	private Cursor cursor;
 	
 	private Date scanStartTime;
+	ConnectionAttemptTimeout connTimeout;
 	
 	
 	
@@ -75,7 +76,7 @@ public class ScanningService extends Service{
 			context = this;
 			handler = new Handler();		
 	        // set up Bluetooth
-	        bluetoothHelper = new BluetoothComms(getApplicationContext(), mHandler);
+	        bluetoothHelper = new BluetoothComms(mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
 			dbHelper.open();
@@ -97,24 +98,35 @@ public class ScanningService extends Service{
 		// Get a cursor over all "active" MACs in the DB
 		cursor = dbHelper.fetchActiveMacs();
 		//TODO: obtain also paired peers around
-		
-		// Stop listening mode
-		bluetoothHelper.stop();
-		
+				
 		// Log the date for later rescheduling of the next scanning
 		scanStartTime = new Date();
 		
 		if (cursor.moveToFirst()) {
             // Get the field values
-            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
+            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));			
             Log.i(TAG, "Scanning for: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
             bluetoothHelper.connect(mac);
+            connTimeout = new ConnectionAttemptTimeout();
+			handler.postDelayed(connTimeout, 10000); //timeout for the conn attempt	 	
             
         } else {
         	stopScanning();
         }
 		
 		return false;
+	}
+	
+	class ConnectionAttemptTimeout implements Runnable {
+		@Override
+		public void run() {
+			if (bluetoothHelper != null) {		 
+				if (bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTING) {				
+					bluetoothHelper.cancelConnectionAttempt();
+				}
+				connTimeout = null;
+			}
+		}
 	}
 	
 	/**
@@ -143,12 +155,17 @@ public class ScanningService extends Service{
 		cursor = null;
 		
 		if(isDisasterMode()){
-			bluetoothHelper.stop();
+			//bluetoothHelper.stop();
 			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
 			
 			// reschedule next scan (randomized)			
 		    ScanningAlarm.scheduleScanning(this,scanStartTime.getTime() + delay + Constants.SCANNING_INTERVAL);		 			
 			
+		    if (connTimeout != null) {
+				handler.removeCallbacks(connTimeout);
+				connTimeout = null;
+			}
+		    
 			// start listening mode
 			bluetoothHelper.start();
 			Log.i(TAG, "Listening...");
@@ -172,71 +189,35 @@ public class ScanningService extends Service{
 		public void handleMessage(Message msg) {
 			switch (msg.what) {          
 
-			case Constants.MESSAGE_READ:         	 
-				Log.i(TAG, msg.obj.toString());
+			case Constants.MESSAGE_READ:  
 				
 				try {
-					ContentValues cvTweet = getTweetCV(msg.obj.toString());
-					cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);
-					
-					// we don't enter our own tweets into the DB.
-					if(cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(context))){
-						Log.i(TAG, "we received our own tweet");
-					} else {
-						ContentValues cvUser = getUserCV(msg.obj.toString());
-						
-						// insert the tweet
-						Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
-						getContentResolver().insert(insertUri, cvTweet);
-						
-						// insert the user
-						Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-						getContentResolver().insert(insertUserUri, cvUser);
-					}
-					
-				} catch (JSONException e1) {
-					Log.e(TAG, "Exception while receiving disaster tweet " , e1);
-				}
+					Log.i(TAG, new JSONObject(msg.obj.toString()).toString());
+				} catch (JSONException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}				 
+				
+				processMessage(msg);
+				
 				break;             
 				
 			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
 				Log.i(TAG, "connection succeeded");   
 				
-				// Cancel future scans
-				//ScanningService.stopScanning();
+				if (connTimeout != null) { // I need to remove the timeout started at the beginning
+					handler.removeCallbacks(connTimeout);
+					connTimeout = null;
+				}
 				
 				// Insert successful connection into DB
 				dbHelper.updateMacSuccessful(msg.obj.toString(), 1);
 				
 				// Here starts the protocol for Tweet exchange.
 				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
-				
-				// get disaster tweets
-				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
-				Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
-				
-				if(c.getCount()>0){
-					c.moveToFirst();
-					while(!c.isAfterLast()){
-						
-						if(last != null && (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))>last)){
-							JSONObject toSend;
-							try {
-								
-								toSend = getJSON(c);
-								Log.i(TAG, toSend.toString(5));
-								bluetoothHelper.write(toSend.toString());
-								
-							} catch (JSONException e) {								
-								Log.e(TAG,"exception ", e);
-							}
-							
-						}
-						c.moveToNext();
-					}
-				}
+				sendDisasterTweets(last);				
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());				
-				c.close();					
+									
 				
 				break;   
 			case Constants.MESSAGE_CONNECTION_FAILED:             
@@ -256,6 +237,62 @@ public class ScanningService extends Service{
 				
 				break;
 			}
+			
+		}
+
+		private void processMessage(Message msg) {
+			try {
+				ContentValues cvTweet = getTweetCV(msg.obj.toString());
+				cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);
+				
+				// we don't enter our own tweets into the DB.
+				if(cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(context))){
+					Log.i(TAG, "we received our own tweet");
+				} else {
+					ContentValues cvUser = getUserCV(msg.obj.toString());
+					
+					// insert the tweet
+					Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+					getContentResolver().insert(insertUri, cvTweet);
+					
+					// insert the user
+					Uri insertUserUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
+					getContentResolver().insert(insertUserUri, cvUser);
+				}
+				
+			} catch (JSONException e1) {
+				Log.e(TAG, "Exception while receiving disaster tweet " , e1);
+			}
+			
+		}
+
+		private void sendDisasterTweets(Long last) {
+			// get disaster tweets
+			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+			Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
+			
+			if(c.getCount()>0){
+				c.moveToFirst();
+				while(!c.isAfterLast()){
+					
+					if(last != null && (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))>last)){
+						JSONObject toSend;
+						try {								
+							toSend = getJSON(c);
+							Log.i(TAG,"sending...");
+							Log.i(TAG, toSend.toString(5));
+							bluetoothHelper.write(toSend.toString());
+							
+						} catch (JSONException e) {								
+							Log.e(TAG,"exception ", e);
+						}
+						
+					}
+					c.moveToNext();
+				}
+				
+			}
+			c.close();
 			
 		}
 
