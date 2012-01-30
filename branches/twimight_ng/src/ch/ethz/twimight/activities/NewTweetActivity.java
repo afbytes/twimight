@@ -43,7 +43,7 @@ import android.widget.ToggleButton;
 /**
  * The activity to write a new tweet.
  * @author thossmann
- *
+ * @author pcarta
  */
 public class NewTweetActivity extends TwimightBaseActivity{
 
@@ -243,21 +243,19 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private void sendTweet(){
 		Log.i(TAG, "send tweet!");
 		// if no connectivity, notify user that the tweet will be send later
-		try{
+		
 			Uri insertUri = null;
-			ContentValues cv = createContentValues(); //@author pcarta
+			ContentValues cv = createContentValues(); 
 			
-			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){
-				//ContentValues cv = createContentValues();
+			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){				
 
 				// our own tweets go into the my disaster tweets buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
 				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 															+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
-			} else {
+			} else {				
 				
-				//ContentValues cv = createContentValues();
 				// our own tweets go into the timeline buffer
 				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
 
@@ -265,7 +263,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 															Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_LONG).show();
+					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_SHORT).show();
 				}
 			}
 
@@ -275,14 +273,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
 				i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
 				startService(i);
-			}
-
-			
-		} catch (Exception e) {
-			Log.e(TAG, "Exception while inserting tweet into DB: " + e.toString());
-			Toast.makeText(this, "There was an error inserting your tweet into the local database! Please try again.", Toast.LENGTH_LONG).show();
-			return;
-		}
+			}		
+		
 		
 	}
 

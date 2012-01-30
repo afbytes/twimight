@@ -39,7 +39,7 @@ import android.widget.TextView;
  */
 public class ShowUserActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowTwitterUserActivity";
+	private static final String TAG = "ShowUserActivity";
 
 	Uri uri;
 	Cursor c;
@@ -66,7 +66,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	private boolean following;
 	String userScreenName;
 	Handler handler;
-	ContentObserver observer;
+	ContentObserver observer = null;
 
 	/** 
 	 * Called when the activity is first created. 
@@ -97,7 +97,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			// get data from local DB
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
 			c = getContentResolver().query(uri, null, null, null, null);
-
+			startManagingCursor(c);
+			
 			if(c.getCount() == 0) finish();
 
 			c.moveToFirst();
@@ -139,8 +140,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		startService(i);
 		
 		// register content observer to refresh when user was updated
-		handler = new Handler();
-		observer = new UserContentObserver(handler);
+		handler = new Handler();		
 
 		// show the views
 		showUserInfo();
@@ -153,6 +153,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
+		observer = new UserContentObserver(handler);
 		c.registerContentObserver(observer);
 	}
 	
@@ -163,7 +164,12 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	public void onPause(){
 		super.onPause();
 		if(c!=null){
-			if(observer != null) c.unregisterContentObserver(observer);
+			if(observer != null) 
+				try {
+					c.unregisterContentObserver(observer);
+				} catch (IllegalStateException ex) {
+					Log.e(TAG,"error unregistering observer",ex);
+				}
 		}
 	}
 
@@ -180,13 +186,9 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		if(showFollowersButton!=null) showFollowersButton.setOnClickListener(null);
 		if(showFriendsButton!=null) showFriendsButton.setOnClickListener(null);
 		if(showUserTweetsButton!=null) showUserTweetsButton.setOnClickListener(null);
-
 		
 		unbindDrawables(findViewById(R.id.showUserRoot));
-
-		if(c!=null){
-			c.close();
-		}
+		
 		observer = null;
 		handler = null;
 		
@@ -447,14 +449,14 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		@Override
 		public void onChange(boolean selfChange) {
-			Log.d(TAG, "UserContentObserver.onChange( " + selfChange+ ")");
+			Log.i(TAG, "UserContentObserver.onChange( " + selfChange+ ")");
 			super.onChange(selfChange);
 			
 			// close the old cursor
-			if(c!=null) {
-				if(observer!= null) c.unregisterContentObserver(observer);
-				c.close();
-			}
+			//if(c!=null) {
+				//if(observer!= null) c.unregisterContentObserver(observer);
+				//c.close();
+			//}
 			
 			// and get a new one
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
@@ -462,10 +464,9 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			if(c.getCount() == 0) 
 				finish();
 			else {
-				c.moveToFirst();
+				c.moveToFirst();				
 				
-				//observer = new UserContentObserver(handler);
-				c.registerContentObserver(this);
+				//c.registerContentObserver(this);
 
 				// update the views
 				showUserInfo();

@@ -30,6 +30,7 @@ import android.view.Window;
 public class TwimightBaseActivity extends Activity{
 	
 	static TwimightBaseActivity instance;
+	private static final String TAG = "TwimightBaseActivity";
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
@@ -50,10 +51,8 @@ public class TwimightBaseActivity extends Activity{
 	 * on Pause
 	 */
 	@Override
-	public void onPause(){
-		
-		instance = null;
-		
+	public void onPause(){		
+		//instance = null;
 		super.onPause();
 
 	}
@@ -63,10 +62,9 @@ public class TwimightBaseActivity extends Activity{
 	 */
 	@Override
 	public void onResume(){
-		
+		super.onResume();
 		instance = this;
 		
-		super.onResume();
 
 	}
 
@@ -86,8 +84,10 @@ public class TwimightBaseActivity extends Activity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-		if(!(instance instanceof ShowTweetListActivity))
-			menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
+		if (instance !=null) {
+			if(!(instance instanceof ShowTweetListActivity))
+				menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
+		}		
 		return true;
 	}
 	
@@ -96,7 +96,7 @@ public class TwimightBaseActivity extends Activity{
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
-
+		Log.d(TAG,"onOptionsItemSelected");
 		Intent i;
 		switch(item.getItemId()){
 
@@ -117,14 +117,22 @@ public class TwimightBaseActivity extends Activity{
 	 * @param isLoading
 	 */
 	public static void setLoading(final boolean isLoading) {
+		Log.d(TAG,"setLoading");
 		if(instance!=null){
-			instance.runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 instance.setProgressBarIndeterminateVisibility(isLoading);
-			     }
-			});
+			try {
+				
+				instance.runOnUiThread(new Runnable() {
+				     public void run() {
+				    	 instance.setProgressBarIndeterminateVisibility(isLoading);
+				     }
+				});
+				
+			} catch (Exception ex) {
+				Log.e(TAG,"error: ",ex);
+			}
+			
 		} else {
-			Log.v("TwimightBaseActivity", "Cannot show loading icon");
+			Log.v(TAG, "Cannot show loading icon");
 		}
 
 	}
@@ -134,6 +142,7 @@ public class TwimightBaseActivity extends Activity{
 	 * @param view
 	 */
 	protected void unbindDrawables(View view) {
+		Log.d(TAG,"unBindDrawables");
 	    if (view.getBackground() != null) {
 	        view.getBackground().setCallback(null);
 	    }

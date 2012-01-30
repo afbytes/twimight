@@ -71,7 +71,6 @@ public class BluetoothComms {
 		UUID.fromString("8113ac40-438f-11e1-b86c-0800200c9a66");    	
 
 	// Member fields
-	private static BluetoothComms instance = null;
 
 	private final BluetoothAdapter mAdapter;
 	private final Handler mHandler;
@@ -89,33 +88,29 @@ public class BluetoothComms {
 	public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
 	public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
-	LogFilesOperations logOps;
-	FileWriter bluetoothLogWriter; 
+	//LogFilesOperations logOps;
+	//FileWriter bluetoothLogWriter; 
 
 	/**
 	 * Constructor. Prepares a new BluetoothChat session.
 	 * @param context  The UI Activity Context
 	 * @param handler  A Handler to send messages back to the UI Activity
 	 */
-	public BluetoothComms(Context context, Handler handler) {
+	public BluetoothComms(Handler handler) {
 		mAdapter = BluetoothAdapter.getDefaultAdapter();
 		mState = STATE_NONE;
 		mHandler = handler;
 
-		instance = this;
 		
-		logOps = new LogFilesOperations();
-		logOps.createLogsFolder();
-		bluetoothLogWriter = logOps.createLogFile("ConnectTimes");
+		
+		//logOps = new LogFilesOperations();
+	//	logOps.createLogsFolder();
+	//	bluetoothLogWriter = logOps.createLogFile("ConnectTimes");
 
 
 	}  
 
-	public static BluetoothComms getInstance(){
 
-		return instance;
-
-	}
 	
 	public String getMac(){
 		return mAdapter.getAddress();
@@ -179,7 +174,7 @@ public class BluetoothComms {
 		if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}       
 
 		// Cancel any thread currently running a connection
-		if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
+		//if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
 		// Start the thread to connect with the given device
 		if (mConnectedThread == null) {
@@ -206,6 +201,9 @@ public class BluetoothComms {
 			mInsecureAcceptThread.cancel();
 			mInsecureAcceptThread = null;
 		} 
+		
+	    // Cancel any thread currently running a connection
+        if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
 		// Start the thread to manage the connection and perform transmissions
 		if (mState != STATE_CONNECTED ) {
@@ -271,6 +269,7 @@ public class BluetoothComms {
 		// Send a failure message back to the Activity
 		Message msg = mHandler.obtainMessage(Constants.MESSAGE_CONNECTION_FAILED, -1 ,-1, mac);
 		mHandler.sendMessage(msg);
+		start();
 	}
 
 	/**
@@ -280,6 +279,7 @@ public class BluetoothComms {
 		// Send a failure message back to the Activity
 		Message msg = mHandler.obtainMessage(Constants.MESSAGE_CONNECTION_LOST);
 		mHandler.sendMessage(msg);
+		this.start();
 
 	}
 
@@ -294,40 +294,15 @@ public class BluetoothComms {
 		volatile BluetoothSocket acceptSocket = null;
 
 		public AcceptThread() {
-			BluetoothServerSocket tmp = null;            
+			BluetoothServerSocket tmp = null;       
 
-			// Create a new listening server socket
-     
-				int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-				if (currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD){
+			// Create a new listening server socket			
 				    // from API level 10 we have an API call for insecure RFCOMM connections
 					try {
 						tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);
 					} catch (IOException e) {
 						Log.e(TAG, "Unable to listen for Insecure RFCOMM connection");
-					}
-				} else{
-				    // before Gingerbread, we can try with reflection
-					try {
-						Method m = mAdapter.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
-						tmp = (BluetoothServerSocket) m.invoke(NAME_INSECURE, MY_UUID_INSECURE);
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (NoSuchMethodException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} 
-				}
+					}			
 				                
 			mmServerSocket = tmp;
 		}
@@ -350,14 +325,7 @@ public class BluetoothComms {
 						// Log.e(TAG, "accept() failed", e);
 						break;
 					}
-					/* catch (NullPointerException e) {
-                	Log.e(TAG, "accept() failed: restarting", e);                    
-                    synchronized (this) {
-                    	stop();
-                    	start();                    	
-                    }
-                    break; 
-                }*/
+					
 
 					// If a connection was accepted
 					if (acceptSocket != null) {
@@ -420,35 +388,9 @@ public class BluetoothComms {
 			// Get a BluetoothSocket for a connection with the
 			// given BluetoothDevice
 			
-			try { 
-				int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-				if (currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD){
-				    // from API level 10 we have an API call for insecure RFCOMM connections
-					tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
-				} else{
-				    // before Gingerbread, we can try with reflection
-					Method m;
-					try {
-						m = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] {int.class});
-						tmp = (BluetoothSocket) m.invoke(MY_UUID_INSECURE);
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (NoSuchMethodException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} 
-					
-				}
+			try { 				
+				// from API level 10 we have an API call for insecure RFCOMM connections
+				tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
 
 				                
 			} catch (IOException e) {
@@ -469,29 +411,15 @@ public class BluetoothComms {
 				// successful connection or an exception 
 				mmSocket.connect();
 				
-				Date end = new Date();
-				try {
-					bluetoothLogWriter.write(mmDevice.getAddress() + ": (succeeded) " + (long)(end.getTime()-start.getTime()) + "\n");
-					bluetoothLogWriter.flush();
-				} catch (IOException e1) {
-					Log.e(TAG, "Log error");
-				}
-
-				
-
+				//Date end = new Date();
 				Log.i(TAG,"connection attempt succeded");
+				
 			} catch (Exception e) {            	
 				Log.e(TAG, "connection attempt failed", e);
 				
 				Date end = new Date();
-				try {
-					bluetoothLogWriter.write(mmDevice.getAddress() + ": (failed) " + (long)(end.getTime()-start.getTime()) +"\n");
-					bluetoothLogWriter.flush();
-				} catch (IOException e1) {
-					Log.e(TAG, "Log error");
-				}
-				try { 
-					Thread.yield();
+				
+				try { 					
 					mmSocket.close();                    
 				} catch (Exception e2) {
 					Log.e(TAG, "unable to close()  socket during connection failure", e2);
@@ -500,9 +428,10 @@ public class BluetoothComms {
 				return;
 			}
 
-			// Reset the ConnectThread because we're done
-			mConnectThread = null;
-			
+			/// Reset the ConnectThread because we're done
+            synchronized (this) {
+                mConnectThread = null;
+            }
 			// Start the connected thread
 			connected(mmSocket, mmDevice);
 		}

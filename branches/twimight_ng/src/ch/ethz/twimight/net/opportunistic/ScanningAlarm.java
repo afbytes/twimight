@@ -119,8 +119,8 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 	private static boolean getBluetoothInitialState(Context context) {
 		
-		SharedPreferences prefEditor = PreferenceManager.getDefaultSharedPreferences(context);		
-		return prefEditor.getBoolean("wasBlueEnabled", true);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
+		return pref.getBoolean("wasBlueEnabled", true);
 		
 		}
 
@@ -157,13 +157,13 @@ public class ScanningAlarm extends BroadcastReceiver {
 		// as long as we are in disaster mode we turn bluetooth on if we find it off (is this evil?)
 		BluetoothAdapter.getDefaultAdapter().enable();	
 		
-		scheduleScanning(context,0);
+		scheduleScanning(context,System.currentTimeMillis()+6000);
 		
 	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i(TAG, "requesting synchronization with twitter");		
+		Log.i(TAG, "requesting scanning");		
 		getWakeLock(context);
 		
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {

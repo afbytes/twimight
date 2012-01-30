@@ -16,6 +16,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
@@ -31,7 +32,7 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
 /**
  * Shows the most recent tweets of a user
  * @author thossmann
- *
+ * @author pcarta
  */
 public class SearchableActivity extends TwimightBaseActivity{
 
@@ -42,13 +43,11 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 	private ListAdapter adapter;
 	private Cursor c;
-
-
 	private int positionIndex;
 	private int positionTop;
 
 	/** 
-	 * Called when the activity is first created. 
+	 * Called when the activity is first created. 	private Cursor c;
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,40 +62,18 @@ public class SearchableActivity extends TwimightBaseActivity{
 		// Get the intent and get the query
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
+			String query = intent.getStringExtra(SearchManager.QUERY);			
 			
-			//@author pcarta
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-	        suggestions.saveRecentQuery(query, null);
-
-			Log.e(TAG, query);
-
-			// TODO : check input
-			Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
-			c = getContentResolver().query(uri, null, query, null, null);
-			startManagingCursor(c); //@author pcarta
-
-			adapter = new TweetAdapter(this, c);		
-			searchListView.setAdapter(adapter);
-
-
-			// Click listener when the user clicks on a tweet
-			searchListView.setClickable(true);
-			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-					Cursor c = (Cursor) searchListView.getItemAtPosition(position);
-					//c.moveToFirst();
-					Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
-					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-					startActivity(i);
-					//c.close();
-				}
-			});
-		}
+	        suggestions.saveRecentQuery(query, null);		
+	        
+	        
+	        new PerformSearchTask().execute(query);		
 
 		Log.v(TAG, "created");
+		} else 
+			finish();
 
 	}
 
@@ -173,6 +150,46 @@ public class SearchableActivity extends TwimightBaseActivity{
 		positionTop = savedInstanceState.getInt("positionTop");
 
 		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	}
+	
+	/**
+	 * Perform the user search to Twitter
+	 * @author pcarta
+	 */
+	private class PerformSearchTask extends AsyncTask<String, Void, Void> {			
+
+		@Override
+		protected void onPostExecute(Void result) {
+			
+			adapter = new TweetAdapter(SearchableActivity.this, c);		
+			searchListView.setAdapter(adapter);	
+			
+			// Click listener when the user clicks on a tweet
+			searchListView.setClickable(true);
+			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+					Cursor c = (Cursor) searchListView.getItemAtPosition(position);					
+					Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
+					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
+					startActivity(i);
+					
+				}
+			});
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected Void doInBackground(String... query) {
+			Log.i(TAG, "AsynchTask: PerformSearchTask");
+			
+			// TODO : check input
+						Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
+						c = getContentResolver().query(uri, null, query[0], null, null);
+						startManagingCursor(c); 
+						return null;
+			
+		}
 	}
 
 }
