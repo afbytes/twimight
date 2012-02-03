@@ -12,6 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import ch.ethz.twimight.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -86,7 +87,7 @@ public class TwimightBaseActivity extends Activity{
 		super.onCreateOptionsMenu(menu);
 		if (instance !=null) {
 			if(!(instance instanceof ShowTweetListActivity))
-				menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
+				menu.add(1, OPTIONS_MENU_HOME, 1, "Home").setIcon(R.drawable.ic_menu_home);
 		}		
 		return true;
 	}

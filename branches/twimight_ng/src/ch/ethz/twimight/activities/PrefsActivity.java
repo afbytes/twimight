@@ -12,15 +12,19 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
@@ -39,9 +43,11 @@ public class PrefsActivity extends PreferenceActivity{
 
 	private OnSharedPreferenceChangeListener prefListener;
 	private SharedPreferences prefs;
+	BluetoothAdapter mBluetoothAdapter;
 
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
+	static final int REQUEST_DISCOVERABLE = 2;
 
 	/**
 	 * Set everything up.
@@ -60,12 +66,17 @@ public class PrefsActivity extends PreferenceActivity{
 
 				if (key.equals("prefDisasterMode")) { // toggle disaster mode
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
-						new ScanningAlarm(getApplicationContext(),0,true);
-						finish();
-						Log.i(TAG, "start scanning");
-						Log.i(TAG, PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null) );
+						
+						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
+							enableBluetooth(); 					
+							Log.i(TAG, "start scanning");
+						} else
+							Toast.makeText(getBaseContext(), "You need a verified account to enable the disaster mode", Toast.LENGTH_SHORT).show();
+						
 					} else {
 						ScanningAlarm.stopScanning(getApplicationContext());
+						Intent in = new Intent(getBaseContext(), ScanningAlarm.class);
+						stopService(in);
 						finish();
 						Log.i(TAG, "stop scanning");
 					}
@@ -88,6 +99,7 @@ public class PrefsActivity extends PreferenceActivity{
 					}
 				} else if (key.equals("prefRunAtBoot")) {
 					if (preferences.getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true ) {
+						
 						new TwitterAlarm(getBaseContext(),false);
 						Log.i(TAG, "start background updater");
 					} else {
@@ -98,6 +110,40 @@ public class PrefsActivity extends PreferenceActivity{
 		};
 
 	}
+	/**
+	 * Enables Bluetooth when Disaster Mode get's enabled.
+	 */
+	private void enableBluetooth() {
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		if (mBluetoothAdapter.isEnabled())
+			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);
+		else
+			ScanningAlarm.setBluetoothInitialState(getBaseContext(), false);
+
+		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
+			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);           
+
+		} else {
+			new ScanningAlarm(getApplicationContext(),0,true);
+			finish();
+		}
+				 
+		
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch(requestCode) {
+		case REQUEST_DISCOVERABLE:
+			Log.d(TAG,"resultcode = " + resultCode); 			
+			new ScanningAlarm(getApplicationContext(),0,true);
+			finish();
+			
+		}
+	}  
+	
 	
 	/**
 	 * Important: register shared preference change listener here!

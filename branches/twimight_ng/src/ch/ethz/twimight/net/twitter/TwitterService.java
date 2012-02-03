@@ -38,6 +38,7 @@ import winterwell.jtwitter.Twitter.TweetEntity;
 import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.Twitter_Account;
 import winterwell.jtwitter.User;
+import android.app.AlarmManager;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -112,138 +113,141 @@ public class TwitterService extends Service {
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.w(TAG, "Error synching: no connectivity");
 			return START_NOT_STICKY;
-		} 
-
-		// Create twitter object
-		if(twitter == null){
 			
-			String token = LoginActivity.getAccessToken(this);
-			String secret = LoginActivity.getAccessTokenSecret(this);
-			if(!(token == null || secret == null) ) {
-				// get ready for OAuth
-				OAuthSignpostClient client = new OAuthSignpostClient(Obfuscator.getKey(), Obfuscator.getSecret(), token, secret);
-				twitter = new Twitter(null, client);
-			} else {
-				Log.e(TAG, "Error synching: no access token or secret");
-				return START_NOT_STICKY;
+		} else {
+			// Create twitter object
+			if(twitter == null){
+				
+				String token = LoginActivity.getAccessToken(this);
+				String secret = LoginActivity.getAccessTokenSecret(this);
+				if(!(token == null || secret == null) ) {
+					// get ready for OAuth
+					OAuthSignpostClient client = new OAuthSignpostClient(Obfuscator.getKey(), Obfuscator.getSecret(), token, secret);
+					twitter = new Twitter(null, client);
+				} else {
+					Log.e(TAG, "Error synching: no access token or secret");
+					return START_NOT_STICKY;
+				}
+				
+				twitter.setIncludeTweetEntities(true);
 			}
 			
-			twitter.setIncludeTweetEntities(true);
-		}
-		
-		// check what we are asked to synch
-		int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);		
-	//	Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
-		
-		switch(synchRequest){
-		
-		case SYNCH_TRANSACTIONAL:			
-		    synchTransactional();
-			break;
-		case SYNCH_LOGIN:
-			synchLogin();
-			break;
-		case SYNCH_VERIFY:
-			synchVerify();
-			break;
-		case SYNCH_ALL:
-			TwitterAlarm.releaseWakeLock();
-			Log.i(TAG, "SYNCH_ALL");
-			synchTransactional();
-			if (!intent.hasExtra("isLogin"))
+			// check what we are asked to synch
+			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);		
+			//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+			
+			switch(synchRequest){
+			
+			case SYNCH_TRANSACTIONAL:			
+			    synchTransactional();
+				break;
+			case SYNCH_LOGIN:
+				synchLogin();
+				break;
+			case SYNCH_VERIFY:
+				synchVerify();
+				break;
+			case SYNCH_ALL:
+				TwitterAlarm.releaseWakeLock();
+				Log.i(TAG, "SYNCH_ALL");
+				synchTransactional();
+				if (!intent.hasExtra("isLogin"))
+					synchTimeline(intent.getBooleanExtra(FORCE_FLAG, false));
+				else {
+					synchFriends();
+					synchFollowers();
+				}
+				synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
+				synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));	
+				synchMessages();
+				break;
+			case SYNCH_TIMELINE:
 				synchTimeline(intent.getBooleanExtra(FORCE_FLAG, false));
-			else {
+				break;
+			case SYNCH_MENTIONS:
+				synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
+				break;
+			case SYNCH_FAVORITES:
+				Log.i(TAG, "SYNCH_FAVORITES");
+				synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));
+				break;
+			case SYNCH_FRIENDS:
+				synchFriends();
+				break;
+			case SYNCH_FOLLOWERS:
+				synchFollowers();
+				break;
+			case SYNCH_FRIENDS_AND_FOLLOWERS:
 				synchFriends();
 				synchFollowers();
-			}
-			synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
-			synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));	
-			synchMessages();
-			break;
-		case SYNCH_TIMELINE:
-			synchTimeline(intent.getBooleanExtra(FORCE_FLAG, false));
-			break;
-		case SYNCH_MENTIONS:
-			synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
-			break;
-		case SYNCH_FAVORITES:
-			Log.i(TAG, "SYNCH_FAVORITES");
-			synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));
-			break;
-		case SYNCH_FRIENDS:
-			synchFriends();
-			break;
-		case SYNCH_FOLLOWERS:
-			synchFollowers();
-			break;
-		case SYNCH_FRIENDS_AND_FOLLOWERS:
-			synchFriends();
-			synchFollowers();
-			break;
-		case SYNCH_SEARCH_TWEETS:
-			if(intent.getStringExtra("query") != null){
-				synchSearchTweets(intent.getStringExtra("query"));
-			}
-			break;
-		case SYNCH_USER:
-			if(intent.hasExtra("rowId")){
-				long rowId = intent.getLongExtra("rowId", 1);
-				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);
-				Cursor c = null;
-				try{
-					c = getContentResolver().query(queryUri, null, null, null, null);
-
-					if(c.getCount() == 0){
-						Log.w(TAG, "Synch Tweet: Tweet not found " + rowId);
-						break;
-					}
-					c.moveToFirst();
-					synchUser(c,false);
-				} catch(Exception ex) {
-					Log.e(TAG, "Exception while querying user for synch " + ex);
-				} finally {
-					if(c!=null) c.close();
+				break;
+			case SYNCH_SEARCH_TWEETS:
+				if(intent.getStringExtra("query") != null){
+					synchSearchTweets(intent.getStringExtra("query"));
 				}
-			} 
-			break;
-		case SYNCH_TWEET:			
-			if(intent.hasExtra("rowId")){
-				// get the flags
-				long rowId = intent.getLongExtra("rowId", -1);
-				
-				if (rowId >= 0) {
-					
-					Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+rowId);
-					Cursor c = null;					
-					c = getContentResolver().query(queryUri, null, null, null, null);
-		
-					if(c.getCount() == 1){
+				break;
+			case SYNCH_USER:
+				if(intent.hasExtra("rowId")){
+					long rowId = intent.getLongExtra("rowId", 1);
+					Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);
+					Cursor c = null;
+					try{
+						c = getContentResolver().query(queryUri, null, null, null, null);
+
+						if(c.getCount() == 0){
+							Log.w(TAG, "Synch Tweet: Tweet not found " + rowId);
+							break;
+						}
 						c.moveToFirst();
-						synchTweet(c);
-					}				
+						synchUser(c,false);
+					} catch(Exception ex) {
+						Log.e(TAG, "Exception while querying user for synch " + ex);
+					} finally {
+						if(c!=null) c.close();
+					}
+				} 
+				break;
+			case SYNCH_TWEET:			
+				if(intent.hasExtra("rowId")){
+					// get the flags
+					long rowId = intent.getLongExtra("rowId", -1);
+					
+					if (rowId >= 0) {
 						
-					if(c!=null) c.close();					
-				}				
+						Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+rowId);
+						Cursor c = null;					
+						c = getContentResolver().query(queryUri, null, null, null, null);
+			
+						if(c.getCount() == 1){
+							c.moveToFirst();
+							synchTweet(c);
+						}				
+							
+						if(c!=null) c.close();					
+					}				
+				}
+				break;
+			case SYNCH_DMS:
+				synchMessages();
+				break;
+			case SYNCH_DM:
+				if(intent.getLongExtra("rowId", 0) != 0){
+					synchMessage(intent.getLongExtra("rowId", 0));
+				}
+				break;
+			case SYNCH_USERTWEETS:
+				if(intent.getStringExtra("screenname") != null){
+					synchUserTweets(intent.getStringExtra("screenname"));
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Exception: Unknown synch request");
 			}
-			break;
-		case SYNCH_DMS:
-			synchMessages();
-			break;
-		case SYNCH_DM:
-			if(intent.getLongExtra("rowId", 0) != 0){
-				synchMessage(intent.getLongExtra("rowId", 0));
-			}
-			break;
-		case SYNCH_USERTWEETS:
-			if(intent.getStringExtra("screenname") != null){
-				synchUserTweets(intent.getStringExtra("screenname"));
-			}
-			break;
-		default:
-			throw new IllegalArgumentException("Exception: Unknown synch request");
+
+			return START_STICKY;
 		}
 
-		return START_STICKY;
+		
 	}
 	
 	private void synchTransactional() {
@@ -258,6 +262,11 @@ public class TwitterService extends Service {
 		@Override
 		public void uncaughtException(Thread t, Throwable e) {		
 			 Log.e(TAG, "error ", e);
+			 
+			    TwitterService.this.stopSelf();
+				AlarmManager mgr = (AlarmManager) LoginActivity.getInstance().getSystemService(Context.ALARM_SERVICE);
+				mgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 500, LoginActivity.getRestartIntent());
+				System.exit(2);
 		}
 	}
 
@@ -453,7 +462,7 @@ public class TwitterService extends Service {
 	 * Checks the transactional flags of the user with the given _id and performs the corresponding actions
 	 */
 	private void synchUser(Cursor c, boolean force) {
-		Log.i(TAG, "SYNCH_USER");
+		Log.d(TAG, "SYNCH_USER");
 		// get the flags
 		
 		int flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
@@ -884,7 +893,7 @@ public class TwitterService extends Service {
 	private int updateTweet(ContentValues cv){			
 				
 		Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
-		Uri resultUri = getContentResolver().insert(insertUri, cv);
+		Uri resultUri = getContentResolver().insert(insertUri, cv);		
 		return new Integer(resultUri.getLastPathSegment());		
 		
 	}
@@ -1533,6 +1542,7 @@ public class TwitterService extends Service {
 					}
 
 				}
+				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 				// trigger the user synch (for updating the profile images)
 				new SynchTransactionalUsersTask().execute(false);
 

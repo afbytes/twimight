@@ -135,7 +135,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		// if we just got logged in, we load the timeline
 				Intent i = getIntent();
 				if(i.hasExtra("filter_request")) {
-					setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));
+					Log.i(TAG,"filter request: " + i.getIntExtra("filter_request", SHOW_TIMELINE));
+					setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));				
 					i.removeExtra("filter_request");
 				} else if(i.hasExtra("login")){
 					i.removeExtra("login");
@@ -145,7 +146,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				}
 		
 		Log.v(TAG, "created");		
-	   // Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+	    Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
 
 
 	}
@@ -178,7 +179,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onPause(){
-		
+		Log.w(TAG,"onPause called");
 		super.onPause();
 				
 	}
@@ -189,7 +190,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		Log.w(TAG,"onDestroy called");
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
@@ -202,6 +203,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		if(c!=null) c.close();
 				
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
+		
+		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
+			Toast.makeText(this, "Warning: The disaster mode is still running in the background ", Toast.LENGTH_LONG).show();
+
 
 	}
 
@@ -212,12 +217,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile");
-		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages");
-		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings");				
-		menu.add(1,OPTIONS_MENU_PAIR, 3, "Pair");				 
-		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About");
-		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout");
+		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
+		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
+		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
+		menu.add(1,OPTIONS_MENU_PAIR, 3, "Pair").setIcon(R.drawable.ic_menu_mark);				 
+		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About").setIcon(R.drawable.ic_menu_info_details);
+		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 
 		return true;
 	}
@@ -356,6 +361,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 			break;
 		case SHOW_MENTIONS: 
+			Log.i(TAG,"show mentions");
 			b = mentionsButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);

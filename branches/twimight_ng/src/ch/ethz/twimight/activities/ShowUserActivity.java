@@ -58,6 +58,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	private Button messageButton;
 	private Button showFollowersButton;
 	private Button showFriendsButton;
+	private Button showDisPeersButton;
 	private LinearLayout followInfo;
 	private LinearLayout unfollowInfo;
 	private Button showUserTweetsButton;
@@ -89,6 +90,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		unfollowInfo = (LinearLayout) findViewById(R.id.showUserTounfollow);
 		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
 		showFriendsButton = (Button) findViewById(R.id.showUserFriends);
+		showDisPeersButton = (Button) findViewById(R.id.showUserDisasterPeers);
 		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
 
 		if(getIntent().hasExtra("rowId")){
@@ -168,7 +170,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 				try {
 					c.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
-					Log.e(TAG,"error unregistering observer",ex);
+					//Log.e(TAG,"error unregistering observer",ex);
 				}
 		}
 	}
@@ -291,8 +293,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		showFollowersButton.setOnClickListener(new OnClickListener(){
 
 			@Override
-			public void onClick(View v) {
-				Log.i(TAG, "Show followers");
+			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
 				i.putExtra("filter", ShowUserListActivity.SHOW_FOLLOWERS);
 				startActivity(i);
@@ -306,11 +307,22 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		showFriendsButton.setOnClickListener(new OnClickListener(){
 
 			@Override
-			public void onClick(View v) {
-				Log.i(TAG, "Show friends");
+			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
 				i.putExtra("filter", ShowUserListActivity.SHOW_FRIENDS);
 				startActivity(i);
+			}
+
+		});
+		
+		showDisPeersButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				
+				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
+				i.putExtra("filter", ShowUserListActivity.SHOW_DISASTER_PEERS);
+				startActivity(i);
+
 			}
 
 		});

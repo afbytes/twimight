@@ -34,11 +34,11 @@ public class ScanningAlarm extends BroadcastReceiver {
 	static final String TAG = "ScanningAlarm"; /** for logging */	
 	
 	private static WakeLock wakeLock; 
-	private static final String WAKE_LOCK = "ScanningWakeLock";
+	private static final String WAKE_LOCK = "ScanningAlarmWakeLock";
 
 	public static final String FORCE_SCAN = "force_scan"; /** To force a scan, put this extra in the starting intent */
 	public static final String FORCE_SCAN_DELAY = "force_scan_delay"; /** To force a scan after a given delay, put this extra in the starting intent */	
-	
+	public static ScanningAlarm instance = null;
 
 	/**
 	 * This constructor is called the alarm manager.
@@ -50,21 +50,26 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 */
 
 	public ScanningAlarm(Context context, long delay, boolean forceScan) {						
-			
+		
+		if (instance == null) {			
 			// if Bluetooth is already enabled, start scanning. otherwise enable it now.
 			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				setBluetoothInitialState(context, true);
-				scheduleScanning(context,0);
-			} else {
-				enableBluetooth(context);
-			}			
+				
+				scheduleScanning(context,System.currentTimeMillis());
+			} 
 			
 			Log.d(TAG, "instantiated"); 
+		} else {
+			
+			//scheduleScanning(context,0);
+		}
+			
+			
 		
 	}	
 	
 		
-		private void setBluetoothInitialState(Context context, boolean b) {
+		public static void setBluetoothInitialState(Context context, boolean b) {
 			
 			SharedPreferences.Editor prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 			prefEditor.putBoolean("wasBlueEnabled", b);
@@ -82,7 +87,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			releaseWakeLock();
 			
 			PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-			wakeLock = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK , WAKE_LOCK); 
+			wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK , WAKE_LOCK); 
 			wakeLock.acquire();
 		}
 		
@@ -107,14 +112,14 @@ public class ScanningAlarm extends BroadcastReceiver {
 			
 			Intent intent = new Intent(context, ScanningAlarm.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			alarmMgr.cancel(pendingIntent);
-			BluetoothAdapter.getDefaultAdapter().disable();
+			instance = null;
+			alarmMgr.cancel(pendingIntent);			
 			releaseWakeLock();			
 			
 			if (getBluetoothInitialState(context) == false) {
 				BluetoothAdapter.getDefaultAdapter().disable();
-			}
+			}			
+			
 		}
 
 	private static boolean getBluetoothInitialState(Context context) {
@@ -126,9 +131,9 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 	/**
 	 * Schedules a Scanning communication
-	 * @param delay after how many milliseconds (0 for immediately)?
+	 * @param time after how many milliseconds (0 for immediately)?
 	 */
-	public static void scheduleScanning(Context context, long time) {		
+	public void scheduleScanning(Context context, long time) {		
 		
 				
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
@@ -140,30 +145,16 @@ public class ScanningAlarm extends BroadcastReceiver {
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			alarmMgr.cancel(pendingIntent);
 			
-			alarmMgr.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
+			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, time, Constants.SCANNING_INTERVAL+ delay, pendingIntent);
 			Log.i(TAG, "alarm set");
 		} 
 	}
-	
 
-	
-
-	
-	/**
-	 * Enable Bluetooth for scanning
-	 */
-	protected void enableBluetooth(Context context) {
-		
-		// as long as we are in disaster mode we turn bluetooth on if we find it off (is this evil?)
-		BluetoothAdapter.getDefaultAdapter().enable();	
-		
-		scheduleScanning(context,System.currentTimeMillis()+6000);
-		
-	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.i(TAG, "requesting scanning");		
+		Log.d(TAG, "requesting scanning");		
 		getWakeLock(context);
 		
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {

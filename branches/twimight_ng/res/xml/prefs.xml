@@ -14,7 +14,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
 		<CheckBoxPreference android:title="Use Location" android:key="prefUseLocation" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to geo-tag your Tweets by default."></CheckBoxPreference>
-		<CheckBoxPreference android:title="Run at Boot" android:key="prefRunAtBoot" android:summary="Tap to start automatic updates when system boots" android:defaultValue="true" android:enabled="true" android:selectable="true"/>
+		<CheckBoxPreference android:title="Updates in Background" android:key="prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/>
 	</PreferenceCategory>
     
    	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">

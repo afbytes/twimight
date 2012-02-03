@@ -24,6 +24,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -39,6 +40,7 @@ import ch.ethz.twimight.activities.ShowUserActivity.UserContentObserver;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.TweetTagHandler;
 
 /**
@@ -177,6 +179,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				@Override
 				public void onClick(View v) {
 					showRetweetDialog();
+					retweetButton.setVisibility(Button.GONE);
 				}
 				
 			});
@@ -193,6 +196,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 					@Override
 					public void onClick(View v) {
 						showDeleteDialog();
+						
 					}
 				});
 				
@@ -206,12 +210,16 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	
 		// Reply button: we show it only if we have a Tweet ID!
 		replyButton = (Button) findViewById(R.id.showTweetReply);
-		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0){
+		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0 || 
+				PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getBaseContext(), NewTweetActivity.class);
-					i.putExtra("isReplyTo", c.getLong(c.getColumnIndex(Tweets.COL_TID)));
+					if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0)
+						i.putExtra("isReplyTo", c.getLong(c.getColumnIndex(Tweets.COL_TID)));
+					else
+						i.putExtra("isReplyTo", -1);
 					i.putExtra("text", "@"+c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))+ " ");
 					startActivity(i);
 				}
@@ -405,7 +413,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				try {
 					c.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
-					Log.e(TAG,"error unregistering observer",ex);
+					//Log.e(TAG,"error unregistering observer",ex);
 				}
 		}
 		

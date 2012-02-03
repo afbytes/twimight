@@ -205,7 +205,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_NAME + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
+					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
 				c = database.rawQuery(sql, null);
@@ -318,9 +318,9 @@ public class TweetsContentProvider extends ContentProvider {
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				
 				// start synch service with a synch timeline request
-				i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
-				getContext().startService(i);
+				//i = new Intent(TwitterService.SYNCH_ACTION);
+				//i.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
+				//getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_ALL:
 				Log.d(TAG, "Query TIMELINE_ALL");
@@ -374,7 +374,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_USERS + " " 
+					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
 					+ "WHERE "+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+" "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -653,8 +653,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c.close();
 				// if none of the before was true, this is a proper new tweet which we now insert
 				try {
-					insertUri = insertTweet(values);
-					getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					insertUri = insertTweet(values);					
 				} catch (Exception ex) {
 					Log.e(TAG,"exception while inserting", ex);
 				}
@@ -701,20 +700,22 @@ public class TweetsContentProvider extends ContentProvider {
 					} else {
 						values.put(Tweets.COL_ISVERIFIED, 0);
 					}
-					// if we are in disaster mode, we give the content provider half a 
+					// if we are in disaster mode, we give the content provider a 
 					// second to insert the tweet and then schedule a scanning operation
 					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-						new ScanningAlarm(getContext(), 500L, true);					
+						  //ScanningAlarm.scheduleScanning(getContext(),System.currentTimeMillis() +2000L);		 			
 						
 					}
 				} else {
+					
 					String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
 					// check validity
 					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){
+						
 						// check signature
 						String signature = values.getAsString(Tweets.COL_SIGNATURE);
 						String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
-						if(km.checkSinature(cm.parsePem(certificate), signature, text)){
+						if(km.checkSinature(cm.parsePem(certificate), signature, text)){							
 							values.put(Tweets.COL_ISVERIFIED, 1);
 						} else {
 							values.put(Tweets.COL_ISVERIFIED, 0);
@@ -730,7 +731,7 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 				c.close();
 				insertUri = insertTweet(values);
-				
+				//getContext().getContentResolver().notifyChange(uri, null);
 				// delete everything that now falls out of the buffer
 				purgeTweets(values);
 				break;
@@ -748,13 +749,13 @@ public class TweetsContentProvider extends ContentProvider {
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
-		Log.i(TAG, "Update TWEET");
+		Log.d(TAG, "Update TWEET");
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
 			getContext().getContentResolver().notifyChange(uri, null);
 			//getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-			Log.i(TAG, "success");
+			Log.d(TAG, "success");
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
 				
@@ -872,7 +873,7 @@ public class TweetsContentProvider extends ContentProvider {
 		String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
 		
 		String userId;
-		if(!cv.containsKey(Tweets.COL_USER) | (cv.getAsString(Tweets.COL_USER)==null)){
+		if(!cv.containsKey(Tweets.COL_USER) || (cv.getAsString(Tweets.COL_USER)==null)){
 			userId = LoginActivity.getTwitterId(getContext()).toString();
 		} else {
 			userId = cv.getAsString(Tweets.COL_USER);
@@ -896,7 +897,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	private Uri insertTweet(ContentValues values){
 	//	if(checkValues(values)){
-			
+			Log.i(TAG,"inside insert Tweet");
 			if(!values.containsKey(Tweets.COL_CREATED)){
 				// set the current timestamp
 				values.put(Tweets.COL_CREATED, System.currentTimeMillis());
@@ -927,23 +928,28 @@ public class TweetsContentProvider extends ContentProvider {
 						// notify user
 						notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 					} else
-						Log.i(TAG, "notifications skipped since it is the first login");
+						Log.d(TAG, "notifications skipped since it is the first login");
 									
 				} else {
 					values.put(Tweets.COL_MENTIONS, 0);				
 				}
 			}		
 			try {
-				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);			
-				
+				Log.d(TAG,values.getAsString(Tweets.COL_SCREENNAME));
+				Log.d(TAG,"" + values.getAsLong(Tweets.COL_USER));
+				Log.d(TAG,"" + values.getAsLong(Tweets.COL_DISASTERID));
+				Log.d(TAG,values.getAsString(Tweets.COL_TEXT));
+				long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);				
+					
 				if(rowId >= 0){
+					Log.i(TAG,"rowId:" + rowId);			
 					Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 					return insertUri;
 				} else {
 					 return null; 
 				}
 				
-			} catch (SQLException ex) {
+			} catch (Exception ex) {
 				Log.e(TAG,"could not insert tweet in the table...maybe already stored",ex);
 				return null;
 			}

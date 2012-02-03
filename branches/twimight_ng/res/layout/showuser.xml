@@ -52,31 +52,34 @@
 
 		<LinearLayout android:id="@+id/showUserTweetsButtons"
 			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="20dp">
+			android:layout_height="wrap_content" android:layout_marginTop="25dp">
 
 			<Button android:id="@+id/showUserTweetsButton"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="Recent Tweets" android:layout_marginRight="20dp"
-				android:visibility="visible" />
+				android:visibility="visible" android:textSize="13dp" android:minHeight="30dp"/>
 		</LinearLayout>
 		
 				<LinearLayout android:id="@+id/showLocalUserButtons"
 			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="20dp"
-			android:visibility="gone">
+			android:layout_height="wrap_content" android:layout_marginTop="25dp" android:visibility="gone">
 			<Button android:id="@+id/showUserFollowers"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="Followers" android:layout_marginRight="20dp" 
-				android:visibility="visible"/>
+				android:visibility="visible" android:textSize="14dp" android:minHeight="30dp"/>
 			<Button android:id="@+id/showUserFriends"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="Friends" android:layout_marginRight="20dp" 
-				android:visibility="visible"/>
+				android:visibility="visible" android:textSize="14dp" android:minHeight="30dp"/>
+			<Button android:id="@+id/showUserDisasterPeers"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="Disaster Peers" android:layout_marginRight="20dp" 
+				android:visibility="visible" android:textSize="14dp" android:minHeight="30dp"/>
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showUserButtons"
 			android:orientation="vertical" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="20dp"
+			android:layout_height="wrap_content" android:layout_marginTop="25dp"
 			android:visibility="visible">
 			<LinearLayout android:id="@+id/showUserTounfollow"
 				android:orientation="horizontal" android:layout_width="match_parent"
@@ -109,14 +112,14 @@
 				android:layout_marginTop="20dp">
 				<Button android:id="@+id/showUserFollow"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="Follow" android:layout_marginRight="20dp" />
+					android:text="Follow" android:layout_marginRight="20dp" android:textSize="13dp" android:minHeight="30dp"/>
 				<Button android:id="@+id/showUserMention"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="Mention" android:layout_marginRight="20dp" />
+					android:text="Mention" android:layout_marginRight="20dp" android:textSize="13dp" android:minHeight="30dp"/>
 				<Button android:id="@+id/showUserMessage"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:layout_width="wrap_content" android:layout_height="30dp"
 					android:text="Direct Message" android:layout_marginRight="20dp"
-					android:visibility="visible" />
+					android:visibility="visible" android:textSize="13dp" android:minHeight="30dp" android:maxHeight="30dp"/>
 			</LinearLayout>
 		</LinearLayout>
 
