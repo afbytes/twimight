@@ -146,18 +146,18 @@
 			<ImageButton android:id="@+id/showTweetFavorite"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/star_big_off" android:background="@color/transparent"
-				android:layout_marginRight="20dp" />
+				android:layout_marginRight="25dp"/>
 			<ImageButton android:id="@+id/showTweetDelete"
 				android:layout_width="wrap_content" android:src="@android:drawable/ic_menu_delete" android:background="@color/transparent"
-				android:layout_marginRight="20dp" android:layout_height="50dp" android:visibility="visible"/>			
+				android:layout_marginRight="25dp" android:layout_height="50dp" android:visibility="visible"/>			
 			<Button android:id="@+id/showTweetRetweet"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="RT"
-				android:layout_marginRight="20dp" />
+				android:layout_marginRight="25dp" android:minWidth="30dp" android:minHeight="25dp"/>
 			<Button android:id="@+id/showTweetReply"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="Reply"
-				android:layout_marginRight="20dp" />
+				android:layout_marginRight="20dp" android:minHeight="25dp" android:minWidth="40dp"/>
 
 		</LinearLayout>
 

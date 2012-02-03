@@ -6,7 +6,7 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="2" android:versionName="0.7preview">
+	package="ch.ethz.twimight" android:versionCode="2" android:versionName="0.8.1 preview">
 	<uses-sdk android:minSdkVersion="10" />
 
 	<application android:icon="@drawable/ic_launcher_twimight"

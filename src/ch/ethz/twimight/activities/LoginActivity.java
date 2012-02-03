@@ -13,8 +13,6 @@
 
 package ch.ethz.twimight.activities;
 
-import java.util.Date;
-
 import junit.framework.Assert;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
@@ -26,6 +24,7 @@ import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -99,6 +98,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	private ProgressDialog progressDialog;
 	private LoginReceiver loginReceiver;
+	private static PendingIntent restartIntent;
+	private static LoginActivity instance = null; /** The single instance of this class */
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -111,7 +112,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		LinearLayout showLoginLogo = (LinearLayout) findViewById(R.id.showLoginLogo);
 		showLoginLogo.setBackgroundResource(R.drawable.about_background);		
-		
+		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
+				new Intent(getIntent()), getIntent().getFlags()));
+		instance = this;
 		
 		// which state are we in?
 		if(hasAccessToken(this) && hasAccessTokenSecret(this) && getTwitterId(this)!=null){
@@ -688,6 +691,27 @@ public class LoginActivity extends Activity implements OnClickListener{
 	}
 	
 	/**
+	 * returns the one instance of this activity
+	 */
+	public static LoginActivity getInstance() {
+		return instance;
+	}
+	
+	/**
+	 * @param restartIntent the restartIntent to set
+	 */
+	public static void setRestartIntent(PendingIntent restartIntent) {
+		LoginActivity.restartIntent = restartIntent;
+	}
+
+	/**
+	 * @return the restartIntent
+	 */
+	public static PendingIntent getRestartIntent() {
+		return restartIntent;
+	}
+	
+	/**
 	 * Listens to login results from the Twitter service (verify credentials)
 	 * @author thossmann
 	 *
@@ -707,7 +731,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	    	        		} else {
 	    	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
 	    	        			
-	    	        			//finish();
+	    	        			
 	    	        		}
 	    	        	}
 	    	        }

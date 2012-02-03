@@ -13,10 +13,6 @@
 
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.util.Constants;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +22,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -39,6 +36,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * The activity to write a new tweet.
@@ -88,8 +89,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 
 			@Override
 			public void onClick(View v) {
-				sendTweet();
-				finish();
+				new SendTweetTask().execute();				
 			}
 			
 		});
@@ -237,47 +237,71 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		unbindDrawables(findViewById(R.id.showNewTweetRoot));
 	}
 	
-	/**
+	/**	
 	 * Checks whether we are in disaster mode and inserts the content values into the content provider.
+	 *
+	 * @author pcarta
+	 *
 	 */
-	private void sendTweet(){
-		Log.i(TAG, "send tweet!");
-		// if no connectivity, notify user that the tweet will be send later
+	private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		
-			Uri insertUri = null;
-			ContentValues cv = createContentValues(); 
-			
-			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){				
-
-				// our own tweets go into the my disaster tweets buffer
-				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
-
-				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
-															+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
-			} else {				
+		Uri insertUri = null;
+		
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			boolean result=false;
+		
+			Log.i(TAG, "send tweet!");
+			// if no connectivity, notify user that the tweet will be send later		
 				
-				// our own tweets go into the timeline buffer
-				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
+				ContentValues cv = createContentValues(); 
+				
+				if(PreferenceManager.getDefaultSharedPreferences(NewTweetActivity.this).getBoolean("prefDisasterMode", false) == true){				
 
-				insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
-															Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
-				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-					Toast.makeText(this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_SHORT).show();
+					// our own tweets go into the my disaster tweets buffer
+					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
+
+					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+																+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				} else {				
+					
+					// our own tweets go into the timeline buffer
+					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
+
+					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
+																Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					//getContentResolver().notifyChange(insertUri, null);
+					ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+						result=true;
+					}
 				}
-			}
 
+					
+				return result;
+			
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result){
+			if (result)
+				Toast.makeText(NewTweetActivity.this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_SHORT).show();
+			
 			if(insertUri != null){
 				// schedule the tweet for uploading to twitter
-				Intent i = new Intent(this, TwitterService.class);
+				Intent i = new Intent(NewTweetActivity.this, TwitterService.class);
 				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
 				i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
 				startService(i);
-			}		
-		
-		
+			}
+			finish();
+		}
 	}
-
+	
+	
+	
 	/**
 	 * Prepares the content values of the tweet for insertion into the DB.
 	 * @return
@@ -288,7 +312,9 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
 		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
-		tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
+		if (isReplyTo > 0) {
+			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
+		}
 		
 		// we mark the tweet for posting to twitter
 		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);

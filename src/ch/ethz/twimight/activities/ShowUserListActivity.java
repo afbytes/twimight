@@ -40,9 +40,11 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	private ListView userListView;
 	private Button friendsButton;
 	private Button followersButton;
+	private Button disPeersButton;
 		
 	static final int SHOW_FRIENDS = 1;
 	static final int SHOW_FOLLOWERS = 2;
+	static final int SHOW_DISASTER_PEERS = 3;
 
 	Cursor c;
 	private TwitterUserAdapter adapter;
@@ -74,6 +76,15 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 			@Override
 			public void onClick(View v) {
 				setFilter(SHOW_FOLLOWERS);
+			}
+		});
+		
+		disPeersButton = (Button) findViewById(R.id.headerBarDisasterPeersButton);
+		disPeersButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				setFilter(SHOW_DISASTER_PEERS);
 			}
 		});
 
@@ -178,6 +189,12 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 			currentFilter=SHOW_FOLLOWERS;
 
 			break;
+		case SHOW_DISASTER_PEERS:
+			b = disPeersButton;
+			c = getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
+					+ "/" + TwitterUsers.TWITTERUSERS_DISASTER), null, null, null, null);
+			currentFilter=SHOW_DISASTER_PEERS;
+			break;
 		default:
 			break;
 		}
@@ -212,6 +229,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	private void resetButtons(){
 		friendsButton.setEnabled(true);
 		followersButton.setEnabled(true);
+		disPeersButton.setEnabled(true);
 	}
 	
 }
