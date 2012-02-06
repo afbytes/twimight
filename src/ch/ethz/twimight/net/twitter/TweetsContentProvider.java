@@ -242,8 +242,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
-					+ "WHERE  " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' OR " + DBOpenHelper.TABLE_USERS + "." 
-						+ TwitterUsers.COL_SCREENNAME + " LIKE '" + where + "' "
+					+ "WHERE  " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
@@ -897,7 +896,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	private Uri insertTweet(ContentValues values){
 	//	if(checkValues(values)){
-			Log.i(TAG,"inside insert Tweet");
+			
 			if(!values.containsKey(Tweets.COL_CREATED)){
 				// set the current timestamp
 				values.put(Tweets.COL_CREATED, System.currentTimeMillis());
@@ -935,14 +934,11 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 			}		
 			try {
-				Log.d(TAG,values.getAsString(Tweets.COL_SCREENNAME));
-				Log.d(TAG,"" + values.getAsLong(Tweets.COL_USER));
-				Log.d(TAG,"" + values.getAsLong(Tweets.COL_DISASTERID));
-				Log.d(TAG,values.getAsString(Tweets.COL_TEXT));
-				long rowId = database.insert(DBOpenHelper.TABLE_TWEETS, null, values);				
+				
+				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);				
 					
 				if(rowId >= 0){
-					Log.i(TAG,"rowId:" + rowId);			
+							
 					Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 					return insertUri;
 				} else {

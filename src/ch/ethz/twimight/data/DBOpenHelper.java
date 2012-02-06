@@ -40,7 +40,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 
-	private static final int DATABASE_VERSION = 38;
+	private static final int DATABASE_VERSION = 39;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -73,7 +73,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
 			+ "_id integer primary key autoincrement not null, "
 			+ Tweets.COL_TEXT + " string not null, "
-			+ Tweets.COL_USER + " bigint not null, "
+			+ Tweets.COL_USER + " bigint, "
 			+ Tweets.COL_SCREENNAME+ " string, "
 			+ Tweets.COL_TID + " bigint unique, "
 			+ Tweets.COL_REPLYTO + " bigint, "
@@ -84,8 +84,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_MENTIONS + " int, "
 			+ Tweets.COL_LAT + " real, "
 			+ Tweets.COL_LNG + " real, "
-			+ Tweets.COL_CREATED + " integer not null, "
-			+ Tweets.COL_RECEIVED + " integer not null, "
+			+ Tweets.COL_CREATED + " integer, "
+			+ Tweets.COL_RECEIVED + " integer, "
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "
@@ -119,6 +119,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_ISFOLLOWER + " integer, "
 			+ TwitterUsers.COL_ISFRIEND + " integer, "
 			+ TwitterUsers.COL_ISDISASTER_PEER + " integer default 0, "
+			+ TwitterUsers.COL_IS_SEARCH_RESULT + " integer default 0, "			
 			+ TwitterUsers.COL_FOLLOWREQUEST + " integer, "
 			+ TwitterUsers.COL_PROFILEIMAGE + " blob,"
 			+ TwitterUsers.COL_LASTUPDATE + " integer,"

@@ -278,7 +278,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			startActivity(i);    
 			break;
 		case OPTIONS_MENU_PAIR:
-			//TODO: handle pairing
+			Toast.makeText(this, "Feature not yet implemented, it will be available soon!", Toast.LENGTH_SHORT).show();
+
 			break;
 		default:
 			return false;

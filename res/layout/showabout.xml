@@ -10,13 +10,15 @@
 	android:layout_height="fill_parent" 
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/showAboutRoot">
+
 <ImageView
     android:id="@+id/showAboutLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:src="@drawable/bird"
-    android:orientation="vertical" 
-    android:layout_gravity="center">
+    android:layout_width="300dp"
+    android:layout_height="300dp"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    android:src="@drawable/bird" android:layout_marginLeft="10dp">
+
 </ImageView>
 <LinearLayout
 	    android:id="@+id/showAboutLogo"
@@ -38,7 +40,7 @@
 
 		<TextView android:id="@+id/textCopy" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_gravity="center"
-			android:text="(c) CSG, ETH Zurich, 2011" android:layout_marginTop="10dp" android:textColor="@color/black"/>
+			android:text="(c) CSG, ETH Zurich, 2012" android:layout_marginTop="10dp" android:textColor="@color/black"/>
 
 		<LinearLayout android:id="@+id/linearLayout1"
 			android:layout_width="match_parent" android:layout_height="wrap_content"

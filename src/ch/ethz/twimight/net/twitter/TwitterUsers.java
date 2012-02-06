@@ -73,6 +73,10 @@ public class TwitterUsers implements BaseColumns {
 	 */
 	public static final String TWITTERUSERS_DISASTER = "disaster_peers";
 	/**
+	 * Selecting users for the searching operation
+	 */
+	public static final String TWITTERUSERS_SEARCH = "search_users";
+	/**
 	 * Only the screenname of a user
 	 */
 	public static final String TWITTERUSERS_SCREENNAME = null;
@@ -105,6 +109,7 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_ISFOLLOWER = "following"; /** is the user following us? */
 	public static final String COL_ISFRIEND = "follow"; /** are we following the user? */
 	public static final String COL_ISDISASTER_PEER = "disaster_peer"; /** have we met the user in disaster mode */
+	public static final String COL_IS_SEARCH_RESULT = "search_result"; /** have we met the user in disaster mode */
 	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
 	public static final String COL_PROFILEIMAGE = "profile_image";
 	
