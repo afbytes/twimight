@@ -36,6 +36,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,6 +57,7 @@ import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
  * Logging the user in and out.
@@ -481,6 +483,10 @@ public class LoginActivity extends Activity implements OnClickListener{
 		RevocationDBHelper rm = new RevocationDBHelper(context);
 		rm.open();
 		rm.flushRevocationList();
+		
+		SearchRecentSuggestions suggestions = new SearchRecentSuggestions(context,
+                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
+		suggestions.clearHistory();
 		
 		// Start login activity
 		Intent intent = new Intent(context, LoginActivity.class);

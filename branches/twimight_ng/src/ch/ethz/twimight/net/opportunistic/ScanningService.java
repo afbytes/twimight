@@ -276,7 +276,7 @@ public class ScanningService extends Service{
 				if(msg.obj.toString().equals("####CLOSING_REQUEST####")) {
 					//state = CLOSING_REQ_RECEIVED; 
 					Log.i(TAG,"closing request received, connection shutdown");
-					//bluetoothHelper.start();
+					bluetoothHelper.start();
 					break;
 				}
 				

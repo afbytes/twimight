@@ -91,6 +91,7 @@ public class TwitterService extends Service {
 	public static final int SYNCH_VERIFY = 15;
 	public static final int SYNCH_TRANSACTIONAL = 16;
 	public static final int SYNCH_FRIENDS_AND_FOLLOWERS = 17;
+	public static final int SYNCH_SEARCH_USERS = 18;
 	
 	public static final String FORCE_FLAG = "force";
 	Twitter twitter;
@@ -186,6 +187,11 @@ public class TwitterService extends Service {
 					synchSearchTweets(intent.getStringExtra("query"));
 				}
 				break;
+			case SYNCH_SEARCH_USERS:
+				if(intent.getStringExtra("query") != null){
+					synchSearchUsers(intent.getStringExtra("query"));
+				}
+				break;
 			case SYNCH_USER:
 				if(intent.hasExtra("rowId")){
 					long rowId = intent.getLongExtra("rowId", 1);
@@ -250,6 +256,16 @@ public class TwitterService extends Service {
 		
 	}
 	
+	
+	/**
+	 * Starts a thread to search Twitter users
+	 */
+	private void synchSearchUsers(String query) {
+			Log.i(TAG, "SYNCH_SEARCH USERS");
+			(new SearchUsersTask()).execute(query);
+		
+	}
+
 	private void synchTransactional() {
 		new SynchTransactionalMessagesTask().execute();
 		new SynchTransactionalTweetsTask().execute();
@@ -952,23 +968,26 @@ public class TwitterService extends Service {
 		if (scrName != null) {			
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
+		
 		cv.put(Tweets.COL_TEXT, createSpans(tweet));
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
+		
 		cv.put(Tweets.COL_TID, tweet.getId().longValue());
 		cv.put(Tweets.COL_FAVORITED, tweet.isFavorite());
-
+		
 		// TODO: How do we know if we have retweeted the tweet?
 		cv.put(Tweets.COL_RETWEETED, 0);
 		cv.put(Tweets.COL_RETWEETCOUNT, tweet.retweetCount);
 		if(tweet.inReplyToStatusId != null){
 			cv.put(Tweets.COL_REPLYTO, tweet.inReplyToStatusId.longValue());
 		}
+		
 		cv.put(Tweets.COL_USER, tweet.getUser().getId());
 		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
 		//cv.put(Tweets.COL_FLAGS, 0);
 		cv.put(Tweets.COL_BUFFER, buffer);
-
+		
 		return cv;
 	}
 
@@ -1674,6 +1693,7 @@ public class TwitterService extends Service {
 			
 			try {
 				searchTweets = twitter.search(query);
+				Log.i(TAG,"searchTweets size: " + searchTweets.size());
 			} catch (Exception ex) {
 				this.ex = ex;
 			}
@@ -1701,6 +1721,58 @@ public class TwitterService extends Service {
 		}
 	}
 	
+
+	/**
+	 * Loads user search results from Twitter
+	 * @author pcarta
+	 *
+	 */
+	private class SearchUsersTask extends AsyncTask<String, Void, List<User>> {
+
+		Exception ex;
+
+		@Override
+		protected List<winterwell.jtwitter.User> doInBackground(String... params) {
+			Log.v(TAG, "AsynchTask: SearchTweetsTask");
+
+			SearchableActivity.setLoading(true);
+			
+			String query = params[0];
+
+			List<winterwell.jtwitter.User> searchTweets = null;			
+			
+			try {
+				searchTweets = twitter.users().searchUsers(query);
+			} catch (Exception ex) {
+				this.ex = ex;
+			}
+
+			return searchTweets;
+		}
+
+		@Override
+		protected void onPostExecute(List<winterwell.jtwitter.User> result) {
+
+			SearchableActivity.setLoading(false);
+			
+			// error handling
+			if(ex != null){
+				if(ex instanceof TwitterException.RateLimit){
+					Toast.makeText(getBaseContext(), "Rate limit. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while updating user: " + ex);
+				} else {
+					Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
+					Log.e(TAG, "exception while searching: " + ex);
+				}
+				return;
+			} else
+				 new InsertSearchUsersTask().execute(result);
+		}
+
+		
+	}
+	
+	
 	/**
 	 * Asynchronously insert search result tweets into the respective buffer
 	 * @author thossmann
@@ -1718,10 +1790,16 @@ public class TwitterService extends Service {
 				
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					
+					String ret_screenName = null;
+					if (tweet.getOriginal()!= null) {
+						ret_screenName = tweet.getUser().getScreenName();
+						tweet = tweet.getOriginal();						
+					}
+					
 					if(tweet.getUser() != null){
 						if (tweet.getUser().getScreenName() != null ) {
 							
-							ContentValues cv = getTweetContentValues(tweet, null, Tweets.BUFFER_SEARCH);
+							ContentValues cv = getTweetContentValues(tweet, ret_screenName, Tweets.BUFFER_SEARCH);
 							if (cv != null)
 								updateTweet( cv);						
 							updateUser(tweet.getUser());
@@ -1740,8 +1818,58 @@ public class TwitterService extends Service {
 			return null;
 		}
 	}
+	
+	/**
+	 * Asynchronously inserts list of users obtained by the search op into the DB
+	 * @author pcarta
+	 *
+	 */
+	private class InsertSearchUsersTask extends AsyncTask<List<User>, Void, Void>{
 
+		@Override
+		protected Void doInBackground(List<User>... params) {
 
+			ShowUserListActivity.setLoading(true);
+			
+			List<User> result = params[0];
+
+			if(result==null || result.isEmpty()){
+				return null;
+			}
+
+			ContentValues cv = new ContentValues();
+			for (User user: result) {
+
+				cv= getUserContentValues(user);
+				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());				
+				cv.put(TwitterUsers.COL_IS_SEARCH_RESULT,1);
+
+				try{
+					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);			
+					getContentResolver().insert(insertUri, cv);
+				} catch (Exception ex){
+					Log.e(TAG, "Exception while inserting friends list");
+				}
+
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void params){
+
+			ShowUserListActivity.setLoading(false);
+			
+			// trigger the user synch (for updating the profile images)
+			new SynchTransactionalUsersTask().execute(false);
+
+			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+
+		}
+
+	}
+	
+	
 
 	/**
 	 * Updates the list of friends
@@ -1760,7 +1888,7 @@ public class TwitterService extends Service {
 			List<Number> friendsList = null;
 
 			try {
-				friendsList = twitter.getFriendIDs();
+				friendsList = twitter.users().getFriendIDs();
 
 			} catch (Exception ex) {
 				this.ex = ex;
@@ -1923,7 +2051,7 @@ public class TwitterService extends Service {
 			List<Number> followersList = null;
 
 			try {
-				followersList = twitter.getFollowerIDs();
+				followersList = twitter.users().getFollowerIDs();
 
 			} catch (Exception ex) {
 				this.ex = ex;

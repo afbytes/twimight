@@ -16,4 +16,6 @@
     <string name="app_name">Twimight</string>
     <string name="app_label">Twimight</string>
     <string name="search_hint">Search tweets and users</string>
+    <string name="permDescription">This permission will grant access to content providers. Data might be manipulated by malicious applications</string>
+    
 </resources>

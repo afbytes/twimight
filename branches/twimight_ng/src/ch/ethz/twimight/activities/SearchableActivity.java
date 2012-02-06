@@ -21,12 +21,16 @@ import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
@@ -40,14 +44,21 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 	// Views
 	private ListView searchListView;
+	private Button searchTweetsButton;
+	private Button searchUsersButton;
 
 	private ListAdapter adapter;
 	private Cursor c;
 	private int positionIndex;
 	private int positionTop;
-
+	
+	String query;
+	
+	private static final int SHOW_TWEETS = 1;
+	private static final int SHOW_USERS = 2;
+	
 	/** 
-	 * Called when the activity is first created. 	private Cursor c;
+	 * Called when the activity is first created. 	
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,16 +73,31 @@ public class SearchableActivity extends TwimightBaseActivity{
 		// Get the intent and get the query
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
-			String query = intent.getStringExtra(SearchManager.QUERY);			
+			query = intent.getStringExtra(SearchManager.QUERY);			
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-	        suggestions.saveRecentQuery(query, null);		
+	        suggestions.saveRecentQuery(query, null);
 	        
-	        
-	        new PerformSearchTask().execute(query);		
-
-		Log.v(TAG, "created");
+	        searchUsersButton = (Button) findViewById(R.id.headerBarUsersButton);
+	        searchTweetsButton = (Button) findViewById(R.id.headerBarTweetsButton);		
+	        setFilter(SHOW_TWEETS);	        
+	        	        
+			searchTweetsButton.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					setFilter(SHOW_TWEETS);
+				}
+			});
+			
+					
+			searchUsersButton.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					setFilter(SHOW_USERS);
+				}
+			});
+		
 		} else 
 			finish();
 
@@ -82,8 +108,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onResume(){
-		super.onResume();
-
+		super.onResume();		
 
 		if(positionIndex != 0 | positionTop !=0){
 			if(searchListView!=null) searchListView.setSelectionFromTop(positionIndex, positionTop);
@@ -152,11 +177,56 @@ public class SearchableActivity extends TwimightBaseActivity{
 		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
 	}
 	
+	
 	/**
-	 * Perform the user search to Twitter
+	 * WWhat do we wanna show, tweets or users?
+	 * @param filter
+	 */
+	private void setFilter(int filter){
+		// set all colors to transparent
+		resetButtons();
+		Button b=null;
+		
+		switch(filter) {
+			
+		case SHOW_TWEETS: 
+			b = searchTweetsButton;
+			new PerformSearchTweetsTask().execute(query);	
+			//currentFilter=;
+
+			break;
+			
+		case SHOW_USERS	: 
+			b = searchUsersButton;
+			new PerformSearchUsersTask().execute(query);	
+			//currentFilter=;
+
+			break;
+		
+		default:
+			break;
+		}
+		
+		// style button
+		if(b!=null){
+			b.setEnabled(false);
+		} 	
+	}
+	
+	/**
+	 * Enables all header buttons
+	 */
+	private void resetButtons(){
+		searchTweetsButton.setEnabled(true);
+		searchUsersButton.setEnabled(true);
+		
+	}
+	
+	/**
+	 * Perform the tweets search to Twitter
 	 * @author pcarta
 	 */
-	private class PerformSearchTask extends AsyncTask<String, Void, Void> {			
+	private class PerformSearchTweetsTask extends AsyncTask<String, Void, Void> {			
 
 		@Override
 		protected void onPostExecute(Void result) {
@@ -185,6 +255,47 @@ public class SearchableActivity extends TwimightBaseActivity{
 			
 			// TODO : check input
 						Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
+						c = getContentResolver().query(uri, null, query[0], null, null);
+						startManagingCursor(c); 
+						return null;
+			
+		}
+	}
+	
+	/**
+	 * Perform the user search to Twitter
+	 * @author pcarta
+	 */
+	private class PerformSearchUsersTask extends AsyncTask<String, Void, Void> {			
+
+		@Override
+		protected void onPostExecute(Void result) {
+			
+			adapter = new TwitterUserAdapter(SearchableActivity.this, c);		
+			searchListView.setAdapter(adapter);	
+			
+			// Click listener when the user clicks on a tweet
+			searchListView.setClickable(true);
+			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+					Cursor c = (Cursor) searchListView.getItemAtPosition(position);					
+					Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
+					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
+					startActivity(i);
+					
+				}
+			});
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected Void doInBackground(String... query) {
+			Log.i(TAG, "AsynchTask: PerformSearchTask");
+			
+			// TODO : check input
+						Uri uri = Uri.parse("content://"+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
+								+ "/" + TwitterUsers.TWITTERUSERS_SEARCH);
 						c = getContentResolver().query(uri, null, query[0], null, null);
 						startManagingCursor(c); 
 						return null;

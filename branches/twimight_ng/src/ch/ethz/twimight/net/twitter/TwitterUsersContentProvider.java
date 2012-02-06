@@ -43,6 +43,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	private static final int USERS_FRIENDS = 4;
 	private static final int USERS_FOLLOWERS = 5;
 	private static final int USERS_DISASTER = 6;
+	private static final int USERS_SEARCH = 7;
 	
 	
 	// Here we define all the URIs this provider knows
@@ -55,7 +56,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FRIENDS, USERS_FRIENDS);
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS, USERS_FOLLOWERS);
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_DISASTER, USERS_DISASTER);
+		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_SEARCH, USERS_SEARCH);
 
+		
 	}
 	
 	/**
@@ -132,6 +135,18 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISDISASTER_PEER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				break;
+				
+			case USERS_SEARCH:
+				Log.d(TAG, "Query USERS_SEARCH");
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_SEARCH_RESULT+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
+				
+				// start synch service with a synch followers request
+				i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_SEARCH_USERS);
+				i.putExtra("query", where);
+				getContext().startService(i);
+				break;
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
 		}
 		
@@ -149,7 +164,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
 			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" LIKE '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
 			if(c.getCount()==1){
-				Log.i(TAG, "already have the user, updating...");
+				
 				c.moveToFirst();
 				
 				// we flag the user for updating the profile image if
@@ -196,8 +211,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		
 		if(checkValues(values)){
 			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
-			if(nrRows > 0){
-				Log.i(TAG,"user updated");
+			if(nrRows > 0){				
 				return nrRows;
 			} else {
 				throw new IllegalStateException("Could not insert user into database " + values);
