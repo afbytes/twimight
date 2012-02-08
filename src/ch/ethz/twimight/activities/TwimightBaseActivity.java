@@ -31,8 +31,8 @@ import android.view.Window;
 public class TwimightBaseActivity extends Activity{
 	
 	static TwimightBaseActivity instance;
-	private static final String TAG = "TwimightBaseActivity";
-	
+	private static final String TAG = "TwimightBaseActivity";	
+	public static boolean running= false;
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
 
@@ -43,21 +43,12 @@ public class TwimightBaseActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		running = true;
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		
 	}
 	
-	/**
-	 * on Pause
-	 */
-	@Override
-	public void onPause(){		
-		//instance = null;
-		super.onPause();
-
-	}
-	
+		
 	/**
 	 * on Resume
 	 */
@@ -65,9 +56,34 @@ public class TwimightBaseActivity extends Activity{
 	public void onResume(){
 		super.onResume();
 		instance = this;
-		
-
+		running= true;
 	}
+	
+	
+
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		running=true;
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		running= false;
+	}
+
+	
+	
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		running= false;
+	}
+
 
 	/**
 	 * Called at the end of the Activity lifecycle
@@ -75,6 +91,7 @@ public class TwimightBaseActivity extends Activity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		running=false;
 
 	}
 	

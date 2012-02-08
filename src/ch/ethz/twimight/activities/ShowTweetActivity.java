@@ -572,13 +572,13 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 		@Override
 		public boolean deliverSelfNotifications() {
-			Log.i(TAG, "Test");
+			
 			return true;
 		}
 
 		@Override
 		public void onChange(boolean selfChange) {
-			Log.i(TAG, "TweetContentObserver.onChange( " + selfChange+ ")");
+			
 			super.onChange(selfChange);
 
 			/* close the old cursor

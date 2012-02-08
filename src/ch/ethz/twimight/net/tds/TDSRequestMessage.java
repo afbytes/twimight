@@ -13,9 +13,7 @@
 
 package ch.ethz.twimight.net.tds;
 
-import java.math.BigInteger;
 import java.security.KeyPair;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -25,7 +23,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.location.Location;
-
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 

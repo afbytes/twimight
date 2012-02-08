@@ -73,7 +73,7 @@ public class TDSService extends Service {
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		Log.i(TAG, "started..");
+		Log.d(TAG, "started..");
 
 
 		// Do we have connectivity?
@@ -82,65 +82,67 @@ public class TDSService extends Service {
 			Log.i(TAG, "Error synching: no connectivity");
 			schedulePeriodic(false);
 			return START_NOT_STICKY;
+			
 		} else {
-			Log.i(TAG, "We are connected!");
-		}
-
-		// Create twitter object
-		String token = LoginActivity.getAccessToken(this);
-		String secret = LoginActivity.getAccessTokenSecret(this);
-		if(!(token == null || secret == null) ) {
-			try {
-				tds = new TDSCommunication(getBaseContext(), Constants.CONSUMER_ID, token, secret);
-			} catch (JSONException e) {
-				Log.e(TAG, "error while setting up TDS Communication");
+			// Create twitter object
+			String token = LoginActivity.getAccessToken(this);
+			String secret = LoginActivity.getAccessTokenSecret(this);
+			if(!(token == null || secret == null) ) {
+				try {
+					tds = new TDSCommunication(getBaseContext(), Constants.CONSUMER_ID, token, secret);
+				} catch (JSONException e) {
+					Log.e(TAG, "error while setting up TDS Communication");
+					schedulePeriodic(false);
+					return START_NOT_STICKY;
+				}
+			} else {
+				Log.i(TAG, "Error synching: no access token or secret");
 				schedulePeriodic(false);
+				
 				return START_NOT_STICKY;
 			}
-		} else {
-			Log.i(TAG, "Error synching: no access token or secret");
-			schedulePeriodic(false);
-			
+
+
+			// check what we have to synch
+			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
+			switch(synchRequest){
+			case SYNCH_ALL:				
+				synchAll();
+				break;
+				
+			case SYNCH_ALL_FORCE:				
+				synchAllForce();
+				break;
+				
+			case SYNCH_REVOKE:				
+				synchRevoke();
+				break;
+				
+			case SYNCH_SIGN:				
+				synchSign();
+				break;
+				
+			default:
+				throw new IllegalArgumentException("Exception: Unknown synch request");
+			}
+
 			return START_NOT_STICKY;
 		}
 
-
-		// check what we have to synch
-		int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
-		switch(synchRequest){
-		case SYNCH_ALL:
-			Log.i(TAG, "SYNCH_ALL");
-			synchAll();
-			break;
-		case SYNCH_ALL_FORCE:
-			Log.i(TAG, "SYNCH_ALL_FORCE");
-			synchAllForce();
-			break;
-		case SYNCH_REVOKE:
-			Log.i(TAG, "SYNCH_REVOKE");
-			synchRevoke();
-			break;
-		case SYNCH_SIGN:
-			Log.i(TAG, "SYNCH_SIGN");
-			synchSign();
-			break;
-		default:
-			throw new IllegalArgumentException("Exception: Unknown synch request");
-		}
-
-		return START_NOT_STICKY;
+		
 	}
 
 	/**
 	 * Regular TDS update, if needed
 	 */
 	private void synchAll() {
+		
 		if(needUpdate()){
-			Log.i(TAG, "starting synch task");
+			Log.d(TAG, "starting synch task");
 			new SynchAllTask().execute();
 		} else {
 			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - getLastUpdate(getBaseContext())));
-			Log.i(TAG, "no synch needed");
+			Log.d(TAG, "no synch needed");
 		}
 	}
 	
@@ -351,11 +353,8 @@ public class TDSService extends Service {
 					KeyManager km = new KeyManager(getBaseContext());
 					tds.createCertificateObject(km.getKey(), null);
 					Log.i(TAG, "we need a new certificate");
-				} else {
-					Log.i(TAG, "no need for a new certificate");
-				}
-
-
+				} 
+				
 				// follower key list
 				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
 				tds.createFollowerObject(fm.getLastUpdate());
@@ -373,13 +372,10 @@ public class TDSService extends Service {
 				Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
-			if(!success) {
-				Log.e(TAG, "Error while sending");
-				return false;
-			}
+			if(!success) 				
+				return false;			
 
 			Log.i(TAG, "success");
-
 			try {
 
 				// authentication
@@ -388,11 +384,12 @@ public class TDSService extends Service {
 					Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				Log.i(TAG, "authentication parsed");
-
+				
 
 				// bluetooth
 				List<String> macsList = tds.parseBluetooth();
+				//TODO: remove this line
+				macsList.clear();
 				if(!macsList.isEmpty()){
 					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
 					dbHelper.open();

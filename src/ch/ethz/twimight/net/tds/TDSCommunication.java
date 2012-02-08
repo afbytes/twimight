@@ -80,7 +80,7 @@ public class TDSCommunication {
 	 * @return
 	 * @throws JSONException
 	 */
-	public int createBluetoothObject(String mac) throws Exception{
+	public int createBluetoothObject(String mac) throws JSONException{
 		tdsRequest.createBluetoothObject(mac);
 		return 0;
 	}
@@ -158,7 +158,7 @@ public class TDSCommunication {
 		try {
 			ent = new UrlEncodedFormEntity(params);
 		} catch (UnsupportedEncodingException e) {
-			Log.i(TAG,"Unsupported Encoding Exception!");
+			Log.e(TAG,"Unsupported Encoding Exception!",e);
 			return false;
 		}
 
@@ -169,10 +169,10 @@ public class TDSCommunication {
 		try {
 			response = client.execute(post);
 		} catch (ClientProtocolException e) {
-			Log.i(TAG,"HTTP POST request failed! " + e.toString());
+			Log.d(TAG,"HTTP POST request failed! " + e.toString());
 			return false;
 		} catch (IOException e) {
-			Log.i(TAG,"HTTP POST request failed!" + e.toString());
+			Log.d(TAG,"HTTP POST request failed!" + e.toString());
 			return false;
 		}	
 

@@ -279,7 +279,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 * Sets the user interface up to show the local user's profile
 	 */
 	private void showLocalUser(){
-		Log.e(TAG, "LOCAL");
+		
 		// disable the normal user buttons
 		LinearLayout remoteUserButtons = (LinearLayout) findViewById(R.id.showUserButtons);
 		remoteUserButtons.setVisibility(LinearLayout.GONE);
@@ -333,8 +333,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	private void showRemoteUser(){
 		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
-		Log.i(TAG, "flags: "+ flags);
-
+		
 		/*
 		 * The following cases are possible: 
 		 * - the user was marked for following
@@ -461,7 +460,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		@Override
 		public void onChange(boolean selfChange) {
-			Log.i(TAG, "UserContentObserver.onChange( " + selfChange+ ")");
+			
 			super.onChange(selfChange);
 			
 			// close the old cursor
