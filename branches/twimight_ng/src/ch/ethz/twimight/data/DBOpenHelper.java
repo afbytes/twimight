@@ -33,8 +33,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */
 	static final String TABLE_LOCATIONS = "locations";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
-	public static final String TABLE_TWEETS = "tweets";
-    //public static final String TABLE_TWEET_MENTIONS = "tweet_mentions";
+	public static final String TABLE_TWEETS = "tweets";   
 	//public static final String TABLE_TWEET_HASHTAGS = "tweet_hashtags";
 	//public static final String TABLE_TWEET_URLS = "tweet_urls";
 	public static final String TABLE_USERS = "users";
@@ -123,6 +122,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_FOLLOWREQUEST + " integer, "
 			+ TwitterUsers.COL_PROFILEIMAGE + " blob,"
 			+ TwitterUsers.COL_LASTUPDATE + " integer,"
+			+ TwitterUsers.COL_LAST_PICTURE_UPDATE + " integer,"
 			+ TwitterUsers.COL_FLAGS + " integer default 0);";
 
 	// Direct Messages (including disaster messages)

@@ -18,4 +18,13 @@
     <string name="search_hint">Search tweets and users</string>
     <string name="permDescription">This permission will grant access to content providers. Data might be manipulated by malicious applications</string>
     
+        <!--  DeviceListActivity -->
+    <string name="scanning">scanning for devices...</string>
+    <string name="select_device">select a device to be added</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_other_devices">Other Available Devices</string>
+    <string name="button_scan">Scan for devices</string>
+    
 </resources>

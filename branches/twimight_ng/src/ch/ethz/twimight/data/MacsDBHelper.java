@@ -232,8 +232,8 @@ public class MacsDBHelper {
 	 */
 	public Long getLastSuccessful(String mac) {
 
-		String[] where = {KEY_LAST};
-		Cursor c = database.query(DBOpenHelper.TABLE_MACS, where, KEY_MAC+"='"+mac + "'",null,null,null,null);
+		String[] columns = {KEY_LAST};
+		Cursor c = database.query(DBOpenHelper.TABLE_MACS, columns, KEY_MAC+"='"+mac + "'",null,null,null,null);
 		if(c.getCount()>0){
 			c.moveToFirst();
 			long last = c.getLong(c.getColumnIndex(KEY_LAST));
@@ -330,29 +330,5 @@ public class MacsDBHelper {
 		return values;
 	}
 	
-	/**
-	 * Helper to convert human readable MAC address to long
-	 * @param MAC address in human readable form 00:00:00...
-	 * @return long representation of the MAC address
 	
-	public long mac2long(String mac){
-		
-		return Long.parseLong(mac.replace(":", ""), 16);
-	}
-	
-	/**
-	 * Helper to convert long to human readable MAC address
-	 * @param macLong long
-	 * @return human readable MAC address
-	 
-	public String long2mac(long macLong){
-		String addressHex = Long.toHexString(macLong);
-		StringBuilder buffer = new StringBuilder("000000000000".substring(addressHex.length()) + addressHex);
-		for (int index = 2; index < buffer.length(); index += 3) {
-			buffer.insert(index, ':');
-		}
-		
-		return buffer.toString().toUpperCase();
-	}
-	*/
 }

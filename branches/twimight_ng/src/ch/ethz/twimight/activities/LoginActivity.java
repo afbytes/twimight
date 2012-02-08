@@ -380,11 +380,11 @@ public class LoginActivity extends Activity implements OnClickListener{
 	
 	
 
-	private void startTimeline(Context context) {
-		startAlarms(context);
+	private void startTimeline(Context context) {		
 		Intent i = new Intent(context, ShowTweetListActivity.class);
 		i.putExtra("login", true);
 		context.startActivity(i);
+		startAlarms(context);
 		finish();
 	}
 
@@ -432,66 +432,84 @@ public class LoginActivity extends Activity implements OnClickListener{
 	}
 	
 	/**
+	 * Upon pressing the login button, we first get Request tokens from Twitter.
+	 * @param context
+	 */
+	
+	  static class PerformLogoutTask extends AsyncTask<Context,Void,Void> {
+
+		@Override
+		protected Void doInBackground(Context... params) {
+			// Stop all services and pending alarms
+			Context context = params[0];
+			stopServices(context);
+
+			
+			// Delete persistent Twitter update information
+			TwitterService.setFavoritesSinceId(null, context);
+			TwitterService.setLastFavoritesUpdate(null, context);
+			TwitterService.setMentionsSinceId(null, context);
+			TwitterService.setLastMentionsUpdate(null, context);
+			TwitterService.setTimelineSinceId(null, context);
+			TwitterService.setLastTimelineUpdate(null, context);
+			TwitterService.setLastFriendsUpdate(null, context);
+			TwitterService.setLastFollowerUpdate(null, context);
+			TwitterService.setLastDMsInUpdate(null, context);
+			TwitterService.setLastDMsOutUpdate(null, context);
+			TwitterService.setDMsOutSinceId(null, context);
+			TwitterService.setDMsInSinceId(null, context);
+			
+			TDSService.resetLastUpdate(context);
+			TDSService.resetUpdateInterval(context);
+			
+			// Delete our Twitter ID and screenname
+			setTwitterId(null, context);
+			setTwitterScreenname(null, context);
+			
+			// Delete Access token and secret
+			setAccessToken(null, context);
+			setAccessTokenSecret(null, context);
+			
+			// Delete Request token and secret
+			setRequestToken(null, context);
+			setRequestTokenSecret(null, context);
+			
+			// Delete key and certificate
+			KeyManager km = new KeyManager(context);
+			km.deleteKey();
+			CertificateManager cm = new CertificateManager(context);
+			cm.deleteCertificate();
+			
+			// Flush DB
+			DBOpenHelper dbHelper = DBOpenHelper.getInstance(context);
+			dbHelper.flushDB();
+			
+			// Flush revocation list
+			RevocationDBHelper rm = new RevocationDBHelper(context);
+			rm.open();
+			rm.flushRevocationList();
+			
+			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(context,
+	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
+			suggestions.clearHistory();
+			
+			// Start login activity
+			Intent intent = new Intent(context, LoginActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(intent);
+			return null;
+		}
+		
+		
+		
+	}
+	
+	/**
 	 * Deleting all the state
 	 */
 	public static void logout(Context context){
+		new PerformLogoutTask().execute(context);
 		
-		// Stop all services and pending alarms
-		stopServices(context);
-
-		
-		// Delete persistent Twitter update information
-		TwitterService.setFavoritesSinceId(null, context);
-		TwitterService.setLastFavoritesUpdate(null, context);
-		TwitterService.setMentionsSinceId(null, context);
-		TwitterService.setLastMentionsUpdate(null, context);
-		TwitterService.setTimelineSinceId(null, context);
-		TwitterService.setLastTimelineUpdate(null, context);
-		TwitterService.setLastFriendsUpdate(null, context);
-		TwitterService.setLastFollowerUpdate(null, context);
-		TwitterService.setLastDMsInUpdate(null, context);
-		TwitterService.setLastDMsOutUpdate(null, context);
-		TwitterService.setDMsOutSinceId(null, context);
-		TwitterService.setDMsInSinceId(null, context);
-		
-		TDSService.resetLastUpdate(context);
-		TDSService.resetUpdateInterval(context);
-		
-		// Delete our Twitter ID and screenname
-		setTwitterId(null, context);
-		setTwitterScreenname(null, context);
-		
-		// Delete Access token and secret
-		setAccessToken(null, context);
-		setAccessTokenSecret(null, context);
-		
-		// Delete Request token and secret
-		setRequestToken(null, context);
-		setRequestTokenSecret(null, context);
-		
-		// Delete key and certificate
-		KeyManager km = new KeyManager(context);
-		km.deleteKey();
-		CertificateManager cm = new CertificateManager(context);
-		cm.deleteCertificate();
-		
-		// Flush DB
-		DBOpenHelper dbHelper = DBOpenHelper.getInstance(context);
-		dbHelper.flushDB();
-		
-		// Flush revocation list
-		RevocationDBHelper rm = new RevocationDBHelper(context);
-		rm.open();
-		rm.flushRevocationList();
-		
-		SearchRecentSuggestions suggestions = new SearchRecentSuggestions(context,
-                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-		suggestions.clearHistory();
-		
-		// Start login activity
-		Intent intent = new Intent(context, LoginActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
 		
 	}
 	

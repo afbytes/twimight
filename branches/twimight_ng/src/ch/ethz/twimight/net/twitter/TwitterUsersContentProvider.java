@@ -57,7 +57,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS, USERS_FOLLOWERS);
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_DISASTER, USERS_DISASTER);
 		twitterusersUriMatcher.addURI(TwitterUsers.TWITTERUSERS_AUTHORITY, TwitterUsers.TWITTERUSERS + "/" + TwitterUsers.TWITTERUSERS_SEARCH, USERS_SEARCH);
-
 		
 	}
 	
@@ -164,7 +163,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
 			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" LIKE '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
 			if(c.getCount()==1){
-				
+				Log.d(TAG, "we already have the user");
 				c.moveToFirst();
 				
 				// we flag the user for updating the profile image if
@@ -174,6 +173,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				if(values.containsKey(TwitterUsers.COL_FLAGS) && ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) >0)){
 					if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 						values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS) & (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
+						Log.d(TAG, "we already have profile picture, deleting flag");
 					} 
 				}
 				Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));

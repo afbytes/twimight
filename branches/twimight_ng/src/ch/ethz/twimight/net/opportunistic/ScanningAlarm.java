@@ -49,21 +49,12 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 * Starts the alarm.
 	 */
 
-	public ScanningAlarm(Context context, long delay, boolean forceScan) {						
+	public ScanningAlarm(Context context, long delay, boolean forceScan) {		
 		
-		if (instance == null) {			
-			// if Bluetooth is already enabled, start scanning. otherwise enable it now.
-			if(BluetoothAdapter.getDefaultAdapter().isEnabled()){
-				
-				scheduleScanning(context,System.currentTimeMillis());
-			} 
-			
-			Log.d(TAG, "instantiated"); 
-		} else {
-			
-			//scheduleScanning(context,0);
-		}
-			
+		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
+			scheduleScanning(context,System.currentTimeMillis());
+		} 			
+		Log.d(TAG, "instantiated"); 		
 			
 		
 	}	

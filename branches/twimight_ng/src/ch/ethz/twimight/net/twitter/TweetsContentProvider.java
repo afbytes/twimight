@@ -35,6 +35,7 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
+import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -702,7 +703,8 @@ public class TweetsContentProvider extends ContentProvider {
 					// if we are in disaster mode, we give the content provider a 
 					// second to insert the tweet and then schedule a scanning operation
 					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-						  //ScanningAlarm.scheduleScanning(getContext(),System.currentTimeMillis() +2000L);		 			
+						if (ScanningService.getState() == ScanningService.STATE_IDLE)
+			    			new ScanningAlarm(getContext(),0,true);		 			
 						
 					}
 				} else {
@@ -746,6 +748,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	@Override
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+		
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		Log.d(TAG, "Update TWEET");

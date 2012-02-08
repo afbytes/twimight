@@ -14,7 +14,9 @@ package ch.ethz.twimight.activities;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -47,7 +49,7 @@ import ch.ethz.twimight.util.Constants;
  */
 public class ShowTweetListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowTweetListActivity";
+	private static final String TAG = "ShowTweetListActivity";	
 	
 	// Views
 	private TweetListView timelineListView;
@@ -174,15 +176,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		}
 	}
 	
-	/**
-	 * On pause
-	 */
-	@Override
-	public void onPause(){
-		Log.w(TAG,"onPause called");
-		super.onPause();
-				
-	}
+	
 
 	/**
 	 * Called at the end of the Activity lifecycle
@@ -190,7 +184,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		Log.w(TAG,"onDestroy called");
+		
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
@@ -210,7 +204,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	}
 
-
+	
 	/**
 	 * Populate the Options menu
 	 */
@@ -278,14 +272,33 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			startActivity(i);    
 			break;
 		case OPTIONS_MENU_PAIR:
-			Toast.makeText(this, "Feature not yet implemented, it will be available soon!", Toast.LENGTH_SHORT).show();
+			   // Get the local Bluetooth adapter
+	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
+				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
+				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
 
+			}			
 			break;
 		default:
 			return false;
 		}
 		return true;
 	}
+	
+	   @Override
+		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+			switch(requestCode) {
+			case PrefsActivity.REQUEST_DISCOVERABLE:
+				Log.i(TAG,""+ resultCode);
+				if (resultCode != Activity.RESULT_CANCELED) {
+					Intent intent = new Intent(this, DeviceListActivity.class);
+					startActivity(intent);
+				}
+						
+			}
+		}  
 	
 	/**
 	 * Saves the current selection
@@ -388,7 +401,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			b.setEnabled(false);
 		}
 		
-		startManagingCursor(c); // @author pcarta
+		startManagingCursor(c); 
 		adapter = new TweetAdapter(this, c);		
 		timelineListView.setAdapter(adapter);		
 		timelineListView.setOverscrollIntent(overscrollIntent);

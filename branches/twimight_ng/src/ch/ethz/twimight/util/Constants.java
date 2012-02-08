@@ -45,6 +45,7 @@ public final class Constants {
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */
 	public static final long WAIT_FOR_BLUETOOTH = 20*1000L; /** If Bluetooth is off, how long to we wait for it to enable? */
+	public static final long MEETINGS_INTERVAL = 60*1000L; /** time interval between to successive encounters */
     
 	//Message types from the BluetoothService Handler	  
 	public static final int MESSAGE_READ = 2;
@@ -83,7 +84,7 @@ public final class Constants {
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
 	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
 	public static final boolean TWEET_DEFAULT_RUN_AT_BOOT = true; /** Are the updates started at boot time ? */
-	public static final long UPDATER_UPDATE_PERIOD = 3 * 60 * 1000L; /** frequency of background updates */
+	public static final long UPDATER_UPDATE_PERIOD = 5 * 60 * 1000L; /** frequency of background updates */
 	
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
 	public static final int NR_FAVORITES = 20; /** how many favorites to request from twitter */
@@ -91,13 +92,13 @@ public final class Constants {
 	public static final int NR_DMS = 20; /** how many direct messages to request from twitter */
 	public static final int NR_SEARCH_TWEETS = 20; /** how many tweets to request from twitter in search */
 	
-	public static final long TIMELINE_MIN_SYNCH = 60*1000L; /** Minimum time between two timeline updates */
-	public static final long FAVORITES_MIN_SYNCH = 60*1000L; /** Minimum time between two favorite updates */
-	public static final long MENTIONS_MIN_SYNCH = 60*1000L; /** Minimum time between two mentions updates */
-	public static final long FRIENDS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the friends list */
-	public static final long FOLLOWERS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the list of followers */
+	public static final long TIMELINE_MIN_SYNCH = 120*1000L; /** Minimum time between two timeline updates */
+	public static final long FAVORITES_MIN_SYNCH = 120*1000L; /** Minimum time between two favorite updates */
+	public static final long MENTIONS_MIN_SYNCH = 120*1000L; /** Minimum time between two mentions updates */
+	public static final long FRIENDS_MIN_SYNCH = 20*60*1000L; /** Minimum time between two updates of the friends list */
+	public static final long FOLLOWERS_MIN_SYNCH = 20*60*1000L; /** Minimum time between two updates of the list of followers */
 	public static final long USERS_MIN_SYNCH = 24*3600*1000L; /** Minmum time between two updates of a user profile */
-	public static final long DMS_MIN_SYNCH = 60*1000L; /** Minimum time between two updates of the direct messages */
+	public static final long DMS_MIN_SYNCH = 120*1000L; /** Minimum time between two updates of the direct messages */
 	
 	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
