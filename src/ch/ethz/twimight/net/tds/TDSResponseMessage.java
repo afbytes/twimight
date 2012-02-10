@@ -142,14 +142,14 @@ public class TDSResponseMessage {
 			return null;
 		}
 		
-		Log.i(TAG, "Bluetooth object status ok");
+		Log.d(TAG, "Bluetooth object status ok");
 		List<String> macList = new ArrayList<String>();
 		JSONArray macs = bluetoothObject.getJSONArray("list");
 		
 		if(macs!= null){
 			for(int i = 0 ; i < macs.length(); i++){
-				Log.i(TAG, "macs length: " + macs.length() + " " + i);
-				Log.i(TAG, "MAC: " + macs.getString(i));
+				Log.d(TAG, "macs length: " + macs.length() + " " + i);
+				Log.d(TAG, "MAC: " + macs.getString(i));
 				macList.add(macs.getString(i));
 			}
 		}

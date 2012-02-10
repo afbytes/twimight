@@ -108,18 +108,20 @@ public class BluetoothComms{
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}       
 
-        // Start the thread to listen on a BluetoothServerSocket
-        
-        if (mInsecureAcceptThread == null) {
-            try {
-				mInsecureAcceptThread = new AcceptThread();
-				 mInsecureAcceptThread.start();
-				 setState(STATE_LISTEN);
-			} catch (IOException e) {
-				Log.e(TAG,"listen() failed");
-			}
-           
+        // Start the thread to listen on a BluetoothServerSocket        
+        if (mInsecureAcceptThread != null) {
+            mInsecureAcceptThread.cancel();
+            mInsecureAcceptThread = null;
         }
+        try {
+        	mInsecureAcceptThread = new AcceptThread();
+        	mInsecureAcceptThread.start();
+        	setState(STATE_LISTEN);
+        } catch (IOException e) {
+        	Log.e(TAG,"listen() failed");
+        }
+           
+        
     }
     
     
@@ -288,7 +290,7 @@ public class BluetoothComms{
                         // successful connection or an exception
                         socket = mmServerSocket.accept();
                     } catch (IOException e) {
-                        Log.e(TAG, "accept() failed", e);
+                       // Log.e(TAG, "accept() failed", e);
                         break;
                     }
 

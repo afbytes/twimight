@@ -52,7 +52,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	private int positionIndex;
 	private int positionTop;
 	
-	String query;
+	private static String query;
 	
 	private static final int SHOW_TWEETS = 1;
 	private static final int SHOW_USERS = 2;
@@ -73,6 +73,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 		// Get the intent and get the query
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
+			//if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
 			query = intent.getStringExtra(SearchManager.QUERY);			
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,

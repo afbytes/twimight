@@ -371,6 +371,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISDISASTER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED_BY + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_SCREENNAME + ", "
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
@@ -396,7 +397,7 @@ public class TweetsContentProvider extends ContentProvider {
 					i.putExtra("screenname", userCursor.getString(userCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 					getContext().startService(i); 
 				}
-				userCursor.close();
+				//userCursor.close();
 
 				break;
 			
@@ -635,7 +636,7 @@ public class TweetsContentProvider extends ContentProvider {
 				disasterId = getDisasterID(values);
 				
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
-				if(c.getCount() == 1){   //@author pcarta before was > 0
+				if(c.getCount() == 1){   
 
 					c.moveToFirst();
 					if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
@@ -949,7 +950,7 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 				
 			} catch (Exception ex) {
-				Log.e(TAG,"could not insert tweet in the table...maybe already stored",ex);
+				Log.e(TAG,"could not insert tweet in the table",ex);
 				return null;
 			}
 			

@@ -79,7 +79,7 @@ public class TDSService extends Service {
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-			Log.i(TAG, "Error synching: no connectivity");
+			Log.d(TAG, "Error synching: no connectivity");
 			schedulePeriodic(false);
 			return START_NOT_STICKY;
 			
@@ -389,7 +389,9 @@ public class TDSService extends Service {
 				// bluetooth
 				List<String> macsList = tds.parseBluetooth();
 				//TODO: remove this line
+				///////////////////////////////////////////////////////////////////////
 				macsList.clear();
+				///////////////////////////////////////////////////////////////////////
 				if(!macsList.isEmpty()){
 					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
 					dbHelper.open();
@@ -410,9 +412,9 @@ public class TDSService extends Service {
 						}
 					}
 				} else {
-					Log.i(TAG, "bluetooth mac list empty");
+					Log.d(TAG, "bluetooth mac list empty");
 				}
-				Log.i(TAG, "bluetooth parsed");
+				Log.d(TAG, "bluetooth parsed");
 
 				// location, nothing to do here
 
@@ -422,7 +424,7 @@ public class TDSService extends Service {
 					CertificateManager cm = new CertificateManager(getBaseContext());
 					cm.setCertificate(certPem);
 				}
-				Log.i(TAG, "certificate parsed");
+				Log.d(TAG, "certificate parsed");
 
 				// revocation
 				RevocationDBHelper rm = new RevocationDBHelper(getBaseContext());

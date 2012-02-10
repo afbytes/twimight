@@ -242,7 +242,7 @@ public class KeyManager {
 			byte[] signature = cipher.doFinal(hash.getBytes());
 
 			String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
-			Log.i(TAG, "Signature: "+signatureString);
+			Log.d(TAG, "Signature: "+signatureString);
 
 			return signatureString;			
 
