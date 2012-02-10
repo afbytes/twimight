@@ -18,6 +18,7 @@ import ch.ethz.twimight.net.twitter.Tweets;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -57,13 +58,8 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 		userTweetListView = (ListView) findViewById(R.id.userTweetList);
 		userTweetListView.setEmptyView(findViewById(R.id.userTweetListEmpty));
 		
-		
 		long userId = getIntent().getLongExtra("userId", 0);
-		c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +"/" + Tweets.TWEETS_TABLE_USER + "/" + userId), null, null, null, null);
-
-		adapter = new TweetAdapter(this, c);		
-		userTweetListView.setAdapter(adapter);
-
+		new QueryUserTimelineTask().execute(userId);
 
 		// Click listener when the user clicks on a tweet
 		userTweetListView.setClickable(true);
@@ -79,7 +75,7 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 			}
 		});
 		
-		Log.v(TAG, "created");
+		
 
 	}
 	
@@ -151,6 +147,28 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 	  positionTop = savedInstanceState.getInt("positionTop");
 	  
 	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	}
+	
+	/**
+	 * Queries the content provider to obtain user timeline
+	 * @author pcarta
+	 */
+	private class QueryUserTimelineTask extends AsyncTask<Long, Void, Void> {		
+
+		@Override
+		protected Void doInBackground(Long... userId) {	
+			Log.i(TAG,"inside asynch task");
+			c = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +"/" + Tweets.TWEETS_TABLE_USER + "/" + userId[0]), null, null, null, null);
+			return null;
+			
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			adapter = new TweetAdapter(ShowUserTweetListActivity.this, c);		
+			userTweetListView.setAdapter(adapter);
+			
+		}
 	}
 	
 }

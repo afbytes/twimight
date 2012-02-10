@@ -14,6 +14,7 @@
 package ch.ethz.twimight.net.twitter;
 
 import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.util.Constants;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -119,8 +120,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 				break;
 			case USERS_FRIENDS:
-				Log.d(TAG, "Query USERS_FRIENDS");
+				Log.i(TAG, "Query USERS_FRIENDS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				Log.i(TAG,"cursor count: "+ c.getCount());
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				// start synch service with a synch friends request
@@ -137,7 +139,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				
 			case USERS_SEARCH:
 				Log.d(TAG, "Query USERS_SEARCH");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_SEARCH_RESULT+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_SEARCH_RESULT+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL" 
+						+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' ", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				
 				// start synch service with a synch followers request
@@ -186,10 +189,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				c.close();
 				
 				long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
-				if(rowId >= 0){
-					
+				if(rowId >= 0){					
 					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);				
-					purge(DBOpenHelper.TABLE_USERS);
+					purge(DBOpenHelper.TABLE_USERS,values);
 						
 					return insertUri;
 				} else {
@@ -226,7 +228,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		return 0;
 	}
 	
-	private void purge(String table){
+	private void purge(String table,ContentValues values){
 		
 	}
 	

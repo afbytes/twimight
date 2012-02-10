@@ -110,6 +110,7 @@ public final class Constants {
 	public static final int MYDISASTERDM_BUFFER_SIZE = 100; /** How many disaster messages sent by the local user do we carry? */
 	public static final int USERTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache for showing user profiles */
 	public static final int SEARCHTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache from searching Twitter */
+	public static final int SEARCHUSERS_BUFFER_SIZE = 100; /** How many users to cache from searching Twitter */
  
 	
 }

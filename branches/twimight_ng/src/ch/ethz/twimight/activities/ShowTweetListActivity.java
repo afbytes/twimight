@@ -148,7 +148,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				}
 		
 		Log.v(TAG, "created");		
-	    Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+	   // Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
 
 
 	}
@@ -279,7 +279,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
 				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
 
-			}			
+			} else if ( PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
+				Intent intent = new Intent(this, DeviceListActivity.class);
+				startActivity(intent);
+			}
+				
+				
 			break;
 		default:
 			return false;

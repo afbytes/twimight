@@ -14,6 +14,7 @@ package ch.ethz.twimight.net.opportunistic;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +22,9 @@ import org.spongycastle.util.encoders.Base64;
 
 import android.app.AlarmManager;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -88,13 +92,34 @@ public class ScanningService extends Service{
 			context = this;
 			handler = new Handler();		
 	        // set up Bluetooth
+			
 	        bluetoothHelper = new BluetoothComms(mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
 			dbHelper.open();
+			
+			BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+			// Get a set of currently paired devices
+	        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	        
+	    	
+	        if (pairedDevices != null) {
+	        	// If there are paired devices, add each one to the ArrayAdapter
+		        if (pairedDevices.size() > 0) {
+		        	
+		            for (BluetoothDevice device : pairedDevices) {
+		            	if (device.getBluetoothClass() != null) {
+		            		if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART)
+		            			dbHelper.createMac(device.getAddress().toString(), 1); 
+		            	} else
+		            		dbHelper.createMac(device.getAddress().toString(), 1); 
+		            }
+		        } 
+	        }
+	        
 		}
+		
 		startScanning();
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 		
 		return START_STICKY; 
 		
 	}
@@ -149,28 +174,33 @@ public class ScanningService extends Service{
 		// Get a cursor over all "active" MACs in the DB
 		cursor = dbHelper.fetchActiveMacs();
 		Log.d(TAG,"active macs: " + cursor.getCount());
-		//TODO: obtain also paired peers around
+		
 		state = STATE_SCANNING;		
 		// Log the date for later rescheduling of the next scanning
 		scanStartTime = new Date();
 		
 		if (cursor.moveToFirst()) {
             // Get the field values
-            String mac = "00:23:76:9F:9C:CC"; //cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));			
+            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));			
             Log.i(TAG, "Connection Attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
             
             if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {
-            	if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
-            		bluetoothHelper.connect(mac);
-                	cursor.moveToLast();
-                	cursor.moveToNext();
-                	connTimeout = new ConnectingTimeout();
-                	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
-            	} else {
-            		Log.i(TAG,"skipping connection, last meeting was too recent");
-            		nextScanning();
-            	}
             	
+            	if (dbHelper.getLastSuccessful(mac) != null) {            		
+            		//if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
+                		bluetoothHelper.connect(mac);                	
+                    	connTimeout = new ConnectingTimeout();
+                    	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
+                	//} else {
+                	//	Log.i(TAG,"skipping connection, last meeting was too recent");
+                	//	nextScanning();
+                //	}
+            	} else {
+            		bluetoothHelper.connect(mac);                	
+                	connTimeout = new ConnectingTimeout();
+                	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	
+            	}
+            		
             } else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {
             	cursor.close();
             	bluetoothHelper.start();
@@ -212,21 +242,24 @@ public class ScanningService extends Service{
 	/**
 	 * Proceed to the next MAC address
 	 */
-	private void nextScanning() {
+	private void nextScanning() {		
 		if(cursor == null || bluetoothHelper.getState()==BluetoothComms.STATE_CONNECTED)
 			stopScanning();
 		else {
 			// do we have another MAC in the cursor?
 			if(cursor.moveToNext()){
+				Log.d(TAG, "scanning for the next peer");
 	            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
-	            if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) { 
+	           // if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) { 
 	            	
 	            	Log.i(TAG, "Connection attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
 		            bluetoothHelper.connect(mac);
 		            connTimeout = new ConnectingTimeout();
 	            	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	
-	            } else
-	            	nextScanning();
+	          //  } else {
+	            	//Log.i(TAG,"skipping connection, last meeting was too recent");
+	            	//nextScanning();
+	           // }
 			} else 
 				stopScanning();
 			
