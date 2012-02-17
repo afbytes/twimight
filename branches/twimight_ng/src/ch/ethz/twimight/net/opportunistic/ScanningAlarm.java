@@ -54,7 +54,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());
 		} 			
-		Log.d(TAG, "instantiated"); 		
+		Log.i(TAG, "instantiated"); 		
 			
 		
 	}	

@@ -654,7 +654,11 @@ public class TweetsContentProvider extends ContentProvider {
 				c.close();
 				// if none of the before was true, this is a proper new tweet which we now insert
 				try {
-					insertUri = insertTweet(values);					
+					insertUri = insertTweet(values);
+					if (ShowTweetListActivity.running==false) {
+						// notify user 
+						notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
+					}
 				} catch (Exception ex) {
 					Log.e(TAG,"exception while inserting", ex);
 				}
@@ -704,8 +708,11 @@ public class TweetsContentProvider extends ContentProvider {
 					// if we are in disaster mode, we give the content provider a 
 					// second to insert the tweet and then schedule a scanning operation
 					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-						if (ScanningService.getState() == ScanningService.STATE_IDLE)
-			    			new ScanningAlarm(getContext(),0,true);		 			
+						if (ScanningService.getState() == ScanningService.STATE_IDLE){
+			    				new ScanningAlarm(getContext(),0,true);
+			    			
+			    			} else
+			    				Log.i(TAG,"already scanning");
 						
 					}
 				} else {
@@ -717,7 +724,7 @@ public class TweetsContentProvider extends ContentProvider {
 						// check signature
 						String signature = values.getAsString(Tweets.COL_SIGNATURE);
 						String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
-						if(km.checkSinature(cm.parsePem(certificate), signature, text)){							
+						if(km.checkSignature(cm.parsePem(certificate), signature, text)){							
 							values.put(Tweets.COL_ISVERIFIED, 1);
 						} else {
 							values.put(Tweets.COL_ISVERIFIED, 0);
@@ -727,8 +734,10 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_ISVERIFIED, 0);
 					}
 					
-					// notify user 
-					notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
+					if (ShowTweetListActivity.running==false) {
+						// notify user 
+						notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
+					}
 					
 				}
 				c.close();
@@ -927,11 +936,10 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
 					}
 					
-					if (!isFirstLogin()) {
+					if (ShowTweetListActivity.running==false) {
 						// notify user
 						notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
-					} else
-						Log.d(TAG, "notifications skipped since it is the first login");
+					} 
 									
 				} else {
 					values.put(Tweets.COL_MENTIONS, 0);				
@@ -960,10 +968,6 @@ public class TweetsContentProvider extends ContentProvider {
 	}
 
 	
-	private boolean isFirstLogin() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
-	}
-
 	/**
 	 * Creates and triggers the status bar notifications
 	 */

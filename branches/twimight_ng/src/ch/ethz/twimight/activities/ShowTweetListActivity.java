@@ -61,7 +61,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	private TweetAdapter adapter;
 	private Cursor c;
-
+	
+	public static boolean running= false;
+	
 	// handler
 	static Handler handler;
 
@@ -92,6 +94,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		setContentView(R.layout.main);
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
+		running = true;
 		timelineListView = (TweetListView) findViewById(R.id.tweetList);
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
@@ -148,7 +151,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				}
 		
 		Log.v(TAG, "created");		
-	   // Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+	   
 
 
 	}
@@ -159,7 +162,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		
+		running = true;
 		// Are we in disaster mode?
 		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
@@ -167,8 +170,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		} else {
 			headerBar.setBackgroundResource(R.drawable.top_bar_background);
 		}
-
-		
 		
 		
 		if(positionIndex != 0 | positionTop !=0){
@@ -178,13 +179,19 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	
 
+	@Override
+	protected void onStop() {
+		running=false;
+		super.onStop();
+	}
+
 	/**
 	 * Called at the end of the Activity lifecycle
 	 */
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		running = false;
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
@@ -338,13 +345,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	}
 	
 	
-	public class CustomExceptionHandler implements UncaughtExceptionHandler {
-
-		@Override
-		public void uncaughtException(Thread t, Throwable e) {		
-			 Log.e(TAG, "error ", e);
-		}
-	}
 	
 	/**
 	 * Which tweets do we show? Timeline, favorites, mentions?

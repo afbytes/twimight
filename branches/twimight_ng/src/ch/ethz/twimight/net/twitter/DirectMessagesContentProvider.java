@@ -17,6 +17,10 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
+import ch.ethz.twimight.net.opportunistic.ScanningService;
+import ch.ethz.twimight.security.CertificateManager;
+import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -83,6 +87,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	private static final int DM_NOTIFICATION_ID = 2;
 	
 	private static final int NOTIFY_DM = 3;
+	private static final int NOTIFY_DISASTER_DM = 4;
 	
 	/**
 	 * onCreate we initialize and open the DB.
@@ -170,8 +175,8 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_NAME + ", "
 				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_PROFILEIMAGE + " "
 				+ "FROM " + DBOpenHelper.TABLE_DMS + " "
-				+ "LEFT JOIN "+DBOpenHelper.TABLE_USERS+" "
-				+ "ON "+ DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+" "				
+				+ "JOIN "+DBOpenHelper.TABLE_USERS+" "
+				+ "ON "+DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+" "				
 				+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+userId+" "
 				+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+userId+" "
 				+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
@@ -232,7 +237,11 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 
 			case LIST_DISASTER:
-				// TODO
+				
+				Log.i(TAG, "Query DMS Disaster");
+				c = database.query(DBOpenHelper.TABLE_DMS, projection,DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_MYDISASTER + "!=0"
+						+ " OR " + DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_DISASTER_OTHERS + "!=0", whereArgs, null, null, sortOrder);
+				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				break;
 
 			case LIST_NORMAL:
@@ -305,10 +314,84 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(DirectMessages.COL_ISDISASTER, 1);
 				
-				// TODO
+				// if we already have a disaster tweet with the same disaster ID, 
+				// we discard the new one
+				disasterId = getDisasterID(values);
+				c = database.query(DBOpenHelper.TABLE_DMS, null, DirectMessages.COL_DISASTERID+"="+disasterId+" AND "+DirectMessages.COL_ISDISASTER+">0", null, null, null, null);
+				if(c.getCount()>0){
+					c.moveToFirst();
+					Uri oldUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));
+					c.close();
+					return oldUri; 
+				}
 				
-				break;
+				CertificateManager cm = new CertificateManager(getContext());
+				KeyManager km = new KeyManager(getContext());
 				
+				//verify whether I was the author or not
+				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(DirectMessages.COL_SENDER).toString())){
+					
+					if(cm.hasCertificate()){
+						
+						// we put the signature
+						String text = values.getAsString(DirectMessages.COL_TEXT);
+						String userId = LoginActivity.getTwitterId(getContext()).toString();
+						
+						String signature = km.getSignature(new String(text+userId));
+						values.put(DirectMessages.COL_SIGNATURE, signature);
+						// and the certificate
+						values.put(DirectMessages.COL_CERTIFICATE, cm.getCertificate());
+						// and set the is_verified flag to show that the tweet is signed
+						values.put(DirectMessages.COL_ISVERIFIED, 1);
+						
+						Long twitterId = getIdFromScreenName(values.getAsString(DirectMessages.COL_RECEIVER_SCREENNAME));
+						
+						//TODO: obtain peers public keys and encrypt
+						values.put(DirectMessages.COL_CRYPTEXT,text );	
+						/*if (twitterId != null) {
+							String cipherText = km.encrypt(text,twitterId );
+							Log.i(TAG, "ciphertext: " + cipherText );
+							if (cipherText != null) {								
+								values.put(DirectMessages.COL_CRYPTEXT,cipherText );															
+								
+							} 
+						}	*/					
+						
+					} else 
+						values.put(DirectMessages.COL_ISVERIFIED, 0);					
+					
+				} else {					
+					//Is it for me?
+					if (values.getAsLong(DirectMessages.COL_RECEIVER).toString().equals(LoginActivity.getTwitterId(getContext()))){
+						
+						values.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_DISASTER_ME|DirectMessages.BUFFER_MESSAGES);
+						//TODO: DECRYPT THE MESSAGE
+					    //String plainText = km.decrypt(values.getAsString(DirectMessages.COL_CRYPTEXT));
+						String plainText = values.getAsString(DirectMessages.COL_CRYPTEXT);
+						//values.remove(DirectMessages.COL_CRYPTEXT);
+						values.put(DirectMessages.COL_TEXT, plainText);
+						
+						// check signature
+						String signature = values.getAsString(DirectMessages.COL_SIGNATURE);
+						String certificate = values.getAsString(DirectMessages.COL_CERTIFICATE);
+						
+						String textForSignatureCheck = plainText + values.getAsString(DirectMessages.COL_SENDER);
+						
+						if(km.checkSignature(cm.parsePem(certificate), signature, textForSignatureCheck)){							
+							values.put(DirectMessages.COL_ISVERIFIED, 1);
+						} else 
+							values.put(DirectMessages.COL_ISVERIFIED, 0);
+												
+					} else
+						values.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_DISASTER_OTHERS);
+						
+					
+				}
+				c.close();
+				insertUri = insertDM(values);				
+				//purgeTweets(values);		
+				
+				break;				
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
 		}
 		
@@ -347,6 +430,21 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		int nrRows = database.delete(DBOpenHelper.TABLE_DMS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 		return nrRows;
+	}
+	
+	/**
+	 * gives the corresponding twitter ID for a screenName
+	 * @param screenName
+	 * @return 
+	 * @author pcarta
+	 */
+	private Long getIdFromScreenName(String screenName) {
+		Cursor c = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_SCREENNAME + "='" + screenName + "'", null, null, null, null);
+		if(c.getCount() > 0){
+			c.moveToFirst();
+			return c.getLong(c.getColumnIndex(TwitterUsers.COL_ID));
+		}
+		return null;
 	}
 	
 	/**
@@ -394,9 +492,14 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			purgeBuffer(DirectMessages.BUFFER_MESSAGES, Constants.MESSAGES_BUFFER_SIZE);
 		}
 			
-		if((bufferFlags & DirectMessages.BUFFER_DISASTER) != 0){
+		if((bufferFlags & DirectMessages.BUFFER_DISASTER_OTHERS) != 0){
 			Log.d(TAG, "purging relay direct messages buffer");
-			purgeBuffer(DirectMessages.BUFFER_DISASTER, Constants.DISASTERDM_BUFFER_SIZE);
+			purgeBuffer(DirectMessages.BUFFER_DISASTER_OTHERS, Constants.DISASTERDM_BUFFER_SIZE);
+		}
+		
+		if((bufferFlags & DirectMessages.BUFFER_DISASTER_ME) != 0){
+			Log.d(TAG, "purging relay direct messages buffer");
+			purgeBuffer(DirectMessages.BUFFER_DISASTER_ME, Constants.DISASTERDM_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & DirectMessages.BUFFER_MYDISASTER) != 0){
@@ -442,8 +545,8 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		if(checkValues(values)){
 			
 			int flags = 0;
-			if(values.containsKey(Tweets.COL_FLAGS))
-				flags = values.getAsInteger(Tweets.COL_FLAGS);
+			if(values.containsKey(DirectMessages.COL_FLAGS))
+				flags = values.getAsInteger(DirectMessages.COL_FLAGS);
 
 						
 			if(!values.containsKey(DirectMessages.COL_CREATED)){
@@ -470,18 +573,18 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				}
 				c.close();
 			}
-			
-			// are we the receiver?
-			if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
-				if (!isFirstLogin()) {
-					// notify user
-					notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
-				}
-			}
+						
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
-			if(rowId >= 0){
-				
+			if(rowId >= 0){				
+				Log.i(TAG,"dm added");
+				// are we the receiver?
+				if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
+					
+					// notify user
+					notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
+					
+				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
 				
@@ -502,9 +605,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		}
 	}
 	
-	private boolean isFirstLogin() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
-	}
+	
 
 
 	
@@ -512,7 +613,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Creates and triggers the status bar notifications
 	 */
 	private void notifyUser(int type, String tickerText){
-		
+		Log.i(TAG,"notify dm");
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();

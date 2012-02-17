@@ -53,9 +53,7 @@ public class AboutActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showabout);
 		
-		LinearLayout showAboutLogo = (LinearLayout) findViewById(R.id.showAboutLogo);
-		showAboutLogo.setBackgroundResource(R.drawable.about_background);
-		
+			
 		keyOk = (TextView) findViewById(R.id.showAboutKeys);
 		revokeButton = (Button) findViewById(R.id.showAboutRevoke);
 		CertificateManager cm = new CertificateManager(this);

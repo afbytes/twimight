@@ -90,8 +90,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 			}
 		});
 		
-		Log.v(TAG, "created");
-
+		
 	}
 	
 	/**

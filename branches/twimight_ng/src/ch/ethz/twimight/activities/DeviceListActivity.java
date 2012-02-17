@@ -134,7 +134,10 @@ public class DeviceListActivity extends Activity {
         super.onDestroy();
      // Unregister broadcast listener
         this.unregisterReceiver(mReceiver);
-        
+     // If we're already discovering, stop it
+        if (mBtAdapter.isDiscovering()) {
+            mBtAdapter.cancelDiscovery();
+        }
     }   
  
 

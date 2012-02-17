@@ -106,6 +106,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
 		
 		if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISDISASTER))>0){
+			
 			rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
 			verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
 			verifiedImage.setVisibility(ImageView.VISIBLE);
@@ -115,9 +116,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
 			}
 		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(context))) {
+			
 			rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
 			verifiedImage.setVisibility(ImageView.GONE);
+			
 		} else if((cursor.getColumnIndex(Tweets.COL_MENTIONS)>=0) && (cursor.getInt(cursor.getColumnIndex(Tweets.COL_MENTIONS))>0)){
+			
 			rowLayout.setBackgroundResource(R.drawable.mention_tweet_background);
 			verifiedImage.setVisibility(ImageView.GONE);			
 		} else {

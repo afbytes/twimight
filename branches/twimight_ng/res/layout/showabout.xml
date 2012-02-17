@@ -26,9 +26,8 @@
 	    android:layout_height="wrap_content"
 	    android:layout_gravity="bottom"
 	    android:orientation="vertical"
-	    android:background="@drawable/about_background"
 	    android:layout_alignParentBottom="true"
-	    android:layout_margin="10dp">
+	    android:layout_margin="10dp" android:background="@drawable/normal_tweet_background">
 
 		<TextView android:id="@+id/textTwimight"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -62,7 +61,7 @@
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/linearLayout3"
-			android:layout_width="match_parent" android:layout_height="wrap_content">
+			android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10dp">
 
 			<TextView android:id="@+id/textView5" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Keys: "

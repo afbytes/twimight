@@ -16,11 +16,13 @@ import java.util.Date;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +37,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.ShowUserActivity.UserContentObserver;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -232,14 +235,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		favorited = (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		favoriteButton = (ImageButton) findViewById(R.id.showTweetFavorite);
 		favoriteButton.setBackgroundColor(R.color.transparent);
-		if(favorited){
+		if( favorited && !((flags & Tweets.FLAG_TO_UNFAVORITE)>0)){
 			favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
 		}
 		favoriteButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				Log.i(TAG,"inside click listener");
+				
 				if(favorited){
 					// unfavorite
 					getContentResolver().update(uri, clearFavoriteFlag(flags), null, null);
@@ -251,9 +254,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 					getContentResolver().update(uri, setFavoriteFlag(flags), null, null);
 					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_on);
 					favorited=true;
-				}
-				
-				
+				}			
 			}
 			
 		});
@@ -527,7 +528,12 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private ContentValues setRetweetFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_RETWEET);
-		cv.put(Tweets.COL_BUFFER, buffer);
+		
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true) {
+			cv.put(Tweets.COL_ISDISASTER, 1);
+			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_DISASTER);
+		} else
+			cv.put(Tweets.COL_BUFFER, buffer);
 		return cv;
 	}
 	
@@ -540,7 +546,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private ContentValues setFavoriteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		// set favorite flag und clear unfavorite flag
-		cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE) & (~Tweets.FLAG_TO_UNFAVORITE));
+		if (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0)
+			cv.put(Tweets.COL_FLAGS, (flags  & ~Tweets.FLAG_TO_UNFAVORITE));
+		else			
+			cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE) & (~Tweets.FLAG_TO_UNFAVORITE));
 		// put in favorites bufer
 		cv.put(Tweets.COL_BUFFER, buffer|Tweets.BUFFER_FAVORITES);
 		return cv;
@@ -554,9 +563,19 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private ContentValues clearFavoriteFlag(int flags) {
 		ContentValues cv = new ContentValues();
+		
 		// clear favorite flag and set unfavorite flag
-		cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)) | Tweets.FLAG_TO_UNFAVORITE);
-		cv.put(Tweets.COL_BUFFER, buffer);
+		if (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0)
+			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)) | Tweets.FLAG_TO_UNFAVORITE);	
+		else
+			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)));	
+		
+		if ( !c.isNull(c.getColumnIndex(Tweets.COL_TID)) ) {
+			cv.put(Tweets.COL_BUFFER, buffer);
+		}
+		else {
+			cv.put(Tweets.COL_BUFFER, buffer & (~Tweets.BUFFER_FAVORITES));
+		}
 		return cv;
 	}
 	

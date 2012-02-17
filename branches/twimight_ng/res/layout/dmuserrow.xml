@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="wrap_content" android:layout_width="fill_parent"
 	android:orientation="horizontal" android:id="@+id/dmUserRowLayout"
-	android:padding="5dp">
+	android:padding="5dp" android:background="@drawable/normal_tweet_background">
 
 	<LinearLayout android:id="@+id/showDMUser"
 		android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -18,18 +18,18 @@
 			
 				<TextView android:id="@+id/showUserRealName"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="RealName" />
+					android:text="RealName" android:textColor="@color/darkGrey"/>
 				<LinearLayout android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:orientation="horizontal">
 				<TextView android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:text="\@"
-					android:textStyle="bold" />
+					android:textStyle="bold" android:textColor="@color/darkGrey"/>
 				<TextView android:id="@+id/showUserScreenName"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="ScreenName" android:textStyle="bold" />
+					android:text="ScreenName" android:textStyle="bold" android:textColor="@color/darkGrey"/>
 			</LinearLayout>
 			<TextView android:id="@+id/showDMText" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:text="Last DM" />
+				android:layout_height="wrap_content" android:text="Last DM" android:textColor="@color/darkGrey"/>
 		</LinearLayout>
 	</LinearLayout>
 

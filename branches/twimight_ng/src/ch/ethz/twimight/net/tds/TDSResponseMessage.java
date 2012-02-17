@@ -250,7 +250,7 @@ public class TDSResponseMessage {
 	public List<TDSPublicKey> parseFollower() throws JSONException{
 		if(!hasFollowerObject()) return null;
 
-		Log.i(TAG,"reading followers");
+		Log.d(TAG,"reading followers");
 		int statusCode = followerObject.getInt("status"); 
 		if(statusCode != 200) {
 			Log.e(TAG, "TDS returned follower status error code" + statusCode);

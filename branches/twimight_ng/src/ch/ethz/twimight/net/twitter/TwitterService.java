@@ -61,7 +61,7 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
-import ch.ethz.twimight.activities.TwimightBaseActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -586,9 +586,9 @@ public class TwitterService extends Service {
 
 			int flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
 			if((flags & DirectMessages.FLAG_TO_DELETE)>0) {
-				// Delete the DM from twitter
-				// TODO
-				//(new DestroyMessageTask()).execute(rowId);
+				// Delete the DM from twitter				
+				//new DestroyMessageTask()).execute(rowId);
+				
 			} else if((flags & DirectMessages.FLAG_TO_INSERT)>0) {
 				// post the DM to twitter
 				(new SendMessageTask()).execute(rowId);
@@ -1324,7 +1324,7 @@ public class TwitterService extends Service {
 						} 
 					} 
 					i++;
-					if (i == 4) {						
+					if (i == 5) {						
 						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 						new SynchTransactionalUsersTask().execute(false);
 						i=0;
@@ -1646,7 +1646,7 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){					
 					Log.e(TAG, "exception while updating user: " + ex);
 				} else {
-					if (TwimightBaseActivity.running)						
+					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while loading the timeline. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while updating user: " + ex);
 				}
@@ -1733,7 +1733,7 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){					
 					Log.e(TAG, "exception while updating user: " + ex);
 				} else {
-					if (TwimightBaseActivity.running)						
+					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while searching: " + ex);
 				}
@@ -1782,8 +1782,8 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){				
 					Log.e(TAG, "exception while updating user: " + ex);
 				} else {
-					if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while searching: " + ex);
 				}
@@ -1935,12 +1935,12 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){					
 					Log.e(TAG, "exception while loading friends: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
-					if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while loading friends.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading friends: " + ex);
 				}else {
-					//if (TwimightBaseActivity.running)
+					//if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your friends. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}
@@ -2097,12 +2097,12 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){				
 					Log.e(TAG, "exception while loading followers: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
-					if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while loading followers.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}else {
-				//	if (TwimightBaseActivity.running)
+				//	if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your followers. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}
@@ -2447,7 +2447,7 @@ public class TwitterService extends Service {
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)						
+						if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while posting your tweet.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2459,12 +2459,12 @@ public class TwitterService extends Service {
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)						
+						if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Timeout while posting tweet your tweet.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
-					if (TwimightBaseActivity.running)						
+					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while posting your tweet. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
@@ -2491,8 +2491,8 @@ public class TwitterService extends Service {
 				Log.e(TAG, "Exception while updating tweet in DB");
 			}
 			
-			if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+			if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Tweet posted", Toast.LENGTH_SHORT).show();
 
 		}
@@ -2571,8 +2571,8 @@ public class TwitterService extends Service {
 						(new DestroyStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting your tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2584,8 +2584,8 @@ public class TwitterService extends Service {
 						(new DestroyStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while deleting tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2596,8 +2596,8 @@ public class TwitterService extends Service {
 					
 				}else {
 					// an exception happended, we notify the user					
-					if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while deleting tweet: " + ex);
 					return;
@@ -2607,8 +2607,8 @@ public class TwitterService extends Service {
 		    else {
 				Uri deleteUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);				
 				getContentResolver().delete(deleteUri, null, null);
-				if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+				if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Delete successful.", Toast.LENGTH_SHORT).show();
 				
 			}
@@ -2694,8 +2694,8 @@ public class TwitterService extends Service {
 						(new FavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while favoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2707,14 +2707,14 @@ public class TwitterService extends Service {
 						(new FavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while favoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				}else {
 					// an exception happended, we notify the user					
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while favoriting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
@@ -2733,7 +2733,7 @@ public class TwitterService extends Service {
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{
 				getContentResolver().update(updateUri, cv, null, null);
-				if (TwimightBaseActivity.running)
+				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Favorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){
 				Log.e(TAG, "Exception while updating tweet in DB");
@@ -2821,7 +2821,7 @@ public class TwitterService extends Service {
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2833,13 +2833,13 @@ public class TwitterService extends Service {
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while unfavoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				}else {
 					// an exception happended, we notify the user					
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
@@ -2857,7 +2857,7 @@ public class TwitterService extends Service {
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{
 				getContentResolver().update(updateUri, cv, null, null);
-				if (TwimightBaseActivity.running)
+				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Unfavorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){
 				Log.e(TAG, "Exception while updating tweet in DB");
@@ -2945,7 +2945,7 @@ public class TwitterService extends Service {
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong retweeting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2957,13 +2957,13 @@ public class TwitterService extends Service {
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while retweeting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
 					// an exception happended, we notify the user					
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while retweeting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while retweeting: " + ex);
 					return;
@@ -2980,7 +2980,7 @@ public class TwitterService extends Service {
 				Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 				try{
 					getContentResolver().update(updateUri, cv, null, null);
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Retweet successful.", Toast.LENGTH_LONG).show();
 				} catch(NullPointerException ex){
 					Log.e(TAG, "Exception while updating tweet in DB");
@@ -3052,7 +3052,7 @@ public class TwitterService extends Service {
 						(new FollowUserTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending follow request.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -3064,13 +3064,13 @@ public class TwitterService extends Service {
 						(new FollowUserTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while sending follow request.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
 					// an exception happended, we notify the user					
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending follow request. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while following: " + ex);
 					return;
@@ -3091,7 +3091,7 @@ public class TwitterService extends Service {
 
 				try{
 					getContentResolver().update(queryUri, cv, null, null);
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 							Toast.makeText(getBaseContext(), "Follow request sent.", Toast.LENGTH_LONG).show();
 				} catch(NullPointerException ex){
 					Log.e(TAG, "Exception while updating tweet in DB");
@@ -3164,7 +3164,7 @@ public class TwitterService extends Service {
 						(new UnfollowUserTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending unfollow request.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -3176,12 +3176,12 @@ public class TwitterService extends Service {
 						(new UnfollowUserTask()).execute(params);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Timeout while sending unfollow request.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
-					if (TwimightBaseActivity.running)
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending the unfollow request. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while unfollowing: " + ex);
 					return;
@@ -3202,7 +3202,7 @@ public class TwitterService extends Service {
 
 			try{
 				getContentResolver().update(queryUri, cv, null, null);
-				if (TwimightBaseActivity.running)
+				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Unfollowed user.", Toast.LENGTH_LONG).show();
 			} catch(Exception ex){
 				Log.e(TAG, "Exception while updating tweet in DB");
@@ -3404,7 +3404,7 @@ public class TwitterService extends Service {
 						(new UpdateDMsOutTask()).execute(--attempts);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
 						Log.e(TAG, "exception while loading incoming DMs: " + ex);
 						return;
@@ -3513,7 +3513,7 @@ public class TwitterService extends Service {
 						(new UpdateDMsOutTask()).execute(--attempts);
 						return;
 					} else {
-						if (TwimightBaseActivity.running)
+						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
 						Log.e(TAG, "exception while loading outgoing DMs: " + ex);
 						return;
@@ -3609,7 +3609,7 @@ public class TwitterService extends Service {
 
 				text = c.getString(c.getColumnIndex(DirectMessages.COL_TEXT));
 				rec = c.getString(c.getColumnIndex(DirectMessages.COL_RECEIVER_SCREENNAME));
-				Log.e(TAG, "sending: " + text + " to " + rec);
+				Log.d(TAG, "sending: " + text + " to " + rec);
 				msg = twitter.sendMessage(rec, text);
 
 			} catch(Exception ex) { 
@@ -3635,8 +3635,8 @@ public class TwitterService extends Service {
 					getContentResolver().delete(queryUri, null, null);
 					Log.w(TAG, "Error: "+ex);
 					return;
-				}  else {
-					if (TwimightBaseActivity.running)
+				}  else if (ex instanceof TwitterException.E403) {
+					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you?", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
@@ -3645,27 +3645,25 @@ public class TwitterService extends Service {
 					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					getBaseContext().startActivity(i);
 					getContentResolver().delete(queryUri, null, null);
-					Log.w(TAG, "Error: "+ex);
+					
 					return;
 				}
-			}
+			} else {
+				ContentValues cv = new ContentValues();
+				cv.put(DirectMessages.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
+				cv.put(DirectMessages.COL_BUFFER, buffer);
+				cv.put(DirectMessages.COL_TEXT, result.getText());
+				cv.put(DirectMessages.COL_CREATED, result.getCreatedAt().getTime());
+				cv.put(DirectMessages.COL_DMID, result.getId().longValue());
+				cv.put(DirectMessages.COL_SENDER, result.getSender().getId());
+				cv.put(DirectMessages.COL_RECEIVER, result.getRecipient().getId());
+				cv.put(DirectMessages.COL_RECEIVER_SCREENNAME, result.getRecipient().getScreenName());
 
 
-
-			ContentValues cv = new ContentValues();
-			cv.put(DirectMessages.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
-			cv.put(DirectMessages.COL_BUFFER, buffer);
-			cv.put(DirectMessages.COL_TEXT, result.getText());
-			cv.put(DirectMessages.COL_CREATED, result.getCreatedAt().getTime());
-			cv.put(DirectMessages.COL_DMID, result.getId().longValue());
-			cv.put(DirectMessages.COL_SENDER, result.getSender().getId());
-			cv.put(DirectMessages.COL_RECEIVER, result.getRecipient().getId());
-			cv.put(DirectMessages.COL_RECEIVER_SCREENNAME, result.getRecipient().getScreenName());
-
-
-			getContentResolver().update(queryUri, cv, null, null);
-			if (TwimightBaseActivity.running)
-						Toast.makeText(getBaseContext(), "Message sent.", Toast.LENGTH_SHORT).show();
+				getContentResolver().update(queryUri, cv, null, null);
+				if (ShowTweetListActivity.running)
+							Toast.makeText(getBaseContext(), "Message sent.", Toast.LENGTH_SHORT).show();
+			}			
 
 		}
 

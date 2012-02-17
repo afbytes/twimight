@@ -230,7 +230,7 @@ public class MacsDBHelper {
 	/**
 	 * Get the timestamp of the last successful connection
 	 */
-	public Long getLastSuccessful(String mac) {
+	public long getLastSuccessful(String mac) {
 
 		String[] columns = {KEY_LAST};
 		Cursor c = database.query(DBOpenHelper.TABLE_MACS, columns, KEY_MAC+"='"+mac + "'",null,null,null,null);
@@ -240,7 +240,7 @@ public class MacsDBHelper {
 			c.close();
 			return last;
 		} else {
-			return null;
+			return 0;
 		}
 
 	}

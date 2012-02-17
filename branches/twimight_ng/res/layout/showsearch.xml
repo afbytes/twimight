@@ -15,7 +15,9 @@
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
 			android:text="Users" android:layout_marginRight="15dp" android:width="55dp"/>
 		
-			
+		<ImageButton android:id="@+id/headerBarSearchButtonS"
+				android:layout_width="40dp" android:layout_height="fill_parent"
+				android:src="@android:drawable/ic_menu_search" android:minWidth="40dp" android:layout_gravity="right" android:layout_marginLeft="120dp"/>	
 		
 	</LinearLayout>
     
