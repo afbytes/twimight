@@ -83,13 +83,20 @@ public class DMAdapter extends SimpleCursorAdapter {
 		*/
 		
 		// DM background and disaster info
-		LinearLayout rowLayout = (LinearLayout) dmrow.findViewById(R.id.dmUserRowLayout);
-		if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0){
-			rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
-		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(DirectMessages.COL_SENDER))).equals(LoginActivity.getTwitterId(context))) {
-			rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
+		LinearLayout rowLayout = (LinearLayout) dmrow.findViewById(R.id.dmUserRowLayout);		
+		if(Long.toString(cursor.getLong(cursor.getColumnIndex(DirectMessages.COL_SENDER))).equals(LoginActivity.getTwitterId(context))) {
+			
+			if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0)
+				rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
+			else
+				rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
+			
 		} else {
-			rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
+			
+			if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0)
+				rowLayout.setBackgroundResource(R.drawable.disaster_dm_background_receiver);
+			else
+				rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 		}
 		
 	}

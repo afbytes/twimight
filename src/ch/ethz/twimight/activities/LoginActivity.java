@@ -130,6 +130,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			startTimeline(this);
 			
 		} else if(hasAccessToken(this) && hasAccessTokenSecret(this)) {
+			
 			// we verify the tokens and retrieve the twitter ID
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);
 			i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
@@ -137,8 +138,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 			startService(i);
 			
 		} else if(hasRequestToken(this) && hasRequestTokenSecret(this)) {
-			// We get the URI when we are called back from Twitter
 			
+			// We get the URI when we are called back from Twitter
 			Uri uri = getIntent().getData();
 			if(uri != null){
 				buttonLogin = (Button) findViewById(R.id.buttonLogin);
@@ -147,20 +148,31 @@ public class LoginActivity extends Activity implements OnClickListener{
 				showLoginLayout.setVisibility(LinearLayout.GONE);
 				
 				new GetAccessTokensTask().execute(uri);
+			} else {
+				
+				// Delete Request token and secret
+				setRequestToken(null, this);
+				setRequestTokenSecret(null, this);
+				setupLoginButton();				
 			}
 
 		} else {
 			// if we don't have request token and secret, we show the login button
-			Log.i(TAG, "we do not have the tokens, enabling login button");
-			buttonLogin = (Button) findViewById(R.id.buttonLogin);
-			buttonLogin.setEnabled(true);	
-			buttonLogin.setOnClickListener(this);
+			Log.i(TAG, "we do not have the tokens, enabling login button");			
+			setupLoginButton();
 		}
 		
 		
 		
 	}
 	
+	private void setupLoginButton() {
+		buttonLogin = (Button) findViewById(R.id.buttonLogin);
+		buttonLogin.setEnabled(true);	
+		buttonLogin.setOnClickListener(this);
+		
+	}
+
 	/**
 	 * Method used to register a login Receiver
 	 * @author pcarta	 
@@ -170,6 +182,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 		IntentFilter intentFilter = new IntentFilter(LoginActivity.LOGIN_RESULT_ACTION);
 		registerReceiver(loginReceiver, intentFilter);
 	}
+	
+	
 	
 	/**
 	 * When the login button is pressed
@@ -182,7 +196,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()){
 				// disabling button
 				buttonLogin.setEnabled(false);
-
+									
 				new GetRequestTokenTask().execute();
 			} else {
 				Toast.makeText(this,"Not connected to the Internet, please try again later!", Toast.LENGTH_LONG).show();
@@ -217,7 +231,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected String doInBackground(Void... params) {
-			Log.i(TAG, "getting reqeuest token");
+			Log.i(TAG, "getting request token");
 
 			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
 			OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
@@ -363,10 +377,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				
 			}
 			// As a last step, we verify the correctness of the credentials and retrieve our Twitter ID
-			if(success){
-				SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit();
-				edit.putBoolean("isFirstLogin", true);
-				edit.commit();
+			if(success){				
 				// call the twitter service to verify the credentials
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);

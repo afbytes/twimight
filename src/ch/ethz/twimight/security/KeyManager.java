@@ -35,6 +35,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.spongycastle.jce.provider.X509CertificateObject;
 import org.spongycastle.openssl.PEMReader;
 
+import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.util.Constants;
 
 import android.content.Context;
@@ -51,19 +52,21 @@ import android.util.Log;
 public class KeyManager {
 
 	// The names of the fields in shared preferences
-	private static final String PPK_EXPONENT = "ppk_exponent";
-	private static final String PPK_MODULUS = "ppk_modulus";
-	private static final String PK_EXPONENT = "pk_exponent";
-	private static final String PK_MODULUS = "pk_modulus";
+	private static final String PRIVATE_EXPONENT = "PRIVATE_exponent";
+	private static final String PRIVATE_MODULUS = "PRIVATE_modulus";
+	private static final String PUBLIC_EXPONENT = "PUBLIC_exponent";
+	private static final String PUBLIC_MODULUS = "PUBLIC_modulus";
 
 	private static final String TAG = "KeyManager"; /** Logging */
 	SharedPreferences prefs;
+	private Context context;
 
 	/**
 	 * Constructor
 	 */
 	public KeyManager(Context context){
 		prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		this.context=context;
 	}
 
 
@@ -74,23 +77,23 @@ public class KeyManager {
 	public KeyPair getKey(){
 
 		// load all the ingredients from shared preferences
-		String pkModulusString = prefs.getString(PK_MODULUS, null);
-		String pkExponentString = prefs.getString(PK_EXPONENT, null);
-		String ppkModulusString = prefs.getString(PPK_MODULUS, null);
-		String ppkExponentString = prefs.getString(PPK_EXPONENT, null);
+		String PUBLICModulusString = prefs.getString(PUBLIC_MODULUS, null);
+		String PUBLICExponentString = prefs.getString(PUBLIC_EXPONENT, null);
+		String PRIVATEModulusString = prefs.getString(PRIVATE_MODULUS, null);
+		String PRIVATEExponentString = prefs.getString(PRIVATE_EXPONENT, null);
 
 		//return generateKey();
 
 		// if we had a key saved, this should be true. otherwise we will now create one.
-		if(pkModulusString != null && pkExponentString != null && ppkModulusString != null && ppkExponentString != null){
+		if(PUBLICModulusString != null && PUBLICExponentString != null && PRIVATEModulusString != null && PRIVATEExponentString != null){
 
 			try{
 
 				KeyFactory fact = KeyFactory.getInstance("RSA");
-				RSAPublicKeySpec pub = new RSAPublicKeySpec(new BigInteger(pkModulusString), new BigInteger(pkExponentString));
+				RSAPublicKeySpec pub = new RSAPublicKeySpec(new BigInteger(PUBLICModulusString), new BigInteger(PUBLICExponentString));
 				RSAPublicKey publicKey = (RSAPublicKey) fact.generatePublic(pub);
 
-				RSAPrivateKeySpec priv = new RSAPrivateKeySpec(new BigInteger(ppkModulusString),new BigInteger(ppkExponentString));
+				RSAPrivateKeySpec priv = new RSAPrivateKeySpec(new BigInteger(PRIVATEModulusString),new BigInteger(PRIVATEExponentString));
 				RSAPrivateKey privKey = (RSAPrivateKey) fact.generatePrivate(priv);
 
 				KeyPair kp = new KeyPair(publicKey, privKey);
@@ -109,7 +112,7 @@ public class KeyManager {
 	}
 
 	/**
-	 * Creates PEM Format of the encoded (PKCS #8?) public key
+	 * Creates PEM Format of the encoded (PUBLICCS #8?) public key
 	 * TODO: Let BouncyCastle (SpongyCastle) take care of this
 	 * @param kp
 	 * @return
@@ -172,12 +175,12 @@ public class KeyManager {
 			SharedPreferences.Editor editor = prefs.edit();
 
 			// public key
-			editor.putString(PK_MODULUS, pub.getModulus().toString());
-			editor.putString(PK_EXPONENT, pub.getPublicExponent().toString());
+			editor.putString(PUBLIC_MODULUS, pub.getModulus().toString());
+			editor.putString(PUBLIC_EXPONENT, pub.getPublicExponent().toString());
 
 			// private key
-			editor.putString(PPK_MODULUS, priv.getModulus().toString());
-			editor.putString(PPK_EXPONENT, priv.getPrivateExponent().toString());
+			editor.putString(PRIVATE_MODULUS, priv.getModulus().toString());
+			editor.putString(PRIVATE_EXPONENT, priv.getPrivateExponent().toString());
 
 			// finally, commit the changes to shared preferences
 			editor.commit();
@@ -197,10 +200,10 @@ public class KeyManager {
 	public void deleteKey(){
 
 		SharedPreferences.Editor editor = prefs.edit();
-		editor.remove(PK_MODULUS);
-		editor.remove(PK_EXPONENT);
-		editor.remove(PPK_MODULUS);
-		editor.remove(PPK_EXPONENT);
+		editor.remove(PUBLIC_MODULUS);
+		editor.remove(PUBLIC_EXPONENT);
+		editor.remove(PRIVATE_MODULUS);
+		editor.remove(PRIVATE_EXPONENT);
 		editor.commit();
 
 	}
@@ -211,16 +214,16 @@ public class KeyManager {
 	public static RSAPublicKey parsePem(String pemString){
 
 
-		RSAPublicKey pk = null;
+		RSAPublicKey PUBLIC = null;
 
 		PEMReader pem = new PEMReader(new StringReader(pemString));
 		try {
-			pk = (RSAPublicKey) pem.readObject();
+			PUBLIC = (RSAPublicKey) pem.readObject();
 		} catch (IOException e) {
 			Log.e(TAG, "error reading key");
 		}
 
-		return pk;
+		return PUBLIC;
 	}
 
 	/**
@@ -263,7 +266,7 @@ public class KeyManager {
 	 * @param text
 	 * @return
 	 */
-	public boolean checkSinature(X509CertificateObject cert, String signature, String text) {
+	public boolean checkSignature(X509CertificateObject cert, String signature, String text) {
 
 		
 		String originalHash = Long.toString(text.hashCode());
@@ -271,10 +274,10 @@ public class KeyManager {
 		  try {
 			  
 				// get the public key from the certificate
-			  	RSAPublicKey pk = (RSAPublicKey) cert.getPublicKey();
+			  	RSAPublicKey PUBLIC = (RSAPublicKey) cert.getPublicKey();
 			  	
 				Cipher cipher = Cipher.getInstance("RSA");			    	    
-				cipher.init(Cipher.DECRYPT_MODE, pk);
+				cipher.init(Cipher.DECRYPT_MODE, PUBLIC);
 				// we get the signature in base 64 encoding -> decode first
 				String decryptedHash = new String(cipher.doFinal(Base64.decode(signature, Base64.DEFAULT)));
 				return originalHash.equals(decryptedHash);
@@ -287,5 +290,62 @@ public class KeyManager {
 			} 
 		return false;
 	}
+	
+	 public String encrypt(String text, Long twitterId ) {		 
+		 try {			
+				Cipher cipher = Cipher.getInstance("RSA");
+				//I NEED PEER'S PUBLIC KEY    
+				FriendsKeysDBHelper kHelper = new FriendsKeysDBHelper(context);
+				kHelper.open();
+				if (kHelper.hasKey(twitterId)) {
+					Log.i(TAG,"has Key");
+					String publicKeyString =  kHelper.getKey(twitterId);					
+					RSAPublicKey publicKey = parsePem(publicKeyString);
+					cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+					byte[] cipherText = cipher.doFinal(text.getBytes());
+
+					String cipherTextString = Base64.encodeToString(cipherText, Base64.DEFAULT);			
+
+					return cipherTextString;	
+				} 
+						
+
+			} catch (NoSuchAlgorithmException e) {
+				Log.e(TAG,"NoSuchAlgorithmException",e);
+			} catch (NoSuchPaddingException e) {
+				Log.e(TAG,"NoSuchPaddingException",e);
+			} catch (IllegalBlockSizeException e) {	
+				Log.e(TAG,"IllegalBlockSizeException",e);
+			} catch (BadPaddingException e) {
+				Log.e(TAG,"error",e);
+			} catch (InvalidKeyException e) {	
+				Log.e(TAG,"error",e);
+			} 
+			return null;
+
+	 }
+	  
+	  public String decrypt(String cipherData) {
+		 
+		  try {			  
+			    KeyPair kp = getKey();			    
+
+				RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+			  	
+				Cipher cipher = Cipher.getInstance("RSA");			    	    
+				cipher.init(Cipher.DECRYPT_MODE, privateKey);
+				// we get the signature in base 64 encoding -> decode first
+				String decryptedText = new String(cipher.doFinal(Base64.decode(cipherData, Base64.DEFAULT)));
+				return decryptedText;
+				
+		  	} catch (NoSuchAlgorithmException e) {			
+			} catch (NoSuchPaddingException e) {			
+			} catch (InvalidKeyException e) {			
+			} catch (IllegalBlockSizeException e) {			
+			} catch (BadPaddingException e) {			
+			} 
+		  return null;
+		    
+	  }
 
 }

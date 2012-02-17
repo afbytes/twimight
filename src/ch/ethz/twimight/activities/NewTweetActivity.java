@@ -172,8 +172,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		// User settings: do we use location or not?
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
 		locationButton = (ToggleButton) findViewById(R.id.tweet_location);
-		locationButton.setChecked(useLocation);
-		locationButton.setBackgroundDrawable(null);
+		locationButton.setChecked(useLocation);		
 		locationButton.setOnClickListener(new OnClickListener() {
 			
 			@Override

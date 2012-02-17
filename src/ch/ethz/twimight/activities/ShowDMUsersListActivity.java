@@ -59,9 +59,8 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-				
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		super.onCreate(savedInstanceState);				
+		
 		setContentView(R.layout.show_dm_users);
 		
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
@@ -92,8 +91,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 				startActivity(new Intent(getBaseContext(), NewDMActivity.class));
 			}
 		});
-				
-		Log.i(TAG, "created");
+		
 
 	}
 	

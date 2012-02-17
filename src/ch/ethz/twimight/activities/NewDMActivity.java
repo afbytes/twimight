@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -75,7 +76,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 
 			@Override
 			public void onClick(View v) {
-				sendDM();
+				new SendDMTask().execute();
 				finish();
 			}
 			
@@ -179,43 +180,64 @@ public class NewDMActivity extends TwimightBaseActivity{
 		sendButton = null;
 		
 		text.removeTextChangedListener(textWatcher);
-		text = null;
+		
 		textWatcher = null;
 		
 		unbindDrawables(findViewById(R.id.showNewDMRoot));
 	}
 	
-	/**
-	 * Checks whether we are in disaster mode and inserts the content values into the content provider.
+	/**	
+	 * Checks whether we are in disaster mode and inserts the direct message in the db	 *
+	 * @author pcarta
+	 *
 	 */
-	private void sendDM(){
-		Log.i(TAG, "send DM!");
-		// if no connectivity, notify user that the tweet will be send later
-		try{
+	private class SendDMTask extends AsyncTask<Void, Void, Boolean>{
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			boolean result = false;
+			
+			Log.i(TAG, "send DM!");
+			// if no connectivity, notify user that the tweet will be send later
+
 			ContentValues cv = createContentValues();
-			if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true){				
-				// our own DMs go into the my disaster dm buffer
-				cv.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_MYDISASTER|DirectMessages.BUFFER_MESSAGES);
-				getContentResolver().insert(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_DISASTER), cv);
-			} else {
-				
-				// our own DMs go into the messages buffer
-				cv.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_MESSAGES);
-				getContentResolver().insert(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_NORMAL), cv);
-				
-				ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-					Toast.makeText(this, "No connectivity, your Message will be sent once we have a connection!", Toast.LENGTH_SHORT).show();
-				}				
+			if (cv != null) {
+				if(PreferenceManager.getDefaultSharedPreferences(NewDMActivity.this).getBoolean("prefDisasterMode", false) == true){
+
+					// our own DMs go into the my disaster dm buffer
+					cv.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_MYDISASTER|DirectMessages.BUFFER_MESSAGES);
+					getContentResolver().insert(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_DISASTER), cv);
+				} else {
+
+					// our own DMs go into the messages buffer
+					cv.put(DirectMessages.COL_BUFFER, DirectMessages.BUFFER_MESSAGES);
+					getContentResolver().insert(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_NORMAL), cv);
+
+					ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+						result=true;
+					}
+
+				}
 			}
 			
-		} catch (Exception e) {
-			Log.e(TAG, "Exception while inserting DM into DB: " + e.toString());
-			Toast.makeText(this, "There was an error inserting your DM into the local database! Please try again.", Toast.LENGTH_SHORT).show();
-			return;
+			
+			return result;
 		}
-	}
 
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (result)
+				Toast.makeText(NewDMActivity.this, "No connectivity, your Message will be sent once we have a connection!", Toast.LENGTH_SHORT).show();
+
+			super.onPostExecute(result);
+		}
+		
+		
+		
+	}
+	
+	
 	/**
 	 * Prepares the content values of the DM for insertion into the DB.
 	 * @return
@@ -223,13 +245,22 @@ public class NewDMActivity extends TwimightBaseActivity{
 	private ContentValues createContentValues() {
 		
 		ContentValues dmContentValues = new ContentValues();
+		try {
+			Log.i(TAG,"1");
+			if (text != null && text.getText() != null)
+				dmContentValues.put(DirectMessages.COL_TEXT, text.getText().toString());
+			Log.i(TAG,"2");
+			dmContentValues.put(DirectMessages.COL_SENDER, LoginActivity.getTwitterId(this));
+			Log.i(TAG,"3");
+			dmContentValues.put(DirectMessages.COL_RECEIVER_SCREENNAME, recepient.getText().toString());
+			Log.i(TAG,"4");
+			// we mark the tweet for sending to twitter
+			dmContentValues.put(DirectMessages.COL_FLAGS, DirectMessages.FLAG_TO_INSERT);
+			
+		} catch (Exception ex) {
+			return null;
+		}
 		
-		dmContentValues.put(DirectMessages.COL_TEXT, text.getText().toString());
-		dmContentValues.put(DirectMessages.COL_SENDER, LoginActivity.getTwitterId(this));
-		dmContentValues.put(DirectMessages.COL_RECEIVER_SCREENNAME, recepient.getText().toString());
-		
-		// we mark the tweet for sending to twitter
-		dmContentValues.put(DirectMessages.COL_FLAGS, DirectMessages.FLAG_TO_INSERT);
 		
 		return dmContentValues;
 	}

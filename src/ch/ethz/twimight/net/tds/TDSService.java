@@ -388,9 +388,9 @@ public class TDSService extends Service {
 
 				// bluetooth
 				List<String> macsList = tds.parseBluetooth();
-				//TODO: remove this line
+				//TODO: 
 				///////////////////////////////////////////////////////////////////////
-				macsList.clear();
+				//macsList.clear();
 				///////////////////////////////////////////////////////////////////////
 				if(!macsList.isEmpty()){
 					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
@@ -406,16 +406,15 @@ public class TDSService extends Service {
 						String mac = iterator.next();
 						if(dbHelper.createMac(mac, 1) == -1){
 							dbHelper.updateMacActive(mac, 1);
-							Log.i(TAG, "Already have MAC: " + mac);
+							Log.d(TAG, "Already have MAC: " + mac);
 						} else {
-							Log.i(TAG,"New MAC: " + mac);
+							Log.d(TAG,"New MAC: " + mac);
 						}
 					}
 				} else {
 					Log.d(TAG, "bluetooth mac list empty");
 				}
-				Log.d(TAG, "bluetooth parsed");
-
+				
 				// location, nothing to do here
 
 				// certificate
@@ -448,14 +447,14 @@ public class TDSService extends Service {
 						km.deleteKey();
 					}
 				} else {
-					Log.i(TAG, "no new revocations");
+					Log.d(TAG, "no new revocations");
 				}
-				Log.i(TAG, "revocation parsed");
+				Log.d(TAG, "revocation parsed");
 
 				// Followers
-				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
+				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());				
 				fm.open();
-				List<TDSPublicKey> keyList = tds.parseFollower();
+				List<TDSPublicKey> keyList = tds.parseFollower();			
 				if(keyList != null){
 					fm.insertKeys(keyList);
 					long lastUpdate = tds.parseFollowerLastUpdate();
@@ -466,7 +465,7 @@ public class TDSService extends Service {
 				Log.i(TAG, "followers parsed");
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while parsing response");
+				Log.e(TAG, "Exception while parsing response",e);
 			}
 
 			return true;

@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import ch.ethz.twimight.net.tds.TDSPublicKey;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -104,6 +105,30 @@ public class FriendsKeysDBHelper {
 		c.close();
 		return key;
 	}
+	
+	/**
+	 * gives the public key for the specified twitter user
+	 * @param screenName
+	 * @return
+	 * @author pcarta
+	 */
+	public String getKey(long twitterID){
+		
+
+		Cursor c = database.query(DBOpenHelper.TABLE_FRIENDS_KEYS, null, KEY_FRIENDS_KEY_TWITTER_ID + "=" + twitterID, null, null, null, null);
+
+		if(c.getCount() > 0){
+			c.moveToFirst();
+			String key = c.getString(c.getColumnIndex("key"));
+			c.close();
+			return key;
+		} 
+
+
+		return null;
+		
+	}
+	
 	
 	/**
 	 * Insert a key into DB. If we already have a key, we delete the old one.

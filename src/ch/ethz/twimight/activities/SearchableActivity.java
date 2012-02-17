@@ -18,12 +18,15 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
@@ -46,6 +49,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	private ListView searchListView;
 	private Button searchTweetsButton;
 	private Button searchUsersButton;
+	private ImageButton searchButton;
 
 	private ListAdapter adapter;
 	private Cursor c;
@@ -69,7 +73,13 @@ public class SearchableActivity extends TwimightBaseActivity{
 		
 		searchListView = (ListView) findViewById(R.id.searchList);
 		searchListView.setEmptyView(findViewById(R.id.searchListEmpty));
-
+		searchButton = (ImageButton) findViewById(R.id.headerBarSearchButtonS);
+		searchButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				onSearchRequested();
+			}
+		});
 		// Get the intent and get the query
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
@@ -110,7 +120,13 @@ public class SearchableActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();		
-
+		// Are we in disaster mode?
+				LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarSearch);
+				if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+					headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
+				} else {
+					headerBar.setBackgroundResource(R.drawable.top_bar_background);
+				}
 		if(positionIndex != 0 | positionTop !=0){
 			if(searchListView!=null) searchListView.setSelectionFromTop(positionIndex, positionTop);
 		}

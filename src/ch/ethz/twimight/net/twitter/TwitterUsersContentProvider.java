@@ -139,8 +139,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				
 			case USERS_SEARCH:
 				Log.d(TAG, "Query USERS_SEARCH");
-				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_SEARCH_RESULT+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL" 
-						+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' ", whereArgs, null, null, sortOrder);
+				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" IS NOT NULL" 
+						+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' OR " + TwitterUsers.COL_NAME + " LIKE '%" + where + "%' " , whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				
 				// start synch service with a synch followers request

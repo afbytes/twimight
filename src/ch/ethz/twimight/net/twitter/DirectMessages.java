@@ -47,7 +47,7 @@ public class DirectMessages implements BaseColumns {
 	
 	// here start the column names
 	public static final String COL_TEXT = "text"; /** the dm text */
-	public static final String COL_SENDER = "sender"; /** the user id of the sender */
+	public static final String COL_SENDER = "user_id"; /** the user id of the sender */
 	public static final String COL_RECEIVER = "receiver"; /** the user id of the receiver */
 	public static final String COL_RECEIVER_SCREENNAME = "receiver_screenname"; /** the screenname of the receiver (required for sending messages) */
 	public static final String COL_DMID = "dm_id"; /** the "official" message ID from twitter */
@@ -58,6 +58,7 @@ public class DirectMessages implements BaseColumns {
 	
 	// for disaster mode
 	public static final String COL_ISDISASTER = "is_disaster_dm"; /** disaster or normal message? */
+
 	public static final String COL_DISASTERID = "d_id"; /** the disaster ID of the message (for both, disaster and normal message) */
 	public static final String COL_ISVERIFIED = "is_verified"; /** is the signature of the disaster message valid? */
 	public static final String COL_SIGNATURE = "signature"; /** the signature of the disaster message */
@@ -73,7 +74,9 @@ public class DirectMessages implements BaseColumns {
 	
 	// flags to mark which buffer(s) a tweet belongs to. (Buffer sizes are defined in class Constants)
 	public static final int BUFFER_MESSAGES = 1; /** Holds all messages of the local user (to and from) */
-	public static final int BUFFER_DISASTER = 2; /** Disaster messages of other users */
+	public static final int BUFFER_DISASTER_ME = 2; /** Disaster messages written by other users for me */
 	public static final int BUFFER_MYDISASTER = 4; /** The disaster messages of the local user */
+	public static final int BUFFER_DISASTER_OTHERS = 8; /** Disaster messages for other users */
+
 
 }

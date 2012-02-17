@@ -49,7 +49,7 @@ public class Tweets implements BaseColumns {
 	
 	// here start the column names
 	public static final String COL_TEXT = "text"; /** the tweet text */
-	public static final String COL_USER = "user"; /** the user id of the author */
+	public static final String COL_USER = "user_id"; /** the user id of the author */
 	public static final String COL_SCREENNAME = "user_screenname"; /** the user screenname of the author */
 	public static final String COL_TID = "t_id"; /** the "official" tweet ID from twitter */
 	public static final String COL_REPLYTO = "reply_to"; /** the tweet ID to which this tweet replies */
