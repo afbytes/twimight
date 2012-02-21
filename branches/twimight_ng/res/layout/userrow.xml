@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:layout_width="fill_parent"
-	android:orientation="horizontal" android:id="@+id/userrowLayout"
-	android:padding="5dp" android:background="@drawable/normal_tweet_background">
 
-	<LinearLayout android:id="@+id/showUserInfo"
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/showUserInfo"
 		android:layout_width="match_parent" android:layout_height="wrap_content"
-		android:layout_weight="7.47" android:orientation="horizontal">
+		android:orientation="horizontal"
+		android:padding="5dp" android:descendantFocusability="blocksDescendants">
 		<ImageView android:id="@+id/showUserProfileImage"
 			android:layout_height="45dp" 
 		android:layout_width="45dp"
@@ -21,18 +19,18 @@
 
 		<LinearLayout android:id="@+id/linearLayout1"
 			android:layout_width="match_parent" android:layout_height="wrap_content"
-			android:layout_weight="7.47" android:orientation="vertical"
+			android:orientation="vertical"
 			android:paddingLeft="20dp">
 			<TextView android:id="@+id/showUserRealName"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="RealName" android:textColor="@color/darkGrey"/>
+				android:text="RealName" />
 			<TextView android:id="@+id/showUserScreenName"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="ScreenName" android:textStyle="bold" android:textColor="@color/darkGrey"/>
+				android:text="ScreenName" android:textStyle="bold" />
 			<TextView android:id="@+id/showUserLocation"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Location" android:textColor="@color/darkGrey"/>
+				android:text="Location" />
 		</LinearLayout>
 	</LinearLayout>
 
-</LinearLayout>
+

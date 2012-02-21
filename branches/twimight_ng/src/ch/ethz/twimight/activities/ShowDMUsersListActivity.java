@@ -47,6 +47,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 
 	private DMUserAdapter adapter;
 	private Cursor c;
+	public static boolean running= false;
 
 	// handler
 	static Handler handler;
@@ -60,7 +61,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);				
-		
+		running=true;
 		setContentView(R.layout.show_dm_users);
 		
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
@@ -101,7 +102,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		
+		running = true;
 		// Are we in disaster mode?
 		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarDMUsers);
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
@@ -115,13 +116,12 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 		}
 	}
 	
-	/**
-	 * On pause
-	 */
+
+
 	@Override
-	public void onPause(){
-		super.onPause();
-				
+	protected void onStop() {
+		running=false;
+		super.onStop();
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		running = false;
 		messageButton.setOnClickListener(null);
 
 		dmUsersListView.setOnItemClickListener(null);

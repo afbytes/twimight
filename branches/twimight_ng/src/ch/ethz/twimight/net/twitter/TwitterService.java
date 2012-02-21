@@ -1782,8 +1782,7 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){				
 					Log.e(TAG, "exception while updating user: " + ex);
 				} else {
-					if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while searching: " + ex);
 				}
@@ -1877,8 +1876,12 @@ public class TwitterService extends Service {
 					Log.e(TAG, "Exception while inserting friends list");
 				}
 				i++;
-				if (i==6)
+				if (i==6){
 					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+					// trigger the user synch (for updating the profile images)
+					new SynchTransactionalUsersTask().execute(false);
+					i=0;
+				}
 
 			}
 			return null;
@@ -2041,8 +2044,12 @@ public class TwitterService extends Service {
 					getContentResolver().insert(insertUri, cv);
 				}
 				i++;
-				if (i==6)
+				if (i==6) {
 					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+					// trigger the user synch (for updating the profile images)
+					new SynchTransactionalUsersTask().execute(false);
+					i=0;
+				}
 
 			}
 			return null;
@@ -2209,10 +2216,14 @@ public class TwitterService extends Service {
 				} catch (Exception ex){
 					Log.e(TAG, "Exception while inserting followers list");
 				}
-				
+
 				i++;
-				if (i==6)
+				if (i==6){
 					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+					// trigger the user synch (for updating the profile images)
+					new SynchTransactionalUsersTask().execute(false);
+					i=0;
+				}
 
 
 			}
@@ -3636,8 +3647,8 @@ public class TwitterService extends Service {
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}  else if (ex instanceof TwitterException.E403) {
-					if (ShowTweetListActivity.running)
-						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you?", Toast.LENGTH_SHORT).show();
+					if (ShowUserActivity.running || ShowDMUsersListActivity.running)
+						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you ?", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
 					i.putExtra("recipient", rec);

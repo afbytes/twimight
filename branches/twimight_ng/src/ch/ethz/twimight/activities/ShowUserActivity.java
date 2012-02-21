@@ -62,8 +62,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	private LinearLayout followInfo;
 	private LinearLayout unfollowInfo;
 	private Button showUserTweetsButton;
-
-
+	
+	public static boolean running= false;
 	private boolean following;
 	String userScreenName;
 	Handler handler;
@@ -92,7 +92,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		showFriendsButton = (Button) findViewById(R.id.showUserFriends);
 		showDisPeersButton = (Button) findViewById(R.id.showUserDisasterPeers);
 		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
-
+		running = true;
+		
 		if(getIntent().hasExtra("rowId")){
 			rowId = (long) getIntent().getIntExtra("rowId", 0);
 
@@ -157,6 +158,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		super.onResume();
 		observer = new UserContentObserver(handler);
 		c.registerContentObserver(observer);
+		running = true;
 	}
 	
 	/**
@@ -181,7 +183,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-
+		running = false;
 		if(followButton!=null) followButton.setOnClickListener(null);
 		if(mentionButton!=null) mentionButton.setOnClickListener(null);
 		if(messageButton!=null) messageButton.setOnClickListener(null);

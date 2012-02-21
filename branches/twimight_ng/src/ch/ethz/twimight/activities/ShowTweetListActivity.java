@@ -179,6 +179,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	
 
+
+
 	@Override
 	protected void onStop() {
 		running=false;

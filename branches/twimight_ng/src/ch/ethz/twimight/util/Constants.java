@@ -79,12 +79,12 @@ public final class Constants {
 	
 	// Twitter
 	public static final int CONSUMER_ID = 1;
-	public static final int LOGIN_ATTEMPTS = 5; /** How many times do we attempt to log in before giving up? */
+	public static final int LOGIN_ATTEMPTS = 3; /** How many times do we attempt to log in before giving up? */
 	public static final int TIMELINE_ATTEMPTS = 3; /** How many times do we attempt to update the timeline before giving up? */
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
 	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
 	public static final boolean TWEET_DEFAULT_RUN_AT_BOOT = true; /** Are the updates started at boot time ? */
-	public static final long UPDATER_UPDATE_PERIOD = 5 * 60 * 1000L; /** frequency of background updates */
+	public static long UPDATER_UPDATE_PERIOD = 5 * 60 * 1000L; /** frequency of background updates */
 	
 	public static final int NR_TWEETS = 50; /** how many tweets to request from twitter in timeline update */
 	public static final int NR_FAVORITES = 20; /** how many favorites to request from twitter */

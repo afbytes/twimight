@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="wrap_content" android:layout_width="fill_parent"
-	android:orientation="horizontal" android:id="@+id/rowLayout">
+	android:orientation="horizontal" android:id="@+id/rowLayout" android:descendantFocusability="blocksDescendants">
 
 	<ImageView android:id="@+id/imageView1"
 		android:layout_marginRight="5dp" android:src="@drawable/default_profile"
@@ -19,7 +19,7 @@
 			<!-- placeholder for the digital signature icon -->
 			<ImageView android:id="@+id/showTweetVerified" android:src="@drawable/blank"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:visibility="gone" /> 
+				android:visibility="gone" />
 
 			<!-- placeholder for the "unposted" notification -->
 			<ImageView android:id="@+id/topost" android:src="@drawable/blank"
@@ -31,7 +31,7 @@
 
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:id="@+id/textUser"
-				android:text="BOB" android:textStyle="bold" android:textColor="@color/darkGrey"
+				android:text="BOB" android:textStyle="bold" android:textColor="@color/white"
 				android:minLines="1" android:textSize="15sp"  />
 
 			<TextView android:layout_height="wrap_content" android:id="@+id/tweetCreatedAt"
@@ -43,7 +43,7 @@
 
 		<TextView android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/textText"
-			android:text="The latest status " android:textColor="@color/darkGrey"
+			android:text="The latest status " android:textColor="@color/white"
 			android:textSize="15sp" android:layout_marginBottom="8dp"/>
 		
 		<TextView android:layout_width="fill_parent"

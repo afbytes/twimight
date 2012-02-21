@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
     <resources>
-    	<color name="grey">#777777</color>
-    	<color name="darkGrey">#333333</color>
+    	<color name="grey">#999999</color>
     	<color name="red">#ff0000</color>
     	<color name="title">#ffffff</color>
         <color name="transparent">#00000000</color>
@@ -14,31 +13,30 @@
         
         <color name="headerBarTextOn">#FFFFFF</color>
         <color name="headerBarTextOff">#00000000</color>
-        
         <color name="titlenormalbackgroundcolor">#939393</color>
   		<color name="titledisasterbackgroundcolor">#ff0000</color>
+  		<color name="tweet_background_normal_start">#000000</color>
+  		<color name="tweet_background_normal_end">#454545</color>
+  		<color name="tweet_background_disaster_start">#450000</color>
+  		<color name="tweet_background_disaster_end">#994545</color>
+  		<color name="tweet_background_mention_start">#002200</color>
+  		<color name="tweet_background_mention_end">#455545</color>
+  		<color name="tweet_background_own_start">#000022</color>
+  		<color name="tweet_background_own_end">#454555</color>
   		
-  		<color name="tweet_background_normal_start">#F4E7FF</color>
-  		<color name="tweet_background_normal_end">#DFD9FF</color>
-  		<color name="tweet_background_disaster_start">#FFA570</color>
-  		<color name="tweet_background_disaster_end">#FDC6B8</color>
-  		
-  		<color name="dm_background_disaster_start">#FD8566</color>
-  		<color name="dm_background_disaster_end">#FD6466</color>
-  		
-  		<color name="tweet_background_mention_start">#EEFFDD</color>
-  		<color name="tweet_background_mention_end">#E8FFBF</color>
-  		<color name="tweet_background_own_start">#95B1F4</color>
-  		<color name="tweet_background_own_end">#A5C6FA</color>
+  		<color name="general_background_end">#61421F</color>
+  		<color name="general_background_start">#272010</color>
   		
  		<color name="btn_blue_background_start">#000022</color>
   		<color name="btn_blue_background_end">#454555</color>
  		<color name="btn_red_background_start">#450000</color>
   		<color name="btn_red_background_end">#994545</color>
  		<color name="btn_orange_background_start">#453300</color>
-  		<color name="btn_orange_background_end">#ffa500</color>  
+  		<color name="btn_orange_background_end">#ffa500</color>  		
   		
-  		<color name="headerBarStart">#59A9FF</color>  
-  		<color name="headerBarEnd">#4692D6</color>  
-  				
+  		 <color name="dm_background_disaster_start">#FD8566</color>
+         <color name="dm_background_disaster_end">#FD6466</color>
+         
+         
+  		
     </resources>

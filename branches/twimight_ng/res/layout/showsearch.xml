@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="fill_parent" android:layout_width="fill_parent"
-	android:orientation="vertical" android:id="@+id/showSearchListRoot">
+        android:layout_height="fill_parent" android:layout_width="fill_parent"
+        android:orientation="vertical" android:id="@+id/showSearchListRoot">
 
-	
+        
     <LinearLayout android:id="@+id/headerBarSearch"
-		android:layout_height="50dp" android:layout_width="match_parent"
-		android:orientation="horizontal" android:background="@drawable/top_bar_background"
-		android:gravity="center_vertical">
-		<Button android:id="@+id/headerBarTweetsButton"
-			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:text="Tweets" android:layout_marginRight="15dp" android:width="60dp"/>
-		<Button android:id="@+id/headerBarUsersButton"
-			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:text="Users" android:layout_marginRight="15dp" android:width="55dp"/>
-		
-		<ImageButton android:id="@+id/headerBarSearchButtonS"
-				android:layout_width="40dp" android:layout_height="fill_parent"
-				android:src="@android:drawable/ic_menu_search" android:minWidth="40dp" android:layout_gravity="right" android:layout_marginLeft="120dp"/>	
-		
-	</LinearLayout>
+                android:layout_height="50dp" android:layout_width="match_parent"
+                android:orientation="horizontal" android:background="@drawable/top_bar_background"
+                android:gravity="center_vertical">
+                <Button android:id="@+id/headerBarTweetsButton"
+                        android:layout_width="wrap_content" android:layout_height="fill_parent"
+                        android:text="Tweets" android:layout_marginRight="15dp" android:width="60dp"/>
+                <Button android:id="@+id/headerBarUsersButton"
+                        android:layout_width="wrap_content" android:layout_height="fill_parent"
+                        android:text="Users" android:layout_marginRight="15dp" android:width="55dp"/>
+                
+                <ImageButton android:id="@+id/headerBarSearchButtonS"
+                                android:layout_width="40dp" android:layout_height="fill_parent"
+                                android:src="@android:drawable/ic_menu_search" android:minWidth="40dp" android:layout_gravity="right" android:layout_marginLeft="120dp"/>       
+                
+        </LinearLayout>
     
-	<ListView android:layout_height="fill_parent"
-		android:layout_width="fill_parent" android:id="@+id/searchList"
-		android:fastScrollEnabled="true" android:scrollingCache="true" />
-	<TextView android:id="@+id/searchListEmpty"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="No results" android:textSize="16sp" android:layout_gravity="center"
-		android:paddingTop="20dp" />
+        <ListView android:layout_height="fill_parent"
+                android:layout_width="fill_parent" android:id="@+id/searchList"
+                android:fastScrollEnabled="true" android:scrollingCache="true" />
+        <TextView android:id="@+id/searchListEmpty"
+                android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:text="No results" android:textSize="16sp" android:layout_gravity="center"
+                android:paddingTop="20dp" />
 
 </LinearLayout>

@@ -67,9 +67,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.showsearch);
-
-		setTitle("Search Results");
+		setContentView(R.layout.showsearch);		
 		
 		searchListView = (ListView) findViewById(R.id.searchList);
 		searchListView.setEmptyView(findViewById(R.id.searchListEmpty));
@@ -84,7 +82,8 @@ public class SearchableActivity extends TwimightBaseActivity{
 		Intent intent = getIntent();
 		if (intent.hasExtra(SearchManager.QUERY)) {
 			//if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
-			query = intent.getStringExtra(SearchManager.QUERY);			
+			query = intent.getStringExtra(SearchManager.QUERY);	
+			setTitle("Search Results for: " + query);
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
