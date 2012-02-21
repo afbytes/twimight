@@ -655,8 +655,10 @@ public class TweetsContentProvider extends ContentProvider {
 				// if none of the before was true, this is a proper new tweet which we now insert
 				try {
 					insertUri = insertTweet(values);
-					if (ShowTweetListActivity.running==false) {
+					if (ShowTweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
+							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true ) {
 						// notify user 
+						Log.i(TAG,"2 notifying normal tweet");
 						notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
 					}
 				} catch (Exception ex) {
@@ -734,7 +736,8 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_ISVERIFIED, 0);
 					}
 					
-					if (ShowTweetListActivity.running==false) {
+					if (ShowTweetListActivity.running==false && 
+							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true) {
 						// notify user 
 						notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
 					}
@@ -936,8 +939,11 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
 					}
 					
-					if (ShowTweetListActivity.running==false) {
+					if (ShowTweetListActivity.running==false && 
+							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions", true) == true 
+							&& !isFirstLogin()) {
 						// notify user
+						Log.i(TAG,"1 notifying mention");
 						notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 					} 
 									
@@ -967,7 +973,12 @@ public class TweetsContentProvider extends ContentProvider {
 	//	}
 	}
 
-	
+	 
+    private boolean isFirstLogin() {
+            return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
+    }
+
+    
 	/**
 	 * Creates and triggers the status bar notifications
 	 */

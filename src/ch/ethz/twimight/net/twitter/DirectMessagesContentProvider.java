@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.ShowDMListActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
@@ -577,13 +578,15 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
 			if(rowId >= 0){				
-				Log.i(TAG,"dm added");
+				
 				// are we the receiver?
 				if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
 					
-					// notify user
-					notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
-					
+					if ( (!ShowDMUsersListActivity.running || !ShowDMListActivity.running) && !isFirstLogin() &&
+							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
+						// notify user
+						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
+					}
 				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
@@ -606,6 +609,10 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	}
 	
 	
+	 
+    private boolean isFirstLogin() {
+            return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
+    }
 
 
 	

@@ -70,7 +70,12 @@ public class TwitterAlarm extends BroadcastReceiver {
 				i.putExtra("isLogin",true );
 				isLogin=false;
 				Log.i(TAG,"this is the login");
-			} 
+			} else {
+                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                edit.putBoolean("isFirstLogin", false);
+                edit.commit();
+        }
+
 			context.startService(i);			
 			
 		

@@ -28,7 +28,7 @@
 				<TextView android:id="@+id/showDMScreenName"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:text="ScreenName" android:textStyle="bold"
-					android:textColor="@color/darkGrey" />
+					android:textColor="@color/white" />
 				<TextView android:layout_height="wrap_content" android:id="@+id/dmCreatedAt"
 					android:text="10 minutes ago" android:layout_gravity="right"
 					android:gravity="right" android:layout_width="fill_parent"
@@ -46,7 +46,7 @@
 			     -->
 				<TextView android:id="@+id/showDMText"
 					android:layout_width="fill_parent" android:layout_height="wrap_content"
-					android:text="DM Text" android:textColor="@color/darkGrey"
+					android:text="DM Text" android:textColor="@color/white"
 					android:textSize="16sp" android:layout_marginBottom="6dp" />
 
 

@@ -13,14 +13,14 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.R;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
+import ch.ethz.twimight.R;
 
 /** 
  * Cursor adapter for a cursor containing users.
@@ -48,7 +48,8 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}
-		
+		LinearLayout rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);		
+		rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 	}
 	
 }

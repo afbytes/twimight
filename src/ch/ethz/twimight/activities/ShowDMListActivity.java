@@ -47,6 +47,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	
 	private int rowId;
 	private String screenname;
+	public static boolean running= false;
 
 	// handler
 	static Handler handler;
@@ -61,7 +62,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-				
+		running = true;		
 		setContentView(R.layout.show_dm_user);
 		
 		rowId = getIntent().getIntExtra("rowId", 0);
@@ -99,7 +100,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		
+		running = true;
 		// Are we in disaster mode?
 		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarDMUser);
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
@@ -128,7 +129,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		running=false;
 		messageButton.setOnClickListener(null);
 
 		dmUserListView.setAdapter(null);

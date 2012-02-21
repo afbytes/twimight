@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 
 /** 
@@ -48,6 +49,8 @@ public class UserAdapter extends SimpleCursorAdapter {
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}
+		//LinearLayout rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);		
+		//rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 		
 	}
 	

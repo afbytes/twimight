@@ -390,7 +390,7 @@ public class TDSService extends Service {
 				List<String> macsList = tds.parseBluetooth();
 				//TODO: 
 				///////////////////////////////////////////////////////////////////////
-				//macsList.clear();
+				macsList.clear();
 				///////////////////////////////////////////////////////////////////////
 				if(!macsList.isEmpty()){
 					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());

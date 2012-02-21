@@ -123,7 +123,7 @@ public class ScanningService extends Service{
 	        } 
         }		
 		startScanning();
-		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 		
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 		
 		return START_STICKY; 
 		
 	}

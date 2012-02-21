@@ -49,8 +49,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 	private EditText recepient;
 	private TextView characters;
 	private Button cancelButton;
-	private Button sendButton;
-		
+	private Button sendButton;	
 	private TextWatcher textWatcher;
 	
 	/** 
@@ -59,8 +58,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.new_dm);
-
+		setContentView(R.layout.new_dm);		
 		cancelButton = (Button) findViewById(R.id.dm_cancel);
 		cancelButton.setOnClickListener(new OnClickListener(){
 
@@ -150,29 +148,14 @@ public class NewDMActivity extends TwimightBaseActivity{
 		Log.v(TAG, "onCreated");
 	}
 	
-	/**
-	 * onResume
-	 */
-	@Override
-	public void onResume(){
-		super.onResume();
-	}
-	
-	/**
-	 * onPause
-	 */
-	@Override
-	public void onPause(){
-		super.onPause();
-	}
-	
+
 	/**
 	 * On Destroy
 	 */
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+	
 		cancelButton.setOnClickListener(null);
 		cancelButton = null;
 		

@@ -17,7 +17,7 @@
 		android:fastScrollEnabled="true" android:scrollingCache="true" />
 
 	<TextView android:id="@+id/dmListEmpty" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="No direct messages (loading..)" 
+		android:layout_height="wrap_content" android:text="No direct messages (loading...)" 
 		android:textSize="16sp" android:layout_gravity="center"
 		android:paddingTop="20dp"/>
 
