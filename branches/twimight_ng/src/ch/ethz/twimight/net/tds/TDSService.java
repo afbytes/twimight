@@ -74,8 +74,10 @@ public class TDSService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
 		Log.d(TAG, "started..");
-
-
+		
+		//  release the lock
+		TDSAlarm.releaseWakeLock();
+		
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
@@ -213,8 +215,7 @@ public class TDSService extends Service {
 			Log.i(TAG, "update not successful");
 		}
 
-		// finally, release the lock
-		TDSAlarm.releaseWakeLock();
+		
 	}
 
 	/**

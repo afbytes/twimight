@@ -121,7 +121,7 @@ public class LocationAlarm extends BroadcastReceiver {
 		releaseWakeLock();
 		
 		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		wakeLock = mgr.newWakeLock(PowerManager.FULL_WAKE_LOCK, WAKE_LOCK);
+		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK);
 		wakeLock.acquire();
 
 		return wakeLock;

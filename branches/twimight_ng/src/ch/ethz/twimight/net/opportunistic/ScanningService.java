@@ -20,8 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Base64;
 
-import winterwell.jtwitter.TwitterException;
-
 import android.app.AlarmManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -41,7 +39,6 @@ import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -92,27 +89,31 @@ public class ScanningService extends Service{
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
+		
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
+		
+		Log.i(TAG,"1");
 		if (context == null) {
 			context = this;
 			handler = new Handler();		
 	        // set up Bluetooth
-			
+			Log.i(TAG,"2");
 	        bluetoothHelper = new BluetoothComms(mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
-			dbHelper.open();		
+			dbHelper.open();
+			Log.i(TAG,"3");
 	        
 		}		
 		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 		// Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	        
-    	
+    	Log.i(TAG,"4");
         if (pairedDevices != null) {
         	// If there are paired devices, add each one to the ArrayAdapter
 	        if (pairedDevices.size() > 0) {
-	        	
+	        	Log.i(TAG,"5");
 	            for (BluetoothDevice device : pairedDevices) {
 	            	if (device.getBluetoothClass() != null) {
 	            		if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART)
@@ -121,7 +122,8 @@ public class ScanningService extends Service{
 	            		dbHelper.createMac(device.getAddress().toString(), 1); 
 	            }
 	        } 
-        }		
+        }	
+    	Log.i(TAG,"6");
 		startScanning();
 		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 		
 		return START_STICKY; 
