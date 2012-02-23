@@ -14,7 +14,6 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +37,6 @@ import winterwell.jtwitter.Twitter.TweetEntity;
 import winterwell.jtwitter.TwitterException;
 import winterwell.jtwitter.Twitter_Account;
 import winterwell.jtwitter.User;
-import android.app.AlarmManager;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -48,6 +46,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -61,7 +60,7 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.net.opportunistic.BluetoothComms;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -93,7 +92,16 @@ public class TwitterService extends Service {
 	public static final int SYNCH_TRANSACTIONAL = 16;
 	public static final int SYNCH_SEARCH_USERS = 18;
 	
+	public static final long TRUE = 1;
+	public static final long FALSE = 0;
+	
 	public static final String FORCE_FLAG = "force";
+	public static final String TASK_MENTIONS = "mentions";
+	public static final String TASK_DIRECT_MESSAGES_IN = "direct_messages_in";
+	
+	
+	
+	
 	Twitter twitter;
 
 	@Override
@@ -108,7 +116,7 @@ public class TwitterService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
 
-
+		TwitterAlarm.releaseWakeLock();
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
@@ -135,7 +143,7 @@ public class TwitterService extends Service {
 			
 			// check what we are asked to synch
 			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);		
-			//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 
+		
 			
 			switch(synchRequest){
 			
@@ -148,8 +156,7 @@ public class TwitterService extends Service {
 			case SYNCH_VERIFY:
 				synchVerify();
 				break;
-			case SYNCH_ALL:
-				TwitterAlarm.releaseWakeLock();
+			case SYNCH_ALL:				
 				Log.i(TAG, "SYNCH_ALL");
 				synchTransactional();				
 				
@@ -158,8 +165,8 @@ public class TwitterService extends Service {
 					synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));									
 					synchMessages();
 				} else {
-					//synchFriends();
-				    //synchFollowers();
+					 Handler handler = new Handler();
+					 handler.postDelayed(new GetFriendsFollowersDelayed( ), 60 * 1000L );
 				}					
 				break;
 			case SYNCH_TIMELINE:
@@ -172,10 +179,10 @@ public class TwitterService extends Service {
 				synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));
 				break;
 			case SYNCH_FRIENDS:
-				synchFriends();
+				synchFriends(TRUE);
 				break;
 			case SYNCH_FOLLOWERS:
-				synchFollowers();
+				synchFollowers(TRUE);
 				break;			
 			case SYNCH_SEARCH_TWEETS:
 				if(intent.getStringExtra("query") != null){
@@ -221,7 +228,7 @@ public class TwitterService extends Service {
 			
 						if(c.getCount() == 1){
 							c.moveToFirst();
-							synchTweet(c);
+							synchTweet(c,TRUE);
 						}				
 							
 						if(c!=null) c.close();					
@@ -233,7 +240,7 @@ public class TwitterService extends Service {
 				break;
 			case SYNCH_DM:
 				if(intent.getLongExtra("rowId", 0) != 0){
-					synchMessage(intent.getLongExtra("rowId", 0));
+					synchMessage(intent.getLongExtra("rowId", 0) , TRUE);
 				}
 				break;
 			case SYNCH_USERTWEETS:
@@ -251,6 +258,20 @@ public class TwitterService extends Service {
 		
 	}
 	
+	private class GetFriendsFollowersDelayed implements Runnable {
+		@Override
+		public void run() {
+			synchFriends(FALSE);
+		    synchFollowers(FALSE);
+		}
+	}
+	
+	public static void setTaskExecuted(String which, Context context){
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putBoolean(which,true );
+		prefEditor.commit();
+	}
 	
 	/**
 	 * Starts a thread to search Twitter users
@@ -268,26 +289,15 @@ public class TwitterService extends Service {
 		
 	}
 
-	public class CustomExceptionHandler implements UncaughtExceptionHandler {
 
-		@Override
-		public void uncaughtException(Thread t, Throwable e) {		
-			 Log.e(TAG, "error ", e);
-			 
-			    TwitterService.this.stopSelf();
-				AlarmManager mgr = (AlarmManager) LoginActivity.getInstance().getSystemService(Context.ALARM_SERVICE);
-				mgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() , LoginActivity.getRestartIntent());
-				System.exit(2);
-		}
-	}
 
 	/**
 	 * Creates the thread to update friends
 	 */
-	private void synchFriends() {
-		Log.i(TAG, "SYNCH_FRIENDS");
+	private void synchFriends(long notify) {
+		Log.d(TAG, "SYNCH_FRIENDS");
 		if(System.currentTimeMillis() - getLastFriendsUpdate(getBaseContext()) > Constants.FRIENDS_MIN_SYNCH){
-			(new UpdateFriendsTask()).execute();
+			(new UpdateFriendsTask()).execute(notify);
 		} else {
 			Log.i(TAG, "Last friends synch too recent.");
 		}
@@ -298,10 +308,10 @@ public class TwitterService extends Service {
 	/**
 	 * Creates the thread to update followers
 	 */
-	private void synchFollowers() {
+	private void synchFollowers(long notify) {
 		Log.i(TAG, "SYNCH_FOLLOWERS");
 		if(System.currentTimeMillis() - getLastFollowerUpdate(getBaseContext()) > Constants.FOLLOWERS_MIN_SYNCH){
-			(new UpdateFollowersTask()).execute();
+			(new UpdateFollowersTask()).execute(notify);
 		} else {
 			Log.i(TAG, "Last followers synch too recent.");
 		}		
@@ -351,7 +361,7 @@ public class TwitterService extends Service {
 				if(c.getCount() >= 0){
 					c.moveToFirst();
 					while(!c.isAfterLast()){
-						synchTweet(c);
+						synchTweet(c,FALSE);
 						c.moveToNext();
 					}
 				}				
@@ -384,7 +394,7 @@ public class TwitterService extends Service {
 				if(c.getCount() >= 0){
 					c.moveToFirst();
 					while(!c.isAfterLast()){
-						synchMessage(c.getLong(c.getColumnIndex("_id")));
+						synchMessage(c.getLong(c.getColumnIndex("_id")) , FALSE);
 						c.moveToNext();
 					}
 				}			
@@ -431,7 +441,7 @@ public class TwitterService extends Service {
 	/**
 	 * Checks the transactional flags of the tweet with the given _id and performs the corresponding actions
 	 */
-	private void synchTweet(Cursor c) {
+	private void synchTweet(Cursor c, long notify) {
 		Log.i(TAG, "SYNCH_TWEET");
 
 		int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
@@ -439,28 +449,28 @@ public class TwitterService extends Service {
 		
 		if((flags & Tweets.FLAG_TO_DELETE)>0) {
 			// Delete a tweet from twitter
-			Long[] params = {rowId, 3L}; // three attempts
+			Long[] params = {rowId, 3L, notify}; // three attempts
 			(new DestroyStatusTask()).execute(params);
 			
 		} else if((flags & Tweets.FLAG_TO_INSERT)>0) {
 			// post the tweet to twitter
 			Log.i(TAG,"uploading tweet");
-			Long[] params = {rowId, 3L}; // three attempts
+			Long[] params = {rowId, 3L, notify}; // three attempts
 			(new UpdateStatusTask()).execute(params);
 		} 		
 		if((flags & Tweets.FLAG_TO_FAVORITE)>0) {
 			// post favorite to twitter
-			Long[] params = {rowId, 3L}; // three attempts
+			Long[] params = {rowId, 3L, notify}; // three attempts
 			(new FavoriteStatusTask()).execute(params);
 			
 		} else if((flags & Tweets.FLAG_TO_UNFAVORITE)>0) {
 			// remove favorite from twitter
-			Long[] params = {rowId, 3L}; // three attempts
+			Long[] params = {rowId, 3L, notify}; // three attempts
 			(new UnfavoriteStatusTask()).execute(params);
 		} 
 		if((flags & Tweets.FLAG_TO_RETWEET)>0) {
 			// retweet
-			Long[] params = {rowId, 3L}; // three attempts
+			Long[] params = {rowId, 3L, notify}; // three attempts
 			(new RetweetStatusTask()).execute(params);
 		} 
 		
@@ -570,12 +580,13 @@ public class TwitterService extends Service {
 	/**
 	 * Checks the transactional flags of the direct message with the given _id and performs the corresponding actions
 	 */
-	private void synchMessage(long rowId) {
+	private void synchMessage(long rowId, long notify) {
 		Log.i(TAG, "SYNCH_DM");
 		// get the flags
 		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+rowId);
 		Cursor c = null;
-
+		long notify_user;
+		
 		try{
 			c = getContentResolver().query(queryUri, null, null, null, null);
 			if(c.getCount() == 0){
@@ -591,7 +602,8 @@ public class TwitterService extends Service {
 				
 			} else if((flags & DirectMessages.FLAG_TO_INSERT)>0) {
 				// post the DM to twitter
-				(new SendMessageTask()).execute(rowId);
+				
+				(new SendMessageTask()).execute(rowId, notify);
 			} 
 		} catch(Exception ex){
 			Log.e(TAG, "Exception: " + ex);
@@ -1349,6 +1361,7 @@ public class TwitterService extends Service {
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			setTaskExecuted(TwitterService.TASK_MENTIONS, TwitterService.this);
 		}
 
 	}
@@ -1908,15 +1921,17 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateFriendsTask extends AsyncTask<Void, Void, List<Number>> {
+	private class UpdateFriendsTask extends AsyncTask<Long, Void, List<Number>> {
 
 		Exception ex;
+		long notify;
 
 		@Override
-		protected List<Number> doInBackground(Void... params) {
+		protected List<Number> doInBackground(Long... params) {
 			Log.d(TAG, "AsynchTask: UpdateFriendsTask");
 			ShowUserListActivity.setLoading(true);
-
+			this.notify= params[0];
+			
 			List<Number> friendsList = null;
 
 			try {
@@ -1938,12 +1953,11 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){					
 					Log.e(TAG, "exception while loading friends: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
-					if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Timeout while loading friends.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading friends: " + ex);
 				}else {
-					//if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your friends. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}
@@ -2074,15 +2088,17 @@ public class TwitterService extends Service {
 	 * @author thossmann
 	 *
 	 */
-	private class UpdateFollowersTask extends AsyncTask<Void, Void, List<Number>> {
+	private class UpdateFollowersTask extends AsyncTask<Long, Void, List<Number>> {
 
 		Exception ex;
-
+		long notify;
+		
 		@Override
-		protected List<Number> doInBackground(Void... params) {
+		protected List<Number> doInBackground(Long... params) {
 			Log.d(TAG, "AsynchTask: UpdateFollowersTask");
 			ShowUserListActivity.setLoading(true);
-
+			this.notify= params[0];
+			
 			List<Number> followersList = null;
 
 			try {
@@ -2104,12 +2120,11 @@ public class TwitterService extends Service {
 				if(ex instanceof TwitterException.RateLimit){				
 					Log.e(TAG, "exception while loading followers: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
-					if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Timeout while loading followers.", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}else {
-				//	if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your followers. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while loading followers: " + ex);
 				}
@@ -2380,7 +2395,7 @@ public class TwitterService extends Service {
 	 */
 	private class UpdateStatusTask extends AsyncTask<Long, Void, winterwell.jtwitter.Status> {
 
-		long attempts;
+		long attempts,notify;
 		long rowId;
 		int flags;
 		int buffer;
@@ -2393,7 +2408,7 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
-
+			this.notify= rowId[2];
 
 			winterwell.jtwitter.Status tweet = null;
 			Cursor c = null;
@@ -2458,7 +2473,7 @@ public class TwitterService extends Service {
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)						
+						if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Something went wrong while posting your tweet.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2470,12 +2485,12 @@ public class TwitterService extends Service {
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)						
+						if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Timeout while posting tweet your tweet.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
-					if (ShowTweetListActivity.running)						
+					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Something went wrong while posting your tweet. Please try again later!", Toast.LENGTH_SHORT).show();
 					Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
@@ -2519,6 +2534,7 @@ public class TwitterService extends Service {
 		long attempts;
 		long rowId;
 		int flags;
+		long notify;
 
 		Exception ex;
 
@@ -2528,7 +2544,8 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
-
+			this.notify= rowId[2];
+			
 			Integer result = null;
 
 			Cursor c = null;
@@ -2581,9 +2598,8 @@ public class TwitterService extends Service {
 						Long[] params = {rowId, --attempts};
 						(new DestroyStatusTask()).execute(params);
 						return;
-					} else {
-						if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting your tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2594,9 +2610,8 @@ public class TwitterService extends Service {
 						Long[] params = {rowId, --attempts};
 						(new DestroyStatusTask()).execute(params);
 						return;
-					} else {
-						if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Timeout while deleting tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2607,8 +2622,7 @@ public class TwitterService extends Service {
 					
 				}else {
 					// an exception happended, we notify the user					
-					if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)					
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while deleting tweet: " + ex);
 					return;
@@ -2618,8 +2632,7 @@ public class TwitterService extends Service {
 		    else {
 				Uri deleteUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);				
 				getContentResolver().delete(deleteUri, null, null);
-				if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+				if (ShowTweetListActivity.running)					
 						Toast.makeText(getBaseContext(), "Delete successful.", Toast.LENGTH_SHORT).show();
 				
 			}
@@ -2633,7 +2646,7 @@ public class TwitterService extends Service {
 	 */
 	private class FavoriteStatusTask extends AsyncTask<Long, Void, Integer> {
 
-		long attempts;
+		long attempts,notify;
 		long rowId;
 		int flags;
 		int buffer;
@@ -2647,7 +2660,8 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
-
+			this.notify= rowId[2];
+			
 			Integer result = null;
 			Cursor c = null;
 
@@ -2704,9 +2718,8 @@ public class TwitterService extends Service {
 						Long[] params = {rowId, --attempts};
 						(new FavoriteStatusTask()).execute(params);
 						return;
-					} else {
-						if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while favoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2717,15 +2730,14 @@ public class TwitterService extends Service {
 						Long[] params = {rowId, --attempts};
 						(new FavoriteStatusTask()).execute(params);
 						return;
-					} else {
-						if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Timeout while favoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				}else {
 					// an exception happended, we notify the user					
-					if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while favoriting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
@@ -2759,7 +2771,7 @@ public class TwitterService extends Service {
 	 */
 	private class UnfavoriteStatusTask extends AsyncTask<Long, Void, Integer> {
 
-		long attempts;
+		long attempts,notify;
 		long rowId;
 		int flags;
 		int buffer;
@@ -2773,7 +2785,8 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
-
+			this.notify= rowId[2];
+			
 			Integer result = null;
 			Cursor c = null;
 
@@ -2832,7 +2845,7 @@ public class TwitterService extends Service {
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
@@ -2844,13 +2857,13 @@ public class TwitterService extends Service {
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)
+						if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Timeout while unfavoriting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				}else {
 					// an exception happended, we notify the user					
-					if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while favoriting: " + ex);
 					return;
@@ -2883,7 +2896,7 @@ public class TwitterService extends Service {
 	 */
 	private class RetweetStatusTask extends AsyncTask<Long, Void, Integer> {
 
-		long attempts;
+		long attempts,notify;
 		long rowId;
 		int flags;
 		int buffer;
@@ -2898,7 +2911,7 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
-
+			this.notify= rowId[2];
 			
 			Cursor c = null;
 
@@ -2946,8 +2959,9 @@ public class TwitterService extends Service {
 
 			// error handling
 			if(ex != null){
-				if(ex instanceof TwitterException.Repetition){				
+				if(ex instanceof TwitterException.Repetition){					
 					Log.w(TAG, "exception while retweeting: ", ex);
+					
 				} else if(ex instanceof TwitterException.E401){
 					Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
@@ -2956,10 +2970,11 @@ public class TwitterService extends Service {
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)
-						Toast.makeText(getBaseContext(), "Something went wrong retweeting.", Toast.LENGTH_SHORT).show();
+						if (ShowTweetListActivity.running && notify == TRUE)
+							Toast.makeText(getBaseContext(), "Something went wrong retweeting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
+					
 				} else if(ex instanceof TwitterException.Timeout){
 					Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
@@ -2968,13 +2983,13 @@ public class TwitterService extends Service {
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
-						if (ShowTweetListActivity.running)
-						Toast.makeText(getBaseContext(), "Timeout while retweeting.", Toast.LENGTH_SHORT).show();
+						if (ShowTweetListActivity.running && notify == TRUE)
+							Toast.makeText(getBaseContext(), "Timeout while retweeting.", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else {
 					// an exception happended, we notify the user					
-					if (ShowTweetListActivity.running)
+					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while retweeting. We will try again later!", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while retweeting: " + ex);
 					return;
@@ -3390,6 +3405,7 @@ public class TwitterService extends Service {
 
 			try {
 				dms = twitter.getDirectMessages();
+				Log.i(TAG,"dms size: " + dms.size());
 			} catch (Exception ex) {					
 				// save the expcetion for handling it in on post execute
 				this.ex = ex;
@@ -3473,6 +3489,7 @@ public class TwitterService extends Service {
 
 			// save the timestamp of the last update
 			setLastDMsInUpdate(new Date(), getBaseContext());
+			setTaskExecuted(TwitterService.TASK_DIRECT_MESSAGES_IN, TwitterService.this);
 		}
 	}
 
@@ -3580,6 +3597,7 @@ public class TwitterService extends Service {
 
 			// save the timestamp of the last update
 			setLastDMsOutUpdate(new Date(), getBaseContext());
+			
 		}
 	}
 	/**
@@ -3588,7 +3606,7 @@ public class TwitterService extends Service {
 	 */
 	private class SendMessageTask extends AsyncTask<Long, Void, winterwell.jtwitter.Message> {
 
-		long rowId;
+		long rowId, notify;
 		int flags;
 		int buffer;
 		String text;
@@ -3600,6 +3618,7 @@ public class TwitterService extends Service {
 		protected winterwell.jtwitter.Message doInBackground(Long... rowId) {
 			Log.d(TAG, "AsynchTask: SendMessageTask");
 			this.rowId = rowId[0];
+			notify = rowId[1];
 			
 			Cursor c = null;
 			winterwell.jtwitter.Message msg = null;
@@ -3647,7 +3666,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}  else if (ex instanceof TwitterException.E403) {
-					if (ShowUserActivity.running || ShowDMUsersListActivity.running)
+					if (ShowUserActivity.running || ShowDMUsersListActivity.running && notify==1)
 						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you ?", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);

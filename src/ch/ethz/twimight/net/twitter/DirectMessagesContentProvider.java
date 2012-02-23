@@ -539,6 +539,10 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		return true;
 	}
 	
+	  private boolean hasBeenExecuted() {
+            return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(TwitterService.TASK_DIRECT_MESSAGES_IN, false);
+    }
+	
 	/**
 	 * Inserts a direct message into the DB
 	 */
@@ -578,14 +582,15 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
 			if(rowId >= 0){				
-				
+				Log.i(TAG,"new DM received");
 				// are we the receiver?
 				if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
 					
-					if ( (!ShowDMUsersListActivity.running || !ShowDMListActivity.running) && !isFirstLogin() &&
+					if ( (!ShowDMUsersListActivity.running || !ShowDMListActivity.running) && hasBeenExecuted()  &&
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
 						// notify user
 						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
+						Log.i(TAG,"notifying");
 					}
 				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
@@ -609,10 +614,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	}
 	
 	
-	 
-    private boolean isFirstLogin() {
-            return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
-    }
 
 
 	

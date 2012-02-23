@@ -159,7 +159,7 @@ public class TDSAlarm extends BroadcastReceiver {
 		releaseWakeLock();
 		
 		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		wakeLock = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK , WAKE_LOCK); //@author pcarta
+		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK , WAKE_LOCK); 
 		wakeLock.acquire();
 	}
 

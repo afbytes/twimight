@@ -55,6 +55,7 @@ public class CommunicationReceiver extends BroadcastReceiver {
 					i.putExtra("synch_request", TwitterService.SYNCH_VERIFY);					
 				} else {					
 					i.putExtra("synch_request", TwitterService.SYNCH_TRANSACTIONAL);
+					
 				}
 				context.startService(i);
 

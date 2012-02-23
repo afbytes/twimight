@@ -941,7 +941,7 @@ public class TweetsContentProvider extends ContentProvider {
 					
 					if (ShowTweetListActivity.running==false && 
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions", true) == true 
-							&& !isFirstLogin()) {
+							&& hasBeenExecuted()  ) {
 						// notify user
 						Log.i(TAG,"1 notifying mention");
 						notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
@@ -974,9 +974,10 @@ public class TweetsContentProvider extends ContentProvider {
 	}
 
 	 
-    private boolean isFirstLogin() {
-            return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("isFirstLogin", false);
-    }
+	  private boolean hasBeenExecuted() {
+          return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(TwitterService.TASK_MENTIONS, false);
+  }
+	
 
     
 	/**

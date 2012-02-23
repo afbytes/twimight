@@ -55,7 +55,8 @@ public class LocationThread extends HandlerThread{
 		super(TAG);
 
 		this.context = context;
-
+		
+		
 		// open DB connection
 		dbHelper = new LocationDBHelper(this.context);
 		dbHelper.open();
@@ -83,6 +84,9 @@ public class LocationThread extends HandlerThread{
 			public void onProviderEnabled(String provider) {}
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
 		};
+		
+		//release the wake lock
+		LocationAlarm.releaseWakeLock();
 
 	}
 
@@ -169,11 +173,7 @@ public class LocationThread extends HandlerThread{
 		loc = null;
 		timeOutRunnable = null;
 		dbHelper = null;
-		handler = null;
-		
-
-		// finally, release the wake lock
-		LocationAlarm.releaseWakeLock();
+		handler = null;	
 
 		Log.d(TAG, "done");
 	}

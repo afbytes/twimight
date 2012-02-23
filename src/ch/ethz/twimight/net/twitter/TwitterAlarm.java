@@ -44,7 +44,8 @@ public class TwitterAlarm extends BroadcastReceiver {
 	
 	public TwitterAlarm(){}
 	
-	public TwitterAlarm(Context context, boolean isLogin) {		
+	public TwitterAlarm(Context context, boolean isLogin) {	
+		
 	    AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 		this.isLogin=isLogin;
 		intent = new Intent(context, TwitterAlarm.class);		
@@ -70,11 +71,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 				i.putExtra("isLogin",true );
 				isLogin=false;
 				Log.i(TAG,"this is the login");
-			} else {
-                SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                edit.putBoolean("isFirstLogin", false);
-                edit.commit();
-        }
+			} 
 
 			context.startService(i);			
 			
@@ -105,7 +102,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 		//releaseWakeLock();
 		
 		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		wakeLock = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK , WAKE_LOCK); 
+		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK); 
 		wakeLock.acquire();
 	}
 
