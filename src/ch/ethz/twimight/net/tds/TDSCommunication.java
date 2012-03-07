@@ -16,7 +16,6 @@ package ch.ethz.twimight.net.tds;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +32,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ch.ethz.twimight.security.RevocationListEntry;
-import ch.ethz.twimight.util.Constants;
-
 import android.content.Context;
 import android.location.Location;
 import android.util.Log;
+import ch.ethz.twimight.security.RevocationListEntry;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * API for communication with the Twimight Disaster Server

@@ -61,7 +61,9 @@ public class DeviceListActivity extends Activity {
 
     // Member fields
     private BluetoothAdapter mBtAdapter;
+    private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
+    ListView newDevicesListView;
     
     private MacsDBHelper dbHelper;
 
@@ -71,26 +73,29 @@ public class DeviceListActivity extends Activity {
 
         // Setup the window
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.device_list);
+        setContentView(R.layout.device_list);        
 
-        // Initialize the button to perform device discovery
+        // Initialize array adapters. One for already paired devices and
+        // one for newly discovered devices 
+        mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);     
+        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+        mNewDevicesArrayAdapter.add(" ");           
+        
+        // Find and set up the ListView for paired devices
+        ListView pairedListView = (ListView) findViewById(R.id.paired_devices);
+        pairedListView.setAdapter(mPairedDevicesArrayAdapter);
+        // Find and set up the ListView for newly discovered devices
+        newDevicesListView = (ListView) findViewById(R.id.new_devices);
+        newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
+        newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+        
+     // Initialize the button to perform device discovery
         Button scanButton = (Button) findViewById(R.id.button_scan);
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                doDiscovery();
-               // v.setVisibility(View.GONE);
+                doDiscovery();               
             }
         });
-
-        // Initialize array adapters. One for already paired devices and
-        // one for newly discovered devices       
-        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
-        mNewDevicesArrayAdapter.add(" ");           
-
-        // Find and set up the ListView for newly discovered devices
-        ListView newDevicesListView = (ListView) findViewById(R.id.new_devices);
-        newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
-        newDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -104,7 +109,21 @@ public class DeviceListActivity extends Activity {
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         dbHelper = new MacsDBHelper(this);
-		dbHelper.open();	
+		dbHelper.open();
+		
+		// Get a set of currently paired devices
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+
+        // If there are paired devices, add each one to the ArrayAdapter
+        if (pairedDevices.size() > 0) {
+            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
+            for (BluetoothDevice device : pairedDevices) {
+                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            }
+        } else {
+            String noDevices = getResources().getText(R.string.none_paired).toString();
+            mPairedDevicesArrayAdapter.add(noDevices);
+        }
 		
     }
 
@@ -121,9 +140,7 @@ public class DeviceListActivity extends Activity {
     		if (ScanningService.getState() == ScanningService.STATE_IDLE)
     			new ScanningAlarm(getApplicationContext(),0,true);
     		
-    	} else {
-    		mBtAdapter.disable();    		
-    	}
+    	} 
     	
         
 	}	
@@ -153,7 +170,7 @@ public class DeviceListActivity extends Activity {
 
         // Turn on sub-title for new devices
         findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
-
+        newDevicesListView.setVisibility(ListView.VISIBLE);
         // If we're already discovering, stop it
         if (mBtAdapter.isDiscovering()) {
             mBtAdapter.cancelDiscovery();
@@ -166,17 +183,14 @@ public class DeviceListActivity extends Activity {
     // The on-click listener for all devices in the ListViews
     private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-           // Cancel discovery because it's costly and we're about to connect
-           mBtAdapter.cancelDiscovery();
-
+           
            // Get the device MAC address, which is the last 17 chars in the View
            String info = ((TextView) v).getText().toString();
            String address = info.substring(info.length() - 17);
             
            dbHelper.createMac(address, 1);
            Toast.makeText(DeviceListActivity.this, "Devices added to active devices, connection will be attempted soon", Toast.LENGTH_SHORT).show();
-           
-           // finish();
+                      
         }
     };
 

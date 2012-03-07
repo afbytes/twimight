@@ -21,7 +21,6 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
@@ -35,14 +34,13 @@ import javax.crypto.NoSuchPaddingException;
 import org.spongycastle.jce.provider.X509CertificateObject;
 import org.spongycastle.openssl.PEMReader;
 
-import ch.ethz.twimight.data.FriendsKeysDBHelper;
-import ch.ethz.twimight.util.Constants;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
+import ch.ethz.twimight.data.FriendsKeysDBHelper;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * Manages the cryptographic key.

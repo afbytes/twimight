@@ -12,9 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -31,6 +28,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
  * Display a user
@@ -249,7 +249,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
 		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
 
-		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "+favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
+		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "
+						+ favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
 
 		// if the user we show is the local user, disable the follow button
 		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
@@ -350,8 +351,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		} else {
 			followButton.setText("Follow");
 		}
-		// listen to clicks
-		//followButton.setOnClickListener(null);
+		// listen to clicks		
 		followButton.setOnClickListener(new OnClickListener(){
 
 			@Override

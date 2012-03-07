@@ -16,14 +16,13 @@ package ch.ethz.twimight.data;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.ethz.twimight.security.RevocationListEntry;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
+import ch.ethz.twimight.security.RevocationListEntry;
 
 /**
  * Manages the revocation list in the DB.

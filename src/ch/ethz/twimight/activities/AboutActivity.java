@@ -14,9 +14,6 @@ package ch.ethz.twimight.activities;
 
 import java.util.Date;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.tds.TDSService;
-import ch.ethz.twimight.security.CertificateManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,9 +24,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.tds.TDSService;
+import ch.ethz.twimight.security.CertificateManager;
 
 /**
  * Show information about Twimight

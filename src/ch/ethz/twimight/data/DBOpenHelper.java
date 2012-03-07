@@ -12,13 +12,13 @@
  ******************************************************************************/
 package ch.ethz.twimight.data;
 
-import ch.ethz.twimight.net.twitter.DirectMessages;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
  * Manages the database: creation/deletion of tables, opening the connection, etc.
@@ -33,9 +33,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */
 	static final String TABLE_LOCATIONS = "locations";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
-	public static final String TABLE_TWEETS = "tweets";   
-	//public static final String TABLE_TWEET_HASHTAGS = "tweet_hashtags";
-	//public static final String TABLE_TWEET_URLS = "tweet_urls";
+	public static final String TABLE_TWEETS = "tweets"; 	
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 

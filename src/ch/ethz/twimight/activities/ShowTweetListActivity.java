@@ -12,8 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -225,7 +223,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		menu.add(1,OPTIONS_MENU_PAIR, 3, "Pair").setIcon(R.drawable.ic_menu_mark);				 
+		menu.add(1,OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
 		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About").setIcon(R.drawable.ic_menu_info_details);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 
@@ -290,7 +288,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
 				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
 
-			} else if ( PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
+			} else  {
 				Intent intent = new Intent(this, DeviceListActivity.class);
 				startActivity(intent);
 			}
@@ -307,7 +305,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 			switch(requestCode) {
 			case PrefsActivity.REQUEST_DISCOVERABLE:
-				Log.i(TAG,""+ resultCode);
+				
 				if (resultCode != Activity.RESULT_CANCELED) {
 					Intent intent = new Intent(this, DeviceListActivity.class);
 					startActivity(intent);
@@ -383,8 +381,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			currentFilter=SHOW_FAVORITES;
 
 			break;
-		case SHOW_MENTIONS: 
-			Log.i(TAG,"show mentions");
+		case SHOW_MENTIONS: 			
 			b = mentionsButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);

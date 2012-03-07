@@ -13,15 +13,13 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.R;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
+import ch.ethz.twimight.R;
 
 /** 
  * Cursor adapter for a cursor containing users.

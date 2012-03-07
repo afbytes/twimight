@@ -32,15 +32,14 @@ import java.util.Date;
 import org.spongycastle.jce.provider.X509CertificateObject;
 import org.spongycastle.openssl.PEMReader;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.util.Constants;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.data.RevocationDBHelper;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * Manages the TDS issued certificates.

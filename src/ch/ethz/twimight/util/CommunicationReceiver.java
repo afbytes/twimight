@@ -12,16 +12,15 @@
  ******************************************************************************/
 package ch.ethz.twimight.util;
 
-import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.net.tds.TDSAlarm;
-import ch.ethz.twimight.net.twitter.TwitterService;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.net.tds.TDSAlarm;
+import ch.ethz.twimight.net.twitter.TwitterService;
 
 /**
  * Listends for changes in connectivity and starts the TDSThread if a new connection

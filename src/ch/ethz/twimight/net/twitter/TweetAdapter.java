@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.text.Html;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -73,6 +74,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		} else {
+			
 			picture.setImageResource(R.drawable.default_profile);
 		}
 

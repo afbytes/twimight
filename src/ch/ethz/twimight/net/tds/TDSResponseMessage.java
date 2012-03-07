@@ -24,9 +24,7 @@ import org.spongycastle.jce.provider.X509CertificateObject;
 
 import android.content.Context;
 import android.util.Log;
-
 import ch.ethz.twimight.security.CertificateManager;
-import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
 import ch.ethz.twimight.util.Constants;
 

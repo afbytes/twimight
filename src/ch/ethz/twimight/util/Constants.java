@@ -79,8 +79,8 @@ public final class Constants {
 	
 	// Twitter
 	public static final int CONSUMER_ID = 1;
-	public static final int LOGIN_ATTEMPTS = 3; /** How many times do we attempt to log in before giving up? */
-	public static final int TIMELINE_ATTEMPTS = 3; /** How many times do we attempt to update the timeline before giving up? */
+	public static final int LOGIN_ATTEMPTS = 2; /** How many times do we attempt to log in before giving up? */
+	public static final int TIMELINE_ATTEMPTS = 2; /** How many times do we attempt to update the timeline before giving up? */
 	public static final int TWEET_LENGTH = 140; /** The max length of a tweet */
 	public static final boolean TWEET_DEFAULT_LOCATION = true; /** Are tweets by default geo-tagged or not? */
 	public static final boolean TWEET_DEFAULT_RUN_AT_BOOT = true; /** Are the updates started at boot time ? */
@@ -95,12 +95,12 @@ public final class Constants {
 	public static final long TIMELINE_MIN_SYNCH = 120*1000L; /** Minimum time between two timeline updates */
 	public static final long FAVORITES_MIN_SYNCH = 120*1000L; /** Minimum time between two favorite updates */
 	public static final long MENTIONS_MIN_SYNCH = 120*1000L; /** Minimum time between two mentions updates */
-	public static final long FRIENDS_MIN_SYNCH = 20*60*1000L; /** Minimum time between two updates of the friends list */
-	public static final long FOLLOWERS_MIN_SYNCH = 20*60*1000L; /** Minimum time between two updates of the list of followers */
+	public static final long FRIENDS_MIN_SYNCH = 120*60*1000L; /** Minimum time between two updates of the friends list */
+	public static final long FOLLOWERS_MIN_SYNCH = 120*60*1000L; /** Minimum time between two updates of the list of followers */
 	public static final long USERS_MIN_SYNCH = 24*3600*1000L; /** Minmum time between two updates of a user profile */
-	public static final long DMS_MIN_SYNCH = 120*1000L; /** Minimum time between two updates of the direct messages */
+	public static final long DMS_MIN_SYNCH = 20*1000L; /** Minimum time between two updates of the direct messages */
 	
-	public static final int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
+	public static int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
 	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
 	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
 	public static final int DTWEET_BUFFER_SIZE = 100; /** How many disaster tweets of other users */
