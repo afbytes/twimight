@@ -1105,21 +1105,27 @@ public class TwitterService extends Service {
 		// assemble the text
 		StringBuilder replacedText = new StringBuilder();
 		int lastIndex = 0;
-		for (TweetEntity curEntity: allEntities) {
-			// append everything before the start of this entity
-			replacedText.append("<tweet>"+originalText.substring(lastIndex, curEntity.start));
-			// append the entity
-			if(curEntity.type == KEntityType.hashtags){
-				replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
-			} else if(curEntity.type == KEntityType.urls){
-				replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-			} else if(curEntity.type == KEntityType.user_mentions){
-				replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
+		try {
+			for (TweetEntity curEntity: allEntities) {
+				// append everything before the start of this entity
+				replacedText.append("<tweet>"+originalText.substring(lastIndex, curEntity.start));
+				// append the entity
+				if(curEntity.type == KEntityType.hashtags){
+					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
+				} else if(curEntity.type == KEntityType.urls){
+					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
+				} else if(curEntity.type == KEntityType.user_mentions){
+					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
+				}
+				lastIndex = curEntity.end;
 			}
-			lastIndex = curEntity.end;
-		}
-		// append the rest of the original text
-		replacedText.append(originalText.substring(lastIndex,originalText.length())+"</tweet>");
+			// append the rest of the original text
+			replacedText.append(originalText.substring(lastIndex,originalText.length())+"</tweet>");
+			
+			
+		} catch (StringIndexOutOfBoundsException ex) {
+			Log.e(TAG,"create spans error",ex);
+		}	
 
 		return replacedText.toString();
 	}
