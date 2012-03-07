@@ -13,16 +13,16 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.util.Constants;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+import ch.ethz.twimight.data.DBOpenHelper;
 
 /**
  * The content provider for Twitter users
@@ -162,12 +162,11 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
-			// if we already have the user, we update with the new info
-			String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
-			Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" LIKE '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
-			if(c.getCount()==1){
+			Cursor c = isUserAlreadyStored(values);
+			
+			if(c != null){
 				Log.d(TAG, "we already have the user");
-				c.moveToFirst();
+				
 				
 				// we flag the user for updating the profile image if
 				// - the flag is set
@@ -179,32 +178,109 @@ public class TwitterUsersContentProvider extends ContentProvider {
 						Log.d(TAG, "we already have profile picture, deleting flag");
 					} 
 				}
-				Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+				Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"
+											+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 				update(updateUri, values, null, null);
 				c.close();
 				return updateUri;
 				
-			} else {
-				
-				c.close();
-				
-				long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
-				if(rowId >= 0){					
-					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);				
-					purge(DBOpenHelper.TABLE_USERS,values);
-						
-					return insertUri;
-				} else {
-					throw new IllegalStateException("Could not insert user into database " + values);
-				}
-				
-			}		
+			} else 							
+				return insertNewUser(values);				
 			
-			
+
 		} else {
 			throw new IllegalArgumentException("Illegal user: " + values);
 		}
 	}
+
+
+	private Cursor isUserAlreadyStored(ContentValues values) {
+		// if we already have the user, we update with the new info
+		String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
+		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" = '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
+		if(c.getCount()==1){
+			Log.i(TAG, "we already have the user");
+			c.moveToFirst();
+			return c;
+		} else
+			return null;
+	}
+	
+
+	private Uri insertNewUser(ContentValues values) {
+		
+		Cursor c = isUserAlreadyStored(values);
+
+		if(c != null){
+			Log.d(TAG, "we already have the user");
+
+
+			// we flag the user for updating the profile image if
+			// - the flag is set
+			// - and we do not yet have a profile image
+			// - otherwise, we clear the profile image flag
+			if(values.containsKey(TwitterUsers.COL_FLAGS) && ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) >0)){
+				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+					values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS) & (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
+					Log.d(TAG, "we already have profile picture, deleting flag");
+				} 
+			}
+			Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"
+					+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+			update(updateUri, values, null, null);
+			c.close();
+			return updateUri;
+
+		} else {						
+			//return insertNewUser(values);
+			try {
+				long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
+				if(rowId >= 0){				
+					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);				
+					purge(DBOpenHelper.TABLE_USERS,values);
+
+					return insertUri;
+				} else
+					return null;
+
+			} catch (SQLException ex) {
+				Log.e(TAG,"error 19");
+				return null;
+			}
+
+		}
+		
+	}
+
+	/**
+	 * Inserts a bunch of users into the DB
+	*/
+	@Override
+	public synchronized int bulkInsert(Uri uri, ContentValues[] values) {
+		
+		int numInserted= 0;		
+		database.beginTransaction();
+		try {			
+
+			for (ContentValues value : values){
+				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE)) {
+					updateUser(uri,value);
+
+				} else {
+					if (insertNewUser(value)!=null ) 
+						numInserted++;
+				}
+			}
+			database.setTransactionSuccessful();
+
+		} finally {
+			database.endTransaction();
+		}
+		return numInserted;
+	}
+	
+	
+	
 
 	@Override
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
@@ -212,17 +288,23 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(twitterusersUriMatcher.match(uri) != USERS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
-			int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + uri.getLastPathSegment() , null);
-			if(nrRows > 0){				
-				return nrRows;
-			} else {
-				throw new IllegalStateException("Could not insert user into database " + values);
-			}
+			values.put("_id", Long.parseLong(uri.getLastPathSegment() ));
+			return updateUser(uri,values);
+			 
 		} else {
 			throw new IllegalArgumentException("Illegal user: " + values);
 		}
 	}
 	
+	private int updateUser(Uri uri, ContentValues values) {
+		
+		int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + values.getAsLong("_id") , null);
+		if(nrRows > 0){				
+			return nrRows;
+		} else
+			return -1;
+	}
+
 	@Override
 	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		return 0;

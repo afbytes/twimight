@@ -12,20 +12,19 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
  * Display a list of users (friends, followers, etc.)

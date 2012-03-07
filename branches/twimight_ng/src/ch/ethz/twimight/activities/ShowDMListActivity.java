@@ -12,9 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DMAdapter;
-import ch.ethz.twimight.net.twitter.DirectMessages;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -27,6 +24,9 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.DMAdapter;
+import ch.ethz.twimight.net.twitter.DirectMessages;
 
 /**
  * Shows the overview of direct messages. A list view with an item for each user with which
@@ -71,7 +71,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 		// If we don't know which user to show, we stop the activity
 		if(rowId == 0 || screenname == null) finish();
 
-		setTitle("Direct Messages - @" + screenname);
+		setTitle("Direct Messages - with: " + screenname);
 		
 		dmUserListView = (ListView) findViewById(R.id.dmUserList);
 		c = getContentResolver().query(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_USER + "/" + rowId), null, null, null, null);

@@ -14,8 +14,6 @@ package ch.ethz.twimight.location;
 
 import java.util.Date;
 
-import ch.ethz.twimight.util.Constants;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -25,6 +23,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * Periodically launches the Location Thread if the settings are accordingly.
@@ -76,7 +75,7 @@ public class LocationAlarm extends BroadcastReceiver {
 		pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-		alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+delay, pendingIntent);
+		alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+delay+ 30000L, pendingIntent);
 		
 	}
 	

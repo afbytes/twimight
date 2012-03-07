@@ -13,9 +13,6 @@
 
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DirectMessages;
-import ch.ethz.twimight.util.Constants;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +32,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * The activity to write a new tweet.

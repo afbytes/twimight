@@ -35,19 +35,20 @@
 					android:textColor="@color/grey" />
 			</LinearLayout>
 
-			<LinearLayout android:layout_width="fill_parent"
-				android:layout_height="wrap_content" android:orientation="horizontal">
-				<!-- 
-				<ImageButton android:id="@+id/showDMDelete"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:layout_gravity="right" android:layout_marginLeft="5dp"
-					android:background="@color/transparent"
-					android:src="@android:drawable/ic_menu_delete" />
-			     -->
+			<LinearLayout android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp">
+				
+				
+			     
 				<TextView android:id="@+id/showDMText"
-					android:layout_width="fill_parent" android:layout_height="wrap_content"
+					android:layout_width="190dp" android:layout_height="wrap_content"
 					android:text="DM Text" android:textColor="@color/white"
 					android:textSize="16sp" android:layout_marginBottom="6dp" />
+				
+				<ImageButton android:id="@+id/showDMDelete"
+					android:layout_width="40dp" android:layout_height="40dp"
+					android:layout_gravity="right" android:layout_marginLeft="5dp"					
+					android:src="@drawable/ic_menu_delete" android:visibility="visible"/>
 
 
 			</LinearLayout>

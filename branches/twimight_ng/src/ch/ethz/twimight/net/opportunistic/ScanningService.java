@@ -89,43 +89,35 @@ public class ScanningService extends Service{
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 	
 		
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
-		
-		Log.i(TAG,"1");
+			
 		if (context == null) {
 			context = this;
 			handler = new Handler();		
 	        // set up Bluetooth
-			Log.i(TAG,"2");
+			
 	        bluetoothHelper = new BluetoothComms(mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
-			dbHelper.open();
-			Log.i(TAG,"3");
+			dbHelper.open();			
 	        
 		}		
 		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 		// Get a set of currently paired devices
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	        
-    	Log.i(TAG,"4");
+        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	      
+    	
         if (pairedDevices != null) {
         	// If there are paired devices, add each one to the ArrayAdapter
-	        if (pairedDevices.size() > 0) {
-	        	Log.i(TAG,"5");
-	            for (BluetoothDevice device : pairedDevices) {
-	            	if (device.getBluetoothClass() != null) {
-	            		if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART)
-	            			dbHelper.createMac(device.getAddress().toString(), 1); 
-	            	} else
+	        if (pairedDevices.size() > 0) {	        	
+	            for (BluetoothDevice device : pairedDevices) {	            	
 	            		dbHelper.createMac(device.getAddress().toString(), 1); 
 	            }
 	        } 
-        }	
-    	Log.i(TAG,"6");
-		startScanning();
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 		
+        }	    	
+		startScanning();			
 		return START_STICKY; 
 		
 	}
@@ -138,7 +130,7 @@ public class ScanningService extends Service{
 		@Override
 		public void uncaughtException(Thread t, Throwable e) {		
 			 Log.e(TAG, "error ", e);
-			 
+			context= null; 
 			ScanningService.this.stopSelf();
 			AlarmManager mgr = (AlarmManager) LoginActivity.getInstance().getSystemService(Context.ALARM_SERVICE);
 			mgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() , LoginActivity.getRestartIntent());
@@ -171,6 +163,12 @@ public class ScanningService extends Service{
 	}
 
 	
+	@Override
+	public void onDestroy() {
+		context=null;
+		super.onDestroy();
+	}
+
 	/**
 	 * Start the scanning.
 	 * @return true if the connection with the TDS was successful, false otherwise.
@@ -182,8 +180,6 @@ public class ScanningService extends Service{
 		Log.d(TAG,"active macs: " + cursor.getCount());
 		
 		state = STATE_SCANNING;		
-		// Log the date for later rescheduling of the next scanning
-		//scanStartTime = new Date();
 		
 		if (cursor.moveToFirst()) {
             // Get the field values
@@ -192,16 +188,14 @@ public class ScanningService extends Service{
             
             if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {            	
 
-            	if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
+            	//if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
             		bluetoothHelper.connect(mac);                	
             		connTimeout = new ConnectingTimeout();
             		handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
-            	} else {
-            		Log.i(TAG,"skipping connection, last meeting was too recent");
-            		nextScanning();
-            	}
-
-
+            	//} else {
+            		//Log.i(TAG,"skipping connection, last meeting was too recent");
+            	//	nextScanning();
+            	//}
             } else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {            	
             	bluetoothHelper.start();
             	

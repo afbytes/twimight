@@ -66,6 +66,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.i(TAG,"on create");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showsearch);		
 		
@@ -79,7 +80,15 @@ public class SearchableActivity extends TwimightBaseActivity{
 			}
 		});
 		// Get the intent and get the query
-		Intent intent = getIntent();
+		Intent intent = getIntent();		
+		processIntent(intent);
+		
+
+	}
+	
+	
+
+	private void processIntent(Intent intent) {
 		if (intent.hasExtra(SearchManager.QUERY)) {
 			//if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
 			query = intent.getStringExtra(SearchManager.QUERY);	
@@ -109,9 +118,18 @@ public class SearchableActivity extends TwimightBaseActivity{
 			});
 		
 		} else 
-			finish();
-
+			//finish();	
+			Log.i(TAG,"intent has no extra");
 	}
+
+
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		Log.i(TAG,"on new intent");
+		processIntent(intent);		
+	}
+
 
 	/**
 	 * On resume

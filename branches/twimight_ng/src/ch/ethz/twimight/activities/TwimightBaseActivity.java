@@ -12,7 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import ch.ethz.twimight.R;
 
 /**
  * The base activity for all Twimight activities.

@@ -21,17 +21,6 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.json.JSONException;
 
-import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.data.FriendsKeysDBHelper;
-import ch.ethz.twimight.data.LocationDBHelper;
-import ch.ethz.twimight.data.MacsDBHelper;
-import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.security.CertificateManager;
-import ch.ethz.twimight.security.KeyManager;
-import ch.ethz.twimight.security.RevocationListEntry;
-import ch.ethz.twimight.util.Constants;
-import ch.ethz.twimight.util.EasySSLSocketFactory;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +31,16 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.data.FriendsKeysDBHelper;
+import ch.ethz.twimight.data.LocationDBHelper;
+import ch.ethz.twimight.data.MacsDBHelper;
+import ch.ethz.twimight.data.RevocationDBHelper;
+import ch.ethz.twimight.security.CertificateManager;
+import ch.ethz.twimight.security.KeyManager;
+import ch.ethz.twimight.security.RevocationListEntry;
+import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.EasySSLSocketFactory;
 
 /**
  * The service to send all kinds of API calls to the disaster server. 

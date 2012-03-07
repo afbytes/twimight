@@ -14,7 +14,6 @@ package ch.ethz.twimight.net.tds;
 
 import java.util.Date;
 
-import ch.ethz.twimight.util.Constants;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -26,6 +25,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * TDSAlarm, together with TDSThread 
@@ -68,7 +68,7 @@ public class TDSAlarm extends BroadcastReceiver {
 
 		if(System.currentTimeMillis() - lastUpdate >= Constants.TDS_UPDATE_INTERVAL){	
 			// schedule one immediately
-			alarmMgr.set(AlarmManager.RTC_WAKEUP, 0, pendingIntent);
+			alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (90 * 1000L), pendingIntent);
 			Log.i(TAG, "alarm set");
 		} else {
 			// schedule update interval after last update

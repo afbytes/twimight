@@ -23,8 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -262,6 +262,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -347,8 +348,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 
-				c = database.rawQuery(sql, null);
-				Log.i(TAG,"query performed by tweet content provider, c.getCount() == " + c.getCount());
+				c = database.rawQuery(sql, null);				
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				
 				// start synch service with a synch timeline request
@@ -358,7 +358,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_USER_ID:
-				Log.d(TAG, "Query TWEETS_USER_ID");
+				Log.i(TAG, "Query TWEETS_USER_ID");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -608,6 +608,30 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		return c;
 	}
+	
+	
+	/**
+	 * Inserts a bunch of tweets into the DB
+	 */
+	@Override
+	public synchronized int bulkInsert(Uri uri, ContentValues[] values) {
+		
+		int numInserted= 0;
+		database.beginTransaction();
+		try {			
+			
+			for (ContentValues value : values){
+				
+				if (insertTweetsTimelineNormal(value) != null) ;	
+				numInserted++;
+			}
+			database.setTransactionSuccessful();
+			
+		} finally {
+			database.endTransaction();
+		}
+		return numInserted;
+	}
 
 	/**
 	 * Insert a tweet into the DB
@@ -621,51 +645,8 @@ public class TweetsContentProvider extends ContentProvider {
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:
 				Log.d(TAG, "Insert TWEETS_TIMELINE_NORMAL");
-				/*
-				 *  First, we check if we already have a tweets with the same disaster ID.
-				 *  If yes, three cases are possible
-				 *  1 If the existing tweet is a disaster tweet, it was uploaded to the server and
-				 *    now we receive it from the server. In this case we update the disaster tweet
-				 *    accordingly.
-				 *  2 If the existing tweet is a tweet of our own which was flagged to insert, the insert
-				 *    operation may have been successful but the success was not registered locally.
-				 *    In this case we update the new tweet with the new information
-				 *  3 It may be a hash function collision (two different tweets have the same hash code)
-				 *    Probability of this should be small.  
-				 */
-				disasterId = getDisasterID(values);
 				
-				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
-				if(c.getCount() == 1){   
-
-					c.moveToFirst();
-					if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
-						// clear the to insert flag
-						int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-						values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
-					}
-					Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
-					update(updateUri, values, null, null);
-					c.close();
-					
-					return updateUri;
-					
-				}
-				c.close();
-				// if none of the before was true, this is a proper new tweet which we now insert
-				try {
-					insertUri = insertTweet(values);
-					if (ShowTweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
-							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true ) {
-						// notify user 
-						Log.i(TAG,"2 notifying normal tweet");
-						notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
-					}
-				} catch (Exception ex) {
-					Log.e(TAG,"exception while inserting", ex);
-				}
-				// delete everything that now falls out of the buffer
-				purgeTweets(values);
+				insertUri = insertTweetsTimelineNormal(values);				
 
 				break;
 				
@@ -713,8 +694,7 @@ public class TweetsContentProvider extends ContentProvider {
 						if (ScanningService.getState() == ScanningService.STATE_IDLE){
 			    				new ScanningAlarm(getContext(),0,true);
 			    			
-			    			} else
-			    				Log.i(TAG,"already scanning");
+			    			} 
 						
 					}
 				} else {
@@ -754,6 +734,62 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 		
 		return insertUri;
+	}
+
+	private Uri insertTweetsTimelineNormal(ContentValues values) {
+		
+		int disasterId;
+		/*
+		 *  First, we check if we already have a tweets with the same disaster ID.
+		 *  If yes, three cases are possible
+		 *  1 If the existing tweet is a disaster tweet, it was uploaded to the server and
+		 *    now we receive it from the server. In this case we update the disaster tweet
+		 *    accordingly.
+		 *  2 If the existing tweet is a tweet of our own which was flagged to insert, the insert
+		 *    operation may have been successful but the success was not registered locally.
+		 *    In this case we update the new tweet with the new information
+		 *  3 It may be a hash function collision (two different tweets have the same hash code)
+		 *    Probability of this should be small.  
+		 */
+		if ( values == null)
+			Log.i(TAG,"values are null");
+		disasterId = getDisasterID(values);
+		
+		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
+		if(c.getCount() == 1){   
+
+			c.moveToFirst();
+			if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
+				// clear the to insert flag
+				int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+				values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
+			}
+			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+			update(updateUri, values, null, null);
+			c.close();
+			
+			return updateUri;
+			
+		}
+		c.close();
+		// if none of the before was true, this is a proper new tweet which we now insert
+		try {
+			Uri insertUri = insertTweet(values);
+			if (ShowTweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
+					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true ) {
+				// notify user 				
+				notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
+			}
+			// delete everything that now falls out of the buffer
+			purgeTweets(values);
+			return insertUri;
+			
+		} catch (Exception ex) {
+			Log.e(TAG,"exception while inserting", ex);
+			return null;
+		}
+		
+		
 	}
 
 	/**
@@ -885,16 +921,20 @@ public class TweetsContentProvider extends ContentProvider {
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
-		String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
+		if ( cv != null ) {
+			String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
+			
+			String userId;
+			if(!cv.containsKey(Tweets.COL_USER) || (cv.getAsString(Tweets.COL_USER)==null)){
+				userId = LoginActivity.getTwitterId(getContext()).toString();
+			} else {
+				userId = cv.getAsString(Tweets.COL_USER);
+			}
+			
+			return (new String(text+userId)).hashCode();
+		} else 
+			return -1;
 		
-		String userId;
-		if(!cv.containsKey(Tweets.COL_USER) || (cv.getAsString(Tweets.COL_USER)==null)){
-			userId = LoginActivity.getTwitterId(getContext()).toString();
-		} else {
-			userId = cv.getAsString(Tweets.COL_USER);
-		}
-		
-		return (new String(text+userId)).hashCode();
 	}
 	
 	/**
@@ -942,8 +982,7 @@ public class TweetsContentProvider extends ContentProvider {
 					if (ShowTweetListActivity.running==false && 
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions", true) == true 
 							&& hasBeenExecuted()  ) {
-						// notify user
-						Log.i(TAG,"1 notifying mention");
+						// notify user						
 						notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 					} 
 									

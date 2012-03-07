@@ -68,17 +68,14 @@ public class PrefsActivity extends PreferenceActivity{
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
-							enableBluetooth(); 					
-							Log.i(TAG, "start scanning");
-						} else
-							Toast.makeText(getBaseContext(), "You need a verified account to enable the disaster mode", Toast.LENGTH_SHORT).show();
+							enableBluetooth(); 								
+						} 
 						
 					} else {
 						ScanningAlarm.stopScanning(getApplicationContext());
 						Intent in = new Intent(getBaseContext(), ScanningService.class);
 						stopService(in);
-						finish();
-						Log.i(TAG, "stop scanning");
+						finish();						
 					}
 					
 				} else if(key.equals("prefTDSCommunication")){
@@ -89,8 +86,7 @@ public class PrefsActivity extends PreferenceActivity{
 						Log.i(TAG, "start TDS communication");
 					} else {
 						//stopService(new Intent(getApplicationContext(), TDSService.class));
-						TDSAlarm.stopTDSCommuniction(getApplicationContext());
-						Log.i(TAG, "stop TDS communication");
+						TDSAlarm.stopTDSCommuniction(getApplicationContext());						
 					}
 					
 				} else if(key.equals("prefLocationUpdates")) { 
@@ -101,7 +97,7 @@ public class PrefsActivity extends PreferenceActivity{
 						Log.i(TAG, "start location service");
 					} else {
 						LocationAlarm.stopLocationUpdate(getApplicationContext());
-						Log.i(TAG, "stop location service");
+						
 					}
 					
 				} else if (key.equals("prefRunAtBoot")) {
@@ -110,7 +106,7 @@ public class PrefsActivity extends PreferenceActivity{
 						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference("prefUpdateInterval");
 						updatesBackground.setEnabled(true);
 						new TwitterAlarm(getBaseContext(),false);
-						Log.i(TAG, "start background updater");
+					
 					} else {
 						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference("prefUpdateInterval");
 						updatesBackground.setEnabled(false);

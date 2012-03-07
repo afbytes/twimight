@@ -13,16 +13,6 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ShowDMListActivity;
-import ch.ethz.twimight.activities.ShowDMUsersListActivity;
-import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
-import ch.ethz.twimight.net.opportunistic.ScanningService;
-import ch.ethz.twimight.security.CertificateManager;
-import ch.ethz.twimight.security.KeyManager;
-import ch.ethz.twimight.util.Constants;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -38,6 +28,14 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.ShowDMListActivity;
+import ch.ethz.twimight.activities.ShowDMUsersListActivity;
+import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.security.CertificateManager;
+import ch.ethz.twimight.security.KeyManager;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * The content provider for all kinds of direct messages (normal, disaster, local and relayed). 
@@ -171,6 +169,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED + ", "
 				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_ISDISASTER + ", "
 				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_FLAGS + ", "
+				+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_DMID+ ", "
 				+ DBOpenHelper.TABLE_USERS+"._id AS userRowId, "
 				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_SCREENNAME + ", "
 				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_NAME + ", "
@@ -413,6 +412,14 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			getContext().getContentResolver().notifyChange(uri, null);
 			getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 			
+			if(values.containsKey(DirectMessages.COL_FLAGS) && values.getAsInteger(DirectMessages.COL_FLAGS)!=0){
+
+				Intent i = new Intent(TwitterService.SYNCH_ACTION);
+				i.putExtra("synch_request", TwitterService.SYNCH_DM);
+				i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+				getContext().startService(i);
+			}
+			
 			return nrRows;
 		} else {
 			throw new IllegalStateException("Could not update direct message " + values);
@@ -582,11 +589,11 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
 			if(rowId >= 0){				
-				Log.i(TAG,"new DM received");
+				
 				// are we the receiver?
 				if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
 					
-					if ( (!ShowDMUsersListActivity.running || !ShowDMListActivity.running) && hasBeenExecuted()  &&
+					if ( (!ShowDMUsersListActivity.running && !ShowDMListActivity.running) && hasBeenExecuted()  &&
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
 						// notify user
 						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));

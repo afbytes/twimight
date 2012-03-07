@@ -16,13 +16,11 @@ import java.util.Date;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,9 +35,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.ShowUserActivity.UserContentObserver;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -51,9 +47,7 @@ import ch.ethz.twimight.util.TweetTagHandler;
  * @author thossmann
  * @author pcarta
  */
-public class ShowTweetActivity extends TwimightBaseActivity{
-
-	
+public class ShowTweetActivity extends TwimightBaseActivity{	
 	Cursor c;
 	
 	// Views
@@ -102,9 +96,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		rowId = getIntent().getIntExtra("rowId", 0);
 		
 		// If we don't know which tweet to show, we stop the activity
-		if(rowId != 0) {
-			
-			
+		if(rowId != 0) {		
 			
 			queryContentProvider();
 			
@@ -207,11 +199,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				deleteButton.setOnClickListener(new OnClickListener(){
 					@Override
 					public void onClick(View v) {
-						showDeleteDialog();
-						
+						showDeleteDialog();						
 					}
-				});
-				
+				});				
 				
 			} else {
 				deleteButton.setVisibility(ImageButton.GONE);
@@ -282,8 +272,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
 		LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
 		LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
-		LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
-		Log.i(TAG,"inflated");			
+		LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);					
 					if ( toSendNotification != null) {
 						if((flags & Tweets.FLAG_TO_INSERT) ==0 ){						
 							toSendNotification.setVisibility(LinearLayout.GONE);						

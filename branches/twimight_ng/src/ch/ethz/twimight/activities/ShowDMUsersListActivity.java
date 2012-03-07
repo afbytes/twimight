@@ -12,10 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DMUserAdapter;
-import ch.ethz.twimight.net.twitter.DirectMessages;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -25,11 +21,14 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.DMUserAdapter;
+import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
  * Shows the overview of direct messages. A list view with an item for each user with which

@@ -28,7 +28,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import winterwell.jtwitter.Message;
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Status;
 import winterwell.jtwitter.Twitter;
@@ -60,7 +59,6 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
-import ch.ethz.twimight.net.opportunistic.BluetoothComms;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -92,15 +90,17 @@ public class TwitterService extends Service {
 	public static final int SYNCH_TRANSACTIONAL = 16;
 	public static final int SYNCH_SEARCH_USERS = 18;
 	
+	public static final int OVERSCROLL_TOP = 100;	
+	public static final int OVERSCROLL_BOTTOM = -100;
+	
+	
 	public static final long TRUE = 1;
 	public static final long FALSE = 0;
 	
 	public static final String FORCE_FLAG = "force";
 	public static final String TASK_MENTIONS = "mentions";
-	public static final String TASK_DIRECT_MESSAGES_IN = "direct_messages_in";
-	
-	
-	
+	public static final String TASK_DIRECT_MESSAGES_IN = "direct_messages_in";	
+	public static final String OVERSCROLL_TYPE = "overscroll_type";		
 	
 	Twitter twitter;
 
@@ -136,8 +136,7 @@ public class TwitterService extends Service {
 				} else {
 					Log.e(TAG, "Error synching: no access token or secret");
 					return START_NOT_STICKY;
-				}
-				
+				}				
 				twitter.setIncludeTweetEntities(true);
 			}
 			
@@ -156,21 +155,20 @@ public class TwitterService extends Service {
 			case SYNCH_VERIFY:
 				synchVerify();
 				break;
-			case SYNCH_ALL:				
-				Log.i(TAG, "SYNCH_ALL");
-				synchTransactional();				
+			case SYNCH_ALL:										
 				
 				if (!intent.hasExtra("isLogin")) {
-					synchTimeline(intent.getBooleanExtra(FORCE_FLAG, false));
+					synchTimeline(intent);
 					synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));									
 					synchMessages();
+					synchTransactional();	
 				} else {
-					 Handler handler = new Handler();
-					 handler.postDelayed(new GetFriendsFollowersDelayed( ), 60 * 1000L );
+					// Handler handler = new Handler();
+					// handler.postDelayed(new GetFriendsFollowersDelayed( ), 60 * 1000L );
 				}					
 				break;
-			case SYNCH_TIMELINE:
-				synchTimeline(intent.getBooleanExtra(FORCE_FLAG, false));
+			case SYNCH_TIMELINE:				
+					synchTimeline(intent);				
 				break;
 			case SYNCH_MENTIONS:
 				synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
@@ -195,6 +193,7 @@ public class TwitterService extends Service {
 				}
 				break;
 			case SYNCH_USER:
+				Log.i(TAG,"SYNCH_USER");
 				if(intent.hasExtra("rowId")){
 					long rowId = intent.getLongExtra("rowId", -1);
 					Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowId);
@@ -207,7 +206,7 @@ public class TwitterService extends Service {
 							break;
 						}
 						c.moveToFirst();
-						synchUser(c,false);
+						synchUser(c,true);
 					} catch(Exception ex) {
 						Log.e(TAG, "Exception while querying user for synch " + ex);
 					} finally {
@@ -285,7 +284,7 @@ public class TwitterService extends Service {
 	private void synchTransactional() {
 		new SynchTransactionalMessagesTask().execute();
 		new SynchTransactionalTweetsTask().execute();
-	    new SynchTransactionalUsersTask().execute(false);
+	    new SynchTransactionalUsersTask(false).execute(false);
 		
 	}
 
@@ -298,10 +297,7 @@ public class TwitterService extends Service {
 		Log.d(TAG, "SYNCH_FRIENDS");
 		if(System.currentTimeMillis() - getLastFriendsUpdate(getBaseContext()) > Constants.FRIENDS_MIN_SYNCH){
 			(new UpdateFriendsTask()).execute(notify);
-		} else {
-			Log.i(TAG, "Last friends synch too recent.");
-		}
-
+		} 
 
 	}
 
@@ -410,34 +406,50 @@ public class TwitterService extends Service {
 	 * Syncs all users which have transactional flags set
 	 * 
 	 */
-	private class SynchTransactionalUsersTask extends AsyncTask<Boolean, Void, Void> {	
+	private class SynchTransactionalUsersTask extends AsyncTask<Boolean, Void, Void> {
+		boolean picturesBulkInsert;
+		
+		public SynchTransactionalUsersTask(boolean bulkInsertRequired) {
+			this.picturesBulkInsert=bulkInsertRequired;			
+		}
 
 		@Override
 		protected Void doInBackground(Boolean... params) {
-			
+
 			// get the flagged users
 			Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
 			Cursor c = null;
-		
-				c = getContentResolver().query(queryUri, null, TwitterUsers.COL_FLAGS+"!=0", null, null);
-				Log.i(TAG, c.getCount()+" transactional users to synch");
+
+			c = getContentResolver().query(queryUri, null, TwitterUsers.COL_FLAGS+"!=0", null, null);			
+
+			if(c.getCount() >= 0){
+				c.moveToFirst();	
 				
-				if(c.getCount() >= 0){
-					c.moveToFirst();
-					
-					while(!c.isAfterLast()){
-						synchUser(c,params[0]);
-						c.moveToNext();
-					}					
-				}
-			
-				c.close();
+				if (picturesBulkInsert) {
+					Log.i(TAG,"doing pictures bulk insert");
+					Long[] rowIds = getRowIdsFromCursor(c);
+					new UpdateProfileImagesTask().execute(rowIds);					
+				}								
+				while(!c.isAfterLast()){
+					synchUser(c,params[0]);					
+					c.moveToNext();					
+				}				
+			}
+			c.close();
 			return null;
-		}	
-		
+		}
 	}
 	
-
+	private Long[] getRowIdsFromCursor(Cursor c) {
+		Long[] ids = new Long[c.getCount()];
+		
+		for (int i=0; i<c.getCount(); i++) {			
+			ids[i]= c.getLong(c.getColumnIndex("_id"));
+			c.moveToNext();
+		}
+		return ids ;
+	}	
+	
 	/**
 	 * Checks the transactional flags of the tweet with the given _id and performs the corresponding actions
 	 */
@@ -481,21 +493,18 @@ public class TwitterService extends Service {
 	 */
 	private void synchUser(Cursor c, boolean force) {		
 		// get the flags
-		
+		Log.d(TAG,"synch user");
 		int flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		long rowId = c.getInt(c.getColumnIndex("_id"));
-
-		if((flags & TwitterUsers.FLAG_TO_UPDATE)>0) {
+		
+		if((flags & TwitterUsers.FLAG_TO_UPDATE)>0) {			
 			// Update a user if it's time to do so
 			if(force || ( c.isNull(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) ||
 					(System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) >Constants.USERS_MIN_SYNCH) )){
 				
 				Long[] params = {rowId, 3L}; // three attempts
-				(new UpdateUserTask()).execute(params);
-				
-			} else {
-				Log.i(TAG, "Last user update too recent");
-			}
+				(new UpdateUserTask()).execute(params);				
+			} 
 			
 		} else if((flags & TwitterUsers.FLAG_TO_FOLLOW)>0) {
 			// Follow a user
@@ -508,27 +517,27 @@ public class TwitterService extends Service {
 			(new UnfollowUserTask()).execute(params);
 			
 		} else if((flags & TwitterUsers.FLAG_TO_UPDATEIMAGE)>0){
-			// load the profile image
-			
+		
+			// load the profile image			
 			if( c.isNull(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE)) ||
-					(System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE)) >Constants.USERS_MIN_SYNCH)){				
-				new UpdateProfileImageTask().execute(rowId);
+					(System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE)) >Constants.USERS_MIN_SYNCH)){
+				Long[] rowIds = {rowId};
+				new UpdateProfileImagesTask().execute(rowIds);
 			}
 		}
+		
 	}
 
 	/**
 	 * Starts a thread to load the timeline. But only if the last timeline request is old enough.
 	 */
-	private void synchTimeline(boolean force) {
-
-		Log.i(TAG, "SYNCH_TIMELINE");
+	private void synchTimeline(Intent intent) {
+		
+		boolean force = intent.getBooleanExtra(FORCE_FLAG, false);
+		
 		if(force || (System.currentTimeMillis() - getLastTimelineUpdate(getBaseContext()) > Constants.TIMELINE_MIN_SYNCH)){
-			(new UpdateTimelineTask()).execute(Constants.TIMELINE_ATTEMPTS);
-		} else {
-			Log.i(TAG, "Last timeline synch too recent.");
-		}
-
+			(new UpdateTimelineTask()).execute(Constants.TIMELINE_ATTEMPTS, intent.getIntExtra(OVERSCROLL_TYPE, OVERSCROLL_TOP));
+		} 
 	}
 
 	/**
@@ -538,9 +547,7 @@ public class TwitterService extends Service {
 		Log.d(TAG, "SYNCH_FAVORITES");
 		if(force || (System.currentTimeMillis() - getLastFavoritesUpdate(getBaseContext()) > Constants.FAVORITES_MIN_SYNCH)){
 			(new UpdateFavoritesTask()).execute();
-		} else {
-			Log.i(TAG, "Last favorites synch too recent.");
-		}
+		} 
 
 	}
 
@@ -551,9 +558,7 @@ public class TwitterService extends Service {
 		Log.d(TAG, "SYNCH_MENTIONS");
 		if(force || (System.currentTimeMillis() - getLastMentionsUpdate(getBaseContext()) > Constants.MENTIONS_MIN_SYNCH)){
 			(new UpdateMentionsTask()).execute();
-		} else {
-			Log.d(TAG, "Last mentions synch too recent.");
-		}
+		} 
 
 	}
 
@@ -584,8 +589,7 @@ public class TwitterService extends Service {
 		Log.i(TAG, "SYNCH_DM");
 		// get the flags
 		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+rowId);
-		Cursor c = null;
-		long notify_user;
+		Cursor c = null;		
 		
 		try{
 			c = getContentResolver().query(queryUri, null, null, null, null);
@@ -594,17 +598,18 @@ public class TwitterService extends Service {
 				return;
 			}
 			c.moveToFirst();
-
+			
 			int flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
+			
 			if((flags & DirectMessages.FLAG_TO_DELETE)>0) {
 				// Delete the DM from twitter				
-				//new DestroyMessageTask()).execute(rowId);
+				new DestroyMessageTask().execute(rowId,3L, notify);
 				
 			} else if((flags & DirectMessages.FLAG_TO_INSERT)>0) {
-				// post the DM to twitter
-				
+				// post the DM to twitter				
 				(new SendMessageTask()).execute(rowId, notify);
 			} 
+			
 		} catch(Exception ex){
 			Log.e(TAG, "Exception: " + ex);
 		} finally {
@@ -617,7 +622,7 @@ public class TwitterService extends Service {
 	 */
 	private void synchUserTweets(String screenname) {
 
-		Log.i(TAG, "SYNCH_USERTWEETS");
+		Log.d(TAG, "SYNCH_USERTWEETS");
 		(new UpdateUserTweetsTask()).execute(screenname);
 
 	}
@@ -627,7 +632,7 @@ public class TwitterService extends Service {
 	 */
 	private void synchSearchTweets(String query) {
 
-		Log.i(TAG, "SYNCH_SEARCH");
+		Log.d(TAG, "SYNCH_SEARCH");
 		(new SearchTweetsTask()).execute(query);
 
 	}
@@ -644,6 +649,27 @@ public class TwitterService extends Service {
 		else
 			return new BigInteger(sinceIdString);
 	}
+	
+	/**
+	 * Reads the ID of the last tweet from shared preferences.
+	 * @return
+	 */
+	public static BigInteger getTimelineUntilId(Context context) {
+		Cursor c = context.getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+				+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
+		if (c.getCount()>0) {
+			c.moveToLast();
+		} else
+			return null;
+		
+		Long id = c.getLong(c.getColumnIndex(Tweets.COL_TID));
+		if (id != null)
+			return new BigInteger(Long.toString(id));
+		else 
+			return null;
+		
+	}
+	
 
 	/**
 	 * Stores the given ID as the since ID
@@ -653,8 +679,8 @@ public class TwitterService extends Service {
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putString("timelineSinceId",sinceId==null?null:sinceId.toString());
 		prefEditor.commit();
-	}
-
+	}	
+	
 	/**
 	 * Reads the timestamp of the last timeline update from shared preferences.
 	 * @return
@@ -912,13 +938,12 @@ public class TwitterService extends Service {
 	 * Returns the row ID on success, 0 on failure.
 	 * @param ret_screenName 
 	 */
-	private int updateTweet(ContentValues cv){			
+	private int updateTweets(ContentValues[] cv){			
 				
 		Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
-		Uri resultUri = getContentResolver().insert(insertUri, cv);	
-		if (resultUri != null)
-			return new Integer(resultUri.getLastPathSegment());	
-		else return -1;
+		int result = getContentResolver().bulkInsert(insertUri, cv);			
+		return result;
+		
 		
 	}
 	
@@ -960,6 +985,22 @@ public class TwitterService extends Service {
 		else return 0;		
 
 	}
+	
+	/**
+	 * Updates the user profile in the DB.
+	 * @param contentValues 
+	 * @param user
+	 */
+	private long updateUsers(ContentValues[] users) {
+		if(users==null) return 0;
+
+		Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+		int result = getContentResolver().bulkInsert(insertUri, users);
+
+		return result;	
+
+	}
+
 
 	/**
 	 * Creates content values for a tweet from Twitter
@@ -1090,7 +1131,7 @@ public class TwitterService extends Service {
 	 * @param buffer
 	 * @return
 	 */
-	private ContentValues getMessageContentValues(Message dm, int buffer) {
+	private ContentValues getMessageContentValues(winterwell.jtwitter.Message dm, int buffer) {
 		ContentValues cv = new ContentValues();
 		cv.put(DirectMessages.COL_TEXT, dm.getText());
 		cv.put(DirectMessages.COL_CREATED, dm.getCreatedAt().getTime());
@@ -1119,7 +1160,7 @@ public class TwitterService extends Service {
 					userContentValues.put(TwitterUsers.COL_ID, user.id);
 												
 				} 
-				userContentValues.put(TwitterUsers.COL_SCREENNAME, user.screenName);
+				userContentValues.put(TwitterUsers.COL_SCREENNAME, user.screenName);				
 				userContentValues.put(TwitterUsers.COL_NAME, user.name);
 				if(user.description!=null) userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.description);
 				if(user.location!=null) userContentValues.put(TwitterUsers.COL_LOCATION, user.location);
@@ -1200,8 +1241,10 @@ public class TwitterService extends Service {
 
 			// error handling
 			if(ex != null){
+				Log.e(TAG, "exception while verifying: " + ex);
 				// user not authorized!
 				if(ex instanceof TwitterException.E401){
+				
 					// tell the user that the login was not successful
 					if(startTimeline>0){
 						Intent timelineIntent = new Intent(LoginActivity.LOGIN_RESULT_ACTION);
@@ -1319,33 +1362,31 @@ public class TwitterService extends Service {
 			List<winterwell.jtwitter.Status> tweetList = params[0];
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
-				BigInteger lastId = null;
-				int i=0;
-				Log.i(TAG,"starting inserting mentions " + new Date().toString());
+				BigInteger lastId = null;								
+				
+				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
+			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+				
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
-						lastId = tweet.getId();
-
-					if(tweet.getUser() != null){						
-						if (tweet.getUser().getScreenName() != null && tweet.getUser().getId() != null) {
-							
-							updateUser(tweet.getUser(),false);
-							ContentValues cv = getTweetContentValues(tweet, null, Tweets.BUFFER_MENTIONS);
-							if (cv != null)
-								updateTweet( cv);							
-						} 
-					} 
-					i++;
-					if (i == 5) {						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-						new SynchTransactionalUsersTask().execute(false);
-						i=0;
+						lastId = tweet.getId();					
+					
+					
+					if(tweet.getUser() != null){	
+												
+							users.add( getUserContentValues(tweet.getUser(),false));	
+							cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_MENTIONS) );												
 						
+					} 					
+					if (cv.size() == 5) {						
+						insertDataAndNotify(cv,users);		
+					    cv.clear();
+					    users.clear();												
 					}
 				}
-				  Log.i(TAG,"done " + new Date().toString());
-				// trigger the user synch (for updating the profile images)
-				new SynchTransactionalUsersTask().execute(false);
+				if (cv.size() > 0) {
+					insertDataAndNotify(cv,users);		
+				}
 
 				// save the id of the last tweet for future timeline synchs
 				setMentionsSinceId(lastId, getBaseContext());
@@ -1360,7 +1401,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			//getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			setTaskExecuted(TwitterService.TASK_MENTIONS, TwitterService.this);
 		}
 
@@ -1432,34 +1473,31 @@ public class TwitterService extends Service {
 			List<winterwell.jtwitter.Status> tweetList = params[0];
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null;
-				int i=0;
+					
+			
+				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
+			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+				
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();
 
-					if(tweet.getUser() != null){
-						if (tweet.getUser().getScreenName() != null && tweet.getUser().getId() != null) {
-							updateUser(tweet.getUser(),false);
-							ContentValues cv = getTweetContentValues(tweet, null, Tweets.BUFFER_FAVORITES);
-							if (cv != null)
-								updateTweet( cv);
-							
-						} else
-							Log.w(TAG, "screenname or id are null!");
-					} else {
-						Log.w(TAG, "user is null!");
-					}
-					i++;
-					if (i == 4) {						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-						new SynchTransactionalUsersTask().execute(false);
-						i=0;
+					if(tweet.getUser() != null){													
+							users.add( getUserContentValues(tweet.getUser(),false));	
+							cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_FAVORITES) );						
 						
+					} 
+					
+					if (cv.size()==4) {
+						insertDataAndNotify(cv,users);						
+					    cv.clear();
+					    users.clear();
+											
 					}
 				}
-
-				// trigger the user synch (for updating the profile images)
-				new SynchTransactionalUsersTask().execute(false);
+				if (cv.size() > 0) {
+					insertDataAndNotify(cv,users);		
+				}
 
 				// save the id of the last tweet for future timeline synchs
 				setFavoritesSinceId(lastId, getBaseContext());
@@ -1471,12 +1509,23 @@ public class TwitterService extends Service {
 			return null;
 		}
 
+		
+
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 		}
 
+	}
+	
+	private void insertDataAndNotify(ArrayList<ContentValues> cv,
+			ArrayList<ContentValues> users) {		
+		updateTweets( convertToArray(cv) );
+		updateUsers( convertToArray(users) );
+		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+		new SynchTransactionalUsersTask(true).execute(false);
+		
 	}
 
 	/**
@@ -1488,21 +1537,27 @@ public class TwitterService extends Service {
 
 		Exception ex = null;
 		int attempts_left;
+		int overscroll= OVERSCROLL_TOP;
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(Integer... params) {
 			
 			ShowTweetListActivity.setLoading(true);
 			attempts_left= params[0];
-			Log.d(TAG, "AsynchTask: UpdateTimelineTask, attempts_left = " + attempts_left);
+			if (params.length>1)
+				overscroll = params[1];
 			
 			List<winterwell.jtwitter.Status> timeline = null;
 			twitter.setCount(Constants.NR_TWEETS);
-			twitter.setSinceId(getTimelineSinceId(getBaseContext()));
-
+			if (overscroll == OVERSCROLL_BOTTOM) {	
+				Log.i(TAG,"setting timeline until id");
+				twitter.setUntilId(getTimelineUntilId(getBaseContext()));
+			} else
+				twitter.setSinceId(getTimelineSinceId(getBaseContext()));
 
 			try {				
-				timeline = twitter.getHomeTimeline();					
+				timeline = twitter.getHomeTimeline();
+				Log.i(TAG,"timeline size:" + timeline.size());
 			} catch (Exception ex) {
 				this.ex = ex;
 			}
@@ -1551,18 +1606,23 @@ public class TwitterService extends Service {
 	 *
 	 */
 	private class InsertTimelineTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
+	
 
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
-
+			Log.i(TAG,"insert timeline task");
+			
 			ShowTweetListActivity.setLoading(true);
 			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
-				BigInteger lastId = null;
-			    int i=0;			    
-			   
+				BigInteger lastId = null;			   		    
+			    
+			    ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
+			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+			    ArrayList<ContentValues> allUsers = new ArrayList<ContentValues>();	
+			    
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null) {
 						lastId = tweet.getId();						
@@ -1576,39 +1636,41 @@ public class TwitterService extends Service {
 						tweet = tweet.getOriginal();						
 					}
 					
-					if(tweet.getUser() != null){
-						if (tweet.getUser().getScreenName() != null && tweet.getUser().getId() != null) {
+					if(tweet.getUser() != null){					
 							
-							if (ret_screenName == null)
-								updateUser(tweet.getUser(),true);
-							else
-								updateUser(tweet.getUser(),false);
-							ContentValues cv = getTweetContentValues(tweet,ret_screenName, Tweets.BUFFER_TIMELINE);
-							if (cv != null)
-								updateTweet(cv);
-						} 						
-					} 
-					i++;
-					if (i == 5) {						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-						new SynchTransactionalUsersTask().execute(false);
-						i=0;
-						
-					}
+						if (!contains(allUsers,tweet.getUser())) {
+							if (ret_screenName == null)	{							
+								users.add( getUserContentValues(tweet.getUser(),true));	
+								allUsers.add( getUserContentValues(tweet.getUser(),true));	
+							}
+							else 	{					    	
+								users.add( getUserContentValues(tweet.getUser(),false));	
+								allUsers.add( getUserContentValues(tweet.getUser(),false));	
+							}
+						} else
+							Log.i(TAG,"we already have the user ");
+													
+							cv.add( getTweetContentValues(tweet,ret_screenName, Tweets.BUFFER_TIMELINE) );												
+					} 					
+					if (cv.size() == 5) {						
+						insertDataAndNotify(cv,users);		
+					    cv.clear();
+					    users.clear();											
+					}					
 				}				
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-				// trigger the user synch (for updating the profile images)
-				new SynchTransactionalUsersTask().execute(false);
-
+				if (cv.size() > 0) {
+					insertDataAndNotify(cv,users);		
+				}
 				// save the id of the last tweet for future timeline synchs
-				setTimelineSinceId(lastId, getBaseContext());
+				setTimelineSinceId(lastId, getBaseContext());				
 			}
-
 			// save the timestamp of the last update
 			setLastTimelineUpdate(new Date(), getBaseContext());
 
 			return null;
 		}
+
+	
 
 		@Override
 		protected void onPostExecute(Void params){
@@ -1616,6 +1678,31 @@ public class TwitterService extends Service {
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 		}
 
+	}
+	
+	private boolean contains(ArrayList<ContentValues> usersCv, User incomingUser) {
+		
+		for (ContentValues cv: usersCv){
+			if(cv.getAsLong(TwitterUsers.COL_ID) == incomingUser.id)
+				return true;			
+		}
+		return false;
+	}
+	
+	private ContentValues[] convertToArray(ArrayList<ContentValues> list) {
+		
+		if (list != null) {			
+			ContentValues[] values = new ContentValues[list.size()];
+			 
+			 int i=0;
+			 for(ContentValues cv : list) {
+				 values[i++]=cv;
+			 }
+			 return values;
+			 
+		}else 
+			return null;
+		 
 	}
 
 	/**
@@ -1629,7 +1716,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(String... params) {
-			Log.d(TAG, "AsynchTask: UpdateUserTweetsTask");
+			Log.i(TAG, "AsynchTask: UpdateUserTweetsTask");
 
 			ShowUserTweetListActivity.setLoading(true);
 			
@@ -1685,21 +1772,30 @@ public class TwitterService extends Service {
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
 				int i =0;
+				
+				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();
+				
 				for (winterwell.jtwitter.Status tweet: tweetList) {
+					
 					if(tweet.getUser()!=null){
-						ContentValues cv = getTweetContentValues(tweet, null, Tweets.BUFFER_USERS);
-						if (cv != null)
-							updateTweet( cv);
+						cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_USERS) );				
 						
 					} 
 					i++;
-					if (i == 4) {						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					
+					if (i == 5) {	
+						updateTweets( convertToArray(cv) );						
+						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);						
+						cv.clear();
 						i=0;
 					}
 				}
+				if (cv.size() > 0) {
+					updateTweets( convertToArray(cv));
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);	
+				}
 			}			
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);			
+					
 			ShowUserTweetListActivity.setLoading(false);
 			
 			return null;
@@ -1820,9 +1916,14 @@ public class TwitterService extends Service {
 
 			SearchableActivity.setLoading(true);			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
+			Log.i(TAG,"search results: " + tweetList.size());
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
 				double i = 0;
+				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
+			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();
+				
+			    Log.i(TAG,"start  " + new Date().toString());
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					
 					String ret_screenName = null;
@@ -1834,23 +1935,21 @@ public class TwitterService extends Service {
 					if(tweet.getUser() != null){
 						if (tweet.getUser().getScreenName() != null ) {
 							
-							ContentValues cv = getTweetContentValues(tweet, ret_screenName, Tweets.BUFFER_SEARCH);
-							if (cv != null)
-								updateTweet( cv);						
-							updateUser(tweet.getUser(),false);
+							users.add( getUserContentValues(tweet.getUser(),false));	
+							cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_SEARCH) );								
 						} 
 					} 
 					i++;
 					if (i == 5) {						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-						new SynchTransactionalUsersTask().execute(false);
+						insertDataAndNotify(cv,users);		
+					    cv.clear();
+					    users.clear();
 						i=0;
 					}
 				}
-			}			
-			new SynchTransactionalUsersTask().execute(true);
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-			
+				insertDataAndNotify(cv,users);	
+				  Log.i(TAG,"end " + new Date().toString());
+			}					
 			SearchableActivity.setLoading(false);
 			
 			return null;
@@ -1874,28 +1973,29 @@ public class TwitterService extends Service {
 			if(result==null || result.isEmpty()){
 				return null;
 			}
-			int i =0;
-			ContentValues cv = new ContentValues();
+			
+			ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+
 			for (User user: result) {
 
-				cv= getUserContentValues(user,false);
+				ContentValues cv= getUserContentValues(user,false);
 				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());				
 				cv.put(TwitterUsers.COL_IS_SEARCH_RESULT,1);
 
-				try{
-					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);			
-					getContentResolver().insert(insertUri, cv);
-				} catch (Exception ex){
-					Log.e(TAG, "Exception while inserting friends list");
-				}
-				i++;
-				if (i==6){
-					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-					// trigger the user synch (for updating the profile images)
-					new SynchTransactionalUsersTask().execute(false);
-					i=0;
-				}
+				users.add(cv );					
 
+				if (users.size()==5) {
+					updateUsers( convertToArray(users) );
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					new SynchTransactionalUsersTask(true).execute(false);
+					users.clear();					
+				}			
+
+			}
+			if (users.size()>0) {
+				updateUsers( convertToArray(users) );
+				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
 		}
@@ -1906,7 +2006,7 @@ public class TwitterService extends Service {
 			ShowUserListActivity.setLoading(false);
 			
 			// trigger the user synch (for updating the profile images)
-			new SynchTransactionalUsersTask().execute(false);
+			new SynchTransactionalUsersTask(false).execute(false);
 
 			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 
@@ -2000,7 +2100,8 @@ public class TwitterService extends Service {
 					}
 				}
 				try {
-					userList = twitter.bulkShowById(toLookup);
+					userList = twitter.users().showById(toLookup);
+					//userList = twitter.bulkShowById(toLookup);
 
 				} catch (Exception ex) {
 					this.ex = ex;
@@ -2034,50 +2135,45 @@ public class TwitterService extends Service {
 	 *
 	 */
 	private class InsertFriendsListTask extends AsyncTask<List<User>, Void, Void>{
-
+	
 		@Override
 		protected Void doInBackground(List<User>... params) {
-
+			Log.i(TAG,"insert friends task");
 			ShowUserListActivity.setLoading(true);
 			
 			List<User> result = params[0];
 
 			if(result==null || result.isEmpty()){
 				return null;
-			}
-			int i =0;
-			ContentValues cv = new ContentValues();
+			}			
+			ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+			
 			for (User user: result) {
-
-				cv= getUserContentValues(user,true);
-				if (cv !=null) {
-					cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
-					//cv.put(TwitterUsers.COL_ISFRIEND, 1);					
-					
-					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);			
-					getContentResolver().insert(insertUri, cv);
-				}
-				i++;
-				if (i==6) {
-					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-					// trigger the user synch (for updating the profile images)
-					new SynchTransactionalUsersTask().execute(false);
-					i=0;
+				
+				ContentValues cv = getUserContentValues(user,true);
+				if (cv !=null) 
+					cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());			
+				users.add(cv );					
+				
+				if (users.size()==5) {
+					updateUsers( convertToArray(users) );
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					new SynchTransactionalUsersTask(true).execute(false);
+					users.clear();					
 				}
 
+			}
+			if (users.size()>0) {
+				updateUsers( convertToArray(users) );
+				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void params){
-
-			ShowUserListActivity.setLoading(false);
-			
-			// trigger the user synch (for updating the profile images)
-			new SynchTransactionalUsersTask().execute(false);
-
-			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+			ShowUserListActivity.setLoading(false);		
 
 		}
 
@@ -2168,7 +2264,7 @@ public class TwitterService extends Service {
 				}
 
 				try {
-					userList = twitter.bulkShowById(toLookup);
+					userList = twitter.users().showById(toLookup);
 
 				} catch (Exception ex) {
 					this.ex = ex;
@@ -2216,44 +2312,39 @@ public class TwitterService extends Service {
 
 			if(result==null || result.isEmpty()){
 				return null;
-			}
-			int i=0;
+			}			
+			
 			ContentValues cv = new ContentValues();
+			ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
+			Log.i(TAG,"followers size: "+ result.size());
+			
 			for (User user: result) {
 
 				cv= getUserContentValues(user,false);
 				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
 				cv.put(TwitterUsers.COL_ISFOLLOWER, 1);
+				users.add(cv);				
 				
-				try{
-					Uri insertUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);			
-					getContentResolver().insert(insertUri, cv);
-				} catch (Exception ex){
-					Log.e(TAG, "Exception while inserting followers list");
+				if (users.size()==5){
+					updateUsers( convertToArray(users) );
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					new SynchTransactionalUsersTask(true).execute(false);
+					users.clear();					
 				}
-
-				i++;
-				if (i==6){
-					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-					// trigger the user synch (for updating the profile images)
-					new SynchTransactionalUsersTask().execute(false);
-					i=0;
-				}
-
-
+			}
+			
+			if (users.size()>0) {
+				Log.i(TAG,"inserting last users");
+				updateUsers( convertToArray(users) );
+				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void params){
-
-			ShowUserListActivity.setLoading(false);
-			
-			// trigger the user synch (for updating the profile images)
-			new SynchTransactionalUsersTask().execute(false);
-
-			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+			ShowUserListActivity.setLoading(false);		
 
 		}
 
@@ -2266,54 +2357,60 @@ public class TwitterService extends Service {
 	 * Gets profile image from twitter
 	 * @author thossmann
 	 */
-	private class UpdateProfileImageTask extends AsyncTask<Long, Void, HttpEntity> {
+	private class UpdateProfileImagesTask extends AsyncTask<Long[], Void, HttpEntity[]> {
 
-		long rowId;
+		
 		Exception ex;
 		Cursor c;
 		Uri queryUri;
+		Long[] rowIds;
+	
 
 		@Override
-		protected HttpEntity doInBackground(Long... rowId) {
+		protected HttpEntity[] doInBackground(Long[]... params) {
 			Log.d(TAG, "AsynchTask: UpdateProfileImageTask");
-			ShowUserListActivity.setLoading(true);
-			this.rowId = rowId[0];
-
-			HttpEntity entity = null;
-
-			try {
+			ShowUserListActivity.setLoading(true);	
+			
+			rowIds = params[0];
+			HttpEntity[] entity = new HttpEntity[rowIds.length];
+			
+			
+			for (int i=0; i<rowIds.length; i++) {
 				
-				queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+this.rowId);
-				
-				c = getContentResolver().query(queryUri, null, null, null, null);
+				try {
+					
+					queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowIds[i]);
+					
+					c = getContentResolver().query(queryUri, null, null, null, null);
 
-				if(c.getCount() == 0){
-					Log.w(TAG, "UpdateUserTask: User not found " + this.rowId);
-					c.close();
-					return null;
-				}
-				c.moveToFirst();
+					if(c.getCount() == 0){						
+						c.close();
+						return null;
+					}
+					c.moveToFirst();
+					
+					String imageUrl = null;
+					// this should not happen
+					if(c.isNull(c.getColumnIndex(TwitterUsers.COL_IMAGEURL))){
+						c.close();
+						ex = new Exception();
+						return null;
+					} else {
+						imageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
+					}
 
-				String imageUrl = null;
-				// this should not happen
-				if(c.isNull(c.getColumnIndex(TwitterUsers.COL_IMAGEURL))){
-					c.close();
-					ex = new Exception();
-					return null;
-				} else {
-					imageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
-				}
+					DefaultHttpClient mHttpClient = new DefaultHttpClient();
+					HttpGet mHttpGet = new HttpGet(imageUrl);
+					HttpResponse mHttpResponse = mHttpClient.execute(mHttpGet);
+					if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+						entity[i] = mHttpResponse.getEntity();
+						
+					}
 
-				DefaultHttpClient mHttpClient = new DefaultHttpClient();
-				HttpGet mHttpGet = new HttpGet(imageUrl);
-				HttpResponse mHttpResponse = mHttpClient.execute(mHttpGet);
-				if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-					entity = mHttpResponse.getEntity();
-				}
-
-			} catch (Exception ex) {
-				this.ex = ex;
-			} 
+				} catch (Exception ex) {
+					this.ex = ex;
+				} 
+			}
 			
 			return entity;
 		}
@@ -2322,55 +2419,99 @@ public class TwitterService extends Service {
 		 * Clear to update flag and update the user with the information from twitter
 		 */
 		@Override
-		protected void onPostExecute(HttpEntity result) {
+		protected void onPostExecute(HttpEntity[] result) {
 			
 			if(ex!=null){
-				Log.e(TAG, "EEEEEE " + ex);
+				Log.e(TAG, "E" + ex);
 				c.close();
 				return;
 			}
 			
-			// clear the update image flag
-			ContentValues cv = new ContentValues();
+			// clear the update image flag			
+			ContentValues[] cv = new ContentValues[result.length];
 			
-			try {
-				cv.put("_id", this.rowId);
-				cv.put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS)));
-				cv.put(TwitterUsers.COL_PROFILEIMAGE, EntityUtils.toByteArray(result));				
-				cv.put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
+			for (int i=0; i<cv.length; i++) {				
+				try {
+					cv[i]= new ContentValues();
+					cv[i].put("_id", rowIds[i]);
+					cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS)));
+					cv[i].put(TwitterUsers.COL_PROFILEIMAGE, EntityUtils.toByteArray(result[i]));				
+					cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
+					
 
-			} catch (IOException e) {
-				Log.e(TAG, "IOException while getting image from http entity");
-				c.close();
-				return;
+				} catch (IOException e) {
+					Log.e(TAG, "IOException while getting image from http entity");
+					c.close();
+					return;
+				}
+				
 			}
-
-			c.close();
-			
+			if (c!= null)
+				c.close();	
 			// insert pictures into DB
-			new InsertProfileImageTask().execute(cv);
-
+			new InsertProfileImagesTask().execute(cv);
+			
 		}
 
 	}
-
+	
 	/**
 	 * Asynchronously insert a profile image into the DB 
 	 * @author thossmann
 	 *
 	 */
-	private class InsertProfileImageTask extends AsyncTask<ContentValues, Void, Void> {
+	private class InsertProfileImagesTask extends AsyncTask<ContentValues, Void, Void> {
 
 		Uri queryUri = null;
 		@Override
 		protected Void doInBackground(ContentValues... params) {
+			Log.d(TAG, "AsynchTask: InsertProfileImagesTask");
+			ShowUserListActivity.setLoading(true);
+			
+			if (params.length ==1) {
+				ContentValues cv = params[0];				
+				try{
+					queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
+					getContentResolver().update(queryUri, cv, null, null);
+				} catch(IllegalArgumentException ex){
+					Log.e(TAG, "Exception while inserting profile image into DB");
+				}
+			} else 				
+				updateUsers(params);	
+			
+			return null;
+		}
+
+		@Override 
+		protected void onPostExecute(Void params){
+			// here, we have to notify almost everyone
+			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
+			ShowUserListActivity.setLoading(false);
+		}
+
+	}
+
+	/**
+	 * Asynchronously insert a bunch of profile images into the DB 
+	 * 
+	 *
+	 */
+	private class BulkInsertProfileImageTask extends AsyncTask<ContentValues[], Void, Void> {
+
+		Uri queryUri = null;
+		@Override
+		protected Void doInBackground(ContentValues[]... params) {
 			
 			ShowUserListActivity.setLoading(true);
-			ContentValues cv = params[0];
+			ContentValues[] cv = params[0];
 
 			try{
-				queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
-				getContentResolver().update(queryUri, cv, null, null);
+				queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);			
+				//getContentResolver().update(queryUri, cv, null, null);
+				getContentResolver().bulkInsert(queryUri, cv);
+				
 			} catch(IllegalArgumentException ex){
 				Log.e(TAG, "Exception while inserting profile image into DB");
 			}
@@ -2469,7 +2610,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while posting tweet: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
@@ -2481,7 +2622,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while posting tweet: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new UpdateStatusTask()).execute(params);
 						return;
 					} else {
@@ -2587,12 +2728,10 @@ public class TwitterService extends Service {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.e(TAG, "exception while deleting tweet: " + ex);
 					Uri deleteUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);				
 					getContentResolver().delete(deleteUri, null, null);
 					
-				} else if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while deleting tweet: " + ex);
+				} else if(ex instanceof TwitterException.E401){				
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -2600,11 +2739,11 @@ public class TwitterService extends Service {
 						return;
 					} else {						
 						if (ShowTweetListActivity.running && notify == TRUE)
-						Toast.makeText(getBaseContext(), "Something went wrong while deleting your tweet. We will try again later!", Toast.LENGTH_SHORT).show();
+							Toast.makeText(getBaseContext(), "Something went wrong while deleting your tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while deleting tweet: " + ex);
+					
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -2612,11 +2751,11 @@ public class TwitterService extends Service {
 						return;
 					} else {						
 						if (ShowTweetListActivity.running && notify == TRUE)
-						Toast.makeText(getBaseContext(), "Timeout while deleting tweet. We will try again later!", Toast.LENGTH_SHORT).show();
+							Toast.makeText(getBaseContext(), "Timeout while deleting tweet. We will try again later!", Toast.LENGTH_SHORT).show();
 						return;
 					}
 				}else if (ex instanceof TwitterException.E404) {
-					Log.e(TAG, "exception while deleting tweet: " + ex);
+					
 					Uri deleteUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);				
 					getContentResolver().delete(deleteUri, null, null);
 					
@@ -2624,7 +2763,7 @@ public class TwitterService extends Service {
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running && notify == TRUE)					
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while deleting tweet: " + ex);
+					
 					return;
 				}
 			}
@@ -2633,6 +2772,125 @@ public class TwitterService extends Service {
 				Uri deleteUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);				
 				getContentResolver().delete(deleteUri, null, null);
 				if (ShowTweetListActivity.running)					
+						Toast.makeText(getBaseContext(), "Delete successful.", Toast.LENGTH_SHORT).show();
+				
+			}
+		}
+
+	}
+	
+	
+	/**
+	 * Delete a tweet from twitter and from the content provider
+	 * @author thossmann
+	 */
+	private class DestroyMessageTask extends AsyncTask<Long, Void, Integer> {
+
+		long attempts;
+		long rowId;
+	
+		long notify;
+
+		Exception ex;
+
+		@Override
+		protected Integer doInBackground(Long... params) {
+			Log.d(TAG, "AsynchTask: DestroyStatusTask");
+			ShowTweetListActivity.setLoading(true);
+			this.rowId = params[0];
+			this.attempts = params[1];
+			this.notify= params[2];
+			
+			Integer result = null;
+
+			Cursor c = null;
+
+			try {
+				
+				Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+ rowId);
+				c = getContentResolver().query(queryUri, null, null, null, null);
+
+				// making sure the tweet was found in the content provider
+				if(c.getCount() == 0){
+					Log.w(TAG, "DestroyStatusTask: Msg not found " + this.rowId);
+					ex = new Exception();
+					c.close();
+					return null;
+				}				
+				c.moveToFirst();				
+			
+				twitter.destroyMessage(c.getLong(c.getColumnIndex(DirectMessages.COL_DMID)));
+				Log.i(TAG,"destroy executed");
+				result = 1;
+			} catch (TwitterException ex) {
+				this.ex = ex;
+			} finally {
+				if(c!=null) c.close();
+				Log.i(TAG,"cursor closed");
+			}
+
+			return result;
+		}
+
+		/**
+		 * If successful, we delete the tweet also locally. If not successful, we keep the tweet and clear the todelete flag
+		 */
+		@Override
+		protected void onPostExecute(Integer result) {
+			
+			ShowTweetListActivity.setLoading(false);
+			Uri deleteUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+ rowId);
+			Log.i(TAG,"on post ex");
+			
+			// error handling
+			if(ex != null){
+				Log.i(TAG,"ex != null");
+				if(ex instanceof TwitterException.Repetition){	
+					Log.i(TAG,"repetition");
+					getContentResolver().delete(deleteUri, null, null);
+					
+				} else if(ex instanceof TwitterException.E401){
+					Log.i(TAG,"TwitterException.E401");
+					// try again?
+					if(attempts>0){
+						Long[] params = {rowId, --attempts,notify};
+						(new DestroyMessageTask()).execute(params);
+						return;
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
+							Toast.makeText(getBaseContext(), "Something went wrong while deleting your message. We will try again later!", Toast.LENGTH_SHORT).show();
+						return;
+					}
+				} else if(ex instanceof TwitterException.Timeout){
+					Log.i(TAG,"Timeout");
+					// try again?
+					if(attempts>0){
+						Long[] params = {rowId, --attempts,notify};
+						(new DestroyMessageTask()).execute(params);
+						return;
+					} else {						
+						if (ShowTweetListActivity.running && notify == TRUE)
+							Toast.makeText(getBaseContext(), "Timeout while deleting message. We will try again later!", Toast.LENGTH_SHORT).show();
+						return;
+					}
+				}else if (ex instanceof TwitterException.E404) {
+					Log.i(TAG,"E404");
+					getContentResolver().delete(deleteUri, null, null);
+					
+				}else {
+					Log.i(TAG,"error");
+					// an exception happended, we notify the user					
+					if (ShowTweetListActivity.running && notify == TRUE)					
+						Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
+					
+					return;
+				}
+			}
+		    // TODO: Move this to async task
+		    else {
+		    	Log.i(TAG,"else");			
+				getContentResolver().delete(deleteUri, null, null);
+				if (ShowTweetListActivity.running && notify == TRUE)					
 						Toast.makeText(getBaseContext(), "Delete successful.", Toast.LENGTH_SHORT).show();
 				
 			}
@@ -2715,7 +2973,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while favoriting tweet: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new FavoriteStatusTask()).execute(params);
 						return;
 					} else {						
@@ -2727,7 +2985,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while favoriting tweet: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new FavoriteStatusTask()).execute(params);
 						return;
 					} else {						
@@ -2841,7 +3099,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while unfavoriting: ", ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
@@ -2853,7 +3111,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while unfavoriting: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new UnfavoriteStatusTask()).execute(params);
 						return;
 					} else {
@@ -2966,7 +3224,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
@@ -2979,7 +3237,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts,notify};
 						(new RetweetStatusTask()).execute(params);
 						return;
 					} else {
@@ -3453,11 +3711,11 @@ public class TwitterService extends Service {
 	private class InsertDMsInTask extends AsyncTask<List<winterwell.jtwitter.Message>, Void, Void>{
 
 		@Override
-		protected Void doInBackground(List<Message>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Message>... params) {
 			
 			ShowDMUsersListActivity.setLoading(true);
 
-			List<Message> result = params[0];
+			List<winterwell.jtwitter.Message> result = params[0];
 
 			if(result==null) return null;
 
@@ -3485,7 +3743,7 @@ public class TwitterService extends Service {
 			ShowDMUsersListActivity.setLoading(false);
 
 			// trigger the user synch (for updating the profile images)
-			new SynchTransactionalUsersTask().execute(false);
+			new SynchTransactionalUsersTask(false).execute(false);
 
 			// save the timestamp of the last update
 			setLastDMsInUpdate(new Date(), getBaseContext());
@@ -3561,11 +3819,11 @@ public class TwitterService extends Service {
 	private class InsertDMsOutTask extends AsyncTask<List<winterwell.jtwitter.Message>, Void, Void>{
 
 		@Override
-		protected Void doInBackground(List<Message>... params) {
+		protected Void doInBackground(List<winterwell.jtwitter.Message>... params) {
 
 			ShowDMUsersListActivity.setLoading(true);
 			
-			List<Message> result = params[0];
+			List<winterwell.jtwitter.Message> result = params[0];
 
 			if(result==null) return null;
 
@@ -3593,7 +3851,7 @@ public class TwitterService extends Service {
 			ShowDMUsersListActivity.setLoading(false);
 
 			// trigger the user synch (for updating the profile images)
-			new SynchTransactionalUsersTask().execute(false);
+			new SynchTransactionalUsersTask(false).execute(false);
 
 			// save the timestamp of the last update
 			setLastDMsOutUpdate(new Date(), getBaseContext());

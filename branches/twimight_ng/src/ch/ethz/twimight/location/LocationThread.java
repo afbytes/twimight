@@ -12,9 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.location;
 
-import ch.ethz.twimight.data.LocationDBHelper;
-import ch.ethz.twimight.util.Constants;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,6 +20,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
+import ch.ethz.twimight.data.LocationDBHelper;
+import ch.ethz.twimight.util.Constants;
 
 /**
  * This is the thread for periodic localization in Twimight.

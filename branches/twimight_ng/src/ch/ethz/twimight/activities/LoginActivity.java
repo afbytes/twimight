@@ -136,17 +136,15 @@ public class LoginActivity extends Activity implements OnClickListener{
 			i.putExtra("synch_request", TwitterService.SYNCH_LOGIN);
 			registerLoginReceiver();
 			startService(i);
+			removeLoginInterface();
 			
 		} else if(hasRequestToken(this) && hasRequestTokenSecret(this)) {
 			
 			// We get the URI when we are called back from Twitter
 			Uri uri = getIntent().getData();
 			if(uri != null){
-				buttonLogin = (Button) findViewById(R.id.buttonLogin);
-				showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
-				buttonLogin.setVisibility(Button.GONE);
-				showLoginLayout.setVisibility(LinearLayout.GONE);
 				
+				removeLoginInterface();
 				new GetAccessTokensTask().execute(uri);
 			} else {
 				
@@ -164,6 +162,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		
 		
+	}
+	
+	private void removeLoginInterface(){
+		buttonLogin = (Button) findViewById(R.id.buttonLogin);
+		showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
+		buttonLogin.setVisibility(Button.GONE);
+		showLoginLayout.setVisibility(LinearLayout.GONE);
 	}
 	
 	private void setupLoginButton() {
@@ -764,7 +769,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 	    			if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_ACTION)) {
 	    	        	
 	    	        	if(intent.hasExtra(LoginActivity.LOGIN_RESULT)){
-	    	        		progressDialog.dismiss();
+	    	        		if (progressDialog != null)
+	    	        			progressDialog.dismiss();
 	    	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){	        			
 	    	        			startTimeline(context);
 	    	        		} else {

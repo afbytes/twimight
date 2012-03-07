@@ -334,8 +334,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private void registerLocationListener(){
 		try{
 			if ((lm != null) && (locationListener != null)) {
-				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 20, locationListener);
-				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 100, locationListener);
+				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 40, locationListener);
+				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 200, locationListener);
 			}
 		} catch(Exception e) {
 			Log.i(TAG,"Can't request location Updates: " + e.toString());

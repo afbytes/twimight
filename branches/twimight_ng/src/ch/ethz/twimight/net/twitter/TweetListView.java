@@ -1,5 +1,6 @@
 package ch.ethz.twimight.net.twitter;
 
+import ch.ethz.twimight.util.Constants;
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
@@ -8,7 +9,7 @@ import android.widget.ListView;
 
 public class TweetListView extends ListView {
 	private final String TAG = "TweetListView";
-	private int maxOverscroll = 100;
+	private int maxOverscroll = 150;
 	private int curOverscroll = 0;
 	private Intent overscrollIntent;
 	private Context context;
@@ -29,16 +30,22 @@ public class TweetListView extends ListView {
 		overscrollIntent = i;
 	}
 
-	private void sendOverscrollIntent(){
-		Log.v(TAG, "send?");
+	private void sendOverscrollIntent(boolean topOverscroll){		
 		if(overscrollIntent!=null && context!=null) {
+			if (topOverscroll) {
+				overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_TOP);
+				if (Constants.TIMELINE_BUFFER_SIZE >= 150)
+					Constants.TIMELINE_BUFFER_SIZE -= 50;
+			}
+			else {
+				overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_BOTTOM);
+				Constants.TIMELINE_BUFFER_SIZE += 50;
+			}
 			context.startService(overscrollIntent);
-			Log.v(TAG, "intent sent!");
+			
 		}
 	}
-	
-	
-	/*
+		/*
 	 * 
 	 *
 	private void initBounceListView()
@@ -63,14 +70,17 @@ public class TweetListView extends ListView {
 
 	@Override
 	protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
-
+		
 		// did we reach the max just now?
 		if(curOverscroll>(-maxOverscroll) && scrollY==(-maxOverscroll)){
-			Log.v(TAG, "now!!");
-			sendOverscrollIntent();
+			//Log.i(TAG, "now!!");
+			sendOverscrollIntent(true);
+		} else if (curOverscroll<(maxOverscroll) && scrollY==(maxOverscroll)){ 
+			sendOverscrollIntent(false);	
+			//Log.i(TAG, "bottom!!");
 		}
 		curOverscroll=scrollY;
-		//Log.v(TAG, "scrollX:" + scrollX + " scrollY:" + scrollY + " clampedX:" + clampedX + " clampedY:" + clampedX);
+		//Log.i(TAG, "scrollY:" + scrollY );
 
 		super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
 

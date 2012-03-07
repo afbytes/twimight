@@ -16,15 +16,13 @@ package ch.ethz.twimight.data;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.ethz.twimight.net.tds.TDSPublicKey;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
+import ch.ethz.twimight.net.tds.TDSPublicKey;
 
 /**
  * Manages the FriendsKeys table in the DB.

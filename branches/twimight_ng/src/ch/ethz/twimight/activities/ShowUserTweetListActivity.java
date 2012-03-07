@@ -12,9 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TweetAdapter;
-import ch.ethz.twimight.net.twitter.Tweets;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,6 +21,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.TweetAdapter;
+import ch.ethz.twimight.net.twitter.Tweets;
 
 /**
  * Shows the most recent tweets of a user
@@ -74,9 +74,6 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 				
 			}
 		});
-		
-		
-
 	}
 	
 	/**
@@ -84,8 +81,7 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onResume(){
-		super.onResume();
-		
+		super.onResume();	
 		
 		if(positionIndex != 0 | positionTop !=0){
 			userTweetListView.setSelectionFromTop(positionIndex, positionTop);

@@ -15,9 +15,6 @@ package ch.ethz.twimight.util;
 
 import org.xml.sax.XMLReader;
 
-import ch.ethz.twimight.activities.SearchableActivity;
-import ch.ethz.twimight.activities.ShowUserActivity;
-
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -25,9 +22,10 @@ import android.text.Editable;
 import android.text.Html.TagHandler;
 import android.text.Spannable;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+import ch.ethz.twimight.activities.SearchableActivity;
+import ch.ethz.twimight.activities.ShowUserActivity;
 
 public class TweetTagHandler implements TagHandler {
 
@@ -134,9 +132,11 @@ public class TweetTagHandler implements TagHandler {
 
 	 private class HashtagClickableSpan extends ClickableSpan {
 		 private String hashtag;
+		 
 		 public void setHashtag(String hashtag){
 			 this.hashtag = hashtag;
 		 }
+		 
 		 public void onClick(View view) {
 			 if(hashtag==null){
 				 Toast.makeText(context, "There was an error, please try again", Toast.LENGTH_SHORT).show();
