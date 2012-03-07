@@ -1044,7 +1044,7 @@ public class TwitterService extends Service {
 	 * Creates spans for entities (mentions, urls, hashtags).
 	 * @param tweet
 	 * @return The tweet text with the spans
-	 */
+	 */	
 	@SuppressWarnings("unchecked")
 	private String createSpans(Status tweet){
 
@@ -1068,17 +1068,19 @@ public class TwitterService extends Service {
 				try{
 					// we add (or update, if we already have them) the user to the local DB.
 					String screenname = tweet.getText().substring(entity.start+1, entity.end);
+					Log.i(TAG,"screen name got from entity: " + screenname);
 					ContentValues cv = new ContentValues();
 					cv.put(TwitterUsers.COL_NAME, entity.displayVersion());
-					cv.put(TwitterUsers.COL_SCREENNAME, screenname);				
-					cv.put(TwitterUsers.COL_ID, twitter.users().getUser(screenname).getId());
-				
+					cv.put(TwitterUsers.COL_SCREENNAME, screenname);	
+					//cv = getUserContentValues(twitter.users().getUser(screenname),false);
+					//cv.put(TwitterUsers.COL_ID, twitter.users().getUser(screenname).getId());					
 				
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 					getContentResolver().insert(insertUri, cv);
 				} catch(Exception ex){
 					Log.e(TAG, "Exception while inserting mentioned user");
 				}
+				
 
 			}
 		}
@@ -1125,6 +1127,7 @@ public class TwitterService extends Service {
 			
 		} catch (StringIndexOutOfBoundsException ex) {
 			Log.e(TAG,"create spans error",ex);
+			return tweet.getText();
 		}	
 
 		return replacedText.toString();
@@ -1528,9 +1531,12 @@ public class TwitterService extends Service {
 	private void insertDataAndNotify(ArrayList<ContentValues> cv,
 			ArrayList<ContentValues> users) {		
 		updateTweets( convertToArray(cv) );
-		updateUsers( convertToArray(users) );
+		if (users.size()>0) {
+			updateUsers( convertToArray(users) );
+			new SynchTransactionalUsersTask(true).execute(false);
+		}
 		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-		new SynchTransactionalUsersTask(true).execute(false);
+		
 		
 	}
 
@@ -1688,11 +1694,16 @@ public class TwitterService extends Service {
 	
 	private boolean contains(ArrayList<ContentValues> usersCv, User incomingUser) {
 		
+		boolean result = false;
+		
 		for (ContentValues cv: usersCv){
-			if(cv.getAsLong(TwitterUsers.COL_ID) == incomingUser.id)
-				return true;			
+			if(cv.getAsLong(TwitterUsers.COL_ID) == incomingUser.id){
+				result = true;
+				break;		
+			}
 		}
-		return false;
+		return result;
+		
 	}
 	
 	private ContentValues[] convertToArray(ArrayList<ContentValues> list) {
