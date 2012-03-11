@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="CustomButton" parent="android:style/Theme.Black">
+    <style name="Twimight" parent="android:style/Theme.Black">
         <item name="android:buttonStyle">@style/Button</item>
         <item name="android:imageButtonStyle">@style/ImageButton</item>
+        <item name="android:windowBackground">@color/twimightBackgroundLight</item>
+    	<item name="android:colorBackground">@color/twimightBackgroundLight</item>
+    	<item name="android:textAppearance">@style/twimightDefaultTextAppearance</item>
     </style>
 </resources>

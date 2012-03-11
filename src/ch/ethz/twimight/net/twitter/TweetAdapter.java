@@ -32,7 +32,7 @@ import ch.ethz.twimight.activities.LoginActivity;
  */
 public class TweetAdapter extends SimpleCursorAdapter {
 	
-	static final String[] from = {TwitterUsers.COL_SCREENNAME};
+	static final String[] from = {TwitterUsers.COL_NAME};
 	static final int[] to = {R.id.textUser};
 
 	/** Constructor */
@@ -43,7 +43,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	/** This is where data is mapped to its view */
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
-		super.bindView(row, context, cursor);		
+		super.bindView(row, context, cursor);
+		
+		// if we don't have a real name, we use the screen name
+		if(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME))==null){
+			TextView usernameTextView = (TextView) row.findViewById(R.id.textUser);
+			usernameTextView.setText("@"+cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+		}
 		
 		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
 		TextView textCreatedAt = (TextView) row.findViewById(R.id.tweetCreatedAt);
@@ -85,10 +91,9 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		boolean toPost = (flags>0);
 		if(toPost){
-			toPostInfo.setImageResource(android.R.drawable.ic_dialog_alert);
-			toPostInfo.getLayoutParams().height = 30;
+			toPostInfo.setVisibility(ImageView.VISIBLE);
 		} else {
-			toPostInfo.setImageResource(R.drawable.blank);
+			toPostInfo.setVisibility(ImageView.GONE);
 		}
 		
 		// favorited
@@ -98,12 +103,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 								&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
 								|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		if(favorited){
-			favoriteStar.setImageResource(android.R.drawable.star_off);
+			favoriteStar.setVisibility(ImageView.VISIBLE);
 		} else {
-			favoriteStar.setImageResource(R.drawable.blank);
+			favoriteStar.setVisibility(ImageView.GONE);
 		}
 		
-		// tweet background and disaster info
+		// disaster info
 		LinearLayout rowLayout = (LinearLayout) row.findViewById(R.id.rowLayout);
 		ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
 		

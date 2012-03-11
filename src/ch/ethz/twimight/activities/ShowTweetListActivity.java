@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -51,9 +50,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	// Views
 	private TweetListView timelineListView;
-	private Button timelineButton;
-	private Button favoritesButton;
-	private Button mentionsButton;
+	private ImageButton timelineButton;
+	private ImageButton favoritesButton;
+	private ImageButton mentionsButton;
 	private ImageButton tweetButton;
 	private ImageButton searchButton;
 
@@ -97,21 +96,21 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
 		// Header buttons
-		timelineButton = (Button) findViewById(R.id.headerBarTimelineButton);
+		timelineButton = (ImageButton) findViewById(R.id.headerBarTimelineButton);
 		timelineButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
 				setFilter(SHOW_TIMELINE);
 			}
 		});
-		favoritesButton = (Button) findViewById(R.id.headerBarFavoritesButton);
+		favoritesButton = (ImageButton) findViewById(R.id.headerBarFavoritesButton);
 		favoritesButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
 				setFilter(SHOW_FAVORITES);
 			}
 		});
-		mentionsButton = (Button) findViewById(R.id.headerBarMentionsButton);
+		mentionsButton = (ImageButton) findViewById(R.id.headerBarMentionsButton);
 		mentionsButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
@@ -355,7 +354,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private void setFilter(int filter){
 		// set all header button colors to transparent
 		resetButtons();
-		Button b=null;
+		ImageButton b=null;
 		Intent overscrollIntent = null;
 		
 		if(c!=null) c.close();
