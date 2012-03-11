@@ -12,6 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import android.app.AlertDialog;
@@ -58,9 +59,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private TextView createdWithView;
 	
 	private LinearLayout userInfoView;
-	Button retweetButton;
+	ImageButton retweetButton;
 	ImageButton deleteButton;
-	Button replyButton;
+	ImageButton replyButton;
 	ImageButton favoriteButton;
 	
 	Uri uri;
@@ -115,17 +116,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				
 				// Tweet background and disaster info
 				if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
-					tweetTextView.setBackgroundResource(R.drawable.disaster_tweet_background);
 					if(c.getInt(c.getColumnIndex(Tweets.COL_ISVERIFIED))==0){
 						LinearLayout unverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
 						unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 					}
-				} else if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(this))) {
-					tweetTextView.setBackgroundResource(R.drawable.own_tweet_background);
-				} else if((c.getColumnIndex(Tweets.COL_MENTIONS)>=0) && (c.getInt(c.getColumnIndex(Tweets.COL_MENTIONS))>0)){
-					tweetTextView.setBackgroundResource(R.drawable.mention_tweet_background);
-				} else {
-					tweetTextView.setBackgroundResource(R.drawable.normal_tweet_background);
 				}
 				
 				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
@@ -155,10 +149,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	
 	private void queryContentProvider() {
 		// get data from local DB and mark for update
-					uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
-					c = getContentResolver().query(uri, null, null, null, null);
-					if(c.getCount() > 0) 
-						c.moveToFirst();
+		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
+		c = getContentResolver().query(uri, null, null, null, null);
+		if(c.getCount() > 0) 
+			c.moveToFirst();
 		
 	}
 
@@ -173,7 +167,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		String localUserString = LoginActivity.getTwitterId(this);		
 		
 		// Retweet Button
-		retweetButton = (Button) findViewById(R.id.showTweetRetweet);
+		retweetButton = (ImageButton) findViewById(R.id.showTweetRetweet);
 		// we do not show the retweet button for (1) tweets from the local user, (2) tweets which have been flagged to retweeted and (3) tweets which have been marked as retweeted 
 		if(userString.equals(localUserString) || ((flags & Tweets.FLAG_TO_RETWEET) > 0) || (c.getInt(c.getColumnIndex(Tweets.COL_RETWEETED))>0)){
 			retweetButton.setVisibility(Button.GONE);
@@ -193,7 +187,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		deleteButton = (ImageButton) findViewById(R.id.showTweetDelete);
 		if(userString.equals(localUserString)){			
 			
-			deleteButton.setBackgroundColor(R.color.transparent);
 			deleteButton.setVisibility(ImageButton.VISIBLE);			
 			if((flags & Tweets.FLAG_TO_DELETE) == 0){
 				deleteButton.setOnClickListener(new OnClickListener(){
@@ -211,7 +204,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		}
 	
 		// Reply button: we show it only if we have a Tweet ID!
-		replyButton = (Button) findViewById(R.id.showTweetReply);
+		replyButton = (ImageButton) findViewById(R.id.showTweetReply);
 		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0 || 
 				PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
 			replyButton.setOnClickListener(new OnClickListener() {
@@ -233,9 +226,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		// Favorite button
 		favorited = (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		favoriteButton = (ImageButton) findViewById(R.id.showTweetFavorite);
-		favoriteButton.setBackgroundColor(R.color.transparent);
 		if( favorited && !((flags & Tweets.FLAG_TO_UNFAVORITE)>0)){
-			favoriteButton.setImageResource(android.R.drawable.btn_star_big_on);
+			favoriteButton.setImageResource(R.drawable.btn_twimight_favorite_on);
 		}
 		favoriteButton.setOnClickListener(new OnClickListener() {
 
@@ -245,7 +237,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				if(favorited){
 					// unfavorite
 					getContentResolver().update(uri, clearFavoriteFlag(flags), null, null);
-					((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_off);
+					((ImageButton) v).setImageResource(R.drawable.btn_twimight_favorite);
 					favorited=false;
 					
 				} else {
@@ -253,7 +245,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 					ContentValues cv = setFavoriteFlag(flags);
 					if (cv != null) {
 						getContentResolver().update(uri, cv , null, null);
-						((ImageButton) v).setImageResource(android.R.drawable.btn_star_big_on);
+						((ImageButton) v).setImageResource(R.drawable.btn_twimight_favorite_on);
 						favorited=true;
 					} 
 				}			
@@ -273,76 +265,76 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		LinearLayout toFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
 		LinearLayout toUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
 		LinearLayout toRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);					
-					if ( toSendNotification != null) {
-						if((flags & Tweets.FLAG_TO_INSERT) ==0 ){						
-							toSendNotification.setVisibility(LinearLayout.GONE);						
-						} else
-							toSendNotification.setVisibility(LinearLayout.VISIBLE);	
-					} else 
-						Log.i(TAG,"toSendNotification");
-					
-					if (toDeleteNotification != null) {
-						if((flags & Tweets.FLAG_TO_DELETE) ==0){						
-							toDeleteNotification.setVisibility(LinearLayout.GONE);						
+		if ( toSendNotification != null) {
+			if((flags & Tweets.FLAG_TO_INSERT) ==0 ){						
+				toSendNotification.setVisibility(LinearLayout.GONE);						
+			} else
+				toSendNotification.setVisibility(LinearLayout.VISIBLE);	
+		} else 
+			Log.i(TAG,"toSendNotification");
+		
+		if (toDeleteNotification != null) {
+			if((flags & Tweets.FLAG_TO_DELETE) ==0){						
+				toDeleteNotification.setVisibility(LinearLayout.GONE);						
 
-						} else{
-							toDeleteNotification.setVisibility(LinearLayout.VISIBLE);
-							TextView toDeleteText = (TextView) findViewById(R.id.showTweetInfoText2);
-							if (toDeleteText != null) {
-								toDeleteText.setBackgroundResource(android.R.drawable.list_selector_background);						
-								toDeleteText.setOnClickListener(new OnClickListener() {
+			} else{
+				toDeleteNotification.setVisibility(LinearLayout.VISIBLE);
+				TextView toDeleteText = (TextView) findViewById(R.id.showTweetInfoText2);
+				if (toDeleteText != null) {
+					toDeleteText.setBackgroundResource(android.R.drawable.list_selector_background);						
+					toDeleteText.setOnClickListener(new OnClickListener() {
 
-									@Override
-									public void onClick(View v) {
-										LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
-										if (toDeleteNotification != null) {
-											
-											int num = getContentResolver().update(uri, removeDeleteFlag(flags), null, null);
-											toDeleteNotification.setVisibility(LinearLayout.GONE);
-											if (num > 0) {
-												
-												queryContentProvider();
-												if (c != null) {													
-													flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-													setupButtons();
-												}												
-											}
-										} else 
-											Log.i(TAG,"toDeleteNotification");
-																		 
-									}							
-								});
-							} else
-								Log.i(TAG,"toSendNotification");						
-						}
-					} else 
-						Log.i(TAG,"toDeleteNotification");
-					
-					if ( toFavoriteNotification != null) {
-						if((flags & Tweets.FLAG_TO_FAVORITE) ==0){						
-							toFavoriteNotification.setVisibility(LinearLayout.GONE);
+						@Override
+						public void onClick(View v) {
+							LinearLayout toDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
+							if (toDeleteNotification != null) {
+								
+								int num = getContentResolver().update(uri, removeDeleteFlag(flags), null, null);
+								toDeleteNotification.setVisibility(LinearLayout.GONE);
+								if (num > 0) {
+									
+									queryContentProvider();
+									if (c != null) {													
+										flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+										setupButtons();
+									}												
+								}
+							} else 
+								Log.i(TAG,"toDeleteNotification");
+															 
+						}							
+					});
+				} else
+					Log.i(TAG,"toSendNotification");						
+			}
+		} else 
+			Log.i(TAG,"toDeleteNotification");
+		
+		if ( toFavoriteNotification != null) {
+			if((flags & Tweets.FLAG_TO_FAVORITE) ==0){						
+				toFavoriteNotification.setVisibility(LinearLayout.GONE);
 
-						} else
-							toFavoriteNotification.setVisibility(LinearLayout.VISIBLE);
-					} else 
-						Log.i(TAG,"toFavoriteNotification");
+			} else
+				toFavoriteNotification.setVisibility(LinearLayout.VISIBLE);
+		} else 
+			Log.i(TAG,"toFavoriteNotification");
 
-					if (toUnfavoriteNotification != null) {
-						if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){						
-							toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
+		if (toUnfavoriteNotification != null) {
+			if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){						
+				toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
 
-						} else
-							toUnfavoriteNotification.setVisibility(LinearLayout.VISIBLE);
-					} else 
-						Log.i(TAG,"toUnFavoriteNotification");
+			} else
+				toUnfavoriteNotification.setVisibility(LinearLayout.VISIBLE);
+		} else 
+			Log.i(TAG,"toUnFavoriteNotification");
 
-					if (toRetweetNotification != null) {
-						if((flags & Tweets.FLAG_TO_RETWEET) ==0){						
-							toRetweetNotification.setVisibility(LinearLayout.GONE);
+		if (toRetweetNotification != null) {
+			if((flags & Tweets.FLAG_TO_RETWEET) ==0){						
+				toRetweetNotification.setVisibility(LinearLayout.GONE);
 
-						} else
-							toRetweetNotification.setVisibility(LinearLayout.VISIBLE);
-					}
+			} else
+				toRetweetNotification.setVisibility(LinearLayout.VISIBLE);
+		}
 	}
 
 
@@ -352,11 +344,11 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void setProfilePicture() {
 		// Profile image
-					if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-						ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
-						byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-						picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-					}
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
+			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
+			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+		}
 		
 	}
 
@@ -366,21 +358,20 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void setUserInfo() {
 		
-					userRowId = c.getInt(c.getColumnIndex("userRowId")); 
-					userInfoView = (LinearLayout) findViewById(R.id.showTweetUserInfo);
-					
-					userInfoView.setOnClickListener(new OnClickListener() {
+		userRowId = c.getInt(c.getColumnIndex("userRowId")); 
+		userInfoView = (LinearLayout) findViewById(R.id.showTweetUserInfo);
+		
+		userInfoView.setOnClickListener(new OnClickListener() {
 
-						@Override
-						public void onClick(View v) {
-							userInfoView.setBackgroundResource(android.R.drawable.list_selector_background);
-							Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
-							i.putExtra("rowId", userRowId);
-							i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
-							startActivity(i);
-						}
-						
-					});
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
+				i.putExtra("rowId", userRowId);
+				i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); 
+				startActivity(i);
+			}
+			
+		});
 		
 	}
 
@@ -391,26 +382,27 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void setTweetInfo() {
 		
-					screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-					screenNameView.setText(screenName);
-					realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
-					text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-					tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
-					tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
+		screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		screenNameView.setText("@"+screenName);
+		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
+		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+		tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
+		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-					createdTextView.setText(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED))).toString());
-					if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
-						createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
-					} else {
-						createdWithView.setVisibility(TextView.GONE);
-					}
-					
-					String retweeted_by = c.getString(c.getColumnIndex(Tweets.COL_RETWEETED_BY));
-					TextView textRetweeted_by = (TextView) findViewById(R.id.showTweetRetweeted_by);
-					if (retweeted_by != null) {
-						textRetweeted_by.append(retweeted_by);		
-						textRetweeted_by.setVisibility(View.VISIBLE);					
-					}					
+		createdTextView.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))).toString());
+		if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
+			createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
+		} else {
+			createdWithView.setVisibility(TextView.GONE);
+		}
+
+				
+		String retweeted_by = c.getString(c.getColumnIndex(Tweets.COL_RETWEETED_BY));
+		TextView textRetweeted_by = (TextView) findViewById(R.id.showTweetRetweeted_by);
+		if (retweeted_by != null) {
+			textRetweeted_by.append(retweeted_by);		
+			textRetweeted_by.setVisibility(View.VISIBLE);					
+		}					
 		
 	}
 

@@ -9,8 +9,9 @@
 		android:gravity="right">
 		<ImageButton android:id="@+id/headerBarMessageButtonDMUsers"
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:src="@android:drawable/ic_menu_edit"
-			android:layout_marginRight="10dp" />
+			android:src="@drawable/ic_twimight_compose"
+			android:layout_marginRight="10dp" android:background="@drawable/header_button"
+			android:paddingLeft="10dp" android:paddingRight="10dp" />
 	</LinearLayout>
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/dmUsersList"

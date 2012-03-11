@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -54,8 +55,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	private TextView description;
 	private TextView stats;
 	private Button followButton;
-	private Button mentionButton;
-	private Button messageButton;
+	private ImageButton mentionButton;
+	private ImageButton messageButton;
 	private Button showFollowersButton;
 	private Button showFriendsButton;
 	private Button showDisPeersButton;
@@ -84,8 +85,8 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		description = (TextView) findViewById(R.id.showUserDescription);
 		stats = (TextView) findViewById(R.id.showUserStats);
 		followButton = (Button) findViewById(R.id.showUserFollow);
-		mentionButton = (Button) findViewById(R.id.showUserMention);
-		messageButton = (Button) findViewById(R.id.showUserMessage);
+		mentionButton = (ImageButton) findViewById(R.id.showUserMention);
+		messageButton = (ImageButton) findViewById(R.id.showUserMessage);
 		followInfo = (LinearLayout) findViewById(R.id.showUserTofollow);
 		unfollowInfo = (LinearLayout) findViewById(R.id.showUserTounfollow);
 		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
@@ -222,7 +223,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		}
 		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
-		screenName.setText(userScreenName);
+		screenName.setText("@" + userScreenName);
 		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 
 		if(c.getColumnIndex(TwitterUsers.COL_LOCATION) >=0){

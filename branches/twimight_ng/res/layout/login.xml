@@ -8,30 +8,20 @@
 <RelativeLayout android:layout_width="fill_parent"
 	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/showLoginRoot">
-	<ImageView
-    android:id="@+id/showAboutLayout"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:src="@drawable/bird"
-    android:orientation="vertical" 
-    android:layout_gravity="center">
-</ImageView>
+	<ImageView android:id="@+id/showAboutLayout"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:src="@drawable/mightybird_starglow" android:orientation="vertical"
+		android:layout_gravity="center" android:scaleType="centerCrop" />
+
 
 	<LinearLayout android:id="@+id/showLoginLogo"
-		android:layout_width="match_parent" android:layout_height="wrap_content"
-		android:layout_gravity="bottom" android:orientation="vertical"
-		android:background="@drawable/about_background"
-		android:layout_alignParentBottom="true" android:layout_margin="10dp">
-		<!-- <TextView android:layout_width="wrap_content" android:id="@+id/textView1" 
-			android:text="Press the button below to log in with Twitter. Note that we 
-			will not see your Twitter password." android:layout_height="wrap_content" 
-			android:layout_gravity="center" android:gravity="center" android:textColor="@color/black" 
-			android:textSize="14sp"/> -->
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:layout_gravity="bottom|center_horizontal" android:orientation="vertical"
+		android:layout_alignParentBottom="true" android:gravity="center_horizontal">
 
 		<Button android:id="@+id/buttonLogin" android:layout_width="100dp"
-			android:layout_height="50dp" android:layout_gravity="center"
-			android:layout_marginTop="20dp" android:layout_marginBottom="20dp"
-			android:text="Login" />
+			android:layout_height="wrap_content" android:layout_marginTop="20dp"
+			android:layout_marginBottom="20dp" android:text="Login" />
 
 	</LinearLayout>
 </RelativeLayout>

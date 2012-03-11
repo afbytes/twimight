@@ -37,6 +37,22 @@
   		 <color name="dm_background_disaster_start">#FD8566</color>
          <color name="dm_background_disaster_end">#FD6466</color>
          
+   		<!-- new UI colors -->
+  		<color name="twimightBackgroundLight">#dbe4f3</color>
+  		<color name="twimightBackgroundDark">#cad4e4</color>
+  		<color name="twimightTextDark">#353f50</color>
+  		<color name="twimightTextLight">#838e9e</color>
+  		<color name="twimightHeaderBackground">#627595</color>
+  		<color name="twimightSeparator">#a6b3ca</color>
+  		<color name="twimightButtonBackground">#838e9e</color>
+  		<color name="twimightButtonBackgroundShadow">#404a5b</color>
+  		
+  		<color name="twimightBackgroundOwn">#e4dbf3</color>
+  		<color name="twimightBackgroundMention">#dbf3e4</color>
+  		<color name="twimightBackgroundDisaster">#ffe4db</color>
+  		<color name="twimightButtonActive">#9e838e</color>
+  		<color name="twimightHeaderBackgroundDisaster">#bb5454</color>
+  		<color name="twimightImageBorder">#747474</color>
          
   		
     </resources>

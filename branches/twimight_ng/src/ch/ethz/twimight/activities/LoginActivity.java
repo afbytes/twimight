@@ -112,8 +112,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		setContentView(R.layout.login);
 		
-		LinearLayout showLoginLogo = (LinearLayout) findViewById(R.id.showLoginLogo);
-		showLoginLogo.setBackgroundResource(R.drawable.about_background);		
 		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
 				new Intent(getIntent()), getIntent().getFlags()));
 		instance = this;
