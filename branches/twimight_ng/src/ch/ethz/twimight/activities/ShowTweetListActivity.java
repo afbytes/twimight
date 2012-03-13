@@ -12,6 +12,17 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -148,10 +159,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				} else {
 					setFilter(currentFilter);	
 				}
-		
-		Log.v(TAG, "created");		
-	   
-
 
 	}
 	
@@ -222,10 +229,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		menu.add(1,OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
+		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
 		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About").setIcon(R.drawable.ic_menu_info_details);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
-
+		
 		return true;
 	}
 
@@ -238,6 +245,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		Intent i;
 		switch(item.getItemId()){
 		
+			
 		case OPTIONS_MENU_PROFILE:
 			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
 			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_ID+"="+LoginActivity.getTwitterId(this), null, null);
@@ -300,7 +308,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		return true;
 	}
 	
-	   @Override
+
+
+	@Override
 		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 			switch(requestCode) {
 			case PrefsActivity.REQUEST_DISCOVERABLE:

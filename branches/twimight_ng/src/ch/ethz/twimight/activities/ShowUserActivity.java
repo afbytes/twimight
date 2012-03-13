@@ -337,7 +337,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	private void showRemoteUser(){
 		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
-		
+		Log.i(TAG,"showRemoteUser");
 		/*
 		 * The following cases are possible: 
 		 * - the user was marked for following
@@ -361,10 +361,12 @@ public class ShowUserActivity extends TwimightBaseActivity{
 					getContentResolver().update(uri, setUnfollowFlag(flags), null, null);
 					followButton.setVisibility(Button.GONE);
 					unfollowInfo.setVisibility(LinearLayout.VISIBLE);
+					following=false;
 				} else {
 					getContentResolver().update(uri, setFollowFlag(flags), null, null);
 					followButton.setVisibility(Button.GONE);
 					followInfo.setVisibility(LinearLayout.VISIBLE);
+					following = true;
 				}
 				
 				// trigger the update
@@ -376,20 +378,34 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		});
 
-		if((flags & TwitterUsers.FLAG_TO_FOLLOW)>0){
+		if((flags & TwitterUsers.FLAG_TO_FOLLOW)>0){			
 			// disable follow button
 			followButton.setVisibility(Button.GONE);
 			// show info that the user will be followed upon connectivity
 			followInfo.setVisibility(LinearLayout.VISIBLE);
-		} else if((flags & TwitterUsers.FLAG_TO_UNFOLLOW)>0){
+		} else {
+			// disable follow button
+			followButton.setVisibility(Button.VISIBLE);
+			// show info that the user will be followed upon connectivity
+			followInfo.setVisibility(LinearLayout.GONE);
+		}
+		
+		if((flags & TwitterUsers.FLAG_TO_UNFOLLOW)>0){
 			// disable follow button
 			followButton.setVisibility(Button.GONE);
 			// show info that the user will be unfollowed upon connectivity
 			unfollowInfo.setVisibility(LinearLayout.VISIBLE);
-		} else if(c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWREQUEST))>0){
+		} else {			
+			// disable follow button
+			followButton.setVisibility(Button.VISIBLE);
+			// show info that the user will be unfollowed upon connectivity
+			unfollowInfo.setVisibility(LinearLayout.GONE);
+		}
+		
+		if(c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWREQUEST))>0){			
 			// disable follow button
 			followButton.setVisibility(Button.GONE);
-		}
+		}    
 
 		/*
 		 * Mention button
@@ -466,23 +482,13 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			
 			super.onChange(selfChange);
 			
-			// close the old cursor
-			//if(c!=null) {
-				//if(observer!= null) c.unregisterContentObserver(observer);
-				//c.close();
-			//}
-			
 			// and get a new one
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
 			c = getContentResolver().query(uri, null, null, null, null);
 			if(c.getCount() == 0) 
 				finish();
 			else {
-				c.moveToFirst();				
-				
-				//c.registerContentObserver(this);
-
-				// update the views
+				c.moveToFirst();			
 				showUserInfo();
 			}
 			

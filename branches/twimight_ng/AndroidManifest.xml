@@ -87,6 +87,15 @@
 		<activity android:name=".activities.AboutActivity"
 			android:label="About Twimight" />
 
+		
+		<activity android:name=".activities.WebViewActivity"
+			android:label="WebView" android:theme="@android:style/Theme.NoTitleBar" />
+		
+		 <activity android:name=".activities.DeviceListActivity"
+                  android:label="Select Device"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:configChanges="orientation|keyboardHidden" />
+
 		<activity android:name=".activities.DeviceListActivity"
 			android:label="Select Device" android:theme="@android:style/Theme.Dialog"
 			android:configChanges="orientation|keyboardHidden" />

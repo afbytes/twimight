@@ -119,7 +119,7 @@ public class TDSAlarm extends BroadcastReceiver {
 		Log.i(TAG, "woken up!"+ (new Date()).toString());
 
 		// Acquire wake lock so we don't fall asleep after onReceive returns
-		getWakeLock(context);
+		//getWakeLock(context);
 
 		if(isTdsEnabled(context)){
 			

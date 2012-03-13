@@ -277,8 +277,9 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
-					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
-					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
+					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "					
+					+ "ORDER BY " + Tweets.REVERSE_SORT_ORDER
+					+ " LIMIT 5;";
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
@@ -813,8 +814,7 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
-			getContext().getContentResolver().notifyChange(uri, null);
-			//getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContext().getContentResolver().notifyChange(uri, null);			
 			Log.d(TAG, "success");
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
@@ -852,8 +852,7 @@ public class TweetsContentProvider extends ContentProvider {
 		/*
 		 * First, we remove the respective flag
 		 * Second, we delete all tweets which have no more buffer flags
-		 */
-		
+		 */		
 		String sqlWhere;
 		String sql;
 		Cursor c;
@@ -868,11 +867,13 @@ public class TweetsContentProvider extends ContentProvider {
 				+ " LIMIT -1 OFFSET "
 				+ size +");";
 		c = database.rawQuery(sql, null);
+		Log.i(TAG,"deleting " + c.getCount() + "tweets");
 		c.close();
 		
 		// now delete
 		sql = "DELETE FROM "+DBOpenHelper.TABLE_TWEETS+" WHERE "+Tweets.COL_BUFFER+"=0";
 		c = database.rawQuery(sql, null);
+		Log.i(TAG,"deleted " + c.getCount() + "tweets");
 		c.close();
 		
 	}
@@ -886,7 +887,7 @@ public class TweetsContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
 		
 		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
-			Log.d(TAG, "Purging timeline buffer");
+			Log.i(TAG, "Purging timeline buffer, TIMELINE_BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
 			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
 		}
 			
@@ -911,12 +912,12 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_USERS) != 0){
-			Log.d(TAG, "Purging user tweets buffer");
+			Log.i(TAG, "Purging user tweets buffer");
 			purgeBuffer(Tweets.BUFFER_USERS, Constants.USERTWEETS_BUFFER_SIZE);
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_SEARCH) != 0){
-			Log.d(TAG, "Purging search tweets buffer");
+			Log.i(TAG, "Purging search tweets buffer");
 			purgeBuffer(Tweets.BUFFER_SEARCH, Constants.SEARCHTWEETS_BUFFER_SIZE);
 		}
 

@@ -59,7 +59,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		    getWakeLock(context);
+		   // getWakeLock(context);
 		    Log.i(TAG, "woken up!"+ (new Date()).toString());			
 			
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);

@@ -100,30 +100,25 @@ public class ScanningAlarm extends BroadcastReceiver {
 		 */
 		public static void stopScanning(Context context) {
 			AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-			
+
 			Intent intent = new Intent(context, ScanningAlarm.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			instance = null;
 			alarmMgr.cancel(pendingIntent);			
-			releaseWakeLock();			
-			
-			if (getBluetoothInitialState(context) == false) {
-				BluetoothAdapter.getDefaultAdapter().disable();
-			}			
-			
+			releaseWakeLock();				
 		}
 
-	private static boolean getBluetoothInitialState(Context context) {
-		
-		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
-		return pref.getBoolean("wasBlueEnabled", true);
-		
+		private static boolean getBluetoothInitialState(Context context) {
+
+			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
+			return pref.getBoolean("wasBlueEnabled", true);
+
 		}
 
-	/**
-	 * Schedules a Scanning communication
-	 * @param time after how many milliseconds (0 for immediately)?
-	 */
+		/**
+		 * Schedules a Scanning communication
+		 * @param time after how many milliseconds (0 for immediately)?
+		 */
 	public void scheduleScanning(Context context, long time) {		
 		
 				

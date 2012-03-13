@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.net.twitter.HtmlPage;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
@@ -36,8 +37,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_TWEETS = "tweets"; 	
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
+	static final String TABLE_HTML = "html";
 
-	private static final int DATABASE_VERSION = 39;
+	private static final int DATABASE_VERSION = 40;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -141,9 +143,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ DirectMessages.COL_SIGNATURE + " string, "
 			+ DirectMessages.COL_CRYPTEXT + " string, "
 			+ DirectMessages.COL_CERTIFICATE + " string);";
+	
+	// html pages 
+		private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
+				+ "_id integer primary key autoincrement not null, "
+				+ HtmlPage.COL_URL + " string unique not null, "
+				+ HtmlPage.COL_HTML + " string);";
 		
-	// TODO: Searches
-
+	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
 
 	/**
@@ -175,6 +182,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_TWEETS_CREATE);
 		database.execSQL(TABLE_USERS_CREATE);
 		database.execSQL(TABLE_DMS_CREATE);
+		database.execSQL(TABLE_HTML_CREATE);
 	}
 	
 	/**
@@ -201,6 +209,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DMS);
+		database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML);
 		createTables(database);
 	}
 	
@@ -217,5 +226,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);
 		database.execSQL("DELETE FROM "+TABLE_USERS);
 		database.execSQL("DELETE FROM "+TABLE_DMS);
+		database.execSQL("DELETE FROM "+TABLE_HTML);
 	}
 }
