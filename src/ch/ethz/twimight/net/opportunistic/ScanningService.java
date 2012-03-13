@@ -539,7 +539,15 @@ public class ScanningService extends Service{
 	 * True if the disaster mode is on
 	 */
 	private boolean isDisasterMode(){
-		return (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true);
+		
+		boolean result = false;
+		try {
+			result = (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true);
+			return result;
+		} catch (Exception ex) {
+			return false;
+		}
+		
 	}
 
 	/**

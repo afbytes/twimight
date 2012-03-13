@@ -13,6 +13,7 @@
 package ch.ethz.twimight.activities;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -71,6 +72,10 @@ public class PrefsActivity extends PreferenceActivity{
 						} 
 						
 					} else {
+						if (getBluetoothInitialState(getBaseContext()) == false) {
+							if (BluetoothAdapter.getDefaultAdapter().isEnabled())
+								BluetoothAdapter.getDefaultAdapter().disable();
+						}				
 						ScanningAlarm.stopScanning(getApplicationContext());
 						Intent in = new Intent(getBaseContext(), ScanningService.class);
 						stopService(in);
@@ -146,6 +151,13 @@ public class PrefsActivity extends PreferenceActivity{
 				 
 		
 	}
+	
+	private static boolean getBluetoothInitialState(Context context) {
+		
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
+		return pref.getBoolean("wasBlueEnabled", true);
+		
+		}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

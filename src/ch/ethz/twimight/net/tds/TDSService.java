@@ -75,7 +75,7 @@ public class TDSService extends Service {
 		Log.d(TAG, "started..");
 		
 		//  release the lock
-		TDSAlarm.releaseWakeLock();
+		//TDSAlarm.releaseWakeLock();
 		
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);

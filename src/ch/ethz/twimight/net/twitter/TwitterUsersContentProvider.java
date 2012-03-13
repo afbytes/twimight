@@ -198,8 +198,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		// if we already have the user, we update with the new info
 		String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
 		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" = '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
-		if(c.getCount()==1){
-			Log.i(TAG, "we already have the user");
+		if(c.getCount()==1){			
 			c.moveToFirst();
 			return c;
 		} else
@@ -212,8 +211,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		Cursor c = isUserAlreadyStored(values);
 
 		if(c != null){
-			Log.d(TAG, "we already have the user");
-
+			
 
 			// we flag the user for updating the profile image if
 			// - the flag is set
@@ -299,7 +297,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	private int updateUser(Uri uri, ContentValues values) {
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + values.getAsLong("_id") , null);
-		if(nrRows > 0){				
+		if(nrRows > 0){	
+			Log.d(TAG,"user update successful");
 			return nrRows;
 		} else
 			return -1;

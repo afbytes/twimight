@@ -75,6 +75,7 @@ public class Tweets implements BaseColumns {
 	public static final String COL_CERTIFICATE = "certificate"; /** the certificate of the user */
 	
 	public static final String DEFAULT_SORT_ORDER = COL_CREATED + " DESC";
+	public static final String REVERSE_SORT_ORDER = COL_CREATED + " ASC";
 	
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_INSERT = 1; /** The tweet is new and should be posted to twitter */
