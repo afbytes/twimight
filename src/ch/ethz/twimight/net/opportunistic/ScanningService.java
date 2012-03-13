@@ -165,7 +165,9 @@ public class ScanningService extends Service{
 	
 	@Override
 	public void onDestroy() {
+		Log.i(TAG,"on Destroy");
 		context=null;
+		releaseWakeLock();
 		super.onDestroy();
 	}
 
@@ -267,9 +269,8 @@ public class ScanningService extends Service{
 	private void stopScanning() {
 		cursor = null;
 		state = STATE_IDLE;		
-		if(isDisasterMode()){
-			 			
-			releaseWakeLock();
+		if(isDisasterMode()){			 			
+			
 			removeConnectingTimer()	;	    
 			// start listening mode
 			bluetoothHelper.start();
