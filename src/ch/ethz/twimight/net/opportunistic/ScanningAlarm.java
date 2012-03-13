@@ -140,7 +140,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {		
-		getWakeLock(context);
+		//getWakeLock(context);
 		
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
 			Intent i = new Intent(context,ScanningService.class);		
