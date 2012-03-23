@@ -85,6 +85,10 @@ public class TwitterUsers implements BaseColumns {
 	 * The name of the twitter users id
 	 */
 	public static final String TWITTERUSERS_ID = "id";
+	/**
+	 * The name of the twitter users id
+	 */
+	public static final String TWITTERUSERS_PICTURE = "pictures";
 	
 	// here start the column names
 	public static final String COL_SCREENNAME = "user_screenname";
@@ -111,7 +115,7 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_ISDISASTER_PEER = "disaster_peer"; /** have we met the user in disaster mode */
 	public static final String COL_IS_SEARCH_RESULT = "search_result"; /** have we met the user in disaster mode */
 	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
-	public static final String COL_PROFILEIMAGE = "profile_image";
+	public static final String COL_PROFILEIMAGE = "_data";
 	
 	public static final String COL_LASTUPDATE = "last_update";
 	public static final String COL_LAST_PICTURE_UPDATE = "last_picture_update";

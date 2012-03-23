@@ -13,6 +13,9 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,6 +28,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -158,6 +162,31 @@ public class TweetsContentProvider extends ContentProvider {
 			default: throw new IllegalArgumentException("Unknown URI: " + uri);	
 		}
 	}
+	
+	  /**
+     * Provides read only access to files that have been downloaded and stored
+     * in the provider cache. Specifically, in this provider, clients can
+     * access the files of downloaded images.
+     */
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode)
+            throws FileNotFoundException
+    {
+    	Log.i(TAG," inside openFile");
+    	File root = getContext().getFilesDir();
+    	if (!root.exists())
+    		root.mkdirs();
+    	Log.i(TAG,uri.getEncodedPath().toString());
+        File path = new File(root, "/" + TwitterUsers.TWITTERUSERS_PICTURE + "/" + uri.getLastPathSegment());        
+
+        int imode = 0;
+        
+        if (mode.contains("r")) imode |= ParcelFileDescriptor.MODE_READ_ONLY;          
+
+        return ParcelFileDescriptor.open(path, imode);
+
+       
+    }
 
 	/**
 	 * Query the timeline table

@@ -16,6 +16,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.InternalStorageHelper;
 
 /**
  * Display a user
@@ -219,8 +221,14 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		// do we have a profile image?
 		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			profileImage.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+			InternalStorageHelper helper = new InternalStorageHelper(this);
+			byte[] imageByteArray = helper.readImage(c.getString(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+			if (imageByteArray != null) {				
+				//is = context.getContentResolver().openInputStream(uri);				
+				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+				profileImage.setImageBitmap(bm);	
+			} else
+				profileImage.setImageResource(R.drawable.default_profile);
 		}
 		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
 		screenName.setText("@" + userScreenName);
@@ -267,8 +275,11 @@ public class ShowUserActivity extends TwimightBaseActivity{
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getBaseContext(), ShowUserTweetListActivity.class);
-					i.putExtra("userId", c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
-					startActivity(i);
+					int index = c.getColumnIndex(TwitterUsers.COL_ID);
+					if (index != -1) {
+						i.putExtra("userId",c.getLong(index));
+						startActivity(i);
+					}
 
 				}
 

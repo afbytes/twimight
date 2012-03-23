@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -26,6 +27,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.util.InternalStorageHelper;
 
 /** 
  * Cursor adapter for a cursor containing tweets.
@@ -34,10 +36,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	
 	static final String[] from = {TwitterUsers.COL_NAME};
 	static final int[] to = {R.id.textUser};
+	Context context;
+	private static final String TAG = "tweet adapter";
 
 	/** Constructor */
-	public TweetAdapter(Context context, Cursor c) {
+	public TweetAdapter(Context context, Cursor c) {		
 		super(context, R.layout.row, c, from, to);  
+		this.context= context;
 	}
 
 	/** This is where data is mapped to its view */
@@ -77,14 +82,27 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-		} else {
 			
+			String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			//Uri uri = Uri.parse(Tweets.TWEET_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS_PICTURE + "/" + filename);
+			//InputStream is;
+			InternalStorageHelper helper = new InternalStorageHelper(context);	
+		//long start = System.currentTimeMillis();
+			byte[] imageByteArray = helper.readImage(filename);			
+			//long end = System.currentTimeMillis();
+			//Log.i(TAG,"time: " + (end-start) + " ms");
+			if (imageByteArray != null) {				
+				//is = context.getContentResolver().openInputStream(uri);				
+				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+				picture.setImageBitmap(bm);	
+			} else
+				picture.setImageResource(R.drawable.default_profile);
+
+		} else {			
 			picture.setImageResource(R.drawable.default_profile);
 		}
 
-		
+
 		// any transactional flags?
 		ImageView toPostInfo = (ImageView) row.findViewById(R.id.topost);
 		int flags = cursor.getInt(cursor.getColumnIndex(Tweets.COL_FLAGS));

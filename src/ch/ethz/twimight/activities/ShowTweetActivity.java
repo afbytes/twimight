@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.InternalStorageHelper;
 import ch.ethz.twimight.util.TweetTagHandler;
 
 /**
@@ -346,8 +348,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		// Profile image
 		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
-			byte[] bb = c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+			InternalStorageHelper helper = new InternalStorageHelper(this);
+			byte[] imageByteArray = helper.readImage(c.getString(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+			if (imageByteArray != null) {				
+				//is = context.getContentResolver().openInputStream(uri);				
+				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+				picture.setImageBitmap(bm);	
+			} else
+				picture.setImageResource(R.drawable.default_profile);
 		}
 		
 	}
