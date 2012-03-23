@@ -410,6 +410,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	 * Start all the enabled alarms and services.
 	 */
 	public static void startAlarms(Context context) {
+		
 		// Start the alarm for communication with the TDS
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
 			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
@@ -419,8 +420,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			new ScanningAlarm(context,0,false);
 		}		
 		
-		// Start the location update alarm
-		
+		// Start the location update alarm		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
 			new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
 		}

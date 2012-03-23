@@ -65,6 +65,7 @@ import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.InternalStorageHelper;
 
 /**
  * The service to send all kinds of API calls to Twitter. 
@@ -2494,14 +2495,12 @@ public class TwitterService extends Service {
 	 * Gets profile image from twitter
 	 * @author thossmann
 	 */
-	private class UpdateProfileImagesTask extends AsyncTask<Long[], Void, ArrayList<byte[]> > {
-
-		
+	private class UpdateProfileImagesTask extends AsyncTask<Long[], Void, ArrayList<byte[]> > {		
 		Exception ex;
 		Cursor c;
 		Uri queryUri;
 		Long[] rowIds;
-	
+		ArrayList<String> screenNames;
 
 		@Override
 		protected ArrayList<byte[]> doInBackground(Long[]... params) {
@@ -2512,12 +2511,12 @@ public class TwitterService extends Service {
 			
 			DefaultHttpClient mHttpClient = new DefaultHttpClient();
 			ArrayList<byte[]> byteArrays = new ArrayList<byte[]>();
+			screenNames = new ArrayList<String>();
 			for (int i=0; i<rowIds.length; i++) {
 				
 				try {
 					
-					queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowIds[i]);
-					
+					queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowIds[i]);					
 					c = getContentResolver().query(queryUri, null, null, null, null);
 
 					if(c.getCount() == 0){						
@@ -2535,13 +2534,13 @@ public class TwitterService extends Service {
 					} else {
 						imageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
 					}
-
 					HttpGet mHttpGet = new HttpGet(imageUrl);
 					HttpResponse mHttpResponse = mHttpClient.execute(mHttpGet);
 					if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 						
 						try {
 							byteArrays.add(EntityUtils.toByteArray( mHttpResponse.getEntity()) );
+							screenNames.add(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)) );
 						} catch (IOException ex) {
 							c.close();
 						}
@@ -2550,8 +2549,7 @@ public class TwitterService extends Service {
 				} catch (Exception ex) {
 					this.ex = ex;
 				} 
-			}
-			
+			}			
 			return  byteArrays;
 		}
 
@@ -2568,16 +2566,19 @@ public class TwitterService extends Service {
 			}
 			
 			// clear the update image flag			
-			ContentValues[] cv = new ContentValues[result.size()];
-
-			for (int i=0; i<cv.length; i++) {				
-
+			ContentValues[] cv = new ContentValues[result.size()];		
+			
+			for (int i=0; i<cv.length; i++) {	
+				
+				new InsertProfileImageIntoInternalStorageTask(result.get(i)).execute(screenNames.get(i));													
+				
 				cv[i]= new ContentValues();
 				cv[i].put("_id", rowIds[i]);
 				cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS)));
-				cv[i].put(TwitterUsers.COL_PROFILEIMAGE, result.get(i));				
+				cv[i].put(TwitterUsers.COL_PROFILEIMAGE,screenNames.get(i) );				
 				cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
 			}
+			
 			if (c!= null)
 				c.close();	
 			// insert pictures into DB
@@ -2585,7 +2586,41 @@ public class TwitterService extends Service {
 			
 		}
 
+		
+
 	}
+	
+	/**
+	 * Asynchronously insert a profile image into the DB 
+	 * @author thossmann
+	 *
+	 */
+	private class InsertProfileImageIntoInternalStorageTask extends AsyncTask<String, Void, Void> {
+		
+		byte[] image;
+		int i;
+		
+		public InsertProfileImageIntoInternalStorageTask(byte[] image) {
+			this.image=image;
+			this.i=i;
+		}
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());
+			helper.writeImage(image, params[0]);
+			
+			return null;
+		}
+
+		@Override 
+		protected void onPostExecute(Void params){
+			
+			
+		}
+
+	}
+
 	
 	/**
 	 * Asynchronously insert a profile image into the DB 
@@ -2597,7 +2632,7 @@ public class TwitterService extends Service {
 		Uri queryUri = null;
 		@Override
 		protected Void doInBackground(ContentValues... params) {
-			Log.d(TAG, "AsynchTask: InsertProfileImagesTask");
+			
 			ShowUserListActivity.setLoading(true);
 			
 			if (params.length ==1) {
@@ -2606,7 +2641,8 @@ public class TwitterService extends Service {
 					queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
 					getContentResolver().update(queryUri, cv, null, null);
 				} catch(IllegalArgumentException ex){
-					Log.e(TAG, "Exception while inserting profile image into DB");
+					Log.e(TAG, "Exception while inserting profile image into DB",ex);
+					
 				}
 			} else 				
 				updateUsers(params);	

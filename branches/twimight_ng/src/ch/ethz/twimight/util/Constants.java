@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.net.Uri;
+
 /**
  * This is where all global constants for configuration go!
  * @author thossmann
@@ -72,6 +74,7 @@ public final class Constants {
         locationProvidersMap.put("network", 2);
         locationProvidersMap = Collections.unmodifiableMap(locationProvidersMap);
     }	
+	
 	
 	// Security
 	public static final long DISASTER_DURATION = 7*24*60*60*1000L; /** How long do we need the certificate to be valid during loss of connectivity? */

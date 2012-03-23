@@ -15,24 +15,28 @@ package ch.ethz.twimight.net.twitter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.InternalStorageHelper;
 
 /** 
  * Cursor adapter for a cursor containing users.
  */
 public class DMUserAdapter extends SimpleCursorAdapter {
+	Context context;
 	
 	static final String[] from = {TwitterUsers.COL_SCREENNAME, TwitterUsers.COL_NAME, DirectMessages.COL_TEXT};
 	static final int[] to = {R.id.showUserScreenName, R.id.showUserRealName, R.id.showDMText};
 
 	/** Constructor */
 	public DMUserAdapter(Context context, Cursor c) {
-		super(context, R.layout.dmuserrow, c, from, to);  
+		super(context, R.layout.dmuserrow, c, from, to); 
+		this.context=context;
 	}
 
 	/** This is where data is mapped to its view */
@@ -43,8 +47,14 @@ public class DMUserAdapter extends SimpleCursorAdapter {
 		// Profile image
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showMDUserProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
-			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
+			InternalStorageHelper helper = new InternalStorageHelper(context);
+			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+			if (imageByteArray != null) {				
+				//is = context.getContentResolver().openInputStream(uri);				
+				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+				picture.setImageBitmap(bm);	
+			} else
+				picture.setImageResource(R.drawable.default_profile);
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}
