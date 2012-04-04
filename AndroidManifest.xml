@@ -32,13 +32,13 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".activities.SearchableActivity"
-			android:launchMode="singleTop">
+		<activity android:name=".activities.SearchableActivity" android:launchMode="singleTask">
 			<intent-filter>
 				<action android:name="android.intent.action.SEARCH" />
+				<category android:name="android.intent.category.DEFAULT" />				
 			</intent-filter>
 			<meta-data android:name="android.app.searchable"
-				android:resource="@xml/searchable" />
+				android:resource="@xml/searchable" />			
 		</activity>
 
 		<activity android:name=".activities.ShowTweetListActivity"
@@ -95,10 +95,6 @@
                   android:label="Select Device"
                   android:theme="@android:style/Theme.Dialog"
                   android:configChanges="orientation|keyboardHidden" />
-
-		<activity android:name=".activities.DeviceListActivity"
-			android:label="Select Device" android:theme="@android:style/Theme.Dialog"
-			android:configChanges="orientation|keyboardHidden" />
 
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />

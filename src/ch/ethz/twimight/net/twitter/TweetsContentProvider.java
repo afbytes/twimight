@@ -653,8 +653,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Inserts a bunch of tweets into the DB
 	 */
 	@Override
-	public synchronized int bulkInsert(Uri uri, ContentValues[] values) {
-		
+	public synchronized int bulkInsert(Uri uri, ContentValues[] values) {		
 		int numInserted= 0;
 		database.beginTransaction();
 		try {			
@@ -682,8 +681,7 @@ public class TweetsContentProvider extends ContentProvider {
 		Uri insertUri = null; // the return value;
 		
 		switch(tweetUriMatcher.match(uri)){
-			case TWEETS_TIMELINE_NORMAL:
-				Log.d(TAG, "Insert TWEETS_TIMELINE_NORMAL");
+			case TWEETS_TIMELINE_NORMAL:				
 				
 				insertUri = insertTweetsTimelineNormal(values);				
 
@@ -789,9 +787,7 @@ public class TweetsContentProvider extends ContentProvider {
 		 *    In this case we update the new tweet with the new information
 		 *  3 It may be a hash function collision (two different tweets have the same hash code)
 		 *    Probability of this should be small.  
-		 */
-		if ( values == null)
-			Log.i(TAG,"values are null");
+		 */		
 		disasterId = getDisasterID(values);
 		
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
@@ -802,7 +798,13 @@ public class TweetsContentProvider extends ContentProvider {
 				// clear the to insert flag
 				int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
+				
+			} else if( !c.isNull(c.getColumnIndex(Tweets.COL_TID)) &&
+					c.getLong(c.getColumnIndex(Tweets.COL_TID))==values.getAsLong(Tweets.COL_TID) ){
+				
+				return null;
 			}
+			
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 			update(updateUri, values, null, null);
 			c.close();
@@ -837,14 +839,12 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		
-		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
-		
-		Log.d(TAG, "Update TWEET");
+		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);		
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
-			getContext().getContentResolver().notifyChange(uri, null);			
-			Log.d(TAG, "success");
+			getContext().getContentResolver().notifyChange(uri, null);		
+			
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
 				
@@ -896,13 +896,13 @@ public class TweetsContentProvider extends ContentProvider {
 				+ " LIMIT -1 OFFSET "
 				+ size +");";
 		c = database.rawQuery(sql, null);
-		Log.i(TAG,"deleting " + c.getCount() + "tweets");
+	//Log.i(TAG,"deleting " + c.getCount() + "tweets");
 		c.close();
 		
 		// now delete
 		sql = "DELETE FROM "+DBOpenHelper.TABLE_TWEETS+" WHERE "+Tweets.COL_BUFFER+"=0";
 		c = database.rawQuery(sql, null);
-		Log.i(TAG,"deleted " + c.getCount() + "tweets");
+		//Log.i(TAG,"deleted " + c.getCount() + " tweets");
 		c.close();
 		
 	}
@@ -916,7 +916,7 @@ public class TweetsContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
 		
 		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
-			Log.i(TAG, "Purging timeline buffer, TIMELINE_BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
+			//Log.i(TAG, "Purging timeline buffer, TIMELINE_BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
 			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
 		}
 			
@@ -941,12 +941,12 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_USERS) != 0){
-			Log.i(TAG, "Purging user tweets buffer");
+			Log.d(TAG, "Purging user tweets buffer");
 			purgeBuffer(Tweets.BUFFER_USERS, Constants.USERTWEETS_BUFFER_SIZE);
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_SEARCH) != 0){
-			Log.i(TAG, "Purging search tweets buffer");
+			Log.d(TAG, "Purging search tweets buffer");
 			purgeBuffer(Tweets.BUFFER_SEARCH, Constants.SEARCHTWEETS_BUFFER_SIZE);
 		}
 
@@ -1031,10 +1031,8 @@ public class TweetsContentProvider extends ContentProvider {
 			}		
 			try {
 				
-				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);				
-					
-				if(rowId >= 0){
-							
+				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);						
+				if(rowId >= 0){							
 					Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
 					return insertUri;
 				} else {

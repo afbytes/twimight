@@ -73,12 +73,11 @@ public class TweetListView extends ListView {
 	protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
 		
 		// did we reach the max just now?
-		if(curOverscroll>(-maxOverscroll) && scrollY==(-maxOverscroll)){
-			//Log.i(TAG, "now!!");
+		if(curOverscroll>(-maxOverscroll) && scrollY==(-maxOverscroll)){			
 			sendOverscrollIntent(true);
 		} else if (curOverscroll<(maxOverscroll) && scrollY==(maxOverscroll)){ 
 			sendOverscrollIntent(false);	
-			//Log.i(TAG, "bottom!!");
+			
 		}
 		curOverscroll=scrollY;
 		//Log.i(TAG, "scrollY:" + scrollY );
