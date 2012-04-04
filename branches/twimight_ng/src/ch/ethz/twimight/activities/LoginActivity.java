@@ -109,7 +109,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		Thread.currentThread().setName("UI Thread");	
 		setContentView(R.layout.login);
 		
 		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
@@ -285,9 +285,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	}
 	
 	private class GetAccessTokensTask extends AsyncTask<Uri,Void,String> {
-		boolean success = false;
-		
-		
+		boolean success = false;		
 
 		@Override
 		protected void onPreExecute() {

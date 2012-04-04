@@ -75,7 +75,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 		searchButton = (ImageButton) findViewById(R.id.headerBarSearchButtonS);
 		searchButton.setOnClickListener(new OnClickListener(){
 			@Override
-			public void onClick(View v) {
+			public void onClick(View v) {				
 				onSearchRequested();
 			}
 		});
@@ -127,6 +127,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	@Override
 	protected void onNewIntent(Intent intent) {
 		Log.i(TAG,"on new intent");
+		setIntent(intent);
 		processIntent(intent);		
 	}
 

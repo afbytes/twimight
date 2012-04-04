@@ -144,24 +144,24 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				onSearchRequested();
 			}
 		});
-		
+
 		// if we just got logged in, we load the timeline
-				Intent i = getIntent();
-				if(i.hasExtra("filter_request")) {
-					
-					setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));				
-					i.removeExtra("filter_request");
-					
-				} else if(i.hasExtra("login")){
-					i.removeExtra("login");
-					setFilter(SHOW_TIMELINE);
-					
-				} else {
-					setFilter(currentFilter);	
-				}
+		Intent i = getIntent();
+		if(i.hasExtra("filter_request")) {
+
+			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));				
+			i.removeExtra("filter_request");
+
+		} else if(i.hasExtra("login")){
+			i.removeExtra("login");
+			setFilter(SHOW_TIMELINE);
+
+		} else {
+			setFilter(currentFilter);	
+		}
 
 	}
-	
+
 	/**
 	 * On resume
 	 */

@@ -16,8 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.net.Uri;
-
 /**
  * This is where all global constants for configuration go!
  * @author thossmann
@@ -114,6 +112,10 @@ public final class Constants {
 	public static final int USERTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache for showing user profiles */
 	public static final int SEARCHTWEETS_BUFFER_SIZE = 100; /** How many tweets to cache from searching Twitter */
 	public static final int SEARCHUSERS_BUFFER_SIZE = 100; /** How many users to cache from searching Twitter */
- 
+	
+	
+	//Other
+	public static final long FRIENDS_FOLLOWERS_DELAY = 60*1000L; /** delay after which friends and followers are downloaded */
+
 	
 }

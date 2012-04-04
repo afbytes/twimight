@@ -101,7 +101,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 			
 			case USERS_ID: 
-				Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
+				//Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id="+uri.getLastPathSegment(), whereArgs, null, null, sortOrder);
 				//c.setNotificationUri(getContext().getContentResolver(),uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
@@ -157,7 +157,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	@Override
 	public synchronized Uri insert(Uri uri, ContentValues values) {
-		Log.d(TAG, "Insert USER");
+		
 
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
@@ -241,8 +241,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				} else
 					return null;
 
-			} catch (SQLException ex) {
-				Log.e(TAG,"error 19");
+			} catch (SQLException ex) {				
 				return null;
 			}
 
@@ -261,10 +260,10 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		try {			
 
 			for (ContentValues value : values){
-				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE)) {
+				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE)) {					
 					updateUser(uri,value);
 
-				} else {
+				} else {					
 					if (insertNewUser(value)!=null ) 
 						numInserted++;
 				}
@@ -282,7 +281,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	@Override
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-		Log.d(TAG, "Update USERS");
+		
 		if(twitterusersUriMatcher.match(uri) != USERS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
@@ -297,8 +296,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	private int updateUser(Uri uri, ContentValues values) {
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + values.getAsLong("_id") , null);
-		if(nrRows > 0){	
-			Log.d(TAG,"user update successful");
+		if(nrRows > 0){				
 			return nrRows;
 		} else
 			return -1;

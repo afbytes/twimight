@@ -229,17 +229,14 @@ public class NewDMActivity extends TwimightBaseActivity{
 		
 		ContentValues dmContentValues = new ContentValues();
 		try {
-			Log.i(TAG,"1");
+
 			if (text != null && text.getText() != null)
-				dmContentValues.put(DirectMessages.COL_TEXT, text.getText().toString());
-			Log.i(TAG,"2");
-			dmContentValues.put(DirectMessages.COL_SENDER, LoginActivity.getTwitterId(this));
-			Log.i(TAG,"3");
-			dmContentValues.put(DirectMessages.COL_RECEIVER_SCREENNAME, recepient.getText().toString());
-			Log.i(TAG,"4");
+				dmContentValues.put(DirectMessages.COL_TEXT, text.getText().toString());			
+			dmContentValues.put(DirectMessages.COL_SENDER, LoginActivity.getTwitterId(this));			
+			dmContentValues.put(DirectMessages.COL_RECEIVER_SCREENNAME, recepient.getText().toString());			
 			// we mark the tweet for sending to twitter
 			dmContentValues.put(DirectMessages.COL_FLAGS, DirectMessages.FLAG_TO_INSERT);
-			
+
 		} catch (Exception ex) {
 			return null;
 		}

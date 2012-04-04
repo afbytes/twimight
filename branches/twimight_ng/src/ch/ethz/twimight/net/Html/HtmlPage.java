@@ -1,4 +1,4 @@
-package ch.ethz.twimight.net.twitter;
+package ch.ethz.twimight.net.Html;
 
 import android.provider.BaseColumns;
 

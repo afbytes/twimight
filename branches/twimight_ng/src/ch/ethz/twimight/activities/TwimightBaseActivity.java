@@ -80,7 +80,7 @@ public class TwimightBaseActivity extends Activity{
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
-		Log.d(TAG,"onOptionsItemSelected");
+		
 		Intent i;
 		switch(item.getItemId()){
 
@@ -101,7 +101,7 @@ public class TwimightBaseActivity extends Activity{
 	 * @param isLoading
 	 */
 	public static void setLoading(final boolean isLoading) {
-		Log.d(TAG,"setLoading");
+		
 		if(instance!=null){
 			try {
 				
@@ -126,7 +126,7 @@ public class TwimightBaseActivity extends Activity{
 	 * @param view
 	 */
 	protected void unbindDrawables(View view) {
-		Log.d(TAG,"unBindDrawables");
+	
 	    if (view.getBackground() != null) {
 	        view.getBackground().setCallback(null);
 	    }
