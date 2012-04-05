@@ -148,6 +148,9 @@ public class TwitterService extends Service {
 				twitter.setIncludeTweetEntities(true);
 			}
 			
+			twitter.setSinceId(null);
+			twitter.setUntilId(null);
+			
 			// check what we are asked to synch
 			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);		
 		
@@ -1620,6 +1623,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						
 			ShowTweetListActivity.setLoading(true);
 			attempts_left= params[0];
+			
 			if (params.length>1)
 				overscroll = params[1];
 			
@@ -1627,9 +1631,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			twitter.setCount(Constants.NR_TWEETS);
 			if (overscroll == OVERSCROLL_BOTTOM) {				
 				twitter.setUntilId(getTimelineUntilId(getBaseContext()));
-			} else
+			} else {
 				twitter.setSinceId(getTimelineSinceId(getBaseContext()));
 				//twitter.setSinceId(null);
+			}
 
 			try {				
 				timeline = twitter.getHomeTimeline();
