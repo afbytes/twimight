@@ -84,15 +84,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			
 			String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			//Uri uri = Uri.parse(Tweets.TWEET_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS_PICTURE + "/" + filename);
-			//InputStream is;
-			InternalStorageHelper helper = new InternalStorageHelper(context);	
-		//long start = System.currentTimeMillis();
-			byte[] imageByteArray = helper.readImage(filename);			
-			//long end = System.currentTimeMillis();
-			//Log.i(TAG,"time: " + (end-start) + " ms");
-			if (imageByteArray != null) {				
-				//is = context.getContentResolver().openInputStream(uri);				
+			
+			InternalStorageHelper helper = new InternalStorageHelper(context);			
+			byte[] imageByteArray = helper.readImage(filename);				
+			if (imageByteArray != null) {						
 				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
 				picture.setImageBitmap(bm);	
 			} else
