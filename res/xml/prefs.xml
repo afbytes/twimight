@@ -20,8 +20,7 @@
    	<CheckBoxPreference android:key="prefNotifyDirectMessages" android:summary="tap to be notified about new direct messages" android:enabled="true" android:selectable="true" android:title="Notify Direct Messages" android:defaultValue="true" />
 </PreferenceScreen></PreferenceCategory><PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
 		<CheckBoxPreference android:title="Use Location" android:key="prefUseLocation" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to geo-tag your Tweets by default."></CheckBoxPreference>
-		<CheckBoxPreference android:title="Updates in Background" android:key="prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/>
-		<CheckBoxPreference android:title="Download HTML " android:key="prefHtmlDownload" android:summary="tap to enable automatic caching of HTML pages" android:selectable="false" android:defaultValue="false" android:enabled="false"/><ListPreference android:title="Updates Interval" android:summary="select the desired update interval" android:key="prefUpdateInterval" android:enabled="true" android:entries="@array/listArray" android:entryValues="@array/listValues" android:defaultValue="5"/>
+		<CheckBoxPreference android:title="Updates in Background" android:key="prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/><ListPreference android:title="Updates Interval" android:summary="select the desired update interval" android:key="prefUpdateInterval" android:enabled="true" android:entries="@array/listArray" android:entryValues="@array/listValues" android:defaultValue="5"/>
 		
 	</PreferenceCategory>
     

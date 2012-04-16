@@ -1,0 +1,186 @@
+package ch.ethz.twimight.net.twitter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import android.app.IntentService;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.util.Log;
+import ch.ethz.twimight.activities.ShowUserListActivity;
+import ch.ethz.twimight.util.InternalStorageHelper;
+
+public class PicturesIntentService extends IntentService {
+	
+	public static final String TAG = "PicturesIntentService";
+	public static final String USERS_IDS = "users_ids";
+	ArrayList<String> screenNames;
+	ArrayList<byte[]> pictures;
+	long[] rowIds;
+	Cursor[] cursorArray ;
+
+	public PicturesIntentService() {
+		super("PicturesIntentService");
+		
+	}
+
+	@Override
+	protected void onHandleIntent(Intent intent) {		
+		
+		ShowUserListActivity.setLoading(true);
+		rowIds = intent.getLongArrayExtra(this.USERS_IDS);
+		downloadProfilePictures(rowIds);
+		insertPictures();
+		
+		ShowUserListActivity.setLoading(false);
+
+	}
+	
+	
+
+	private void insertPictures() {		
+		
+		Log.i(TAG,"insert Pictures");
+		// clear the update image flag			
+		ContentValues[] cv = new ContentValues[pictures.size()];		
+		
+		for (int i=0; i<cv.length; i++) {	
+			
+			new InsertProfileImageIntoInternalStorageTask(pictures.get(i)).execute(screenNames.get(i));													
+			
+			cv[i]= new ContentValues();
+			cv[i].put("_id", rowIds[i]);
+			cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & cursorArray[i].getInt(cursorArray[i].getColumnIndex(TwitterUsers.COL_FLAGS)));
+			cv[i].put(TwitterUsers.COL_PROFILEIMAGE,screenNames.get(i) );				
+			cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
+		}	
+
+		// insert pictures into DB
+		InsertProfileImagesParameters(cv);
+		// here, we have to notify almost everyone
+		getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+		getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
+
+	}
+
+	private void InsertProfileImagesParameters(ContentValues[] params) {
+		if (params.length ==1) {
+			ContentValues cv = params[0];				
+			try{
+				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
+				getContentResolver().update(queryUri, cv, null, null);
+			} catch(IllegalArgumentException ex){
+				Log.e(TAG, "Exception while inserting profile image into DB",ex);
+				
+			}
+		} else 				
+			updateUsers(params);	
+		
+	}
+	
+	/**
+	 * Updates the user profile in the DB.
+	 * @param contentValues 
+	 * @param user
+	 */
+	private long updateUsers(ContentValues[] users) {
+		
+		if(users==null) return 0;
+		Log.i(TAG,"updateUsers");
+		Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+		int result = getContentResolver().bulkInsert(insertUri, users);
+
+		return result;	
+
+	}
+
+	private void downloadProfilePictures(long[] rowIds) {
+		Uri queryUri;				
+		
+		DefaultHttpClient mHttpClient = new DefaultHttpClient();		
+		pictures = new ArrayList<byte[]>();
+		screenNames = new ArrayList<String>();
+		cursorArray = new Cursor[rowIds.length];
+		
+		for (int i=0; i<rowIds.length; i++) {
+
+			queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+rowIds[i]);					
+			cursorArray[i] = getContentResolver().query(queryUri, null, null, null, null);
+
+			if(cursorArray[i].getCount() == 0){						
+				cursorArray[i].close();
+				continue;
+			}
+			cursorArray[i].moveToFirst();
+
+			String imageUrl = null;
+			// this should not happen
+			if(cursorArray[i].isNull(cursorArray[i].getColumnIndex(TwitterUsers.COL_IMAGEURL))){
+				cursorArray[i].close();					
+				continue;
+			} else 
+				imageUrl = cursorArray[i].getString(cursorArray[i].getColumnIndex(TwitterUsers.COL_IMAGEURL));
+			
+			HttpGet mHttpGet = new HttpGet(imageUrl);
+			HttpResponse mHttpResponse;
+			try {
+				mHttpResponse = mHttpClient.execute(mHttpGet);
+				if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+					
+					try {
+						
+						pictures.add(EntityUtils.toByteArray( mHttpResponse.getEntity()));
+						screenNames.add(cursorArray[i].getString(cursorArray[i].getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+					} catch (IOException ex) {
+						
+					}
+				}
+			} catch (ClientProtocolException e) {				
+			} catch (IOException e) {				
+			}
+			
+		}
+	}
+	
+	
+	/**
+	 * Asynchronously insert a profile image into the DB 
+	 * @author thossmann
+	 *
+	 */
+	private class InsertProfileImageIntoInternalStorageTask extends AsyncTask<String, Void, Void> {
+		
+		byte[] image;
+		int i;
+		
+		public InsertProfileImageIntoInternalStorageTask(byte[] image) {
+			this.image=image;
+			
+		}
+		
+		@Override
+		protected Void doInBackground(String... params) {			
+			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());
+			helper.writeImage(image, params[0]);
+			
+			return null;
+		}		
+
+	}
+	
+	
+
+}
