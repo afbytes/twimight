@@ -12,17 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -43,6 +32,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -82,6 +72,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
 	private static final int OPTIONS_MENU_PAIR= 80;
+	private static final int OPTIONS_MENU_HTML= 90;
 
 	public static final int SHOW_TIMELINE = 1;
 	public static final int SHOW_FAVORITES = 2;
@@ -230,9 +221,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
 		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
-		menu.add(4, OPTIONS_MENU_ABOUT, 5, "About").setIcon(R.drawable.ic_menu_info_details);
+		menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
-		
+		menu.add(6, OPTIONS_MENU_ABOUT, 7, "About").setIcon(R.drawable.ic_menu_info_details);
 		return true;
 	}
 
@@ -266,6 +257,14 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			// Launch User Messages
 			i = new Intent(this, ShowDMUsersListActivity.class);
 			startActivity(i);    
+			break;
+		case OPTIONS_MENU_HTML:
+			
+			//i = new Intent(this, HtmlService.class);
+			
+			//startService(i); 
+			//i = new Intent(this, WebViewActivity.class);
+			//startActivity(i);
 			break;
 		
 		case OPTIONS_MENU_SETTINGS:
