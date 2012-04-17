@@ -46,13 +46,17 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			InternalStorageHelper helper = new InternalStorageHelper(context);
-			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
-			if (imageByteArray != null) {				
-				//is = context.getContentResolver().openInputStream(uri);				
-				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-				picture.setImageBitmap(bm);	
-			} else
+			try {
+				byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+				if (imageByteArray != null) {				
+					//is = context.getContentResolver().openInputStream(uri);				
+					Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+					picture.setImageBitmap(bm);	
+				} else
+					picture.setImageResource(R.drawable.default_profile);
+			} catch (Exception ex) {
 				picture.setImageResource(R.drawable.default_profile);
+			}			
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}

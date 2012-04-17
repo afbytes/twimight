@@ -148,99 +148,105 @@ public class TwitterService extends Service {
 			twitter.setSinceId(null);
 			twitter.setUntilId(null);
 			
-			// check what we are asked to synch
-			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);		
+			if (intent != null) {
+				// check what we are asked to synch
+				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);	
+				
+				switch(synchRequest){
+				
+				case SYNCH_TRANSACTIONAL:			
+				    synchTransactional();
+					break;
+				case SYNCH_LOGIN:
+					synchLogin();
+					break;
+				case SYNCH_VERIFY:
+					synchVerify();
+					break;
+				case SYNCH_ALL:										
+					
+					if (!intent.hasExtra("isLogin")) {
+						synchTimeline(intent);
+						synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));									
+						synchMessages();
+						synchTransactional();	
+					} else {
+						 Handler handler = new Handler();
+						 handler.postDelayed(new GetFriendsFollowersDelayed( ), Constants.FRIENDS_FOLLOWERS_DELAY );
+					}					
+					break;
+				case SYNCH_TIMELINE:				
+						synchTimeline(intent);				
+					break;
+				case SYNCH_MENTIONS:
+					synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
+					break;
+				case SYNCH_FAVORITES:				
+					synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));
+					break;
+				case SYNCH_FRIENDS:
+					synchFriends(TRUE);
+					break;
+				case SYNCH_FOLLOWERS:
+					synchFollowers(TRUE);
+					break;			
+				case SYNCH_SEARCH_TWEETS:
+					if(intent.getStringExtra("query") != null){
+						synchSearchTweets(intent.getStringExtra("query"));
+					}
+					break;
+				case SYNCH_SEARCH_USERS:
+					if(intent.getStringExtra("query") != null){
+						synchSearchUsers(intent.getStringExtra("query"));
+					}
+					break;
+				case SYNCH_USER:
+					Log.i(TAG,"SYNCH_USER");
+					if(intent.hasExtra("rowId")){
+						long rowId = intent.getLongExtra("rowId", -1);
+						new UserQueryTask().execute(rowId);
+					} 
+					break;
+				case SYNCH_TWEET:			
+					if(intent.hasExtra("rowId")){
+						// get the flags
+						long rowId = intent.getLongExtra("rowId", -1);
+						
+						if (rowId >= 0) {
+							new TweetQueryTask().execute(rowId);										
+						}				
+					}
+					break;
+				case SYNCH_DMS:
+					synchMessages();
+					break;
+				case SYNCH_DM:
+					if(intent.getLongExtra("rowId", 0) != 0){
+						new SynchTransactionalMessagesTask().execute();
+						//synchMessage(intent.getLongExtra("rowId", 0) , TRUE);
+					}
+					break;
+				case SYNCH_USERTWEETS:
+					if(intent.getStringExtra("screenname") != null){
+						synchUserTweets(intent.getStringExtra("screenname"));
+					}
+					break;
+				case SYNCH_HTML_PAGE:
+					if (intent.getStringExtra(URL) != null){
+						
+					}					
+					break;
+				default:
+					throw new IllegalArgumentException("Exception: Unknown synch request");
+				}
+
+				return START_STICKY;
+				
+			} else
+				return START_NOT_STICKY;
 		
 			
-			switch(synchRequest){
 			
-			case SYNCH_TRANSACTIONAL:			
-			    synchTransactional();
-				break;
-			case SYNCH_LOGIN:
-				synchLogin();
-				break;
-			case SYNCH_VERIFY:
-				synchVerify();
-				break;
-			case SYNCH_ALL:										
-				
-				if (!intent.hasExtra("isLogin")) {
-					synchTimeline(intent);
-					synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));									
-					synchMessages();
-					synchTransactional();	
-				} else {
-					 Handler handler = new Handler();
-					 handler.postDelayed(new GetFriendsFollowersDelayed( ), Constants.FRIENDS_FOLLOWERS_DELAY );
-				}					
-				break;
-			case SYNCH_TIMELINE:				
-					synchTimeline(intent);				
-				break;
-			case SYNCH_MENTIONS:
-				synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));
-				break;
-			case SYNCH_FAVORITES:				
-				synchFavorites(intent.getBooleanExtra(FORCE_FLAG, false));
-				break;
-			case SYNCH_FRIENDS:
-				synchFriends(TRUE);
-				break;
-			case SYNCH_FOLLOWERS:
-				synchFollowers(TRUE);
-				break;			
-			case SYNCH_SEARCH_TWEETS:
-				if(intent.getStringExtra("query") != null){
-					synchSearchTweets(intent.getStringExtra("query"));
-				}
-				break;
-			case SYNCH_SEARCH_USERS:
-				if(intent.getStringExtra("query") != null){
-					synchSearchUsers(intent.getStringExtra("query"));
-				}
-				break;
-			case SYNCH_USER:
-				Log.i(TAG,"SYNCH_USER");
-				if(intent.hasExtra("rowId")){
-					long rowId = intent.getLongExtra("rowId", -1);
-					new UserQueryTask().execute(rowId);
-				} 
-				break;
-			case SYNCH_TWEET:			
-				if(intent.hasExtra("rowId")){
-					// get the flags
-					long rowId = intent.getLongExtra("rowId", -1);
-					
-					if (rowId >= 0) {
-						new TweetQueryTask().execute(rowId);										
-					}				
-				}
-				break;
-			case SYNCH_DMS:
-				synchMessages();
-				break;
-			case SYNCH_DM:
-				if(intent.getLongExtra("rowId", 0) != 0){
-					new SynchTransactionalMessagesTask().execute();
-					//synchMessage(intent.getLongExtra("rowId", 0) , TRUE);
-				}
-				break;
-			case SYNCH_USERTWEETS:
-				if(intent.getStringExtra("screenname") != null){
-					synchUserTweets(intent.getStringExtra("screenname"));
-				}
-				break;
-			case SYNCH_HTML_PAGE:
-				if (intent.getStringExtra(URL) != null){
-					
-				}					
-				break;
-			default:
-				throw new IllegalArgumentException("Exception: Unknown synch request");
-			}
-
-			return START_STICKY;
 		}
 
 		
@@ -294,36 +300,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			synchTweet(c,TRUE);
 			if(c!=null) c.close();	
 		}
-	}
-	
-	   private String getHtmlPage(String url) {
-		   
-		   HttpClient client = new DefaultHttpClient();
-		   HttpGet request = new HttpGet(url);
-		   HttpResponse response;
-		   try {
-			   response = client.execute(request);
-			   String html = "";
-			   InputStream in = response.getEntity().getContent();
-			   BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-			   StringBuilder str = new StringBuilder();
-			   String line = null;
-			   
-			   while((line = reader.readLine()) != null)			   
-				   str.append(line);
-			   
-			   in.close();
-			   html = str.toString();
-			   return html;
-
-		   } catch (ClientProtocolException e) {
-			   Log.e(TAG,"error",e);
-			   return null;
-		   } catch (IOException e) {
-			   Log.e(TAG,"error",e);
-			   return null;
-		   }		
-	}
+	}	
 	
 	private class GetFriendsFollowersDelayed implements Runnable {
 		@Override
@@ -1151,16 +1128,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					String screenname = tweet.getText().substring(entity.start+1, entity.end);				
 					ContentValues cv = new ContentValues();
 					cv.put(TwitterUsers.COL_NAME, entity.displayVersion());
-					cv.put(TwitterUsers.COL_SCREENNAME, screenname);	
-					//cv = getUserContentValues(twitter.users().getUser(screenname),false);								
-				
+					cv.put(TwitterUsers.COL_SCREENNAME, screenname);						
+					//cv.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE);
+
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 					getContentResolver().insert(insertUri, cv);
 				} catch(Exception ex){
 					Log.e(TAG, "Exception while inserting mentioned user");
 				}
-				
-
 			}
 		}
 		entities = tweet.getTweetEntities(Twitter.KEntityType.urls);
@@ -1169,7 +1144,6 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				allEntities.add(entity);
 			}
 		}
-
 		// do we have entities at all?
 		if(allEntities.isEmpty()) return tweet.getText();
 
@@ -1195,9 +1169,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
 				} else if(curEntity.type == KEntityType.urls){
 					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-					//synchronized(TwitterService.this) {
-						//htmlUrls.add(curEntity.displayVersion());
-					//}
+									
 					
 				} else if(curEntity.type == KEntityType.user_mentions){
 					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
@@ -2635,7 +2607,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				} else if(ex instanceof TwitterException.E401){				
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts, notify};
 						(new DestroyStatusTask()).execute(params);
 						return;
 					} else {						
@@ -2647,7 +2619,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					
 					// try again?
 					if(attempts>0){
-						Long[] params = {rowId, --attempts};
+						Long[] params = {rowId, --attempts, notify};
 						(new DestroyStatusTask()).execute(params);
 						return;
 					} else {						

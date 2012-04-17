@@ -1,24 +1,37 @@
 package ch.ethz.twimight.net.Html;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.util.Log;
+import ch.ethz.twimight.activities.WebViewActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
-import ch.ethz.twimight.net.twitter.TwitterService;
 
 public class HtmlService extends Service {
 	
 	ArrayList<String> htmlUrls =  new ArrayList<String>();
-	
+	public static final String TAG = "HtmlService";
 	
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO Auto-generated method stub
-		return super.onStartCommand(intent, flags, startId);
+		
+		htmlUrls.add("http://techcrunch.com/2012/04/17/twitpolls/");
+		new GetHtmlPagesTask().execute();
+		return START_NOT_STICKY;
 	}
 
 
@@ -33,27 +46,23 @@ public class HtmlService extends Service {
 	/**
 	 * Loads the html pages from internet
 	 * @author pcarta
-	 *
+	 */
 	
 	private class GetHtmlPagesTask extends AsyncTask<Void, Void, String[]> {
 
-		Exception ex;
-		
+		Exception ex;		
 
 		@Override
 		protected String[] doInBackground(Void... params) {
 			String[] pages = new String[htmlUrls.size()];
 			int i=0;
-			/*
-			synchronized(TwitterService.this) {
-				for (String url: htmlUrls) {
-					pages[i] = getHtmlPage(url);
-					i++;
-				}
-			}
-			
-			return pages;
 
+			for (String url: htmlUrls) {
+				pages[i] = getHtmlPage(url);
+				Log.i(TAG,"html page: " + pages[i]);
+				i++;
+			}
+			return pages;
 		}
 
 		@Override
@@ -69,23 +78,21 @@ public class HtmlService extends Service {
 	}
 	
 	
-	 * Loads the html pages from internet
+	 /* Loads the html pages from internet
 	 * @author pcarta
-	 *
+	 */
 	 
 	private class InsertHtmlPagesTask extends AsyncTask<String[], Void, Void> {
 
 		@Override
 		protected Void doInBackground(String[]... params) {
-			HtmlPagesDbHelper dbHelper = new HtmlPagesDbHelper();
+			Log.i(TAG,"inserting page into the db");
+			HtmlPagesDbHelper dbHelper = new HtmlPagesDbHelper(getBaseContext());
 			dbHelper.open();
 			String[] pages = params[0];
-			
-			for (int i=0;i<pages.length;i++) {
-				synchronized() {
-					dbHelper.insertPage(htmlUrls.get(i),pages[i]);
-				}
-				
+
+			for (int i=0;i<pages.length;i++) {				
+				dbHelper.insertPage(htmlUrls.get(i),pages[i]);
 			}
 			return null;
 		
@@ -93,12 +100,44 @@ public class HtmlService extends Service {
 
 		@Override
 		protected void onPostExecute(Void params){
-			
+			Intent intent = new Intent(HtmlService.this,WebViewActivity.class);
+			HtmlPagesDbHelper dbHelper = new HtmlPagesDbHelper(getBaseContext());
+			dbHelper.open();			
+			intent.putExtra(WebViewActivity.HTML_PAGE, dbHelper.getPage("http://techcrunch.com/2012/04/17/twitpolls/"));
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(intent);
 		}
 
 	}
 	
+	   private String getHtmlPage(String url) {
+		   
+		   HttpClient client = new DefaultHttpClient();
+		   HttpGet request = new HttpGet(url);
+		   HttpResponse response;
+		   try {
+			   response = client.execute(request);
+			   String html = "";
+			   InputStream in = response.getEntity().getContent();
+			   BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			   StringBuilder str = new StringBuilder();
+			   String line = null;
+			   
+			   while((line = reader.readLine()) != null)			   
+				   str.append(line);
+			   
+			   in.close();
+			   html = str.toString();
+			   return html;
+
+		   } catch (ClientProtocolException e) {			  
+			   return null;
+		   } catch (IOException e) {			  
+			   return null;
+		   }		
+	}
 	
-*/
+	
+
 
 }

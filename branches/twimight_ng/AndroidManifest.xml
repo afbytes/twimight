@@ -6,7 +6,7 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="4" android:versionName="0.9 preview">
+	package="ch.ethz.twimight" android:versionCode="4" android:versionName="0.9.1 preview">
 	<uses-sdk android:minSdkVersion="10" />
 	<permission android:description="@string/permDescription"
 		android:label="Access to Twimight content providers" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
@@ -99,6 +99,7 @@
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
 		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />
+		<service android:enabled="true" android:name=".net.Html.HtmlService" />
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
 			<intent-filter>
 				<action android:name="twimight_synch" />
