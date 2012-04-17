@@ -598,7 +598,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// load the profile image			
 			if( c.isNull(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE)) ||
 					(System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE)) >Constants.USERS_MIN_SYNCH)){
-				Long[] rowIds = {rowId};
+				long[] rowIds = {rowId};
 				Intent picturesIntent = new Intent(TwitterService.this, PicturesIntentService.class);
 				picturesIntent.putExtra(PicturesIntentService.USERS_IDS, rowIds);
 				startService(picturesIntent);
