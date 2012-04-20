@@ -260,11 +260,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			break;
 		case OPTIONS_MENU_HTML:
 			
-			//i = new Intent(this, HtmlService.class);
+			i = new Intent(this, HtmlService.class);			
+			startService(i); 
 			
-			//startService(i); 
-			//i = new Intent(this, WebViewActivity.class);
-			//startActivity(i);
 			break;
 		
 		case OPTIONS_MENU_SETTINGS:

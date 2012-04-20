@@ -1076,7 +1076,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
 		
-		cv.put(Tweets.COL_TEXT, createSpans(tweet));
+		cv.put(Tweets.COL_TEXT, createSpans(tweet).getText());
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
 		
@@ -1097,6 +1097,24 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		
 		return cv;
 	}
+	
+	private class SpanResult {
+		private String text;
+		private ArrayList<String> urls;
+		
+		SpanResult(String text, ArrayList<String> urls) {
+			this.text=text;
+			this.urls=urls;
+		}
+		
+		String getText() {
+			return text;
+		}
+		
+		ArrayList<String> getUrls() {
+			return urls;
+		}
+	}
 
 	/**
 	 * Creates spans for entities (mentions, urls, hashtags).
@@ -1104,10 +1122,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * @return The tweet text with the spans
 	 */	
 	@SuppressWarnings("unchecked")
-	private String createSpans(Status tweet){
+	private SpanResult createSpans(Status tweet){
 
 		if(tweet==null) return null;
-
+		ArrayList<String> urls = null;
 		String originalText = (String) tweet.getText();
 
 		// we need one list with all entities, sorted by their start
@@ -1145,7 +1163,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 		}
 		// do we have entities at all?
-		if(allEntities.isEmpty()) return tweet.getText();
+		if(allEntities.isEmpty()) return new SpanResult(tweet.getText(),urls);
 
 		// sort according to start character
 		Collections.sort(allEntities, new Comparator(){
@@ -1161,6 +1179,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		StringBuilder replacedText = new StringBuilder();
 		int lastIndex = 0;
 		try {
+			urls = new ArrayList<String>();
 			for (TweetEntity curEntity: allEntities) {
 				// append everything before the start of this entity
 				replacedText.append("<tweet>"+originalText.substring(lastIndex, curEntity.start));
@@ -1169,7 +1188,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
 				} else if(curEntity.type == KEntityType.urls){
 					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-									
+					urls.add(curEntity.displayVersion());				
 					
 				} else if(curEntity.type == KEntityType.user_mentions){
 					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
@@ -1182,10 +1201,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 		} catch (StringIndexOutOfBoundsException ex) {
 			Log.e(TAG,"create spans error",ex);
-			return tweet.getText();
+			return new SpanResult(tweet.getText(),urls);
 		}	
-
-		return replacedText.toString();
+		
+		return new SpanResult(replacedText.toString(),urls);
 	}
 
 

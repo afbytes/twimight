@@ -40,7 +40,7 @@ public class PicturesIntentService extends IntentService {
 	protected void onHandleIntent(Intent intent) {		
 		
 		ShowUserListActivity.setLoading(true);
-		rowIds = intent.getLongArrayExtra(this.USERS_IDS);
+		rowIds = intent.getLongArrayExtra(PicturesIntentService.USERS_IDS);
 		downloadProfilePictures(rowIds);
 		insertPictures();
 		
@@ -56,16 +56,17 @@ public class PicturesIntentService extends IntentService {
 		// clear the update image flag			
 		ContentValues[] cv = new ContentValues[pictures.size()];		
 		
-		for (int i=0; i<cv.length; i++) {	
-			
-			new InsertProfileImageIntoInternalStorageTask(pictures.get(i)).execute(screenNames.get(i));													
+		for (int i=0; i<cv.length; i++) {				
+															
+			insertProfileImageIntoInternalStorage(pictures.get(i),screenNames.get(i));
 			
 			cv[i]= new ContentValues();
 			cv[i].put("_id", rowIds[i]);
 			if (!cursorArray[i].isClosed()) {
 				cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & cursorArray[i].getInt(cursorArray[i].getColumnIndex(TwitterUsers.COL_FLAGS)));
 				cv[i].put(TwitterUsers.COL_PROFILEIMAGE,screenNames.get(i) );				
-				cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());			
+				cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());	
+				cursorArray[i].close();
 			}				
 		}	
 
@@ -76,6 +77,12 @@ public class PicturesIntentService extends IntentService {
 		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 		getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 
+	}
+
+	private void insertProfileImageIntoInternalStorage(byte[] image, String name) {
+		InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());
+		helper.writeImage(image, name);
+		
 	}
 
 	private void InsertProfileImagesParameters(ContentValues[] params) {
@@ -157,32 +164,7 @@ public class PicturesIntentService extends IntentService {
 		}
 	}
 	
-	
-	/**
-	 * Asynchronously insert a profile image into the DB 
-	 * @author thossmann
-	 *
-	 */
-	private class InsertProfileImageIntoInternalStorageTask extends AsyncTask<String, Void, Void> {
-		
-		byte[] image;
-		int i;
-		
-		public InsertProfileImageIntoInternalStorageTask(byte[] image) {
-			this.image=image;
-			
-		}
-		
-		@Override
-		protected Void doInBackground(String... params) {			
-			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());
-			helper.writeImage(image, params[0]);
-			
-			return null;
-		}		
 
-	}
-	
 	
 
 }
