@@ -24,8 +24,9 @@ public class WebViewActivity extends Activity {
 		WebView web = (WebView) findViewById(R.id.webview);
 		web.getSettings().setJavaScriptEnabled(true);
 		web.getSettings().setBuiltInZoomControls(true); //Enable Multitouch if supported
-		//web.loadData(intent.getStringExtra(HTML_PAGE), "text/html", null);
-		web.loadUrl("http://techcrunch.com/2012/04/17/twitpolls/");
+		Log.i(TAG,intent.getStringExtra(HTML_PAGE));
+		web.loadData(intent.getStringExtra(HTML_PAGE), "text/html", null);
+		//web.loadUrl("http://techcrunch.com/2012/04/17/twitpolls/");
 		web.setWebViewClient(new HelloWebViewClient());
 	}
 	

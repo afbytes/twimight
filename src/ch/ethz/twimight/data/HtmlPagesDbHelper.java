@@ -37,8 +37,7 @@ private static final String TAG = "HtmlPagesDbHelper";
 	}
 	
 	public int insertPage(String url, String page) {
-		Log.i(TAG,"url: " + url);
-		Log.i(TAG,"html page: " + page);
+		Log.i(TAG,"url: " + url);	
 		ContentValues cv = createContentValues(url,page);
 		
 		try {			

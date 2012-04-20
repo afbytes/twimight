@@ -91,7 +91,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_ISDISASTER + " integer default 0, "
 			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
-			+ Tweets.COL_SIGNATURE + " string, "
+			+ Tweets.COL_SIGNATURE + " string, "		
 			+ Tweets.COL_CERTIFICATE + " string);";
 
 	// Twitter Users
@@ -157,7 +157,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	 * Constructor
 	 * @param context
 	 */
-	public DBOpenHelper(Context context) {
+	private DBOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
@@ -166,7 +166,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	 * @param context
 	 * @return the 
 	 */
-	public static DBOpenHelper getInstance(Context context){
+	public static synchronized DBOpenHelper getInstance(Context context){
 		if(dbHelper == null)
 			dbHelper = new DBOpenHelper(context);
 		

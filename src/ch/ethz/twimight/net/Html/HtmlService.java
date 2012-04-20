@@ -1,16 +1,12 @@
 package ch.ethz.twimight.net.Html;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import android.app.Service;
 import android.content.Intent;
@@ -29,7 +25,7 @@ public class HtmlService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
-		htmlUrls.add("http://techcrunch.com/2012/04/17/twitpolls/");
+		htmlUrls.add("http://www.google.com");
 		new GetHtmlPagesTask().execute();
 		return START_NOT_STICKY;
 	}
@@ -58,8 +54,7 @@ public class HtmlService extends Service {
 			int i=0;
 
 			for (String url: htmlUrls) {
-				pages[i] = getHtmlPage(url);
-				Log.i(TAG,"html page: " + pages[i]);
+				pages[i] = getHtmlPage(url);				
 				i++;
 			}
 			return pages;
@@ -91,8 +86,9 @@ public class HtmlService extends Service {
 			dbHelper.open();
 			String[] pages = params[0];
 
-			for (int i=0;i<pages.length;i++) {				
-				dbHelper.insertPage(htmlUrls.get(i),pages[i]);
+			for (int i=0;i<pages.length;i++) {	
+				if (pages[i] != null)
+					dbHelper.insertPage(htmlUrls.get(i),pages[i]);
 			}
 			return null;
 		
@@ -103,7 +99,7 @@ public class HtmlService extends Service {
 			Intent intent = new Intent(HtmlService.this,WebViewActivity.class);
 			HtmlPagesDbHelper dbHelper = new HtmlPagesDbHelper(getBaseContext());
 			dbHelper.open();			
-			intent.putExtra(WebViewActivity.HTML_PAGE, dbHelper.getPage("http://techcrunch.com/2012/04/17/twitpolls/"));
+			intent.putExtra(WebViewActivity.HTML_PAGE, dbHelper.getPage("http://www.google.com"));
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
 		}
@@ -111,30 +107,20 @@ public class HtmlService extends Service {
 	}
 	
 	   private String getHtmlPage(String url) {
+		   Connection conn = Jsoup.connect(url);
+		   Document doc;
+		try {
+			doc = conn.get();
+			//Element root = doc.select("html").first();			
+		    //Log.i(TAG,"html: " + doc.outerHtml());
+			
+			Log.i(TAG,"html: \n"  + doc.outerHtml());
+			return null;
+		} catch (IOException e) {
+			return null;
+		}
 		   
-		   HttpClient client = new DefaultHttpClient();
-		   HttpGet request = new HttpGet(url);
-		   HttpResponse response;
-		   try {
-			   response = client.execute(request);
-			   String html = "";
-			   InputStream in = response.getEntity().getContent();
-			   BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-			   StringBuilder str = new StringBuilder();
-			   String line = null;
-			   
-			   while((line = reader.readLine()) != null)			   
-				   str.append(line);
-			   
-			   in.close();
-			   html = str.toString();
-			   return html;
-
-		   } catch (ClientProtocolException e) {			  
-			   return null;
-		   } catch (IOException e) {			  
-			   return null;
-		   }		
+		   
 	}
 	
 	
