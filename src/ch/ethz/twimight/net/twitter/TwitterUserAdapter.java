@@ -44,24 +44,22 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 			
 		// Profile image
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
 			InternalStorageHelper helper = new InternalStorageHelper(context);
-			try {
-				byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
-				if (imageByteArray != null) {				
-					//is = context.getContentResolver().openInputStream(uri);				
-					Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-					picture.setImageBitmap(bm);	
-				} else
-					picture.setImageResource(R.drawable.default_profile);
-			} catch (Exception ex) {
+
+			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+			if (imageByteArray != null) {				
+				//is = context.getContentResolver().openInputStream(uri);				
+				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+				picture.setImageBitmap(bm);	
+			} else
 				picture.setImageResource(R.drawable.default_profile);
-			}			
+
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}
 		LinearLayout rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);		
 		rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 	}
-	
+
 }

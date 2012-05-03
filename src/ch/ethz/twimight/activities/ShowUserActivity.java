@@ -220,9 +220,9 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		 */
 
 		// do we have a profile image?
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
 			InternalStorageHelper helper = new InternalStorageHelper(this);
-			byte[] imageByteArray = helper.readImage(c.getString(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+			byte[] imageByteArray = helper.readImage(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 			if (imageByteArray != null) {				
 				//is = context.getContentResolver().openInputStream(uri);				
 				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);

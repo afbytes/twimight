@@ -16,7 +16,8 @@ public class TweetListView extends ListView {
 
 	public TweetListView(Context context) {
 		super(context);
-		setOverScrollMode(OVER_SCROLL_ALWAYS);
+		
+		setOverScrollMode(this.OVER_SCROLL_NEVER);
 		this.context = context;
 	}
 
@@ -64,7 +65,7 @@ public class TweetListView extends ListView {
 
 	@Override
 	protected boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-
+		
 		return super.overScrollBy(0, deltaY, 0, scrollY, 0, scrollRangeY, 0, maxOverscroll, isTouchEvent);
 
 	}
