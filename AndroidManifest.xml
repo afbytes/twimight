@@ -6,7 +6,7 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="4" android:versionName="0.9.1 preview">
+	package="ch.ethz.twimight" android:versionCode="5" android:versionName="0.9.1 preview">
 	<uses-sdk android:minSdkVersion="10" />
 	<permission android:description="@string/permDescription"
 		android:label="Access to Twimight content providers" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"

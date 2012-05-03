@@ -32,11 +32,15 @@
 			android:text="Twimight" android:textColor="@color/black" />
 		<TextView android:id="@+id/textMighty" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
-			android:textSize="16dp" android:text="The mighty Twitter client!" android:textColor="@color/black"/>
+			android:textSize="14dp" android:text="The mighty Twitter client!" android:textColor="@color/black"/>
 
 		<TextView android:id="@+id/textCopy" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_gravity="center"
-			android:text="(c) CSG, ETH Zurich, 2012" android:layout_marginTop="10dp" android:textColor="@color/black"/>
+			android:text="(c) CSG, ETH Zurich, 2012" android:layout_marginTop="9dp" android:textColor="@color/black"/>
+		
+		<TextView android:id="@+id/textAuthors" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_gravity="center"
+			android:text="Authors: Paolo Carta and Theus Hossmann" android:layout_marginTop="9dp" android:textColor="@color/black"/>
 
 		<LinearLayout android:id="@+id/linearLayout1"
 			android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -68,13 +72,13 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:text="TextView" android:layout_marginRight="20dp" android:textColor="@color/black"/>
 
-			<Button android:id="@+id/showAboutRevoke" android:layout_width="wrap_content" android:layout_height="wrap_content"
+			<Button android:id="@+id/showAboutRevoke" android:layout_width="65dp" android:layout_height="wrap_content"
 			     android:text="Revoke" android:minHeight="30dp" android:minWidth="50dp"/>
 
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/linearLayout4"
-			android:layout_width="match_parent" android:layout_height="wrap_content">
+			android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp">
 
 			<TextView android:id="@+id/textView7" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="TDS Update"
@@ -85,7 +89,7 @@
 				android:text="TextView" android:layout_marginRight="20dp" android:textColor="@color/black"/>
 
 			<Button android:id="@+id/showAboutUpdate" android:text="Update"
-				android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="visible"
+				android:layout_width="65dp" android:layout_height="wrap_content" android:visibility="visible"
 				android:minHeight="30dp" android:minWidth="50dp" />
 
 		</LinearLayout>

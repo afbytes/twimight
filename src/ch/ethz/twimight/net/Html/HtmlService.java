@@ -1,12 +1,6 @@
 package ch.ethz.twimight.net.Html;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import android.app.Service;
 import android.content.Intent;
@@ -25,7 +19,7 @@ public class HtmlService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
-		htmlUrls.add("http://www.google.com");
+		//htmlUrls.add("http://www.google.com");		
 		new GetHtmlPagesTask().execute();
 		return START_NOT_STICKY;
 	}
@@ -50,14 +44,17 @@ public class HtmlService extends Service {
 
 		@Override
 		protected String[] doInBackground(Void... params) {
-			String[] pages = new String[htmlUrls.size()];
+			
+			//new BasicCrawlController().start("www.corriere.it");
+			return null;
+			/*String[] pages = new String[htmlUrls.size()];
 			int i=0;
 
 			for (String url: htmlUrls) {
 				pages[i] = getHtmlPage(url);				
 				i++;
 			}
-			return pages;
+			return pages;*/
 		}
 
 		@Override
@@ -107,18 +104,17 @@ public class HtmlService extends Service {
 	}
 	
 	   private String getHtmlPage(String url) {
-		   Connection conn = Jsoup.connect(url);
-		   Document doc;
-		try {
-			doc = conn.get();
+		   
+		//try {
+			
 			//Element root = doc.select("html").first();			
 		    //Log.i(TAG,"html: " + doc.outerHtml());
 			
-			Log.i(TAG,"html: \n"  + doc.outerHtml());
+		
 			return null;
-		} catch (IOException e) {
-			return null;
-		}
+		//} catch (IOException e) {
+			//return null;
+		//}
 		   
 		   
 	}

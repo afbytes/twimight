@@ -883,30 +883,27 @@ public class TweetsContentProvider extends ContentProvider {
 		 * Second, we delete all tweets which have no more buffer flags
 		 */		
 		String sqlWhere;
-		String sql;
-		Cursor c;
+		String sql;		
 		// NOTE: DELETE in android does not allow ORDER BY. Hence, the trick with the _id
 		sqlWhere = "("+Tweets.COL_BUFFER+"&"+buffer+")!=0";
 		sql = "UPDATE " + DBOpenHelper.TABLE_TWEETS + " "
 				+"SET " + Tweets.COL_BUFFER +"=("+(~buffer)+"&"+Tweets.COL_BUFFER+") "
 				+"WHERE "
-				+"_id=(SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
+				+"_id IN (SELECT _id FROM "+DBOpenHelper.TABLE_TWEETS 
 				+ " WHERE " + sqlWhere
 				+ " ORDER BY "+Tweets.DEFAULT_SORT_ORDER+" "
-				+ " LIMIT -1 OFFSET "
-				+ size +");";
-		c = database.rawQuery(sql, null);
-	//Log.i(TAG,"deleting " + c.getCount() + "tweets");
-		c.close();
+				+ " LIMIT 100 OFFSET "
+				+ size +");";		
+		database.execSQL(sql);
 		
-		// now delete
-		sql = "DELETE FROM "+DBOpenHelper.TABLE_TWEETS+" WHERE "+Tweets.COL_BUFFER+"=0";
-		c = database.rawQuery(sql, null);
-		//Log.i(TAG,"deleted " + c.getCount() + " tweets");
-		c.close();
-		
+		// now delete			
+		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "& (" + Tweets.BUFFER_FAVORITES + "|" 
+					+ Tweets.BUFFER_MENTIONS + "|" + Tweets.BUFFER_TIMELINE +")" + "=0" , null);
+		Log.i(TAG,"deleted " + result + " tweets");		
+
+		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);		
 	}
-	
+
 	/**
 	 * Keeps the tweets table at acceptable size
 	 */
@@ -916,7 +913,7 @@ public class TweetsContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
 		
 		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
-			//Log.i(TAG, "Purging timeline buffer, TIMELINE_BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
+			Log.d(TAG, "Purging timeline buffer "+ Constants.TIMELINE_BUFFER_SIZE);
 			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
 		}
 			

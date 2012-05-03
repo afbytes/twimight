@@ -40,7 +40,7 @@ public class TweetListView extends ListView {
 			}
 			else {
 				overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_BOTTOM);				
-				Log.i(TAG, "BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
+				
 			}
 			context.startService(overscrollIntent);
 			
