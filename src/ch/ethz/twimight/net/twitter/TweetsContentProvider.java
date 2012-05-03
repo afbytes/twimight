@@ -897,8 +897,7 @@ public class TweetsContentProvider extends ContentProvider {
 		database.execSQL(sql);
 		
 		// now delete			
-		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "& (" + Tweets.BUFFER_FAVORITES + "|" 
-					+ Tweets.BUFFER_MENTIONS + "|" + Tweets.BUFFER_TIMELINE +")" + "=0" , null);
+		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "=0" , null);
 		Log.i(TAG,"deleted " + result + " tweets");		
 
 		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);		
