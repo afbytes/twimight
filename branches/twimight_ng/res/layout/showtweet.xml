@@ -177,17 +177,17 @@
 			android:background="@drawable/content_box" android:padding="10dp">
 			<ImageButton android:id="@+id/showTweetRetweet"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@drawable/btn_twimight_retweet" android:layout_marginRight="25dp" />
+				android:src="@drawable/btn_twimight_retweet" android:layout_marginRight="28dp" />
 			<ImageButton android:id="@+id/showTweetFavorite"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@drawable/btn_twimight_favorite" android:background="@color/transparent"
-				android:layout_marginRight="25dp" />
+				android:layout_marginRight="28dp" />
 			<ImageButton android:id="@+id/showTweetReply" android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:src="@drawable/btn_twimight_reply"
-				android:layout_marginRight="25dp" />
+				android:layout_marginRight="28dp" />
 			<ImageButton android:id="@+id/showTweetDelete"
 				android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/btn_twimight_delete"
-				android:background="@color/transparent" android:layout_marginRight="25dp"
+				android:background="@color/transparent" android:layout_marginRight="28dp"
 				 android:visibility="visible" />
 			
 		</LinearLayout>

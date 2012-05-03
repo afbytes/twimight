@@ -1,13 +1,10 @@
 package ch.ethz.twimight.util;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import org.apache.http.util.ByteArrayBuffer;
 
 import android.content.Context;
 import android.util.Log;
@@ -23,10 +20,9 @@ public class InternalStorageHelper {
 	
 	public boolean writeImage(byte[] image, String filename) {
 		FileOutputStream out = null ;
-		try {			
+		try {				
 			out = context.openFileOutput(filename, Context.MODE_WORLD_READABLE);
-			out.write(image);
-			
+			out.write(image);			
 			return true;
 			
 		} catch (FileNotFoundException e) {

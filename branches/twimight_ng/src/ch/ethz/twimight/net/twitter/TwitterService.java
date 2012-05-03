@@ -719,7 +719,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			return null;
 		
 		Long id = c.getLong(c.getColumnIndex(Tweets.COL_TID));		
-		if (id != null) {				
+		if (id != null) {			
 			return new BigInteger(Long.toString(id));
 		}
 		else 
@@ -732,6 +732,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Stores the given ID as the since ID
 	 */
 	public static void setTimelineSinceId(BigInteger sinceId, Context context) {
+		
+		Log.i(TAG,"inside setTimelineSinceId");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putString("timelineSinceId",sinceId==null?null:sinceId.toString());
@@ -998,8 +1000,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	private int updateTweets(ContentValues[] cv){		
 		
 		Uri insertUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
-		int result = getContentResolver().bulkInsert(insertUri, cv);
-		//new BulkInsertTask(insertUri,cv).execute();
+		int result = getContentResolver().bulkInsert(insertUri, cv);		
 		return result;		
 		
 	}
@@ -1636,8 +1637,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			try {				
 				timeline = twitter.getHomeTimeline();
 				
-				if (timeline.size()>0 && overscroll == OVERSCROLL_BOTTOM )
+				if (timeline.size()>0 && overscroll == OVERSCROLL_BOTTOM ) {
 					Constants.TIMELINE_BUFFER_SIZE += 50;
+					Log.i(TAG, "BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
+				}				
 				Log.i(TAG,"timeline size:" + timeline.size());
 			} catch (Exception ex) {
 				this.ex = ex;
@@ -1671,7 +1674,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				return;
 			}
 			else 
-				new InsertTimelineTask().execute(result);
+				new InsertTimelineTask(overscroll).execute(result);
 
 
 
@@ -1686,7 +1689,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 *
 	 */
 	private class InsertTimelineTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
-	
+		
+		boolean setTimelineSinceId;
+		
+		public InsertTimelineTask(int overscrollType) {
+			if (overscrollType == OVERSCROLL_TOP) 
+				setTimelineSinceId = true;
+			else
+				setTimelineSinceId = false;
+		}
 
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
@@ -1740,8 +1751,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				if (cv.size() > 0) {
 					insertDataAndNotify(cv,users);		
 				}
+				
 				// save the id of the last tweet for future timeline synchs
-				setTimelineSinceId(lastId, getBaseContext());				
+				if (setTimelineSinceId)
+					setTimelineSinceId(lastId, getBaseContext());				
 			}
 			// save the timestamp of the last update
 			setLastTimelineUpdate(new Date(), getBaseContext());
@@ -1754,9 +1767,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);	
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-			//Log.i(TAG, "getting html pages");
-			//new GetHtmlPagesTask().execute();
+			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);			
 			Log.i(TAG,"Insert onPost Execute");
 		}
 

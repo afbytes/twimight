@@ -102,10 +102,10 @@ public final class Constants {
 	public static final long DMS_MIN_SYNCH = 20*1000L; /** Minimum time between two updates of the direct messages */
 	
 	public static int TIMELINE_BUFFER_SIZE = 100; /** How many "normal" tweets (not favorites, mentions, etc) to store locally */
-	public static final int FAVORITES_BUFFER_SIZE = 100; /** How many favorites to store locally */
-	public static final int MENTIONS_BUFFER_SIZE = 100; /** How many mentions to store locally */
+	public static final int FAVORITES_BUFFER_SIZE = 5; /** How many favorites to store locally */
+	public static final int MENTIONS_BUFFER_SIZE = 5; /** How many mentions to store locally */
 	public static final int DTWEET_BUFFER_SIZE = 100; /** How many disaster tweets of other users */
-	public static final int MYDTWEET_BUFFER_SIZE = 100; /** How many of our own disaster tweets */
+	public static final int MYDTWEET_BUFFER_SIZE = 50; /** How many of our own disaster tweets */
 	public static final int MESSAGES_BUFFER_SIZE = 100; /** How many direct messages to and from the local user do we buffer? */
 	public static final int DISASTERDM_BUFFER_SIZE = 100; /** How many disaster direct messages of remote users do we carry? */
 	public static final int MYDISASTERDM_BUFFER_SIZE = 100; /** How many disaster messages sent by the local user do we carry? */

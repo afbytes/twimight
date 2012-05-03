@@ -221,7 +221,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
 		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
-		menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
+		//menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 7, "About").setIcon(R.drawable.ic_menu_info_details);
 		return true;
