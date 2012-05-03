@@ -105,9 +105,9 @@ public class DMAdapter extends SimpleCursorAdapter {
 			
 		// Profile image
 		ImageView picture = (ImageView) dmrow.findViewById(R.id.showDMProfileImage);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
 			InternalStorageHelper helper = new InternalStorageHelper(context);
-			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)));
+			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 			if (imageByteArray != null) {				
 				//is = context.getContentResolver().openInputStream(uri);				
 				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
