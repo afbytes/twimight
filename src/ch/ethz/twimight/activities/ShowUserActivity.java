@@ -275,6 +275,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getBaseContext(), ShowUserTweetListActivity.class);
+					c.moveToFirst();
 					int index = c.getColumnIndex(TwitterUsers.COL_ID);
 					if (index != -1) {
 						i.putExtra("userId",c.getLong(index));
