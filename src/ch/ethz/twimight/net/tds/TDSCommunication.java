@@ -33,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Location;
 import android.util.Log;
 import ch.ethz.twimight.security.RevocationListEntry;
@@ -53,6 +54,8 @@ public class TDSCommunication {
 	private static final String VERSION = "version";
 	private static final String REVOCATION = "revocation";
 	private static final String FOLLOWER = "follower";	
+	private static final String STATISTIC = "statistic";	
+	private static final String NOTIFICATION = "notification";
 	
 	// TDS request URL
 	private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";
@@ -120,6 +123,16 @@ public class TDSCommunication {
 	 */
 	public int createFollowerObject(long lastUpdate) throws Exception{
 		tdsRequest.createFollowerObject(lastUpdate);
+		return 0;
+	}
+	
+	/**
+	 * Creates a new Statistics object in the request
+	 * @return
+	 * @throws JSONException 
+	 */
+	public int createStatisticObject(Cursor stats, long follCount) throws Exception{
+		tdsRequest.createStatisticObject(stats,follCount);
 		return 0;
 	}
 	
@@ -252,6 +265,11 @@ public class TDSCommunication {
 		if(tdsRequest.hasFollowerObject()){
 			requestObject.put(FOLLOWER, tdsRequest.getFollowerObject());
 		}
+		
+		// follower
+		if(tdsRequest.hasStatisticObject()){
+			requestObject.put(STATISTIC, tdsRequest.getStatisticObject());
+		}
 
 		Log.i(TAG, requestObject.toString(5));
 		return requestObject;
@@ -319,6 +337,14 @@ public class TDSCommunication {
 		} catch(JSONException e){
 			Log.i(TAG, "No follower object");
 		}
+		
+		try{
+			// notification
+			JSONObject notificationObject = messageObject.getJSONObject(NOTIFICATION);
+			tdsResponse.setNotificationObject(notificationObject);
+		} catch(JSONException e){
+			Log.i(TAG, "No follower object");
+		}
 
 		return 0;
 	}
@@ -329,6 +355,10 @@ public class TDSCommunication {
 	
 	public List<String> parseBluetooth() throws Exception{
 		return tdsResponse.parseBluetooth();
+	}
+	
+	public JSONObject getNotification() throws Exception{
+		return tdsResponse.getNotification();
 	}
 	
 	public int parseLocation() throws Exception{

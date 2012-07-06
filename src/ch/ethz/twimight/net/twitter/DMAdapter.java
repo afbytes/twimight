@@ -130,28 +130,22 @@ public class DMAdapter extends SimpleCursorAdapter {
 			toPostInfo.setImageResource(R.drawable.blank);
 		}
 		// can we delete the message		
-		
-		final ImageButton deleteButton = (ImageButton) dmrow.findViewById(R.id.showDMDelete);
-		//deleteButton.setBackgroundColor(R.color.transparent);
-				
-		//if(Long.toString(cursor.getLong(cursor.getColumnIndex(DirectMessages.COL_SENDER))).equals(LoginActivity.getTwitterId(context))) {
-		
-			deleteButton.setOnClickListener(new OnButtonClickListener(cursor.getPosition(),cursor )  );			
-		//} else 
-		//	deleteButton.setVisibility(ImageButton.GONE);
-				
-	
+
+		final ImageButton deleteButton = (ImageButton) dmrow.findViewById(R.id.showDMDelete);	
+
+		deleteButton.setOnClickListener(new OnButtonClickListener(cursor.getPosition(),cursor )  );	
+
 		// DM background and disaster info
 		LinearLayout rowLayout = (LinearLayout) dmrow.findViewById(R.id.dmUserRowLayout);		
 		if(Long.toString(cursor.getLong(cursor.getColumnIndex(DirectMessages.COL_SENDER))).equals(LoginActivity.getTwitterId(context))) {
-			
+
 			if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0)
 				rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
 			else
 				rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
-			
+
 		} else {
-			
+
 			if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0)
 				rowLayout.setBackgroundResource(R.drawable.disaster_dm_background_receiver);
 			else

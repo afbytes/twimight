@@ -15,9 +15,12 @@ package ch.ethz.twimight.activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +35,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.TweetListView;
@@ -43,7 +48,7 @@ import ch.ethz.twimight.util.Constants;
 /**
  * The main Twimight view showing the Timeline, favorites and mentions
  * @author thossmann
- *
+ * 
  */
 public class ShowTweetListActivity extends TwimightBaseActivity{
 
@@ -59,6 +64,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	private TweetAdapter adapter;
 	private Cursor c;
+	
+	
 	
 	public static boolean running= false;
 	
@@ -82,6 +89,20 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private int currentFilter = SHOW_TIMELINE;
 	private int positionIndex;
 	private int positionTop;
+	
+	//LOGS
+	LocationHelper locHelper ;
+	long timestamp;
+	Intent intent;
+	ConnectivityManager cm;
+	StatisticsDBHelper locDBHelper;	
+	CheckLocation checkLocation;
+	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
+	
+	//EVENTS
+	public static final String APP_STARTED = "app_started";
+	public static final String APP_CLOSED = "app_closed";
+	public static final String LINK_CLICKED = "link_clicked";
 
 	/** 
 	 * Called when the activity is first created. 
@@ -89,11 +110,25 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-				
+		
 		setContentView(R.layout.main);
+		
+		intent = getIntent();
+		
+		//if (intent.hasExtra("login")) {	
+			locDBHelper = new StatisticsDBHelper(this);
+			locDBHelper.open();
+			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+			timestamp = System.currentTimeMillis();
+			locHelper = new LocationHelper(this);
+			handler = new Handler();
+			checkLocation = new CheckLocation();
+			handler.postDelayed(checkLocation, 1*60*1000L);
+		//}
+	    
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
-		running = true;
+		running = true;Log.i(TAG,"count: " + locHelper.count);
 		timelineListView = (TweetListView) findViewById(R.id.tweetList);
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
@@ -152,6 +187,21 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		}
 
 	}
+	
+	private class CheckLocation implements Runnable {
+
+		@Override
+		public void run() {
+			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
+				Log.i(TAG,"writing log");
+				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+			} else {}
+			
+		}
+		
+	}
+	
+
 
 	/**
 	 * On resume
@@ -160,8 +210,17 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onResume(){
 		super.onResume();
 		running = true;
+		
+		Long pauseTimestamp =  getOnPauseTimestamp(this);
+		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {
+			handler = new Handler();			
+			handler.post(new CheckLocation());
+			
+		}
+		
 		// Are we in disaster mode?
 		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
+		
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
 		} else {
@@ -175,14 +234,49 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	}
 	
 	
+    
 
+
+	@Override
+	protected void onPause() {
+		
+		super.onPause();
+		setOnPauseTimestamp(System.currentTimeMillis(), this);
+	}
+
+
+	/**
+	 * 
+	 * @param id
+	 * @param context
+	 */
+	private static void setOnPauseTimestamp(long timestamp, Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putLong(ON_PAUSE_TIMESTAMP, timestamp);
+		prefEditor.commit();
+	}
+	
+	/**
+	 * Gets the Twitter ID from shared preferences
+	 * @param context
+	 * @return
+	 */
+	public static Long getOnPauseTimestamp(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getLong(ON_PAUSE_TIMESTAMP, 0);
+	}
 
 
 	@Override
 	protected void onStop() {
 		running=false;
+		
 		super.onStop();
+	
+		
 	}
+	
 
 	/**
 	 * Called at the end of the Activity lifecycle
@@ -191,6 +285,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onDestroy(){
 		super.onDestroy();
 		running = false;
+		Log.i(TAG,"on destroy");
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
@@ -198,7 +293,22 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		searchButton.setOnClickListener(null);
 
 		timelineListView.setOnItemClickListener(null);
-		timelineListView.setAdapter(null);
+		timelineListView.setAdapter(null);	
+		
+	
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
+			if (locHelper != null && locHelper.count > 0) {			
+				locHelper.unRegisterLocationListener();
+				handler.removeCallbacks(checkLocation);
+				
+				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
+			} else {}
+		}
+		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
+			locHelper.unRegisterLocationListener();
+			
+			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
+		} else {}
 
 		if(c!=null) c.close();
 				

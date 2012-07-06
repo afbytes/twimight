@@ -6,11 +6,12 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="5" android:versionName="0.9.1 preview">
+	package="ch.ethz.twimight" android:versionCode="6" android:versionName="0.9.2 preview">
 	<uses-sdk android:minSdkVersion="10" />
 	<permission android:description="@string/permDescription"
 		android:label="Access to Twimight content providers" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
 		android:protectionLevel="dangerous" />
+	
 
 
 	<application android:icon="@drawable/ic_launcher_twimight"
@@ -52,9 +53,10 @@
 				android:value=".activities.SearchableActivity" />
 		</activity>
 		<activity android:name=".activities.ShowTweetActivity"
-			android:label="Twimight">
+			android:label="Twimight" android:launchMode="singleTask">
 			<meta-data android:name="android.app.default_searchable"
-				android:value=".activities.SearchableActivity" />
+				android:value=".activities.SearchableActivity" />	
+			
 		</activity>
 		<activity android:name=".activities.ShowUserActivity"
 			android:label="User" android:launchMode="singleTop">
@@ -158,6 +160,7 @@
 	<uses-permission android:name="android.permission.READ_LOGS" />
 	<uses-permission android:name="android.permission.RESTART_PACKAGES" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />

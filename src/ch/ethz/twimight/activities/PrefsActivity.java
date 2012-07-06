@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
@@ -93,18 +92,7 @@ public class PrefsActivity extends PreferenceActivity{
 						TDSAlarm.stopTDSCommuniction(getApplicationContext());						
 					}
 					
-				} else if(key.equals("prefLocationUpdates")) { 
-					
-					// toggle Location updates
-					if(preferences.getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON) == true){
-						new LocationAlarm(getApplicationContext(), Constants.LOCATION_UPDATE_TIME);
-						Log.i(TAG, "start location service");
-					} else {
-						LocationAlarm.stopLocationUpdate(getApplicationContext());
-						
-					}
-					
-				} else if (key.equals("prefRunAtBoot")) {
+				}  else if (key.equals("prefRunAtBoot")) {
 					
 					if (preferences.getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true ) {
 						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference("prefUpdateInterval");

@@ -50,9 +50,9 @@ public class PicturesIntentService extends IntentService {
 	
 	
 
-	private void insertPictures() {		
+	private void insertPictures() {	
 		
-		Log.i(TAG,"insert Pictures");
+		
 		// clear the update image flag			
 		ContentValues[] cv = new ContentValues[pictures.size()];		
 		
@@ -107,8 +107,7 @@ public class PicturesIntentService extends IntentService {
 	 */
 	private long updateUsers(ContentValues[] users) {
 		
-		if(users==null) return 0;
-		Log.i(TAG,"updateUsers");
+		if(users==null) return 0;		
 		Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 		int result = getContentResolver().bulkInsert(insertUri, users);
 
