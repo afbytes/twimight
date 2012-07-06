@@ -39,7 +39,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_DMS = "dms";
 	static final String TABLE_HTML = "html";
 
-	private static final int DATABASE_VERSION = 41;
+
+	private static final int DATABASE_VERSION = 42;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -51,17 +52,23 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ MacsDBHelper.KEY_LAST +" integer);";
 	
 	private static final String TABLE_LOCATIONS_CREATE = "create table "+TABLE_LOCATIONS+" ("
-			+ "_id integer primary key autoincrement not null, "
-			+ "lat real not null, "
-			+ "lng real not null, "
+			+ "_id integer primary key autoincrement not null, "			
+			+ "timestamp integer not null, "
+			+ "lat real, "
+			+ "lng real, "
 			+ "accuracy integer, "
 			+ "loc_date integer, "
-			+ "provider string);";
+			+ "provider string, "
+			+ "network string, "
+			+ "event string, "
+			+ "link string);";
+	
 
 	private static final String TABLE_REVOCATION_CREATE = "create table "+TABLE_REVOCATIONS+" ("
 			+ "_id integer primary key autoincrement not null, "
 			+ "serial string not null, "
 			+ "until integer not null);";
+	
 
 	private static final String TABLE_FRIENDS_KEYS_CREATE = "create table "+TABLE_FRIENDS_KEYS+" ("
 			+ "_id integer primary key autoincrement not null, "

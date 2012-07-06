@@ -40,6 +40,7 @@ public class TDSResponseMessage {
 	private JSONObject certificateObject;
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
+	private JSONObject notificationObject;
 	
 	private Context context;
 	
@@ -74,6 +75,10 @@ public class TDSResponseMessage {
 	public void setFollowerObject(JSONObject followerObject) {
 		this.followerObject = followerObject;
 	}
+	
+	public void setNotificationObject(JSONObject notificationObject) {
+		this.notificationObject = notificationObject;
+	}
 
 	public boolean hasAuthenticationObject(){
 		return authenticationObject != null;
@@ -97,6 +102,25 @@ public class TDSResponseMessage {
 
 	public boolean hasFollowerObject(){
 		return followerObject != null;
+	}	
+
+	public boolean hasNotificationObject(){
+		return notificationObject != null;
+	}
+	
+	/**
+	 * Parses the Notification object
+	 */
+	public JSONObject getNotification() throws JSONException{
+
+		if(!hasNotificationObject()) 
+			return null;
+		else return notificationObject;
+		
+		//String twitterId = authenticationObject.getString("twitter_id");
+		
+		
+		
 	}
 
 	/**

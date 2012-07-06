@@ -133,15 +133,13 @@ public class TDSAlarm extends BroadcastReceiver {
 			// can we obtain the Bluetooth MAC?
 			else if(BluetoothAdapter.getDefaultAdapter() !=null && BluetoothAdapter.getDefaultAdapter().isEnabled()){
 				
-				getMacFromAdapter(context);
-				//@author pcarta
+				getMacFromAdapter(context);				
 				Intent synchIntent = new Intent(context, TDSService.class);
 				synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
 				context.startService(synchIntent);
 			}
 			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
-			else {	
-				
+			else {				
 				Log.d(TAG, "No MAC address, enabling Bluetooth");
 				enableBluetooth(context); // this will also schedule a TDSThread, once bluetooth is done.
 				
@@ -190,10 +188,8 @@ public class TDSAlarm extends BroadcastReceiver {
 						} catch (InterruptedException e) {
 							Log.e(TAG, "error while waiting for Bluetooth");
 						}
-
 						// can we now get an address?
 						getMacFromAdapter(context);
-
 						attempts++;
 					}
 					BluetoothAdapter.getDefaultAdapter().disable();

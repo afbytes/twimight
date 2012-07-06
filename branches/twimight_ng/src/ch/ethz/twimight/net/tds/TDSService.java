@@ -1,8 +1,6 @@
 package ch.ethz.twimight.net.tds;
 
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,22 +18,29 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
-import ch.ethz.twimight.data.LocationDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
+import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
@@ -59,6 +64,12 @@ public class TDSService extends Service {
 	public static final int SYNCH_REVOKE = 2;
 	public static final int SYNCH_SIGN = 3;
 	public static final int SYNCH_ALL_FORCE = 4;
+	
+	//logging
+	private static final int SERVER_NOTIFICATION_ID = 2;
+	private static final int NOTIFY_MESSAGE = 1;
+	private static final int NOTIFY_ACTION = 2;
+	
 
 	TDSCommunication tds;
 
@@ -326,7 +337,7 @@ public class TDSService extends Service {
 				// TODO: This is a hack, we should wait for a connectivity change intent, or a timeout, to proceed.
 				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
 
-				// push locations to the server
+				/*// push locations to the server
 				LocationDBHelper locationAdapter = new LocationDBHelper(getBaseContext());
 				locationAdapter.open();
 
@@ -335,7 +346,7 @@ public class TDSService extends Service {
 				if(!locationList.isEmpty()){
 					tds.createLocationObject(locationList);
 				}
-
+				 */
 				// request potential bluetooth peers
 				String mac = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null);
 				if(mac!=null){
@@ -358,6 +369,11 @@ public class TDSService extends Service {
 				// follower key list
 				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
 				tds.createFollowerObject(fm.getLastUpdate());
+				
+				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
+				statisticAdapter.open();
+				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
+				
 
 			} catch(Exception e) {
 				Log.e(TAG, "Exception while assembling request");
@@ -377,7 +393,12 @@ public class TDSService extends Service {
 
 			Log.i(TAG, "success");
 			try {
-
+				
+				//delete old logs
+				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
+				statHelper.open();
+				statHelper.deleteOldData();
+				
 				// authentication
 				String twitterId = tds.parseAuthentication();
 				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
@@ -463,6 +484,19 @@ public class TDSService extends Service {
 					}
 				}
 				Log.i(TAG, "followers parsed");
+				
+				//NOTIFICATION
+				JSONObject notif = tds.getNotification();
+				Log.i(TAG,notif.toString());
+				try {
+					
+					if (notif.getInt("type") == NOTIFY_ACTION)
+						notifyUser(notif.getInt("type"),notif.getString("message"), notif.getString("url"));
+					else
+						notifyUser(notif.getInt("type"),notif.getString("message"), null);
+					
+				} catch(JSONException ex){}
+				
 
 			} catch(Exception e) {
 				Log.e(TAG, "Exception while parsing response",e);
@@ -475,6 +509,43 @@ public class TDSService extends Service {
 		protected void onPostExecute(Boolean result) {
 			schedulePeriodic(result);
 		}
+
+	}
+	
+	/**
+	 * Creates and triggers the status bar notifications
+	 */
+	private void notifyUser(int type, String tickerText, String url){
+		
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		int icon = R.drawable.ic_launcher_twimight;
+		long when = System.currentTimeMillis();
+		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		
+		Context context = getApplicationContext();
+		
+		CharSequence contentTitle = "New TDS Notification";
+		CharSequence contentText = " ";
+		
+		Intent  notificationIntent = null;		
+		PendingIntent contentIntent = null;
+		switch(type){
+		
+		case(NOTIFY_MESSAGE):
+			contentText = tickerText;		
+			break;
+		case(NOTIFY_ACTION):
+			notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));		
+			contentText = tickerText;
+			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+			break;
+		default:
+			break;
+		}		
+		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+		mNotificationManager.notify(SERVER_NOTIFICATION_ID, notification);
 
 	}
 

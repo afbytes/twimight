@@ -57,13 +57,11 @@ public class CommunicationReceiver extends BroadcastReceiver {
 					
 				}
 				context.startService(i);
-
 				
 			} catch (Exception e) {
 				Log.e(TAG, "Exception on connectivity change");
 			}
-		}
-			
+		}			
 		
 	}
 	

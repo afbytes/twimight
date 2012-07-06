@@ -15,8 +15,6 @@
  */
 package ch.ethz.twimight.net.twitter;
 
-import java.util.Date;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;

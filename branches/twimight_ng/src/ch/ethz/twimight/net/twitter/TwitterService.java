@@ -1180,6 +1180,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		StringBuilder replacedText = new StringBuilder();
 		int lastIndex = 0;
 		try {
+			
 			urls = new ArrayList<String>();
 			for (TweetEntity curEntity: allEntities) {
 				// append everything before the start of this entity
@@ -1189,7 +1190,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
 				} else if(curEntity.type == KEntityType.urls){
 					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-					urls.add(curEntity.displayVersion());				
+					urls.add(curEntity.displayVersion());	
+					
 					
 				} else if(curEntity.type == KEntityType.user_mentions){
 					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
@@ -2396,8 +2398,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}			
 			
 			ContentValues cv = new ContentValues();
-			ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
-			Log.i(TAG,"followers size: "+ result.size());
+			ArrayList<ContentValues> users = new ArrayList<ContentValues>();				
 			
 			for (User user: result) {
 
@@ -2415,7 +2416,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 			
 			if (users.size()>0) {
-				Log.i(TAG,"inserting last users");
+				
 				updateUsers( users.toArray(new ContentValues[0]) );
 				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 				new SynchTransactionalUsersTask(true).execute(false);

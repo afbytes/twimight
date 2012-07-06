@@ -31,6 +31,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -48,7 +51,6 @@ import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.location.LocationAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.tds.TDSService;
@@ -103,14 +105,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static PendingIntent restartIntent;
 	private static LoginActivity instance = null; /** The single instance of this class */
 	
+	
+	
 	/** 
 	 * Called when the activity is first created. 
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Thread.currentThread().setName("UI Thread");	
+		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.login);
+		
 		
 		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
 				new Intent(getIntent()), getIntent().getFlags()));
@@ -156,12 +160,16 @@ public class LoginActivity extends Activity implements OnClickListener{
 			// if we don't have request token and secret, we show the login button
 			Log.i(TAG, "we do not have the tokens, enabling login button");			
 			setupLoginButton();
-		}
-		
-		
+		}	
 		
 	}
 	
+	
+	
+	
+	
+
+
 	private void removeLoginInterface(){
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
 		showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
@@ -208,12 +216,13 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}
 	}
 	
+	
 	/**
 	 * onDestroy
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
+		super.onDestroy();	
 		
 		if (loginReceiver != null) unregisterReceiver(loginReceiver);
 		
@@ -279,6 +288,27 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if (result != null) {
 				Toast.makeText(LoginActivity.this, result, Toast.LENGTH_LONG).show();
 				buttonLogin.setEnabled(true);
+			}
+		}
+		
+	}
+	
+	/**
+	 * Upon pressing the login button, we first get Request tokens from Twitter.
+	 * @param context
+	 */
+	
+	private class SaveLogTask extends AsyncTask<Void,Void,String> {
+
+		@Override
+		protected String doInBackground(Void... params) {		
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			if (result != null) {
+				
 			}
 		}
 		
@@ -398,7 +428,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	private void startTimeline(Context context) {		
 		Intent i = new Intent(context, ShowTweetListActivity.class);
-		i.putExtra("login", true);
+		Log.i(TAG,"inside startTimeline");
+		i.putExtra("login", true);		
 		context.startActivity(i);
 		startAlarms(context);
 		finish();
@@ -418,11 +449,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 			new ScanningAlarm(context,0,false);
 		}		
 		
-		// Start the location update alarm		
-		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefLocationUpdates", Constants.LOCATION_DEFAULT_ON)==true){
-			new LocationAlarm(context, Constants.LOCATION_UPDATE_TIME);
-		}
-		
 		//start the twitter update alarm
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
 			new TwitterAlarm(context,true);
@@ -440,9 +466,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		ScanningAlarm.stopScanning(context);
 		
-		context.stopService(new Intent(context, TwitterService.class));
-		
-		LocationAlarm.stopLocationUpdate(context);		
+		context.stopService(new Intent(context, TwitterService.class));	
 		
 		TwitterAlarm.stopTwitterAlarm(context);
 	}

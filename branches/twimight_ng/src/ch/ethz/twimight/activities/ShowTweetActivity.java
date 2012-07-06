@@ -17,18 +17,23 @@ import java.util.Date;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,6 +43,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -80,6 +87,11 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 	protected String TAG = "ShowTweetActivity";
 	
+	//LOGS
+		LocationHelper locHelper ;	
+		Intent intent;
+		ConnectivityManager cm;
+		StatisticsDBHelper locDBHelper;	
 		
 	/** 
 	 * Called when the activity is first created. 
@@ -87,8 +99,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.showtweet);
+		setContentView(R.layout.showtweet);		
 		
+		
+		locDBHelper = new StatisticsDBHelper(this);
+		locDBHelper.open();
+		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
+		locHelper = new LocationHelper(this);
+				
 		screenNameView = (TextView) findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) findViewById(R.id.showTweetRealName);
 		
@@ -384,7 +402,29 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 	}
 
-
+    
+	private class InternalURLSpan extends ClickableSpan {      
+		String url;
+      
+        public InternalURLSpan(String url) {  
+           
+        	this.url=url;
+        }  
+      
+        @Override  
+        public void onClick(View widget) {  
+           
+        	
+        	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
+    			locHelper.unRegisterLocationListener();
+    			
+    			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
+    		} else {}
+        	Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        	startActivity(intent);
+        }  
+    }  
+	
 	/**
 	 *  The tweet info
 	 *  
@@ -395,7 +435,26 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		screenNameView.setText("@"+screenName);
 		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-		tweetTextView.setText(Html.fromHtml(text, null, new TweetTagHandler(this)));
+		
+		SpannableString str = new SpannableString(Html.fromHtml(text, null, new TweetTagHandler(this)));
+				
+		try {
+			String substr = str.toString().substring(str.toString().indexOf("http"));
+			
+			String[] strarr = substr.split(" ");
+			
+			int endIndex = substr.indexOf(" ");
+			if (endIndex == -1 )
+				endIndex = str.toString().length()-1;
+			else 
+				endIndex += str.toString().indexOf("http");
+				
+			
+			str.setSpan(new InternalURLSpan(strarr[0]), str.toString().indexOf("http"),endIndex , Spannable.SPAN_MARK_MARK);
+						
+		} catch (Exception ex) {			
+		}
+		tweetTextView.setText(str);
 		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
 		createdTextView.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))).toString());
@@ -427,6 +486,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 	}
 	
+
+
+	
 	/**
 	 * On Pause
 	 */
@@ -451,7 +513,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+	
 		userInfoView.setOnClickListener(null);
 		retweetButton.setOnClickListener(null);
 		deleteButton.setOnClickListener(null);
@@ -657,5 +719,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 		}
 	}
+	
+	
+	
 	
 }

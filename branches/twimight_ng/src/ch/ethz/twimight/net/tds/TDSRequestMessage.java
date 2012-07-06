@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Location;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -41,6 +42,7 @@ public class TDSRequestMessage {
 	private JSONObject certificateObject;
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
+	private JSONArray statisticArray;
 	
 	/**
 	 * Constructor
@@ -78,6 +80,42 @@ public class TDSRequestMessage {
 	
 
 	/**
+	 * creates JSONObject to push Statistics to the TDS
+	 * @param 
+	 * @return JSON Object
+	 * @throws JSONException 
+	 */
+	public void createStatisticObject(Cursor stats, long follCount) throws JSONException{
+
+				
+		if(stats != null) {			
+			
+			statisticArray = new JSONArray();
+			
+			while(!stats.isAfterLast()) {
+				
+				JSONObject row = new JSONObject();
+				row.put("latitude", Double.toString(stats.getDouble(stats.getColumnIndex("lat"))));
+				row.put("longitude", Double.toString(stats.getDouble(stats.getColumnIndex("lng"))));
+				row.put("accuracy", Integer.toString(stats.getInt(stats.getColumnIndex("accuracy"))) );
+				row.put("provider", stats.getString(stats.getColumnIndex("provider")));
+				row.put("timestamp", Integer.toString(stats.getInt(stats.getColumnIndex("timestamp"))));
+				row.put("network", stats.getString(stats.getColumnIndex("network")));
+				row.put("event", stats.getString(stats.getColumnIndex("event")));
+				row.put("link", stats.getString(stats.getColumnIndex("link")));
+				row.put("followers_count", follCount);
+				
+				statisticArray.put(row);
+				stats.moveToNext();
+			}
+			
+			
+			
+		}
+	}
+	
+
+	/**
 	 * Sends all the locations since the last successful update to the TDS
 	 * @param client
 	 * @return true if operation was successful, false otherwise
@@ -88,6 +126,7 @@ public class TDSRequestMessage {
 		locationObject = new JSONObject();
 		
 		if(!locationList.isEmpty()){
+			
 			JSONArray locationArray = new JSONArray();
 			// iterate through all location
 			Iterator<Location> iterator = locationList.iterator();
@@ -169,6 +208,15 @@ public class TDSRequestMessage {
 	}
 	
 	/**
+	 * is the Bluetooth object set?
+	 * @return
+	 */
+	public boolean hasStatisticObject(){
+		return statisticArray != null;
+	}
+	
+	
+	/**
 	 * Is the version field set?
 	 * @return
 	 */
@@ -229,6 +277,14 @@ public class TDSRequestMessage {
 	 */
 	public JSONObject getBluetoothObject(){
 		return bluetoothObject;
+	}
+	
+	/**
+	 * Getter
+	 * @return
+	 */
+	public JSONArray getStatisticObject(){
+		return statisticArray;
 	}
 	
 	/**
