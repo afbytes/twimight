@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2011 ETH Zurich. All rights reserved. This program and
+        the accompanying materials are made available under the terms of the GNU
+        Public License v2.0 which accompanies this distribution, and is available
+        at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo
+        Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann
+        - Message specification -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:background="@color/tweet_background"
+        android:padding="5dp" android:id="@+id/showFeedback">
+
+        <EditText android:id="@+id/feedbackText" android:layout_width="250dp"
+                android:layout_height="100dp" android:layout_gravity="top"
+                android:gravity="top" android:inputType="textMultiLine" />
+
+        <LinearLayout android:id="@+id/linearLayout1"
+                android:layout_width="250dp" android:layout_height="wrap_content"
+                android:layout_gravity="right">
+
+                <TextView android:id="@+id/textViewBug" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="Bug"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@color/text" />
+
+                
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/linearLayout2"
+                android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+                <Button android:id="@+id/feedback_send" android:layout_width="120dp"
+                        android:paddingLeft="5dp" android:layout_height="wrap_content"
+                        android:text="Send" android:layout_gravity="left" />
+
+                <Button android:id="@+id/tweet_cancel" android:layout_width="120dp"
+                        android:layout_height="wrap_content" android:text="Cancel"
+                        android:layout_gravity="right" />
+
+        </LinearLayout>
+
+</LinearLayout>
