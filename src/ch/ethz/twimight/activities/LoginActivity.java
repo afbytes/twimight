@@ -293,26 +293,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 	}
 	
-	/**
-	 * Upon pressing the login button, we first get Request tokens from Twitter.
-	 * @param context
-	 */
-	
-	private class SaveLogTask extends AsyncTask<Void,Void,String> {
 
-		@Override
-		protected String doInBackground(Void... params) {		
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute(String result) {
-			if (result != null) {
-				
-			}
-		}
-		
-	}
 	
 	private class GetAccessTokensTask extends AsyncTask<Uri,Void,String> {
 		boolean success = false;		
