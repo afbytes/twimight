@@ -42,7 +42,8 @@ public class TDSRequestMessage {
 	private JSONObject certificateObject;
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
-	private JSONArray statisticArray;
+	private JSONObject statisticObject;
+	
 	
 	/**
 	 * Constructor
@@ -89,8 +90,8 @@ public class TDSRequestMessage {
 
 				
 		if(stats != null) {			
-			
-			statisticArray = new JSONArray();
+			statisticObject = new JSONObject();
+			JSONArray statisticArray = new JSONArray();
 			
 			while(!stats.isAfterLast()) {
 				
@@ -109,7 +110,7 @@ public class TDSRequestMessage {
 				stats.moveToNext();
 			}
 			
-			
+			statisticObject.put("content", statisticArray);
 			
 		}
 	}
@@ -212,7 +213,7 @@ public class TDSRequestMessage {
 	 * @return
 	 */
 	public boolean hasStatisticObject(){
-		return statisticArray != null;
+		return statisticObject != null;
 	}
 	
 	
@@ -283,8 +284,8 @@ public class TDSRequestMessage {
 	 * Getter
 	 * @return
 	 */
-	public JSONArray getStatisticObject(){
-		return statisticArray;
+	public JSONObject getStatisticObject(){
+		return statisticObject;
 	}
 	
 	/**
