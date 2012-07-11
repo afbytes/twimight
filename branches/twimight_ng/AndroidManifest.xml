@@ -81,6 +81,9 @@
 		<activity android:name=".activities.NewTweetActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
+		<activity android:name=".activities.FeedbackActivity"
+			android:label="Twimight" android:theme="@style/Theme.Transparent"
+			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />

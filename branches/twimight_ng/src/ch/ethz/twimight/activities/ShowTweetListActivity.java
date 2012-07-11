@@ -333,9 +333,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
 		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
 		//menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
-		menu.add(5, OPTIONS_MENU_LOGOUT, 6, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
+		menu.add(5, OPTIONS_MENU_LOGOUT, 8, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 7, "About").setIcon(R.drawable.ic_menu_info_details);
-		menu.add(7, OPTIONS_MENU_FEEDBACK, 8, "Feedback").setIcon(R.drawable.ic_menu_edit);
+		menu.add(7, OPTIONS_MENU_FEEDBACK, 6, "Feedback").setIcon(R.drawable.ic_menu_edit);
 		return true;
 	}
 
@@ -413,7 +413,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			break;
 		case OPTIONS_MENU_FEEDBACK:
 			// Launch FeedbacktActivity
-			i = new Intent(this, AboutActivity.class);
+			i = new Intent(this, FeedbackActivity.class);
 			startActivity(i);    
 			break;
 		default:

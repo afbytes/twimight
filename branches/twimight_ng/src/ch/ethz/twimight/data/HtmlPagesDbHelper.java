@@ -41,7 +41,7 @@ private static final String TAG = "HtmlPagesDbHelper";
 		ContentValues cv = createContentValues(url,page);
 		
 		try {			
-			database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
+			//database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
 			
 		} catch (SQLException ex) {
 			Log.e(TAG,"error inserting htlm page",ex);
@@ -50,13 +50,14 @@ private static final String TAG = "HtmlPagesDbHelper";
 	}
 	
 	public String getPage(String url) {
-		
+	/*	
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + "= '" + url +"' " , null, null, null, null);
 		if (c.getCount()==1) {
 			c.moveToFirst();
 			String page = c.getString(c.getColumnIndex(HtmlPage.COL_HTML));
 			return page;
 		}
+		*/
 		return null;
 	}
 	
