@@ -11,7 +11,7 @@
         android:layout_height="wrap_content" android:background="@color/tweet_background"
         android:padding="5dp" android:id="@+id/showFeedback">
 
-        <EditText android:id="@+id/feedbackText" android:layout_width="250dp"
+        <EditText android:id="@+id/feedbackEditText" android:layout_width="250dp"
                 android:layout_height="100dp" android:layout_gravity="top"
                 android:gravity="top" android:inputType="textMultiLine" />
 
@@ -19,22 +19,24 @@
                 android:layout_width="250dp" android:layout_height="wrap_content"
                 android:layout_gravity="right" android:layout_marginTop="10dp">
 
-               
+            <RadioGroup
+                android:id="@+id/radioGroup1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
 
                 <RadioButton
-                    android:id="@+id/radioButton1"
+                    android:id="@+id/radioBug"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bug" android:layout_marginRight="25dp"/>
-                
-               
+                    android:checked="true"
+                    android:text="Bug" android:textColor="@color/black"/>
 
                 <RadioButton
-                    android:id="@+id/radioButton2"
+                    android:id="@+id/radioFeature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Feature Request"/>
-                
+                    android:text="Feature request" android:textColor="@color/black"/>
+            </RadioGroup>
 
         </LinearLayout>
 
