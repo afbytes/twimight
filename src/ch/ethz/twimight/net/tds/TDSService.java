@@ -64,6 +64,11 @@ public class TDSService extends Service {
 	public static final int SYNCH_REVOKE = 2;
 	public static final int SYNCH_SIGN = 3;
 	public static final int SYNCH_ALL_FORCE = 4;
+	public static final int SYNCH_BUG = 5;
+	
+	//bug report
+	public static final String DESCRIPTION_FIELD = "description";
+	public static final String TYPE_FIELD = "classification";
 	
 	//logging
 	private static final int SERVER_NOTIFICATION_ID = 2;
@@ -72,6 +77,9 @@ public class TDSService extends Service {
 	
 
 	TDSCommunication tds;
+	// TDS request URL
+		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";
+		private static final String BUGS_URL = Constants.TDS_BASE_URL + "/bugs/push.json";
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -133,6 +141,9 @@ public class TDSService extends Service {
 			case SYNCH_SIGN:				
 				synchSign();
 				break;
+			case SYNCH_BUG:				
+				synchBug(intent);
+				break;
 				
 			default:
 				throw new IllegalArgumentException("Exception: Unknown synch request");
@@ -141,6 +152,11 @@ public class TDSService extends Service {
 			return START_NOT_STICKY;
 		}
 
+		
+	}
+
+	private void synchBug(Intent intent) {
+		new SynchBugTask(intent).execute();
 		
 	}
 
@@ -319,6 +335,53 @@ public class TDSService extends Service {
 		return new DefaultHttpClient(cm, params);
 
 	}
+	
+	private class SynchBugTask extends AsyncTask<Void, Void, Boolean> {
+		
+		String descr;
+		int type;
+		
+		public SynchBugTask(Intent intent) {
+			descr = intent.getStringExtra(DESCRIPTION_FIELD);
+			type = intent.getIntExtra(TYPE_FIELD, 1);
+		}
+		
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				
+				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
+				
+				if (descr != null) {
+					
+					tds.createBugObject(descr, type);	
+					boolean success = false;
+					// Send the request
+					try {
+						success = tds.sendRequest(getClient(), BUGS_URL);
+					} catch (GeneralSecurityException e) {
+						Log.e(TAG, "GeneralSecurityException while sending the Bug to the TDS");
+					}
+
+					if(!success) 				
+						return false;	
+					//NOTIFICATION
+					String bugResponse;
+					try {
+						bugResponse = tds.getBugResponseString();
+						Log.i(TAG,bugResponse);
+					} catch (Exception e) {}
+				}					
+			} catch (Exception e) { return false;}
+			
+			return true;
+			
+			
+		}
+		
+		
+	}
 
 	/**
 	 * This Task performs the periodic communication with the TDS
@@ -383,7 +446,7 @@ public class TDSService extends Service {
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient());
+				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
 				Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
@@ -572,7 +635,7 @@ public class TDSService extends Service {
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient());
+				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
 				Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
@@ -657,7 +720,7 @@ public class TDSService extends Service {
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient());
+				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
 				Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}

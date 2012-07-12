@@ -43,6 +43,7 @@ public class TDSRequestMessage {
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
 	private JSONObject statisticObject;
+	private JSONObject bugObject;
 	
 	
 	/**
@@ -77,6 +78,21 @@ public class TDSRequestMessage {
 		// the JSON Object will contain our name values
 		bluetoothObject = new JSONObject();
 		bluetoothObject.put("mac", mac);
+	}
+	
+	/**
+	 * creates JSONObject to push the BUG to the TDS
+	 * @param description
+	 * @param type
+	 * @return JSON Object
+	 * @throws JSONException 
+	 */
+	public void createBugObject(String descr, int type) throws JSONException{
+
+		// the JSON Object will contain our name values
+		bugObject = new JSONObject();
+		bugObject.put(TDSService.DESCRIPTION_FIELD, descr);
+		bugObject.put(TDSService.TYPE_FIELD, type);
 	}
 	
 
@@ -209,6 +225,14 @@ public class TDSRequestMessage {
 	}
 	
 	/**
+	 * is the Bug object set?
+	 * @return
+	 */
+	public boolean hasBugObject(){
+		return bugObject != null;
+	}
+	
+	/**
 	 * is the Bluetooth object set?
 	 * @return
 	 */
@@ -278,6 +302,15 @@ public class TDSRequestMessage {
 	 */
 	public JSONObject getBluetoothObject(){
 		return bluetoothObject;
+	}
+	
+	
+	/**
+	 * Getter
+	 * @return
+	 */
+	public JSONObject getBugObject(){
+		return bugObject;
 	}
 	
 	/**
