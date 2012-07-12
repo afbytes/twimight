@@ -41,6 +41,7 @@ public class TDSResponseMessage {
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
 	private JSONObject notificationObject;
+	private String response =  null;
 	
 	private Context context;
 	
@@ -62,6 +63,10 @@ public class TDSResponseMessage {
 	
 	public void setBluetoothObject(JSONObject bluetoothObject){
 		this.bluetoothObject = bluetoothObject;
+	}
+	
+	public void setBugResponseString(String response){
+		this.response = response;
 	}
 	
 	public void setCertificateObject(JSONObject certificateObject){
@@ -86,6 +91,10 @@ public class TDSResponseMessage {
 
 	public boolean hasBluetoothObject(){
 		return bluetoothObject != null;
+	}
+	
+	public boolean hasBugResponseString(){
+		return response != null;
 	}
 	
 	public boolean hasLocationObject(){
@@ -120,6 +129,14 @@ public class TDSResponseMessage {
 		//String twitterId = authenticationObject.getString("twitter_id");
 		
 		
+		
+	}
+	
+	/**
+	 * Parses bug response
+	 */
+	public String getBugResponseString() throws JSONException{		
+		 return response;		
 		
 	}
 

@@ -56,9 +56,9 @@ public class TDSCommunication {
 	private static final String FOLLOWER = "follower";	
 	private static final String STATISTIC = "statistic";	
 	private static final String NOTIFICATION = "notification";
+	private static final String BUGS = "bugs";
 	
-	// TDS request URL
-	private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";
+	
 	
 	
 	private static final String TAG = "TDSCommunication";
@@ -83,6 +83,16 @@ public class TDSCommunication {
 	 */
 	public int createBluetoothObject(String mac) throws JSONException{
 		tdsRequest.createBluetoothObject(mac);
+		return 0;
+	}
+	
+	/**
+	 * Creates a new Bug object in the request
+	 * @return
+	 * @throws JSONException
+	 */
+	public int createBugObject(String description, int type) throws JSONException{
+		tdsRequest.createBugObject(description, type);
 		return 0;
 	}
 	
@@ -140,7 +150,7 @@ public class TDSCommunication {
 	 * Sends the request to the Twimight disaster server. Blocking!
 	 * @return
 	 */
-	public boolean sendRequest(HttpClient client){
+	public boolean sendRequest(HttpClient client, String url){
 		
 		// check the parameters
 		if(client==null) return false;
@@ -159,7 +169,7 @@ public class TDSCommunication {
 		
 
 		// create the HTTP request
-		HttpPost post = new HttpPost(REQUEST_URL);
+		HttpPost post = new HttpPost(url);
 
 		// now we serialize the JSON Object into the post request
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -213,9 +223,9 @@ public class TDSCommunication {
 				Log.i(TAG,"JSON Error while parsing result!" + e.toString());
 				return false;
 			}					
-		} else {
+		} else 
 			return false;
-		}
+		
 		return true;
 		
 	}
@@ -241,16 +251,21 @@ public class TDSCommunication {
 			return null;
 		}
 		
+		// bug
+		if(tdsRequest.hasBugObject()){
+			requestObject.put(BUGS, tdsRequest.getBugObject());
+		}
+
 		// bluetooth
 		if(tdsRequest.hasBluetoothObject()){
 			requestObject.put(BLUETOOTH, tdsRequest.getBluetoothObject());
 		}
-		
+
 		// location
 		if(tdsRequest.hasLocationObject()){
 			requestObject.put(LOCATION, tdsRequest.getLocationObject());
 		}
-		
+
 		// certificate
 		if(tdsRequest.hasCertificatObject()){
 			requestObject.put(CERTIFICATE, tdsRequest.getCertificateObject());
@@ -266,7 +281,7 @@ public class TDSCommunication {
 			requestObject.put(FOLLOWER, tdsRequest.getFollowerObject());
 		}
 		
-		// follower
+		// statistics
 		if(tdsRequest.hasStatisticObject()){
 			requestObject.put(STATISTIC, tdsRequest.getStatisticObject());
 		}
@@ -281,7 +296,16 @@ public class TDSCommunication {
 		JSONObject messageObject = responseObject.getJSONObject(MESSAGE);
 		
 		if(messageObject == null) return -1;
-			
+		
+		try{
+			// bug
+			String status = messageObject.getString("status");
+			tdsResponse.setBugResponseString(status);
+			return 0;
+		} catch(JSONException e) {
+			Log.i(TAG, "error mapping bug response");
+		}
+		
 		// version
 		int responseVersion = messageObject.getInt("version"); 
 		if(responseVersion != tdsResponse.getVersion()){
@@ -359,6 +383,10 @@ public class TDSCommunication {
 	
 	public JSONObject getNotification() throws Exception{
 		return tdsResponse.getNotification();
+	}
+	
+	public String getBugResponseString() throws Exception{
+		return tdsResponse.getBugResponseString();
 	}
 	
 	public int parseLocation() throws Exception{
