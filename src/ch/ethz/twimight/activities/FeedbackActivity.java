@@ -5,7 +5,9 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -16,6 +18,8 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.tds.TDSService;
 
 public class FeedbackActivity extends Activity {
+	
+	private static final String TAG = "FeedbackActivity";
 	
 	private EditText description;		
 	private Button cancelButton;
@@ -36,6 +40,7 @@ public class FeedbackActivity extends Activity {
 	public static final int SEND_FAILURE = 2;
 	
 	ProgressDialog progressDialog;
+	SendingReceiver sendReceiver;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,9 @@ public class FeedbackActivity extends Activity {
 		cancelButton = (Button) findViewById(R.id.feedback_cancel);
 		radioBug = (RadioButton) findViewById(R.id.radioBug);
 		radioFeature = (RadioButton) findViewById(R.id.radioFeature);
+		IntentFilter intentFilter = new IntentFilter(SEND_RESULT_ACTION	);
+		sendReceiver = new SendingReceiver();
+		registerReceiver(sendReceiver,intentFilter );
 		
 		sendButton.setOnClickListener(new OnClickListener() {
 			
@@ -64,8 +72,8 @@ public class FeedbackActivity extends Activity {
 					synchIntent.putExtra(TDSService.DESCRIPTION_FIELD, description.getText().toString());
 					synchIntent.putExtra(TDSService.TYPE_FIELD, type);
 					startService(synchIntent);
-					//progressDialog=ProgressDialog.show(FeedbackActivity.this, "In progress", "Sending feedback to the Twimight Server");
-					finish();
+					progressDialog=ProgressDialog.show(FeedbackActivity.this, "In progress", "Sending feedback to the Twimight Server");
+					
 				} else
 					Toast.makeText(FeedbackActivity.this, "Cannot send an empty feedback report", Toast.LENGTH_SHORT).show();
 				
@@ -83,19 +91,33 @@ public class FeedbackActivity extends Activity {
 		});
 	}
 	
+	
+	
+	@Override
+	protected void onDestroy() {
+		
+		super.onDestroy();
+		unregisterReceiver(sendReceiver);
+	}
+
+
+
 	private class SendingReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(SEND_RESULT_ACTION)) {
-	        	
+			
+	        	Log.i(TAG,"onReceive");
 	        	if(intent.hasExtra(SEND_RESULT)){
 	        		if (progressDialog != null)
 	        			progressDialog.dismiss(); 
-	        		    
+	        		    if (intent.getIntExtra(SEND_RESULT, SEND_FAILURE) == SEND_SUCCESS)
+	        		    	Toast.makeText(FeedbackActivity.this, "Feedback sent correctly", Toast.LENGTH_SHORT).show();
+	        		    else
+	        		    	Toast.makeText(FeedbackActivity.this, "Error sending feedback, please try again later", Toast.LENGTH_SHORT).show();
 	        			
 	        		}	        	
-	        }
+	        
 			
 		}
 		
