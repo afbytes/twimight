@@ -76,7 +76,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TAG = "LoginActivity"; /** For logging */
 	
 	// shared preferences
-	private static final String TWITTER_ID = "twitter_id"; /** Name of Twitter ID in shared preferences */
+	public static final String TWITTER_ID = "twitter_id"; /** Name of Twitter ID in shared preferences */
 	private static final String TWITTER_SCREENNAME = "twitter_screenname"; /** Name of Twitter screenname in shared preferences */
 	
 	private static final String TWITTER_ACCESS_TOKEN = "twitter_access_token"; /** Name of access token in preference */

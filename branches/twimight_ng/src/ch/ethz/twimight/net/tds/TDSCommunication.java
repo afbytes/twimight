@@ -206,21 +206,21 @@ public class TDSCommunication {
 			try {
 				result = EntityUtils.toString(resEntity);
 			} catch (ParseException e) {
-				Log.i(TAG,"Parse Error while parsing response!" + e.toString());
+				Log.e(TAG,"Parse Error while parsing response!" + e.toString());
 				return false;
 			} catch (IOException e) {
-				Log.i(TAG,"IO Error while parsing response!" + e.toString());
+				Log.e(TAG,"IO Error while parsing response!" + e.toString());
 				return false;
 			}
 			Log.i(TAG,"result = " + result);
 
 			try {
 				if(disassembleResponse(result) != 0){
-					Log.i(TAG, "Error while parsing result");
+					Log.e(TAG, "Error while parsing result");
 				}
 				
 			} catch (Exception e) {
-				Log.i(TAG,"JSON Error while parsing result!" + e.toString());
+				Log.e(TAG,"JSON Error while parsing result!" + e.toString());
 				return false;
 			}					
 		} else 
@@ -301,7 +301,7 @@ public class TDSCommunication {
 			// bug
 			String status = messageObject.getString("status");
 			tdsResponse.setBugResponseString(status);
-			return 0;
+			//return 0;
 		} catch(JSONException e) {
 			Log.i(TAG, "error mapping bug response");
 		}
@@ -314,13 +314,16 @@ public class TDSCommunication {
 		}
 		
 		// authentication
-		JSONObject authenticationObject = messageObject.getJSONObject(AUTHENTICATION);
-		if(authenticationObject != null){
-			tdsResponse.setAuthenticationObject(authenticationObject);
-		} else {
-			Log.e(TAG, "Authentication failed");
-			return -1;
-		}
+		try {
+			JSONObject authenticationObject = messageObject.getJSONObject(AUTHENTICATION);
+			if(authenticationObject != null){
+				tdsResponse.setAuthenticationObject(authenticationObject);
+			} else {
+				Log.e(TAG, "Authentication failed");
+				return -1;
+			}
+			
+		} catch (JSONException ex) {}
 		
 		try{
 			// bluetooth

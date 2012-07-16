@@ -35,6 +35,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.FeedbackActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
@@ -363,15 +364,23 @@ public class TDSService extends Service {
 					} catch (GeneralSecurityException e) {
 						Log.e(TAG, "GeneralSecurityException while sending the Bug to the TDS");
 					}
-
-					if(!success) 				
+					
+					Intent bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
+					if(!success) {	
+						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
+						sendBroadcast(bugResponseIntent);
 						return false;	
+					}
 					//NOTIFICATION
-					String bugResponse;
+					String bugResponse;					
 					try {
 						bugResponse = tds.getBugResponseString();
-						Log.i(TAG,bugResponse);
-					} catch (Exception e) {}
+						Log.i(TAG,bugResponse);						
+						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_SUCCESS);
+					} catch (Exception e) {
+						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
+					}
+					sendBroadcast(bugResponseIntent);
 				}					
 			} catch (Exception e) { return false;}
 			
@@ -548,17 +557,16 @@ public class TDSService extends Service {
 				}
 				Log.i(TAG, "followers parsed");
 				
-				//NOTIFICATION
-				JSONObject notif = tds.getNotification();
-				Log.i(TAG,notif.toString());
+				//NOTIFICATION				
 				try {
-					
+					JSONObject notif = tds.getNotification();
+					Log.i(TAG,notif.toString());
 					if (notif.getInt("type") == NOTIFY_ACTION)
 						notifyUser(notif.getInt("type"),notif.getString("message"), notif.getString("url"));
 					else
 						notifyUser(notif.getInt("type"),notif.getString("message"), null);
 					
-				} catch(JSONException ex){}
+				} catch(Exception ex){}
 				
 
 			} catch(Exception e) {

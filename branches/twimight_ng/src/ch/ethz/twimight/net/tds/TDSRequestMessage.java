@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 
@@ -35,6 +36,7 @@ import ch.ethz.twimight.util.Constants;
 public class TDSRequestMessage {
 
 	private int version;
+	Context context;
 	
 	private JSONObject authenticationObject;
 	private JSONObject locationObject;
@@ -51,6 +53,7 @@ public class TDSRequestMessage {
 	 */
 	public TDSRequestMessage(Context context){
 		version = Constants.TDS_MESSAGE_VERSION;
+		this.context=context;
 	}
 	
 	/**
@@ -92,7 +95,8 @@ public class TDSRequestMessage {
 		// the JSON Object will contain our name values
 		bugObject = new JSONObject();
 		bugObject.put(TDSService.DESCRIPTION_FIELD, descr);
-		bugObject.put(TDSService.TYPE_FIELD, type);
+		bugObject.put(TDSService.TYPE_FIELD, type);		
+		bugObject.put(LoginActivity.TWITTER_ID,LoginActivity.getTwitterId(context) );
 	}
 	
 
