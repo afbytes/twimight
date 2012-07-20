@@ -25,7 +25,7 @@ public class FeedbackActivity extends Activity {
 	private Button cancelButton;
 	private Button sendButton;
 	private RadioButton radioBug;
-	private RadioButton radioFeature;
+	//private RadioButton radioFeature;
 	
 	public static final String COL_TWITTER_ID = "twitter_id";
 	public static final String COL_TEXT = "description";
@@ -52,7 +52,7 @@ public class FeedbackActivity extends Activity {
 		sendButton = (Button) findViewById(R.id.feedback_send);
 		cancelButton = (Button) findViewById(R.id.feedback_cancel);
 		radioBug = (RadioButton) findViewById(R.id.radioBug);
-		radioFeature = (RadioButton) findViewById(R.id.radioFeature);
+		//radioFeature = (RadioButton) findViewById(R.id.radioFeature);
 		IntentFilter intentFilter = new IntentFilter(SEND_RESULT_ACTION	);
 		sendReceiver = new SendingReceiver();
 		registerReceiver(sendReceiver,intentFilter );
@@ -73,6 +73,7 @@ public class FeedbackActivity extends Activity {
 					synchIntent.putExtra(TDSService.TYPE_FIELD, type);
 					startService(synchIntent);
 					progressDialog=ProgressDialog.show(FeedbackActivity.this, "In progress", "Sending feedback to the Twimight Server");
+					progressDialog.setCancelable(true);
 					
 				} else
 					Toast.makeText(FeedbackActivity.this, "Cannot send an empty feedback report", Toast.LENGTH_SHORT).show();
@@ -111,8 +112,10 @@ public class FeedbackActivity extends Activity {
 	        	if(intent.hasExtra(SEND_RESULT)){
 	        		if (progressDialog != null)
 	        			progressDialog.dismiss(); 
-	        		    if (intent.getIntExtra(SEND_RESULT, SEND_FAILURE) == SEND_SUCCESS)
+	        		    if (intent.getIntExtra(SEND_RESULT, SEND_FAILURE) == SEND_SUCCESS) {
 	        		    	Toast.makeText(FeedbackActivity.this, "Feedback sent correctly", Toast.LENGTH_SHORT).show();
+	        		        finish();
+	        		    }
 	        		    else
 	        		    	Toast.makeText(FeedbackActivity.this, "Error sending feedback, please try again later", Toast.LENGTH_SHORT).show();
 	        			

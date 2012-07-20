@@ -76,6 +76,7 @@ public class TDSService extends Service {
 	private static final int NOTIFY_MESSAGE = 1;
 	private static final int NOTIFY_ACTION = 2;
 	
+	Intent bugResponseIntent;	
 
 	TDSCommunication tds;
 	// TDS request URL
@@ -102,6 +103,12 @@ public class TDSService extends Service {
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.d(TAG, "Error synching: no connectivity");
 			schedulePeriodic(false);
+			
+			if (intent.getIntExtra("synch_request", SYNCH_ALL) == SYNCH_BUG) {
+				bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
+				bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
+				sendBroadcast(bugResponseIntent);
+			}
 			return START_NOT_STICKY;
 			
 		} else {
@@ -365,7 +372,7 @@ public class TDSService extends Service {
 						Log.e(TAG, "GeneralSecurityException while sending the Bug to the TDS");
 					}
 					
-					Intent bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
+					bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
 					if(!success) {	
 						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
 						sendBroadcast(bugResponseIntent);
