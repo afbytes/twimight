@@ -301,9 +301,9 @@ public class TDSCommunication {
 			// bug
 			String status = messageObject.getString("status");
 			tdsResponse.setBugResponseString(status);
-			//return 0;
+			return 0;
 		} catch(JSONException e) {
-			Log.i(TAG, "error mapping bug response");
+			Log.i(TAG, "No bug response");
 		}
 		
 		// version
@@ -370,7 +370,7 @@ public class TDSCommunication {
 			JSONObject notificationObject = messageObject.getJSONObject(NOTIFICATION);
 			tdsResponse.setNotificationObject(notificationObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No follower object");
+			Log.i(TAG, "No notification object");
 		}
 
 		return 0;
