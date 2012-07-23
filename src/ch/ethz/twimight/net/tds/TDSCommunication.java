@@ -293,18 +293,9 @@ public class TDSCommunication {
 	private int disassembleResponse(String responseString) throws Exception{
 		
 		JSONObject responseObject = new JSONObject(responseString);
-		JSONObject messageObject = responseObject.getJSONObject(MESSAGE);
+		JSONObject messageObject = responseObject.getJSONObject(MESSAGE);		
 		
-		if(messageObject == null) return -1;
-		
-		try{
-			// bug
-			String status = messageObject.getString("status");
-			tdsResponse.setBugResponseString(status);
-			return 0;
-		} catch(JSONException e) {
-			Log.i(TAG, "No bug response");
-		}
+		if(messageObject == null) return -1;	
 		
 		// version
 		int responseVersion = messageObject.getInt("version"); 
@@ -315,8 +306,8 @@ public class TDSCommunication {
 		
 		// authentication
 		try {
-			JSONObject authenticationObject = messageObject.getJSONObject(AUTHENTICATION);
-			if(authenticationObject != null){
+			JSONObject authenticationObject = messageObject.getJSONObject(AUTHENTICATION);			
+			if(authenticationObject != null){				
 				tdsResponse.setAuthenticationObject(authenticationObject);
 			} else {
 				Log.e(TAG, "Authentication failed");
@@ -324,6 +315,14 @@ public class TDSCommunication {
 			}
 			
 		} catch (JSONException ex) {}
+		
+		try{
+			// bug
+			String status = messageObject.getString("status");
+			tdsResponse.setBugResponseString(status);			
+		} catch(JSONException e) {
+			Log.i(TAG, "No bug response");
+		}
 		
 		try{
 			// bluetooth

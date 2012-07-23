@@ -479,8 +479,8 @@ public class TDSService extends Service {
 				statHelper.deleteOldData();
 				
 				// authentication
-				String twitterId = tds.parseAuthentication();
-				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
+				String twitterId = tds.parseAuthentication();				
+				if(!LoginActivity.getTwitterId(getBaseContext()).equals( twitterId  )){
 					Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}

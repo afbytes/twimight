@@ -196,6 +196,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				locHelper.unRegisterLocationListener();
 			} else {}
 			
 		}
