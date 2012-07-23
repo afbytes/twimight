@@ -53,7 +53,7 @@ public class TDSResponseMessage {
 		this.context = context;
 	}
 
-	public void setAuthenticationObject(JSONObject authenticationObject) {
+	public void setAuthenticationObject(JSONObject authenticationObject) {		
 		this.authenticationObject = authenticationObject;
 	}
 	
@@ -148,7 +148,7 @@ public class TDSResponseMessage {
 		if(!hasAuthenticationObject()) return null;
 		
 		String twitterId = authenticationObject.getString("twitter_id");
-		
+		Log.i(TAG,"showing twitter id inside response");
 		return twitterId;
 		
 	}

@@ -52,16 +52,20 @@ public class FeedbackActivity extends Activity {
 		sendButton = (Button) findViewById(R.id.feedback_send);
 		cancelButton = (Button) findViewById(R.id.feedback_cancel);
 		radioBug = (RadioButton) findViewById(R.id.radioBug);
-		//radioFeature = (RadioButton) findViewById(R.id.radioFeature);
-		IntentFilter intentFilter = new IntentFilter(SEND_RESULT_ACTION	);
-		sendReceiver = new SendingReceiver();
-		registerReceiver(sendReceiver,intentFilter );
+		//radioFeature = (RadioButton) findViewById(R.id.radioFeature);	
+		
+		
 		
 		sendButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				if ((description.getText().length()) > 0) {
+					
+					sendReceiver = new SendingReceiver();
+					IntentFilter intentFilter = new IntentFilter(SEND_RESULT_ACTION	);
+					registerReceiver(sendReceiver,intentFilter );
+					
 					int type;
 					if(radioBug.isChecked())
 						type = TYPE_BUG;
@@ -98,7 +102,8 @@ public class FeedbackActivity extends Activity {
 	protected void onDestroy() {
 		
 		super.onDestroy();
-		unregisterReceiver(sendReceiver);
+		if (sendReceiver != null)
+			unregisterReceiver(sendReceiver);
 	}
 
 

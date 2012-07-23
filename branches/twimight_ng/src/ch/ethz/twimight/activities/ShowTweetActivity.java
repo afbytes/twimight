@@ -416,8 +416,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
            
         	
         	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
-    			locHelper.unRegisterLocationListener();
-    			
+    			locHelper.unRegisterLocationListener();    			
     			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
     		} else {}
         	Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -513,7 +512,10 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-	
+		
+		if (locHelper != null) 			
+			locHelper.unRegisterLocationListener();    			
+		
 		userInfoView.setOnClickListener(null);
 		retweetButton.setOnClickListener(null);
 		deleteButton.setOnClickListener(null);
