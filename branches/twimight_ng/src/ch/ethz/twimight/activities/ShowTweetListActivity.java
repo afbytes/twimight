@@ -414,8 +414,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			break;
 		case OPTIONS_MENU_FEEDBACK:
 			// Launch FeedbacktActivity
-			i = new Intent(this, FeedbackActivity.class);
-			startActivity(i);    
+			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
+			startActivity(i);
+			//i = new Intent(this, FeedbackActivity.class);
+			//startActivity(i);    
 			break;
 		default:
 			return false;
