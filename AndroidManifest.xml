@@ -44,9 +44,16 @@
 
 		<activity android:name=".activities.ShowTweetListActivity"
 			android:label="@string/app_name" android:launchMode="singleTop">
+				<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:host="feedback" android:scheme="my-app" />
+			</intent-filter>
 			<meta-data android:name="android.app.default_searchable"
 				android:value=".activities.SearchableActivity" />
 		</activity>
+		
 		<activity android:name=".activities.ShowUserTweetListActivity"
 			android:label="User Tweets" android:launchMode="singleTop">
 			<meta-data android:name="android.app.default_searchable"
