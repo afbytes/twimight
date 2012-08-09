@@ -43,6 +43,7 @@ import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -116,7 +117,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		intent = getIntent();
 		
-		//if (intent.hasExtra("login")) {	
+		if (intent.hasExtra("login")) {	
+			AppRater.app_launched(this);
+		}
 			locDBHelper = new StatisticsDBHelper(this);
 			locDBHelper.open();
 			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -125,7 +128,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			handler = new Handler();
 			checkLocation = new CheckLocation();
 			handler.postDelayed(checkLocation, 1*60*1000L);
-		//}
+		
 	    
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		

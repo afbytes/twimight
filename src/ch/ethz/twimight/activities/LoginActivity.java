@@ -58,6 +58,7 @@ import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
+import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
@@ -409,9 +410,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 	private void startTimeline(Context context) {		
 		Intent i = new Intent(context, ShowTweetListActivity.class);
-		Log.i(TAG,"inside startTimeline");
+		
 		i.putExtra("login", true);		
-		context.startActivity(i);
+		context.startActivity(i);		
 		startAlarms(context);
 		finish();
 	}
