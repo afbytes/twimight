@@ -113,22 +113,17 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.main);
+		setContentView(R.layout.main);	
 		
-		intent = getIntent();
-		
-		if (intent.hasExtra("login")) {	
-			AppRater.app_launched(this);
-		}
-			locDBHelper = new StatisticsDBHelper(this);
-			locDBHelper.open();
-			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-			timestamp = System.currentTimeMillis();
-			locHelper = new LocationHelper(this);
-			handler = new Handler();
-			checkLocation = new CheckLocation();
-			handler.postDelayed(checkLocation, 1*60*1000L);
-		
+		locDBHelper = new StatisticsDBHelper(this);
+		locDBHelper.open();
+		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+		timestamp = System.currentTimeMillis();
+		locHelper = new LocationHelper(this);
+		handler = new Handler();
+		checkLocation = new CheckLocation();
+		handler.postDelayed(checkLocation, 1*60*1000L);
+
 	    
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
@@ -174,21 +169,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 				onSearchRequested();
 			}
 		});
-
-		// if we just got logged in, we load the timeline
-		Intent i = getIntent();
-		if(i.hasExtra("filter_request")) {
-
-			setFilter(i.getIntExtra("filter_request", SHOW_TIMELINE));				
-			i.removeExtra("filter_request");
-
-		} else if(i.hasExtra("login")){
-			i.removeExtra("login");
-			setFilter(SHOW_TIMELINE);
-
-		} else {
-			setFilter(currentFilter);	
-		}
+		
+		
 
 	}
 	
@@ -207,6 +189,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	}
 	
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		
+		setIntent(intent);
+		
+	}
 
 	/**
 	 * On resume
@@ -215,6 +203,25 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onResume(){
 		super.onResume();
 		running = true;
+		
+		intent = getIntent();
+		
+		// if we just got logged in, we load the timeline
+		if(intent.hasExtra("filter_request")) {
+			
+			setFilter(intent.getIntExtra("filter_request", SHOW_TIMELINE));				
+			intent.removeExtra("filter_request");
+
+		} else if(intent.hasExtra("login")){
+			
+			intent.removeExtra("login");
+			AppRater.app_launched(this);
+			setFilter(SHOW_TIMELINE);
+		
+
+		} else {
+			setFilter(currentFilter);	
+		}
 		
 		Long pauseTimestamp =  getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {
@@ -491,6 +498,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		switch(filter) {
 		case SHOW_TIMELINE: 
+			
 			b = timelineButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
@@ -501,6 +509,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 			break;
 		case SHOW_FAVORITES: 
+			
 			b = favoritesButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_FAVORITES);
@@ -510,7 +519,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			currentFilter=SHOW_FAVORITES;
 
 			break;
-		case SHOW_MENTIONS: 			
+		case SHOW_MENTIONS: 
+			
 			b = mentionsButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);
@@ -521,6 +531,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 			break;
 		default:
+			
 			b= timelineButton;
 			overscrollIntent = new Intent(this, TwitterService.class); 
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);

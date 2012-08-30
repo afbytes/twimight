@@ -799,6 +799,17 @@ public class TweetsContentProvider extends ContentProvider {
 				int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
 				
+			} else if ( values.getAsInteger(Tweets.COL_BUFFER) == Tweets.BUFFER_TIMELINE &&
+					(c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_MENTIONS) == Tweets.BUFFER_MENTIONS ) {
+				
+				Log.i(TAG,"updating content values");
+				values.put(Tweets.COL_BUFFER, c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) | Tweets.BUFFER_TIMELINE);
+				
+			} else if ( values.getAsInteger(Tweets.COL_BUFFER) == Tweets.BUFFER_TIMELINE &&
+					(c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) == Tweets.BUFFER_FAVORITES ) {
+				
+				values.put(Tweets.COL_BUFFER, c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) | Tweets.BUFFER_TIMELINE); 
+				
 			} else if( !c.isNull(c.getColumnIndex(Tweets.COL_TID)) &&
 					c.getLong(c.getColumnIndex(Tweets.COL_TID))==values.getAsLong(Tweets.COL_TID) ){
 				
@@ -841,10 +852,11 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);		
 		
+		Log.i(TAG,"inside update");
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
 			getContext().getContentResolver().notifyChange(uri, null);		
-			
+			Log.i(TAG,"updated");
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
 				
@@ -1069,10 +1081,11 @@ public class TweetsContentProvider extends ContentProvider {
 		CharSequence contentText = "New Tweets!";
 		Intent notificationIntent = new Intent(getContext(), ShowTweetListActivity.class);
 		PendingIntent contentIntent;
+		
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = "You have new mention(s)";
-			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_MENTIONS);
+			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_MENTIONS);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = "You have new disaster tweet(s)";
@@ -1085,6 +1098,7 @@ public class TweetsContentProvider extends ContentProvider {
 		default:
 			break;
 		}
+		
 		contentIntent = PendingIntent.getActivity(getContext(), 0, notificationIntent, 0);
 		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 

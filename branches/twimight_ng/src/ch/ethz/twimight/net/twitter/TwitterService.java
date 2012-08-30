@@ -1082,6 +1082,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		cv.put(Tweets.COL_SOURCE, tweet.source);
 		
 		cv.put(Tweets.COL_TID, tweet.getId().longValue());
+		
+		if (tweet.isFavorite())
+			buffer = buffer | Tweets.BUFFER_FAVORITES;
 		cv.put(Tweets.COL_FAVORITED, tweet.isFavorite());
 		
 		// TODO: How do we know if we have retweeted the tweet?
@@ -1389,10 +1392,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			twitter.setCount(Constants.NR_MENTIONS);			
 			twitter.setSinceId(getMentionsSinceId(getBaseContext()));
 
-			try {
-				  Log.i(TAG,"getting mentions " + new Date().toString());
+			try {				  
 				mentions = twitter.getMentions();	
-				  Log.i(TAG,"done " + new Date().toString());
+				 
 			} catch (Exception ex) {					
 				this.ex = ex; // save the exception for later handling
 			}
@@ -1444,13 +1446,12 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
-						lastId = tweet.getId();					
-					
+						lastId = tweet.getId();						
 					
 					if(tweet.getUser() != null){	
 												
 							users.add( getUserContentValues(tweet.getUser(),false));	
-							cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_MENTIONS) );												
+							cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_MENTIONS ) );												
 						
 					} 					
 					if (cv.size() == 5) {						
@@ -1703,7 +1704,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
-			Log.i(TAG,"InsertTimelineTask");
+			
 			Thread.currentThread().setName("InsertTimelineTask");			
 			
 			ShowTweetListActivity.setLoading(true);

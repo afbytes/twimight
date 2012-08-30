@@ -57,7 +57,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		   // getWakeLock(context);		    
+		   //getWakeLock(context);					
 			
 			Intent i = new Intent(TwitterService.SYNCH_ACTION);
 			i.putExtra("synch_request", TwitterService.SYNCH_ALL);
