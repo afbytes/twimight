@@ -1863,7 +1863,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					
 					if(tweet.getUser()!=null){
-						cv.add( getTweetContentValues(tweet,null, Tweets.BUFFER_USERS) );				
+						
+						//is the tweet a retweet ?
+						String ret_screenName = null;
+						if (tweet.getOriginal()!= null) {
+							//yes, get the original one
+							ret_screenName = tweet.getUser().getScreenName();
+							tweet = tweet.getOriginal();						
+						}
+						cv.add( getTweetContentValues(tweet,ret_screenName, Tweets.BUFFER_USERS) );				
 						
 					} 
 					i++;
@@ -1875,6 +1883,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						i=0;
 					}
 				}
+				
+				
 				if (cv.size() > 0) {
 					updateTweets( cv.toArray(new ContentValues[0]));
 					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);	
