@@ -391,6 +391,17 @@ public class TweetsContentProvider extends ContentProvider {
 				
 			case TWEETS_USER_ID:
 				Log.i(TAG, "Query TWEETS_USER_ID");
+				
+				// get the screenname for updating user tweets
+				Uri userUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+				String[] userProjection = {TwitterUsers.COL_SCREENNAME};
+				Cursor userCursor = getContext().getContentResolver().query(userUri, userProjection, TwitterUsers.COL_ID+"="+uri.getLastPathSegment(), null, null);
+				String screenName = "";				
+				if(userCursor.getCount()>0) {
+					userCursor.moveToFirst();
+					screenName = userCursor.getString(userCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+				}
+				
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -410,24 +421,20 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
 					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
-					+ "WHERE "+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+" "
+					+ "WHERE ("+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+") " 
+					+ "OR (" + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + "='" + screenName + "') "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				
 				//TODO: could be done be a separate thread
 				c = database.rawQuery(sql, null); 
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);			
 				
-				// get the screenname for updating user tweets
-				Uri userUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-				String[] userProjection = {TwitterUsers.COL_SCREENNAME};
-				Cursor userCursor = getContext().getContentResolver().query(userUri, userProjection, TwitterUsers.COL_ID+"="+uri.getLastPathSegment(), null, null);
 
-				if(userCursor.getCount()>0){
-					userCursor.moveToFirst();
+				if(userCursor.getCount()>0){					
 					// start synch service with a synch user tweets request
 					i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_USERTWEETS);
-					i.putExtra("screenname", userCursor.getString(userCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+					i.putExtra("screenname", screenName );
 					getContext().startService(i); 
 				}
 				//userCursor.close();
