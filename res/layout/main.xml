@@ -7,6 +7,7 @@
 		android:layout_height="50dp" android:layout_width="fill_parent"
 		android:orientation="horizontal" android:background="@drawable/top_bar_background"
 		android:gravity="center_vertical">
+		
 		<LinearLayout android:layout_width="wrap_content"
 			android:layout_height="match_parent" android:orientation="horizontal"
 			android:layout_gravity="left">
@@ -26,6 +27,7 @@
 				android:text="Mentions" 
 				android:background="@drawable/header_button" android:paddingLeft="18dp" android:paddingRight="18dp" />
 		</LinearLayout>
+		
 		<LinearLayout android:layout_width="fill_parent"
 			android:layout_height="match_parent" android:orientation="horizontal"
 			android:gravity="right">
@@ -43,7 +45,7 @@
 	</LinearLayout>
 	<ch.ethz.twimight.net.twitter.TweetListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/tweetList"
-		android:fastScrollEnabled="true" android:scrollingCache="true" android:dividerHeight="-0.1dip" />
+		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
 	<TextView android:id="@+id/tweetListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:text="loading..." android:textSize="16sp" android:gravity="center"

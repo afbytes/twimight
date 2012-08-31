@@ -63,17 +63,17 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int TWEETS = 1;
 	private static final int TWEETS_ID = 2;
 	
-	private static final int TWEETS_TIMELINE = 3;
+
 	private static final int TWEETS_TIMELINE_NORMAL = 4;
 	private static final int TWEETS_TIMELINE_DISASTER = 5;
 	private static final int TWEETS_TIMELINE_ALL = 6;
 	
-	private static final int TWEETS_FAVORITES = 7;
+
 	private static final int TWEETS_FAVORITES_NORMAL = 8;
 	private static final int TWEETS_FAVORITES_DISASTER = 9;
 	private static final int TWEETS_FAVORITES_ALL = 10;
 
-	private static final int TWEETS_MENTIONS = 11;
+
 	private static final int TWEETS_MENTIONS_NORMAL = 12;
 	private static final int TWEETS_MENTIONS_DISASTER = 13;
 	private static final int TWEETS_MENTIONS_ALL = 14;
@@ -90,11 +90,7 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/#", TWEETS_ID);
 		
-		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.SEARCH, TWEETS_SEARCH);
-		
-		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE, TWEETS_TIMELINE);
-		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES, TWEETS_FAVORITES);
-		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_MENTIONS, TWEETS_MENTIONS);
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.SEARCH, TWEETS_SEARCH);	
 		
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_USER + "/#", TWEETS_USER_ID);
 		
@@ -139,11 +135,7 @@ public class TweetsContentProvider extends ContentProvider {
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS: return Tweets.TWEETS_CONTENT_TYPE;
 			
-			case TWEETS_ID: return Tweets.TWEET_CONTENT_TYPE;
-			
-			case TWEETS_TIMELINE: return Tweets.TWEETS_CONTENT_TYPE;
-			case TWEETS_FAVORITES: return Tweets.TWEETS_CONTENT_TYPE;
-			case TWEETS_MENTIONS: return Tweets.TWEETS_CONTENT_TYPE;
+			case TWEETS_ID: return Tweets.TWEET_CONTENT_TYPE;			
 			
 			case TWEETS_USER_ID: return Tweets.TWEETS_CONTENT_TYPE;
 			
@@ -176,7 +168,7 @@ public class TweetsContentProvider extends ContentProvider {
     	File root = getContext().getFilesDir();
     	if (!root.exists())
     		root.mkdirs();
-    	Log.i(TAG,uri.getEncodedPath().toString());
+    	
         File path = new File(root, "/" + TwitterUsers.TWITTERUSERS_PICTURE + "/" + uri.getLastPathSegment());        
 
         int imode = 0;
