@@ -15,7 +15,7 @@
 	</LinearLayout>
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/dmUsersList"
-		android:fastScrollEnabled="true" android:scrollingCache="true" />
+		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
 
 	<TextView android:id="@+id/dmListEmpty" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:text="No direct messages (loading...)" 

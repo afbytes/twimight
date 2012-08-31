@@ -548,7 +548,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		}
 		
 		startManagingCursor(c); 
-		adapter = new TweetAdapter(this, c);		
+		adapter = new TweetAdapter(this, c);				
 		timelineListView.setAdapter(adapter);		
 		timelineListView.setOverscrollIntent(overscrollIntent);
 

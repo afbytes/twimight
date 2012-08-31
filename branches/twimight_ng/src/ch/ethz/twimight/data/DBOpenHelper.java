@@ -28,6 +28,7 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
  *
  */
 public class DBOpenHelper extends SQLiteOpenHelper {
+	
 	private static final String DATABASE_NAME = "twimight";
 
 	// Database table names;
