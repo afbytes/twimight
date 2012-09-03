@@ -105,6 +105,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public static final String APP_STARTED = "app_started";
 	public static final String APP_CLOSED = "app_closed";
 	public static final String LINK_CLICKED = "link_clicked";
+	public static final String TWEET_WRITTEN = "tweet_written";
 
 	/** 
 	 * Called when the activity is first created. 
@@ -115,6 +116,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		setContentView(R.layout.main);	
 		
+		//statistics
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -127,7 +129,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	    
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
-		running = true;Log.i(TAG,"count: " + locHelper.count);
+		running = true;
 		timelineListView = (TweetListView) findViewById(R.id.tweetList);
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
@@ -215,7 +217,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		} else if(intent.hasExtra("login")){
 			
 			intent.removeExtra("login");
-			AppRater.app_launched(this);
+			//AppRater.app_launched(this);
 			setFilter(SHOW_TIMELINE);
 		
 
@@ -297,7 +299,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onDestroy(){
 		super.onDestroy();
 		running = false;
-		Log.i(TAG,"on destroy");
+		
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
@@ -309,16 +311,15 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 	
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
-			if (locHelper != null && locHelper.count > 0) {			
+			if (locHelper.count > 0) {			
 				locHelper.unRegisterLocationListener();
-				handler.removeCallbacks(checkLocation);
-				
+				handler.removeCallbacks(checkLocation);				
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
+		
 		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
-			locHelper.unRegisterLocationListener();
-			
+			locHelper.unRegisterLocationListener();			
 			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
