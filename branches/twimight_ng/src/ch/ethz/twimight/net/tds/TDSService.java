@@ -615,8 +615,7 @@ public class TDSService extends Service {
 			break;
 		case(NOTIFY_ACTION):
 			notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));		
-			contentText = tickerText;
-			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			contentText = tickerText;			
 			contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 			break;
 		default:
