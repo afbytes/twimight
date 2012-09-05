@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
+	the accompanying materials are made available under the terms of the GNU 
+	Public License v2.0 which accompanies this distribution, and is available 
+	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
+	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
+	- Message specification -->
+<ScrollView
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent" 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/showConditionsRoot">
+
+<LinearLayout
+    android:id="@+id/showConditionsLogo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"   
+    android:background="@drawable/about_background"
+    android:orientation="vertical" android:layout_margin="10dp" android:layout_gravity="center_horizontal">
+	
+    	<TextView android:id="@+id/textConditionTitle"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal" android:textSize="24dp"
+			android:text="Terms of Conditions" android:textColor="@color/black" />	
+    
+		<TextView android:id="@+id/textConditions" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_gravity="center"
+			android:text="@string/conditions" android:layout_marginTop="20dp" android:textColor="@color/black"/>
+
+	<LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_marginTop="30dp" android:gravity="center_horizontal">
+
+		<Button
+		    android:id="@+id/buttonRefuse"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="I refuse" android:padding="10dp" android:layout_marginRight="40dp"/>
+		
+		<Button
+		    android:id="@+id/buttonAgree"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="I Agree" android:padding="10dp"/>
+    
+    
+	</LinearLayout>
+
+</LinearLayout>
+
+
+
+  
+</ScrollView>
+
