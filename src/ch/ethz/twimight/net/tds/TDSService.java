@@ -449,6 +449,7 @@ public class TDSService extends Service {
 				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
 				tds.createFollowerObject(fm.getLastUpdate());
 				
+				//send statistics
 				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
 				statisticAdapter.open();
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
