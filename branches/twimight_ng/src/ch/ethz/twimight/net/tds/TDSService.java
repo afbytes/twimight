@@ -17,6 +17,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +38,6 @@ import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.FeedbackActivity;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
@@ -567,12 +567,16 @@ public class TDSService extends Service {
 				
 				//NOTIFICATION				
 				try {
-					JSONObject notif = tds.getNotification();
-					Log.i(TAG,notif.toString());
-					if (notif.getInt("type") == NOTIFY_ACTION)
-						notifyUser(notif.getInt("type"),notif.getString("message"), notif.getString("url"));
-					else
-						notifyUser(notif.getInt("type"),notif.getString("message"), null);
+					JSONObject notifMessage = tds.getNotification();
+					JSONArray notifArray = notifMessage.getJSONArray("list");					
+					for (int i=0; i<notifArray.length(); i++) {
+						JSONObject notification = (JSONObject) notifArray.get(i);
+						if (notification.getInt("classification") == NOTIFY_ACTION)
+							notifyUser(notification.getInt("classification"),notification.getString("content"), notification.getString("link"));
+						else
+							notifyUser(notification.getInt("classification"),notification.getString("content"), null);
+					}
+					
 					
 				} catch(Exception ex){}
 				
