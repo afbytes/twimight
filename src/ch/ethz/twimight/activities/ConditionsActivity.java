@@ -28,16 +28,10 @@ public class ConditionsActivity extends Activity {
 			
 			setContentView(R.layout.show_conditions);
 
-			Button buttonRef = (Button)findViewById(R.id.buttonRefuse);
+		
 			Button buttonAgree = (Button)findViewById(R.id.buttonAgree);
 			
-			buttonRef.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					finish();
-					
-				}			
-			});
+			
 			
 			buttonAgree.setOnClickListener(new OnClickListener() {
 				@Override
