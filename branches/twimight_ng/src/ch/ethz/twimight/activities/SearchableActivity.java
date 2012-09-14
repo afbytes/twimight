@@ -66,7 +66,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG,"on create");
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showsearch);		
 		
@@ -274,7 +274,8 @@ public class SearchableActivity extends TwimightBaseActivity{
 			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-					Cursor c = (Cursor) searchListView.getItemAtPosition(position);					
+					Cursor c = (Cursor) searchListView.getItemAtPosition(position);	
+					Log.i(TAG, "text: " + c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
 					Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 					startActivity(i);
