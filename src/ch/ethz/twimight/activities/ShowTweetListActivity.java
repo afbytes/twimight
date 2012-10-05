@@ -12,6 +12,9 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.io.File;
+import java.io.FileOutputStream;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -115,6 +118,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.main);	
+		////////////////////////////////////////
+		writeToLog("");
+		//////////////////////////////////
 		
 		//statistics
 		locDBHelper = new StatisticsDBHelper(this);
@@ -192,10 +198,26 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 
 	@Override
-	protected void onNewIntent(Intent intent) {
-		
+	protected void onNewIntent(Intent intent) {		
 		setIntent(intent);
 		
+	}
+	
+	private void writeToLog(String time) {
+		  // TODO Auto-generated method stub
+		  try {
+			  File tempFile = new File("../../../../../sdcard/twimight.tmp");
+			  FileOutputStream writer;
+			  //Log.d("LogThread", Environment.getRootDirectory().getAbsolutePath());
+			  writer = new FileOutputStream(tempFile);
+			  writer.write("paolo".getBytes());
+			  writer.flush();
+			  writer.close();
+		  } catch (Exception e) {
+			  // TODO Auto-generated catch block
+			  e.printStackTrace();
+		  }
+
 	}
 
 	/**
