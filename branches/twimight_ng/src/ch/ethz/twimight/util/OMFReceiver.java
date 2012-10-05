@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.PrefsActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 
 public class OMFReceiver extends BroadcastReceiver {
@@ -23,7 +25,7 @@ public class OMFReceiver extends BroadcastReceiver {
 				if(LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
 					
 					if (intent.getAction().equals(AUTOM_ENABLE_DISASTER_MODE)) {
-						//if ( intent.getStringExtra(SWITCH_DIS_MODE_STATUS)== "on") {
+						if ( intent.getStringExtra(SWITCH_DIS_MODE_STATUS).equals("on")) {
 							
 							BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 							if (mBluetoothAdapter.isEnabled())
@@ -36,10 +38,14 @@ public class OMFReceiver extends BroadcastReceiver {
 							new ScanningAlarm(context,0,true);
 							Toast.makeText(context, "Disaster Mode enabled by OMF", Toast.LENGTH_SHORT).show();
 							
-						//} else {
-						//	PrefsActivity.disableDisasterMode(context);
-							//setPreferences(context,false);
-						//}
+						} else {
+							PrefsActivity.disableDisasterMode(context);
+							setPreferences(context,false);
+							Toast.makeText(context, "Disaster Mode disabled by OMF", Toast.LENGTH_SHORT).show();
+						}
+						Intent refreshIntent = new Intent(context,ShowTweetListActivity.class);
+						refreshIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						context.startActivity(refreshIntent);
 					}
 								
 					
