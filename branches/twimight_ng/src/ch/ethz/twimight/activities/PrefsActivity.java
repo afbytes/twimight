@@ -67,17 +67,11 @@ public class PrefsActivity extends PreferenceActivity{
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
-							enableBluetooth(); 								
+							enableDisasterMode(); 								
 						} 
 						
 					} else {
-						if (getBluetoothInitialState(getBaseContext()) == false) {
-							if (BluetoothAdapter.getDefaultAdapter().isEnabled())
-								BluetoothAdapter.getDefaultAdapter().disable();
-						}				
-						ScanningAlarm.stopScanning(getApplicationContext());
-						Intent in = new Intent(getBaseContext(), ScanningService.class);
-						stopService(in);
+						disableDisasterMode(getBaseContext());						
 						finish();						
 					}
 					
@@ -114,13 +108,27 @@ public class PrefsActivity extends PreferenceActivity{
 					}
 				}
 			}
+
+			
 		};
 
+	}
+	
+	
+	public static void disableDisasterMode(Context context) {
+		if (getBluetoothInitialState(context) == false) {
+			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
+				BluetoothAdapter.getDefaultAdapter().disable();
+		}				
+		ScanningAlarm.stopScanning(context);
+		Intent in = new Intent(context, ScanningService.class);
+		context.stopService(in);
+		
 	}
 	/**
 	 * Enables Bluetooth when Disaster Mode get's enabled.
 	 */
-	private void enableBluetooth() {
+	private void enableDisasterMode() {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter.isEnabled())
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);

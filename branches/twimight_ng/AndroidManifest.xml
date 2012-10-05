@@ -140,6 +140,13 @@
 				<category android:name="android.intent.category.HOME" />
 			</intent-filter>
 		</receiver>
+		
+		<receiver android:name=".util.OMFReceiver"			
+			android:enabled="true">
+			<intent-filter>
+				<action android:name="autom_enable_disaster_mode" />				
+			</intent-filter>
+		</receiver>
 
 		<receiver android:name=".net.opportunistic.ScanningAlarm"
 			android:enabled="true" />

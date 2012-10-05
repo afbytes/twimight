@@ -183,8 +183,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	 */
 	public static synchronized DBOpenHelper getInstance(Context context){
 		if(dbHelper == null)
-			dbHelper = new DBOpenHelper(context);
-		
+			dbHelper = new DBOpenHelper(context);		
 		return dbHelper;
 		
 	}
