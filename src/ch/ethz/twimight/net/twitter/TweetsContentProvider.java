@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -1037,6 +1038,10 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 			}		
 			try {
+				//////////////////////
+				long diff = values.getAsLong(Tweets.COL_RECEIVED) - values.getAsLong(Tweets.COL_CREATED);
+				writeToLog(Long.toString( Math.round( diff/(1000*60) )) );
+				//////////////////////////////////
 				
 				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);						
 				if(rowId >= 0){							
@@ -1059,9 +1064,24 @@ public class TweetsContentProvider extends ContentProvider {
 	 
 	  private boolean hasBeenExecuted() {
           return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(TwitterService.TASK_MENTIONS, false);
-  }
+      }
 	
+		private void writeToLog(String time) {
+			  // TODO Auto-generated method stub
+			  try {
+				  File tempFile = new File("../../../../../sdcard/twimight.tmp");
+				  FileOutputStream writer;
+				  //Log.d("LogThread", Environment.getRootDirectory().getAbsolutePath());
+				  writer = new FileOutputStream(tempFile);
+				  writer.write(time.getBytes());
+				  writer.flush();
+				  writer.close();
+			  } catch (Exception e) {
+				  // TODO Auto-generated catch block
+				  e.printStackTrace();
+			  }
 
+		}
     
 	/**
 	 * Creates and triggers the status bar notifications

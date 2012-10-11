@@ -65,9 +65,6 @@ public class TDSResponseMessage {
 		this.bluetoothObject = bluetoothObject;
 	}
 	
-	public void setBugResponseString(String response){
-		this.response = response;
-	}
 	
 	public void setCertificateObject(JSONObject certificateObject){
 		this.certificateObject = certificateObject;
@@ -91,11 +88,8 @@ public class TDSResponseMessage {
 
 	public boolean hasBluetoothObject(){
 		return bluetoothObject != null;
-	}
-	
-	public boolean hasBugResponseString(){
-		return response != null;
-	}
+	}	
+
 	
 	public boolean hasLocationObject(){
 		return locationObject != null;
@@ -132,13 +126,7 @@ public class TDSResponseMessage {
 		
 	}
 	
-	/**
-	 * Parses bug response
-	 */
-	public String getBugResponseString() throws JSONException{		
-		 return response;		
-		
-	}
+
 
 	/**
 	 * Parses the authentication object

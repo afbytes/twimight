@@ -401,7 +401,7 @@ public class ScanningService extends Service{
 		protected Void doInBackground(String... s) {								
 			JSONObject o;
 			try {
-				Log.i(TAG, "s: " + s[0]);
+				
 				o = new JSONObject(s[0]);
 				if (o.getInt(TYPE) == TWEET) {
 					

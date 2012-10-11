@@ -36,7 +36,6 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.FeedbackActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
@@ -102,13 +101,8 @@ public class TDSService extends Service {
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 			Log.d(TAG, "Error synching: no connectivity");
-			schedulePeriodic(false);
+			schedulePeriodic(false);			
 			
-			if (intent.getIntExtra("synch_request", SYNCH_ALL) == SYNCH_BUG) {
-				bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
-				bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
-				sendBroadcast(bugResponseIntent);
-			}
 			return START_NOT_STICKY;
 			
 		} else {
@@ -149,10 +143,7 @@ public class TDSService extends Service {
 			case SYNCH_SIGN:				
 				synchSign();
 				break;
-			case SYNCH_BUG:				
-				synchBug(intent);
-				break;
-				
+							
 			default:
 				throw new IllegalArgumentException("Exception: Unknown synch request");
 			}
@@ -163,10 +154,7 @@ public class TDSService extends Service {
 		
 	}
 
-	private void synchBug(Intent intent) {
-		new SynchBugTask(intent).execute();
-		
-	}
+
 
 	/**
 	 * Regular TDS update, if needed
@@ -344,61 +332,7 @@ public class TDSService extends Service {
 
 	}
 	
-	private class SynchBugTask extends AsyncTask<Void, Void, Boolean> {
-		
-		String descr;
-		int type;
-		
-		public SynchBugTask(Intent intent) {
-			descr = intent.getStringExtra(DESCRIPTION_FIELD);
-			type = intent.getIntExtra(TYPE_FIELD, 1);
-		}
-		
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				
-				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
-				
-				if (descr != null) {
-					
-					tds.createBugObject(descr, type);	
-					boolean success = false;
-					// Send the request
-					try {
-						success = tds.sendRequest(getClient(), BUGS_URL);
-					} catch (GeneralSecurityException e) {
-						Log.e(TAG, "GeneralSecurityException while sending the Bug to the TDS");
-					}
-					
-					bugResponseIntent = new Intent(FeedbackActivity.SEND_RESULT_ACTION);
-					if(!success) {	
-						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
-						sendBroadcast(bugResponseIntent);
-						return false;	
-					}
-					//NOTIFICATION
-					String bugResponse;					
-					try {
-						bugResponse = tds.getBugResponseString();
-						Log.i(TAG,bugResponse);						
-						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_SUCCESS);
-					} catch (Exception e) {
-						bugResponseIntent.putExtra(FeedbackActivity.SEND_RESULT, FeedbackActivity.SEND_FAILURE);
-					}
-					sendBroadcast(bugResponseIntent);
-				}					
-			} catch (Exception e) { return false;}
-			
-			return true;
-			
-			
-		}
-		
-		
-	}
-
+	
 	/**
 	 * This Task performs the periodic communication with the TDS
 	 * @author thossmann
