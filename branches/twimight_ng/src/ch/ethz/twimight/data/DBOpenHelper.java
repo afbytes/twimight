@@ -16,8 +16,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import ch.ethz.twimight.activities.FeedbackActivity;
-import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -71,12 +69,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ "serial string not null, "
 			+ "until integer not null);";
 	
-	private static final String TABLE_BUGS_CREATE = "create table "+TABLE_BUGS+" ("
-			+ "_id integer primary key autoincrement not null, "
-			+ FeedbackActivity.COL_TWITTER_ID + " bigint not null, " 
-			+ FeedbackActivity.COL_TEXT + " string not null, "
-			+ FeedbackActivity.COL_TYPE + "type integer not null );";
-	
+		
 
 	private static final String TABLE_FRIENDS_KEYS_CREATE = "create table "+TABLE_FRIENDS_KEYS+" ("
 			+ "_id integer primary key autoincrement not null, "
@@ -196,8 +189,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_TWEETS_CREATE);
 		database.execSQL(TABLE_USERS_CREATE);
 		database.execSQL(TABLE_DMS_CREATE);
-		database.execSQL(TABLE_BUGS_CREATE);
-		//database.execSQL(TABLE_HTML_CREATE);
+	
 	}
 	
 	/**
