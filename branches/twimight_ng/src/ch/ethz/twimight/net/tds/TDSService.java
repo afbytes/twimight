@@ -79,8 +79,7 @@ public class TDSService extends Service {
 
 	TDSCommunication tds;
 	// TDS request URL
-		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";
-		private static final String BUGS_URL = Constants.TDS_BASE_URL + "/bugs/push.json";
+		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";		
 
 	@Override
 	public IBinder onBind(Intent arg0) {
