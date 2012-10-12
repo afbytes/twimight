@@ -1,25 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-    
-    <LinearLayout android:layout_marginTop="50px" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="horizontal" android:layout_gravity="center">
-        <ImageView android:id="@+id/imageView1" android:src="@drawable/twitter_icon" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_width="wrap_content"></ImageView>
-        <TextView android:text="Twimight" android:id="@+id/textView2" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center_vertical" android:textAppearance="@style/title"></TextView>
-    </LinearLayout>
-	
-	<TextView android:text="Tap the button below to log in your Twitter account and authorize Twimight to access your data." android:id="@+id/textView1" android:layout_height="wrap_content" android:layout_width="match_parent" android:layout_marginLeft="10px" android:layout_marginRight="10px" android:layout_marginTop="50px" android:layout_marginBottom="50px" android:layout_gravity="center"/>
+	android:layout_height="fill_parent" android:layout_width="fill_parent"
+	android:orientation="vertical" android:id="@+id/showTweetListRoot">
+
+	<LinearLayout android:id="@+id/headerBar"
+		android:layout_height="50dp" android:layout_width="fill_parent"
+		android:orientation="horizontal" android:background="@drawable/top_bar_background"
+		android:gravity="center_vertical">
 		
-	<Button 
-		android:layout_height="wrap_content" 
-		android:text="@string/labelOAuth" 
-		android:id="@+id/buttonOAuth" 
-		android:background="@drawable/buttonbg"
-	 	android:visibility="visible"
-	  	android:layout_width="fill_parent"
-	   	android:layout_marginRight="10px"
-	    android:layout_marginLeft="10px" android:clickable="true" android:layout_marginTop="50px" android:layout_gravity="bottom">
-	</Button>
+		<LinearLayout android:layout_width="wrap_content"
+			android:layout_height="match_parent" android:orientation="horizontal"
+			android:layout_gravity="left">
+			<ImageButton android:id="@+id/headerBarTimelineButton"
+			    android:src="@drawable/ic_twimight_speech"
+				android:layout_width="wrap_content" android:layout_height="fill_parent"
+				android:text="Timeline" 
+				android:background="@drawable/header_button" android:paddingLeft="15dp" android:paddingRight="15dp" />
+			<ImageButton android:id="@+id/headerBarFavoritesButton"
+			    android:src="@drawable/ic_twimight_favorites"
+				android:layout_width="wrap_content" android:layout_height="fill_parent"
+				android:text="Favorites" 
+				android:background="@drawable/header_button" android:paddingLeft="16dp" android:paddingRight="16dp" />
+			<ImageButton android:id="@+id/headerBarMentionsButton"
+			    android:src="@drawable/ic_twimight_mentions"
+				android:layout_width="wrap_content" android:layout_height="fill_parent"
+				android:text="Mentions" 
+				android:background="@drawable/header_button" android:paddingLeft="18dp" android:paddingRight="18dp" />
+		</LinearLayout>
+		
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_height="match_parent" android:orientation="horizontal"
+			android:gravity="right">
+
+			<ImageButton android:id="@+id/headerBarTweetButton"
+				android:layout_width="50dp" android:layout_height="fill_parent"
+				android:src="@drawable/ic_twimight_compose"
+				android:layout_marginRight="8dp" 
+				android:background="@drawable/header_button"/>
+			<ImageButton android:id="@+id/headerBarSearchButton"
+				android:layout_width="40dp" android:layout_height="fill_parent"
+				android:src="@drawable/ic_twimight_search" android:minWidth="40dp"
+				android:background="@drawable/header_button"/>
+		</LinearLayout>
+	</LinearLayout>
+	<ch.ethz.twimight.net.twitter.TweetListView android:layout_height="fill_parent"
+		android:layout_width="fill_parent" android:id="@+id/tweetList"
+		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
+	<TextView android:id="@+id/tweetListEmpty"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:text="loading..." android:textSize="16sp" android:gravity="center"
+		android:paddingTop="20dp" />
 
 </LinearLayout>
