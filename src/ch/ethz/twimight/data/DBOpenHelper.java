@@ -38,7 +38,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 //	static final String TABLE_HTML = "html";
-	public static final String TABLE_BUGS = "bugs";
 
 	private static final int DATABASE_VERSION = 43;
 
@@ -216,7 +215,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DMS);
-		database.execSQL("DROP TABLE IF EXISTS "+TABLE_BUGS);
 		//database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML);
 		createTables(database);
 	}
@@ -234,7 +232,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);
 		database.execSQL("DELETE FROM "+TABLE_USERS);
 		database.execSQL("DELETE FROM "+TABLE_DMS);
-		database.execSQL("DELETE FROM "+TABLE_BUGS);
 		//database.execSQL("DELETE FROM "+TABLE_HTML);
 	}
 }
