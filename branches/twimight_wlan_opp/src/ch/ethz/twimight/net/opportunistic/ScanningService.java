@@ -55,7 +55,6 @@ public class ScanningService extends Service{
 	private static final String TAG = "ScanningService"; /** For Debugging */
 	private static final String WAKE_LOCK = "ScanningServiceWakeLock"; 
 	
-	public Handler handler; /** Handler for delayed execution of the thread */
 	
 	// manage bluetooth communication
 	public static WlanOppComms wlanHelper = null;
@@ -78,15 +77,14 @@ public class ScanningService extends Service{
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());		
+		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());		
 		
 		getWakeLock(this);
 			
 		if (context == null) {
 			context = this;
 			dbHelper = new MacsDBHelper(this);
-			dbHelper.open();
-			handler = new Handler();		
+			dbHelper.open();			
 	        // set up wlan opp helper			
 	        wlanHelper = new WlanOppComms(this,mHandler);						
 	        
@@ -139,6 +137,7 @@ public class ScanningService extends Service{
 		Log.i(TAG,"on Destroy");
 		context=null;
 		releaseWakeLock();
+		wlanHelper.stop();
 		super.onDestroy();
 	}
 
@@ -179,14 +178,15 @@ public class ScanningService extends Service{
 				List<Neighbor> neighbors = (List<Neighbor>)msg.obj;	
 				
 				for (Neighbor n : neighbors) {
-					
+					Log.d(TAG, "Neighbor: "+n.ipAddress + " " + n.id);
+
 					// Insert successful connection into DB
-					dbHelper.updateMacSuccessful(n.id, 1);
+					dbHelper.updateMacSuccessful(n.ipAddress, 1);
 					// Here starts the protocol for Tweet exchange.
-					Long last = dbHelper.getLastSuccessful(n.id);
+					Long last = dbHelper.getLastSuccessful(n.ipAddress);
 					sendDisasterTweets(last,n);
 					sendDisasterDM(last,n);			
-					dbHelper.setLastSuccessful(n.id, new Date());
+					dbHelper.setLastSuccessful(n.ipAddress, new Date());
 					
 				}
 				break;

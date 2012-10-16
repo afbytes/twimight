@@ -66,7 +66,8 @@ public class PrefsActivity extends PreferenceActivity{
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
-							enableDisasterMode(getBaseContext()); 								
+							enableDisasterMode(getBaseContext()); 
+							finish();
 						} 
 						
 					} else {
