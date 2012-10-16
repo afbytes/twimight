@@ -114,8 +114,7 @@ public class ScanningService extends Service{
 	 */
 	 void getWakeLock(Context context){
 		
-		releaseWakeLock();
-		
+		releaseWakeLock();		
 		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK , WAKE_LOCK); 
 		wakeLock.acquire();
@@ -142,20 +141,6 @@ public class ScanningService extends Service{
 	}
 
 		
-	
-	/**
-	 * Terminates one round of scanning: cleans up and reschedules next scan
-	 */
-	private void stopScanning() {
-		cursor = null;		
-		if(isDisasterMode()){		
-			 
-			// start listening mode
-			wlanHelper.stop();
-			Log.i(TAG, "Listening...");
-		}
-	 }
-	
 
 
 
@@ -178,7 +163,7 @@ public class ScanningService extends Service{
 				List<Neighbor> neighbors = (List<Neighbor>)msg.obj;	
 				
 				for (Neighbor n : neighbors) {
-					Log.d(TAG, "Neighbor: "+n.ipAddress + " " + n.id);
+					Log.i(TAG, "Neighbor: "+n.ipAddress + " " + n.id);
 
 					// Insert successful connection into DB
 					dbHelper.updateMacSuccessful(n.ipAddress, 1);
@@ -288,7 +273,7 @@ public class ScanningService extends Service{
 		Uri uriQuery = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + 
 									DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_DISASTER );
 		Cursor c = getContentResolver().query(uriQuery, null, null, null, null);
-		Log.i(TAG, "c.getCount: "+ c.getCount());
+		
 		if (c.getCount() >0){
 			c.moveToFirst();
 			JSONArray jarray = new JSONArray();
@@ -318,7 +303,8 @@ public class ScanningService extends Service{
 
 	private void sendDisasterTweets(Long last, Neighbor n) {			
 		// get disaster tweets
-			
+		
+		Log.i(TAG,"inside sendDisasterTweets");
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
 		
