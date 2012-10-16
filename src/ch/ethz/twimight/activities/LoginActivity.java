@@ -31,9 +31,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -51,14 +48,12 @@ import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
-import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
@@ -428,7 +423,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}		
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-			new ScanningAlarm(context,0,false);
+			//new ScanningAlarm(context,0,false);
 		}		
 		
 		//start the twitter update alarm
@@ -446,7 +441,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		TDSAlarm.stopTDSCommuniction(context);
 		context.stopService(new Intent(context, TDSService.class));
 		
-		ScanningAlarm.stopScanning(context);
+		//ScanningAlarm.stopScanning(context);
 		
 		context.stopService(new Intent(context, TwitterService.class));	
 		

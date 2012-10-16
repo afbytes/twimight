@@ -412,21 +412,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			i = new Intent(this, AboutActivity.class);
 			startActivity(i);    
 			break;
-		case OPTIONS_MENU_PAIR:
-			   // Get the local Bluetooth adapter
-	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
-				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
-				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
-
-			} else  {
-				Intent intent = new Intent(this, DeviceListActivity.class);
-				startActivity(intent);
-			}
-				
-				
-			break;
+		
 		case OPTIONS_MENU_FEEDBACK:
 			// Launch FeedbacktActivity
 			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
@@ -442,19 +428,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 
 
-	@Override
-		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-			switch(requestCode) {
-			case PrefsActivity.REQUEST_DISCOVERABLE:
-				
-				if (resultCode != Activity.RESULT_CANCELED) {
-					Intent intent = new Intent(this, DeviceListActivity.class);
-					startActivity(intent);
-				}
-						
-			}
-		}  
-	
 	/**
 	 * Saves the current selection
 	 */
