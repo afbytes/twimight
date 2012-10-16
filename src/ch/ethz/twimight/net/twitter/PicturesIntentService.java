@@ -71,7 +71,7 @@ public class PicturesIntentService extends IntentService {
 		}	
 
 		// insert pictures into DB
-		InsertProfileImagesParameters(cv);
+		insertProfileImagesParameters(cv);
 		// here, we have to notify almost everyone
 		getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
@@ -85,7 +85,7 @@ public class PicturesIntentService extends IntentService {
 		
 	}
 
-	private void InsertProfileImagesParameters(ContentValues[] params) {
+	private void insertProfileImagesParameters(ContentValues[] params) {
 		if (params.length ==1) {
 			ContentValues cv = params[0];				
 			try{
