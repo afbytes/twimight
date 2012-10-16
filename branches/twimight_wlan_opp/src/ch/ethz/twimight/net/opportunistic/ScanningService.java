@@ -14,17 +14,15 @@ package ch.ethz.twimight.net.opportunistic;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Base64;
 
 import android.app.AlarmManager;
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
+import ch.ethz.twimight.net.opportunistic.WlanOppComms.Neighbor;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -59,28 +58,18 @@ public class ScanningService extends Service{
 	public Handler handler; /** Handler for delayed execution of the thread */
 	
 	// manage bluetooth communication
-	public static BluetoothComms bluetoothHelper = null;
+	public static WlanOppComms wlanHelper = null;
 
-	//private Date lastScan;
-			
-	private MacsDBHelper dbHelper;
 	
 	private static Context context = null;
 	
-	private Cursor cursor;
-	
-	
-	ConnectingTimeout connTimeout;
-	ConnectionTimeout connectionTimeout;
-	private static int state;
+	private Cursor cursor;	
+	private MacsDBHelper dbHelper;
+
 	WakeLock wakeLock;
 	public boolean closing_request_sent = false;
 		
-	public static final int STATE_SCANNING = 1;
-	public static final int STATE_IDLE=0;
-	private static final long CONNECTING_TIMEOUT = 8000L;
-	private static final long CONNECTION_TIMEOUT = 4000L;
-	
+
 	private static final String TYPE = "message_type";
 	public static final int TWEET=0;
 	public static final int DM=1;
@@ -89,42 +78,24 @@ public class ScanningService extends Service{
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 	
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());		
 		
-		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
 			
 		if (context == null) {
 			context = this;
-			handler = new Handler();		
-	        // set up Bluetooth
-			
-	        bluetoothHelper = new BluetoothComms(mHandler);
-	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
-			dbHelper.open();			
+			dbHelper.open();
+			handler = new Handler();		
+	        // set up wlan opp helper			
+	        wlanHelper = new WlanOppComms(this,mHandler);						
 	        
-		}		
-		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-		// Get a set of currently paired devices
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	      
-    	
-        if (pairedDevices != null) {
-        	// If there are paired devices, add each one to the ArrayAdapter
-	        if (pairedDevices.size() > 0) {	        	
-	            for (BluetoothDevice device : pairedDevices) {	            	
-	            		dbHelper.createMac(device.getAddress().toString(), 1); 
-	            }
-	        } 
-        }	    	
-		startScanning();			
+		}			
 		return START_STICKY; 
 		
 	}
 
-	public static int getState() {
-		return state;
-	}
+	
 	public class CustomExceptionHandler implements UncaughtExceptionHandler {
 
 		@Override
@@ -171,129 +142,22 @@ public class ScanningService extends Service{
 		super.onDestroy();
 	}
 
-	/**
-	 * Start the scanning.
-	 * @return true if the connection with the TDS was successful, false otherwise.
-	 */
-	private boolean startScanning(){
 		
-		// Get a cursor over all "active" MACs in the DB
-		cursor = dbHelper.fetchActiveMacs();
-		Log.d(TAG,"active macs: " + cursor.getCount());
-		
-		state = STATE_SCANNING;		
-		
-		if (cursor.moveToFirst()) {
-            // Get the field values
-            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));			
-            Log.i(TAG, "Connection Attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
-            
-            if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {            	
-
-            	//if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
-            		bluetoothHelper.connect(mac);                	
-            		connTimeout = new ConnectingTimeout();
-            		handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
-            	//} else {
-            		//Log.i(TAG,"skipping connection, last meeting was too recent");
-            	//	nextScanning();
-            	//}
-            } else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {            	
-            	bluetoothHelper.start();
-            	
-            }
-            
-            
-        } else 
-        	stopScanning();
-        
-		
-		return false;
-	}
-	
-	private class ConnectingTimeout implements Runnable {
-		@Override
-		public void run() {
-			if (bluetoothHelper != null) {		 
-				if (bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTING) {				
-					bluetoothHelper.start();
-				}
-				connTimeout = null;
-			}
-		}
-	}
-	
-	private class ConnectionTimeout implements Runnable {
-		@Override
-		public void run() {
-			if (bluetoothHelper != null) {		 
-				if (bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTED) {				
-					bluetoothHelper.start();
-				}
-				connectionTimeout = null;
-			}
-		}
-	}
-	
-	/**
-	 * Proceed to the next MAC address
-	 */
-	private void nextScanning() {		
-		if(cursor == null || bluetoothHelper.getState()==BluetoothComms.STATE_CONNECTED)
-			stopScanning();
-		else {
-			// do we have another MAC in the cursor?
-			if(cursor.moveToNext()){
-				Log.d(TAG, "scanning for the next peer");
-	            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
-	           // if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) { 
-	            	
-	            	Log.i(TAG, "Connection attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
-		            bluetoothHelper.connect(mac);
-		            connTimeout = new ConnectingTimeout();
-	            	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	
-	          //  } else {
-	            	//Log.i(TAG,"skipping connection, last meeting was too recent");
-	            	//nextScanning();
-	           // }
-			} else 
-				stopScanning();
-			
-		}
-		
-	}
 	
 	/**
 	 * Terminates one round of scanning: cleans up and reschedules next scan
 	 */
 	private void stopScanning() {
-		cursor = null;
-		state = STATE_IDLE;		
-		if(isDisasterMode()){			 			
-			
-			removeConnectingTimer()	;	    
+		cursor = null;		
+		if(isDisasterMode()){		
+			 
 			// start listening mode
-			bluetoothHelper.start();
+			wlanHelper.stop();
 			Log.i(TAG, "Listening...");
 		}
 	 }
 	
-	
-	private void removeConnectingTimer() {
-		if (connTimeout != null) { // I need to remove the timeout started at the beginning
-			handler.removeCallbacks(connTimeout);
-			connTimeout = null;
-		}
-		
-	}
-	
-	private void removeConnectionTimeout() {
-		if (connectionTimeout != null) { // I need to remove the timeout started at the beginning
-			handler.removeCallbacks(connectionTimeout);
-			connectionTimeout = null;
-		}
-		
-	}
+
 
 
 	/**
@@ -306,90 +170,31 @@ public class ScanningService extends Service{
 			switch (msg.what) {          
 
 			case Constants.MESSAGE_READ:  
-				if(msg.obj.toString().equals("####CLOSING_REQUEST####")) {	
+
+				new ProcessDataReceived().execute(msg.obj.toString());								
+				break; 			
+				
+			case Constants.MESSAGE_NEW_NEIGHBORS:         	 
+				Log.i(TAG, "got neighbor list");  				
+				List<Neighbor> neighbors = (List<Neighbor>)msg.obj;	
+				
+				for (Neighbor n : neighbors) {
 					
-					//synchronized(this){
-						//if (closing_request_sent) {
-							
-							Log.d(TAG,"closing request received, connection shutdown");
-							bluetoothHelper.start();
-							//closing_request_sent = false;
-						//}
-					//}				
-					break;
+					// Insert successful connection into DB
+					dbHelper.updateMacSuccessful(n.id, 1);
+					// Here starts the protocol for Tweet exchange.
+					Long last = dbHelper.getLastSuccessful(n.id);
+					sendDisasterTweets(last,n);
+					sendDisasterDM(last,n);			
+					dbHelper.setLastSuccessful(n.id, new Date());
 					
-				} else {
-					new ProcessDataReceived().execute(msg.obj.toString());								
-					break; 
-				}	            
-				
-			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
-				Log.i(TAG, "connection succeeded");   			
-				
-				removeConnectingTimer();
-				connectionTimeout = new ConnectionTimeout();
-            	handler.postDelayed(connectionTimeout, CONNECTION_TIMEOUT); //timeout for the conn attempt	
-            	
-				// Insert successful connection into DB
-				dbHelper.updateMacSuccessful(msg.obj.toString(), 1);
-				
-				// Here starts the protocol for Tweet exchange.
-				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
-				//new SendDisasterData(msg.obj.toString()).execute(last);				
-				sendDisasterTweets(last);
-				sendDisasterDM(last);			
-				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
-				
-				Log.i(TAG, "sending closing request");
-				bluetoothHelper.write("####CLOSING_REQUEST####");		
-				
-				
-				break;   
-			case Constants.MESSAGE_CONNECTION_FAILED:             
-				Log.i(TAG, "connection failed");
-				
-				// Insert failed connection into DB
-				dbHelper.updateMacAttempts(msg.obj.toString(), 1);
-				removeConnectingTimer();
-				// Next scan
-				nextScanning();
-				break;
-				
-			case Constants.MESSAGE_CONNECTION_LOST:         	 
-				Log.i(TAG, "connection lost");  				
-				// Next scan
-				removeConnectionTimeout();
-				nextScanning();				
+				}
 				break;
 			}			
 		}
 	};
 
-	/**
-	 * send tweets and direct messages over bluetooth
-	 * @author pcarta
-	 */
-	private class SendDisasterData extends AsyncTask<Long, Void, Void> {
-		
-		String mac;
-		
-		public SendDisasterData(String mac) {
-			this.mac=mac;
-		}
 
-		@Override
-		protected Void doInBackground(Long... last) {
-			sendDisasterTweets(last[0]);
-			sendDisasterDM(last[0]);			
-			dbHelper.setLastSuccessful(mac, new Date());
-			synchronized(ScanningService.this){
-				Log.i(TAG, "sending closing request");
-				bluetoothHelper.write("####CLOSING_REQUEST####");
-				closing_request_sent=true;
-			}
-			return null;
-		}
-	}
 	
 	/**
 	 * process all the data received via bluetooth
@@ -400,15 +205,21 @@ public class ScanningService extends Service{
 		@Override
 		protected Void doInBackground(String... s) {								
 			JSONObject o;
+			JSONArray jarray;
+
 			try {
-				
-				o = new JSONObject(s[0]);
-				if (o.getInt(TYPE) == TWEET) {
+				jarray = new JSONArray(s[0]);				
+				for (int i = 0; i < jarray.length(); i++) {
 					
-					processTweet(o);
-				} else {
-					processDM(o);				}
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					o = jarray.getJSONObject(i);
+					if (o.getInt(TYPE) == TWEET) {
+						
+						processTweet(o);
+					} else 
+						processDM(o);				
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					
+				}			
 				
 			} catch (JSONException e) {
 				Log.e(TAG, "error",e);
@@ -472,7 +283,7 @@ public class ScanningService extends Service{
 
 	}
 
-	private void sendDisasterDM(Long last) {
+	private void sendDisasterDM(Long last, Neighbor n) {
 		
 		Uri uriQuery = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + 
 									DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_DISASTER );
@@ -480,6 +291,7 @@ public class ScanningService extends Service{
 		Log.i(TAG, "c.getCount: "+ c.getCount());
 		if (c.getCount() >0){
 			c.moveToFirst();
+			JSONArray jarray = new JSONArray();
 			
 			while (!c.isAfterLast()){
 				if (c.getLong(c.getColumnIndex(DirectMessages.COL_RECEIVED)) > (last - 5000) ) {
@@ -488,9 +300,7 @@ public class ScanningService extends Service{
 						try {
 							dmToSend = getDmJSON(c);
 							if (dmToSend != null) {	
-								Log.i(TAG, "sending dm");
-
-								bluetoothHelper.write(dmToSend.toString());
+								jarray.put(dmToSend);
 							}
 							
 						} catch (JSONException ex){							
@@ -498,13 +308,15 @@ public class ScanningService extends Service{
 				}
 				c.moveToNext();
 			}
+			//send data here
+			wlanHelper.write(jarray.toString(), n.ipAddress);
 		}
 		c.close();
 
 	}
 	
 
-	private void sendDisasterTweets(Long last) {			
+	private void sendDisasterTweets(Long last, Neighbor n) {			
 		// get disaster tweets
 			
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
@@ -512,6 +324,7 @@ public class ScanningService extends Service{
 		
 		if(c.getCount()>0){			
 			c.moveToFirst();
+			JSONArray jarray = new JSONArray();
 			while(!c.isAfterLast()){
 				
 				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5000)){
@@ -519,9 +332,7 @@ public class ScanningService extends Service{
 					try {								
 						toSend = getJSON(c);
 						if (toSend != null) {
-							Log.i(TAG,"sending tweet");
-							Log.d(TAG, toSend.toString(5));
-							bluetoothHelper.write(toSend.toString());
+							jarray.put(toSend);					
 						}
 						
 					} catch (JSONException e) {								
@@ -529,10 +340,11 @@ public class ScanningService extends Service{
 					}					
 				}
 				c.moveToNext();				
-			}			
+			}	
+			//send data here
+			wlanHelper.write(jarray.toString(), n.ipAddress);
 		}
-		//else
-			//bluetoothHelper.write("####CLOSING_REQUEST####");
+		
 		c.close();		
 	}
 	

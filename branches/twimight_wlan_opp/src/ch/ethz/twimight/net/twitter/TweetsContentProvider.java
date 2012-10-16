@@ -38,7 +38,6 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -728,14 +727,11 @@ public class TweetsContentProvider extends ContentProvider {
 					// if we are in disaster mode, we give the content provider a 
 					// second to insert the tweet and then schedule a scanning operation
 					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-						if (ScanningService.getState() == ScanningService.STATE_IDLE){
-			    				new ScanningAlarm(getContext(),0,true);
-			    			
-			    			} 
-						
+
+						//new ScanningAlarm(getContext(),0,true);
 					}
 				} else {
-					
+
 					String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
 					// check validity
 					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){

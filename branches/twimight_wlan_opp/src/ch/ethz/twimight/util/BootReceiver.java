@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
 
@@ -50,7 +49,7 @@ public class BootReceiver extends BroadcastReceiver {
 			
 			
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-				new ScanningAlarm(context,0,false);
+				
 			}
 			
 						

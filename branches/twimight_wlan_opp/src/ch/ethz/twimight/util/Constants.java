@@ -50,9 +50,10 @@ public final class Constants {
 	//Message types from the BluetoothService Handler	  
 	public static final int MESSAGE_READ = 2;
 	public static final int MESSAGE_CONNECTION_SUCCEEDED = 4;
-	public static final int MESSAGE_DELAY = 6;
 	public static final int MESSAGE_CONNECTION_FAILED =8;
 	public static final int MESSAGE_CONNECTION_LOST =10;
+	public static final int MESSAGE_NEW_NEIGHBORS =12;
+
 	
 	// Key names from the BluetoothService Handler
 	public static final String DEVICE_NAME = "device_name";

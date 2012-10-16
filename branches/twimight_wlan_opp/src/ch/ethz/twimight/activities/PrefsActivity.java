@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
@@ -67,7 +66,7 @@ public class PrefsActivity extends PreferenceActivity{
 					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
-							enableDisasterMode(); 								
+							enableDisasterMode(getBaseContext()); 								
 						} 
 						
 					} else {
@@ -115,12 +114,7 @@ public class PrefsActivity extends PreferenceActivity{
 	}
 	
 	
-	public static void disableDisasterMode(Context context) {
-		if (getBluetoothInitialState(context) == false) {
-			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
-				BluetoothAdapter.getDefaultAdapter().disable();
-		}				
-		ScanningAlarm.stopScanning(context);
+	public static void disableDisasterMode(Context context) {		
 		Intent in = new Intent(context, ScanningService.class);
 		context.stopService(in);
 		
@@ -128,23 +122,9 @@ public class PrefsActivity extends PreferenceActivity{
 	/**
 	 * Enables Bluetooth when Disaster Mode get's enabled.
 	 */
-	private void enableDisasterMode() {
-		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (mBluetoothAdapter.isEnabled())
-			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);
-		else
-			ScanningAlarm.setBluetoothInitialState(getBaseContext(), false);
-
-		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
-			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
-			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);           
-			
-		} else {
-			new ScanningAlarm(getApplicationContext(),0,true);
-			finish();
-		}
-				 
+	private void enableDisasterMode(Context context) {
+		Intent in = new Intent(context, ScanningService.class);
+		context.startService(in);			 
 		
 	}
 	
@@ -159,10 +139,7 @@ public class PrefsActivity extends PreferenceActivity{
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
 		case REQUEST_DISCOVERABLE:
-			Log.d(TAG,"resultcode = " + resultCode); 
 			
-			new ScanningAlarm(getApplicationContext(),0,true);
-			finish();
 			
 		}
 	}  
