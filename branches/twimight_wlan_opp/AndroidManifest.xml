@@ -116,9 +116,11 @@
 
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
+
 		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />
 		<service android:enabled="true" android:name=".net.Html.HtmlService" />
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
+		   
 			<intent-filter>
 				<action android:name="twimight_synch" />
 			</intent-filter>
@@ -141,13 +143,7 @@
 			</intent-filter>
 		</receiver>
 		
-		<receiver android:name=".util.OMFReceiver"			
-			android:enabled="true">
-			<intent-filter>
-				<action android:name="autom_enable_disaster_mode" />				
-			</intent-filter>
-		</receiver>
-
+	
 		<receiver android:name=".net.opportunistic.ScanningAlarm"
 			android:enabled="true" />
 		<receiver android:name=".net.tds.TDSAlarm" android:enabled="true" />
