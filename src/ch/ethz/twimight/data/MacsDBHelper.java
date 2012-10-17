@@ -43,12 +43,13 @@ public class MacsDBHelper {
 	
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
+	private static MacsDBHelper macHelper = null;
 
 	/**
 	 * Constructor.
 	 * @param context
 	 */
-	public MacsDBHelper(Context context) {
+	private MacsDBHelper(Context context) {
 		this.context = context;
 	}
 
@@ -61,6 +62,13 @@ public class MacsDBHelper {
 		dbHelper = DBOpenHelper.getInstance(context);
 		database = dbHelper.getWritableDatabase();
 		return this;
+	}
+	
+	public static synchronized MacsDBHelper getInstance(Context context){
+		if(macHelper == null)
+			macHelper = new MacsDBHelper(context);		
+		return macHelper;
+		
 	}
 
 	/**
@@ -215,7 +223,7 @@ public class MacsDBHelper {
 	/**
 	 * Update the timestamp of the last successful connection
 	 */
-	public void setLastSuccessful(String mac, Date date) {
+	public synchronized void setLastSuccessful(String mac, Date date) {
 
 		ContentValues values = new ContentValues();
 		values.put(KEY_LAST, date.getTime());
@@ -230,7 +238,7 @@ public class MacsDBHelper {
 	/**
 	 * Get the timestamp of the last successful connection
 	 */
-	public long getLastSuccessful(String mac) {
+	public synchronized long getLastSuccessful(String mac) {
 
 		String[] columns = {KEY_LAST};
 		Cursor c = database.query(DBOpenHelper.TABLE_MACS, columns, KEY_MAC+"='"+mac + "'",null,null,null,null);

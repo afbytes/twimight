@@ -89,7 +89,7 @@ public class ScanningService extends Service{
 			handler = new Handler();
 			updateTimeout = new UpdateTimeout();
 			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
-			dbHelper = new MacsDBHelper(this);
+			dbHelper = MacsDBHelper.getInstance(this);
 			dbHelper.open();			
 	        // set up wlan opp helper			
 	        wlanHelper = new WlanOppComms(this,mHandler);						
@@ -117,8 +117,11 @@ public class ScanningService extends Service{
 
 		@Override
 		public void run() {
-			if (System.currentTimeMillis() > lastDataExchange + WlanOppComms.MAX_UPDATE_INTERVAL)
+			Log.i(TAG,"inside update timeout");
+			if (System.currentTimeMillis() > lastDataExchange + WlanOppComms.MAX_UPDATE_INTERVAL) {
 				wlanHelper.forceNeighborUpdate();
+				Log.i(TAG,"update timeout went off");
+			}
 			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
 		}
 		
@@ -181,14 +184,12 @@ public class ScanningService extends Service{
 				for (Neighbor n : neighbors) {
 					Log.i(TAG, "sending data to Neighbor: "+n.ipAddress + " " + n.id);
 					lastDataExchange = System.currentTimeMillis();
-					// Insert successful connection into DB
-					//dbHelper.updateMacSuccessful(n.ipAddress, 1);
 					// Here starts the protocol for Tweet exchange.
 					//Long last = dbHelper.getLastSuccessful(n.ipAddress);
 					long last = 0;
 					sendDisasterTweets(last,n);
 					sendDisasterDM(last,n);			
-					//dbHelper.setLastSuccessful(n.ipAddress, new Date());
+					
 					
 				}
 				break;
