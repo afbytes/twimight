@@ -365,31 +365,7 @@ public class ScanningService extends Service{
 		}
 	};
 
-	/**
-	 * send tweets and direct messages over bluetooth
-	 * @author pcarta
-	 */
-	private class SendDisasterData extends AsyncTask<Long, Void, Void> {
-		
-		String mac;
-		
-		public SendDisasterData(String mac) {
-			this.mac=mac;
-		}
 
-		@Override
-		protected Void doInBackground(Long... last) {
-			sendDisasterTweets(last[0]);
-			sendDisasterDM(last[0]);			
-			dbHelper.setLastSuccessful(mac, new Date());
-			synchronized(ScanningService.this){
-				Log.i(TAG, "sending closing request");
-				bluetoothHelper.write("####CLOSING_REQUEST####");
-				closing_request_sent=true;
-			}
-			return null;
-		}
-	}
 	
 	/**
 	 * process all the data received via bluetooth
