@@ -427,7 +427,7 @@ public class TDSService extends Service {
 				macsList.clear();
 				///////////////////////////////////////////////////////////////////////
 				if(!macsList.isEmpty()){
-					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
+					MacsDBHelper dbHelper = MacsDBHelper.getInstance(getBaseContext());
 					dbHelper.open();
 
 					// temporarily de-activate all local MACs
