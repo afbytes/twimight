@@ -61,12 +61,15 @@ public class ScanningService extends Service{
 
 	
 	private static Context context = null;
-	
+	Handler handler;
+	UpdateTimeout updateTimeout;
 	private Cursor cursor;	
 	private MacsDBHelper dbHelper;
 
 	WakeLock wakeLock;
 	public boolean closing_request_sent = false;
+	
+	long lastDataExchange;
 		
 
 	private static final String TYPE = "message_type";
@@ -83,6 +86,9 @@ public class ScanningService extends Service{
 			
 		if (context == null) {
 			context = this;
+			handler = new Handler();
+			updateTimeout = new UpdateTimeout();
+			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
 			dbHelper = new MacsDBHelper(this);
 			dbHelper.open();			
 	        // set up wlan opp helper			
@@ -107,6 +113,16 @@ public class ScanningService extends Service{
 		}
 	}
 	
+	private class UpdateTimeout implements Runnable {
+
+		@Override
+		public void run() {
+			if (System.currentTimeMillis() > lastDataExchange + WlanOppComms.MAX_UPDATE_INTERVAL)
+				wlanHelper.forceNeighborUpdate();
+			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
+		}
+		
+	}
 
 	/**
 	 * Acquire the Wake Lock
@@ -154,24 +170,25 @@ public class ScanningService extends Service{
 			switch (msg.what) {          
 
 			case Constants.MESSAGE_READ:  
-
+				Log.i(TAG, "got message");  
 				new ProcessDataReceived().execute(msg.obj.toString());								
 				break; 			
 				
 			case Constants.MESSAGE_NEW_NEIGHBORS:         	 
-				Log.i(TAG, "got neighbor list");  				
 				List<Neighbor> neighbors = (List<Neighbor>)msg.obj;	
-				
-				for (Neighbor n : neighbors) {
-					Log.i(TAG, "Neighbor: "+n.ipAddress + " " + n.id);
+				Log.i(TAG, "got neighbor list, size = " + neighbors.size() );  				
 
+				for (Neighbor n : neighbors) {
+					Log.i(TAG, "sending data to Neighbor: "+n.ipAddress + " " + n.id);
+					lastDataExchange = System.currentTimeMillis();
 					// Insert successful connection into DB
-					dbHelper.updateMacSuccessful(n.ipAddress, 1);
+					//dbHelper.updateMacSuccessful(n.ipAddress, 1);
 					// Here starts the protocol for Tweet exchange.
-					Long last = dbHelper.getLastSuccessful(n.ipAddress);
+					//Long last = dbHelper.getLastSuccessful(n.ipAddress);
+					long last = 0;
 					sendDisasterTweets(last,n);
 					sendDisasterDM(last,n);			
-					dbHelper.setLastSuccessful(n.ipAddress, new Date());
+					//dbHelper.setLastSuccessful(n.ipAddress, new Date());
 					
 				}
 				break;

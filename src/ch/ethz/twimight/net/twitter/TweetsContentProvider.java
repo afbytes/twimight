@@ -727,7 +727,7 @@ public class TweetsContentProvider extends ContentProvider {
 					// if we are in disaster mode, we give the content provider a 
 					// second to insert the tweet and then schedule a scanning operation
 					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-
+						ScanningService.wlanHelper.forceNeighborUpdate();
 						//new ScanningAlarm(getContext(),0,true);
 					}
 				} else {
@@ -1012,7 +1012,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			if (localUserScreenName != null) {
 				// we convert to lower case to check if it's a mention
-				if(text.toLowerCase().contains("@"+localUserScreenName.toLowerCase())){
+				if(text.toLowerCase().matches(".*@"+localUserScreenName.toLowerCase()+"\\W.*")){
 					
 					values.put(Tweets.COL_MENTIONS, 1);
 					// put into mentions buffer
