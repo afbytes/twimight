@@ -13,7 +13,6 @@
 package ch.ethz.twimight.net.opportunistic;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.Date;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -38,7 +37,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
-import ch.ethz.twimight.net.opportunistic.WlanOppComms.Neighbor;
+import ch.ethz.twimight.net.opportunistic.WlanOppCommsUdp.Neighbor;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -57,7 +56,7 @@ public class ScanningService extends Service{
 	
 	
 	// manage bluetooth communication
-	public static WlanOppComms wlanHelper = null;
+	public static WlanOppCommsUdp wlanHelper = null;
 
 	
 	private static Context context = null;
@@ -92,7 +91,7 @@ public class ScanningService extends Service{
 			dbHelper = MacsDBHelper.getInstance(this);
 			dbHelper.open();			
 	        // set up wlan opp helper			
-	        wlanHelper = new WlanOppComms(this,mHandler);						
+	        wlanHelper = new WlanOppCommsUdp(this,mHandler);						
 	        
 		}			
 		return START_STICKY; 
@@ -345,7 +344,7 @@ public class ScanningService extends Service{
 				}
 				c.moveToNext();				
 			}	
-			//send data here
+			//send data here			
 			wlanHelper.write(jarray.toString(), n.ipAddress);
 		}
 		
