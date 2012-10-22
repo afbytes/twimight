@@ -6,99 +6,25 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.database.ContentObserver;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
-import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.util.Constants;
 
-public class WlanOppCommsUdp {
+public class WlanOppCommsUdp extends OppComms {    
 		
-	    private static final String TAG = WlanOppComms.class.getSimpleName();
-	
-        public static final long MIN_UPDATE_INTERVAL = 30*1000L; /** Interval FOR UPDATES */
-	    public static final long MAX_UPDATE_INTERVAL = 60*1000L + MIN_UPDATE_INTERVAL; /** Interval FOR UPDATES */
-	    private long lastUpdate;
-	    
-	    private List<Neighbor> neighbors = new CopyOnWriteArrayList<Neighbor>();
-		private List<Neighbor> new_neighbors = new CopyOnWriteArrayList<Neighbor>();
-		private ContentObserver neighborObserver;
-		private Cursor neighborCursor;
-		private ContentResolver resolver;
-		private final String[] projection = { "ip", "device_id" };
-		private final int PORT = 19761;
-		private final Handler mHandler;
-		
-		ListeningTask lTask = null;
-	    
-		private MacsDBHelper dbHelper;
-		
-		public class Neighbor{
-			public String ipAddress;
-			public String id;
-			public long time;
-		}
-
-		private ServiceConnection connection = null ;
-		Context context;
+		ListeningTask lTask = null;		
 		
 		public WlanOppCommsUdp(Context context, Handler handler) {
-			this.context = context;
-			bindWifiOppService();
-			dbHelper = MacsDBHelper.getInstance(context);
-			dbHelper.open();		
-			resolver = context.getContentResolver();
-			mHandler = handler;
-			startNeighborUpdates();
-			startListeningSocket();			
-			
-		}
-		
-		public void stop() {
-			Log.i(TAG,"inside stop");
-			stopListeningSocket();
-			stopNeighborUpdates();
-			unbindWifiOppService();			
-			Log.i(TAG,"exiting stop");
-		}
-		
-		private void bindWifiOppService (){
-			connection = new ServiceConnection(){
-				@Override
-				public void onServiceDisconnected (ComponentName arg0 ) {
-					connection = null ;
-				}
-				@Override
-				public void onServiceConnected (ComponentName arg0 , IBinder arg1 ){
-					// do nothing
-				}
-			};
-			Intent intent = new Intent ("ch.ethz.csg.burundi.BIND_SERVICE" );
-			context.bindService(intent, connection , Context.BIND_AUTO_CREATE );
-		}
-
-		private void unbindWifiOppService (){
-			if ( connection != null ){
-				context.unbindService ( connection );
-				connection = null ;
-			}
+			super(context,handler);
 		}
 		
 		public void write(String data, String ip) {		
 			Log.i(TAG,"inside write");
-			new SendingTask(ip,data).start();
-			
+			new SendingTask(ip,data).start();			
 			
 		}
 		
@@ -107,34 +33,11 @@ public class WlanOppCommsUdp {
 			for (Neighbor n : neighbors) {
 				new SendingTask(n.ipAddress,data).start();
 			}
-		}
+		}		
+	
 		
-		private void startNeighborUpdates(){
-			neighborObserver = new ContentObserver(new Handler()){
-				@Override
-				public void onChange(boolean selfChange){
-					super.onChange(selfChange);
-					if (System.currentTimeMillis() > (lastUpdate + MIN_UPDATE_INTERVAL ) ) {					
-						updateNeighbors();
-					}
-					
-				}
-			};
-			updateNeighbors();
-			context.getContentResolver().registerContentObserver(Uri.parse("content://ch.ethz.csg.burundi.NeighborProvider/dictionary"), false, neighborObserver);
-		}
-
-		private void stopNeighborUpdates(){
-			context.getContentResolver().unregisterContentObserver(neighborObserver);
-		}
-		
-		public void forceNeighborUpdate() {
-			Log.i(TAG,"forcing neighbor update");
-			updateNeighbors();
-		}
-
 		/** Updates the local list of available neighbors **/
-		private void updateNeighbors(){
+		protected void updateNeighbors(){
 			Log.i(TAG, "Update Neighbors...");
 			lastUpdate = System.currentTimeMillis();
 			//List<Neighbor> old = neighbors;
@@ -180,12 +83,12 @@ public class WlanOppCommsUdp {
 			
 		}
 		
-		private void startListeningSocket(){
+		protected void startListeningSocket(){
 			lTask = new ListeningTask();
 			lTask.start();
 		}
 		
-		private void stopListeningSocket(){
+		protected void stopListeningSocket(){
 			lTask.cancel();
 			lTask = null;
 		}
