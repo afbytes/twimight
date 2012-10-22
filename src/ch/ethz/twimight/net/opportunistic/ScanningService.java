@@ -37,7 +37,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
-import ch.ethz.twimight.net.opportunistic.WlanOppCommsUdp.Neighbor;
+import ch.ethz.twimight.net.opportunistic.OppComms.Neighbor;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -56,7 +56,7 @@ public class ScanningService extends Service{
 	
 	
 	// manage bluetooth communication
-	public static WlanOppCommsUdp wlanHelper = null;
+	public static OppComms wlanHelper = null;
 
 	
 	private static Context context = null;
@@ -87,7 +87,7 @@ public class ScanningService extends Service{
 			context = this;
 			handler = new Handler();
 			updateTimeout = new UpdateTimeout();
-			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
+			handler.postDelayed(updateTimeout, OppComms.MAX_UPDATE_INTERVAL);
 			dbHelper = MacsDBHelper.getInstance(this);
 			dbHelper.open();			
 	        // set up wlan opp helper			
@@ -117,11 +117,11 @@ public class ScanningService extends Service{
 		@Override
 		public void run() {
 			Log.i(TAG,"inside update timeout");
-			if (System.currentTimeMillis() > lastDataExchange + WlanOppComms.MAX_UPDATE_INTERVAL) {
+			if (System.currentTimeMillis() > lastDataExchange + OppComms.MAX_UPDATE_INTERVAL) {
 				wlanHelper.forceNeighborUpdate();
 				Log.i(TAG,"update timeout went off");
 			}
-			handler.postDelayed(updateTimeout, WlanOppComms.MAX_UPDATE_INTERVAL);
+			handler.postDelayed(updateTimeout, OppComms.MAX_UPDATE_INTERVAL);
 		}
 		
 	}

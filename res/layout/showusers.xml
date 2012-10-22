@@ -26,9 +26,15 @@
 
 
 	</LinearLayout>
-	<ListView android:layout_height="fill_parent"
-		android:layout_width="fill_parent" android:id="@+id/userList"
-		android:fastScrollEnabled="true" android:scrollingCache="true" />
+
+	<ListView
+	    android:id="@+id/userList"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:divider="@color/twimightBackgroundLight"
+	    android:fastScrollEnabled="true"
+	    android:scrollingCache="true" />
+
 	<TextView android:id="@+id/userListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:text="No users (loading..)" android:textSize="16sp"
