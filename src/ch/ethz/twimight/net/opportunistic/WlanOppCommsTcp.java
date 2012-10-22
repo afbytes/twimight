@@ -104,10 +104,10 @@ public class WlanOppCommsTcp extends OppComms {
 		}
 
 		neighborCursor.moveToFirst();
-		while (!neighborCursor.isAfterLast()){
-			Neighbor temp = new Neighbor();
-			temp.ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
-			temp.id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
+		while (!neighborCursor.isAfterLast()){			
+		    String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
+			String id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
+			Neighbor temp = new Neighbor(ipAddress,id);
 			temp.time = System.currentTimeMillis();
 			neighbors.add(temp);	
 			

@@ -1,5 +1,6 @@
 package ch.ethz.twimight.net.opportunistic;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -11,6 +12,7 @@ import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -39,6 +41,11 @@ public abstract class OppComms {
 		public String ipAddress;
 		public String id;
 		public long time;
+		
+		public Neighbor(String ipAddress, String id ){
+			this.ipAddress = ipAddress;
+			this.id = id;
+		}
 	}
 	
 	ServiceConnection connection = null ;
@@ -116,8 +123,24 @@ public abstract class OppComms {
 	protected abstract void startListeningSocket();
 	
 	protected abstract void stopListeningSocket();
-	
+
 	protected abstract void write(String data, String ip);
 
+	protected boolean isApEnabled() {
+		WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+		Method[] wmMethods = wifi.getClass().getDeclaredMethods();
+		for(Method method: wmMethods){
+			if(method.getName().equals("isWifiApEnabled")) {
 
+				try {
+					return (Boolean)method.invoke(wifi);
+				} catch (Exception e) {
+					Log.e(TAG,"error during reflection",e);
+
+				} 
+			}
+
+		}
+		return false;
+	}
 }

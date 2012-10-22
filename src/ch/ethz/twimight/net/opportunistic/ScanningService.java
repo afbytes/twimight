@@ -171,8 +171,7 @@ public class ScanningService extends Service{
 		public void handleMessage(Message msg) {
 			switch (msg.what) {          
 
-			case Constants.MESSAGE_READ:  
-				Log.i(TAG, "got message");  
+			case Constants.MESSAGE_READ:  				
 				new ProcessDataReceived().execute(msg.obj.toString());								
 				break; 			
 				

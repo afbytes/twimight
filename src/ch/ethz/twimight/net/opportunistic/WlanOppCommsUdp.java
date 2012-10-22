@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
@@ -47,10 +48,10 @@ public class WlanOppCommsUdp extends OppComms {
 			}
 
 			neighborCursor.moveToFirst();
-			while (!neighborCursor.isAfterLast()){
-				Neighbor temp = new Neighbor();
-				temp.ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
-				temp.id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
+			while (!neighborCursor.isAfterLast()){				
+				String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
+				String id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
+				Neighbor temp = new Neighbor(ipAddress,id);
 				temp.time = System.currentTimeMillis();
 				neighbors.add(temp);							
 				neighborCursor.moveToNext();
@@ -89,8 +90,11 @@ public class WlanOppCommsUdp extends OppComms {
 		}
 		
 		protected void stopListeningSocket(){
-			lTask.cancel();
-			lTask = null;
+			if (lTask != null) {
+				lTask.cancel();
+				lTask = null;
+			}
+			
 		}
 		
 		
@@ -104,37 +108,45 @@ public class WlanOppCommsUdp extends OppComms {
 					ds = null;
 				}					
 			}			
-			
+
 			@Override
 			public synchronized void run(){
-				
+
 				byte[] msg = new byte[65535];
-			    DatagramPacket dp = new DatagramPacket(msg, msg.length);   
-			    
-			    try {
-			    	
-			    	ds = new DatagramSocket(PORT);
-			    	while(ds != null) {			    		    
-					        //disable timeout for testing
-					        //ds.setSoTimeout(100000);
-					        ds.receive(dp);					        
-					        String data = new String(dp.getData(), 0, dp.getLength());
-					        mHandler.obtainMessage(Constants.MESSAGE_READ, -1, -1, data).sendToTarget();	
-					        
-					        Log.i(TAG,"UDP packet received");
-			    	}		      
-			        
-			    } catch (SocketException e) {
-			    	 Log.e(TAG,"SocketException",e);
+				DatagramPacket dp = new DatagramPacket(msg, msg.length);   
 
-			    } catch (IOException e) {
-			    	 Log.e(TAG,"IOException",e);
+				try {
 
-			    } finally {
-			        if (ds != null) {
-			            ds.close();
-			        }
-			    }				
+					ds = new DatagramSocket(PORT);
+					while(ds != null) {			    		    
+						//disable timeout for testing
+						//ds.setSoTimeout(100000);
+						ds.receive(dp);					        
+						String data = new String(dp.getData(), 0, dp.getLength());
+						if (isApEnabled()) {
+							Log.i(TAG,"wifi AP enabled");
+							ArrayList<Neighbor> temp = new ArrayList<Neighbor>();
+							Neighbor neigh = new Neighbor(dp.getAddress().getHostAddress(),null);
+							temp.add(neigh);
+							mHandler.obtainMessage(Constants.MESSAGE_NEW_NEIGHBORS, -1, -1,temp )
+							.sendToTarget();
+						}
+						mHandler.obtainMessage(Constants.MESSAGE_READ, -1, -1, data).sendToTarget();	
+
+						Log.i(TAG,"UDP packet received");
+					}		      
+
+				} catch (SocketException e) {
+					Log.e(TAG,"SocketException",e);
+
+				} catch (IOException e) {
+					Log.e(TAG,"IOException",e);
+
+				} finally {
+					if (ds != null) {
+						ds.close();
+					}
+				}				
 			}
 		};	
 		
@@ -180,8 +192,9 @@ public class WlanOppCommsUdp extends OppComms {
 		}
 		
 		
-		
 	}	
+	
+	
 	    
 		
 
