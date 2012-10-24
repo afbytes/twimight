@@ -79,7 +79,7 @@ public class ScanningService extends Service{
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
-		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());		
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());		
 		
 		getWakeLock(this);
 			

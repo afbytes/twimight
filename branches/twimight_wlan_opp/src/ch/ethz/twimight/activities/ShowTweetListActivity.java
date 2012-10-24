@@ -12,21 +12,14 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +31,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
@@ -46,7 +38,6 @@ import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -64,7 +55,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private ImageButton favoritesButton;
 	private ImageButton mentionsButton;
 	private ImageButton tweetButton;
-	private ImageButton searchButton;
+	private LinearLayout headerBar;
+	private ImageButton disasterButton;
 
 	private TweetAdapter adapter;
 	private Cursor c;
@@ -73,9 +65,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	public static boolean running= false;
 	
-	// handler
-	static Handler handler;
-
 	// the menu
 	private static final int OPTIONS_MENU_PROFILE = 10;
 	private static final int OPTIONS_MENU_MESSAGES = 20;
@@ -85,6 +74,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private static final int OPTIONS_MENU_PAIR= 80;
 	private static final int OPTIONS_MENU_HTML= 90;
 	private static final int OPTIONS_MENU_FEEDBACK= 100;
+	private static final int OPTIONS_MENU_SEARCH= 110;
 
 	public static final int SHOW_TIMELINE = 1;
 	public static final int SHOW_FAVORITES = 2;
@@ -99,9 +89,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	LocationHelper locHelper ;
 	long timestamp;
 	Intent intent;
-	ConnectivityManager cm;
-	StatisticsDBHelper locDBHelper;	
-	CheckLocation checkLocation;
+
+	
+	
 	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
 	
 	//EVENTS
@@ -119,17 +109,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		setContentView(R.layout.main);	
 		
-		//statistics
-		locDBHelper = new StatisticsDBHelper(this);
-		locDBHelper.open();
-		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+		
 		timestamp = System.currentTimeMillis();
-		locHelper = new LocationHelper(this);
-		handler = new Handler();
-		checkLocation = new CheckLocation();
-		handler.postDelayed(checkLocation, 1*60*1000L);
-
-	    
+					    
 		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
 		
 		running = true;
@@ -167,30 +149,43 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			}
 		});
 
-		searchButton = (ImageButton) findViewById(R.id.headerBarSearchButton);
-		searchButton.setOnClickListener(new OnClickListener(){
+		tweetButton = (ImageButton) findViewById(R.id.headerBarTweetButton);
+		tweetButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				onSearchRequested();
+				startActivity(new Intent(getBaseContext(), NewTweetActivity.class));
 			}
 		});
 		
 		
+		disasterButton = (ImageButton) findViewById(R.id.headerBarDisasterModeButton);
+		disasterButton.setOnClickListener(new OnClickListener(){
+			
+			boolean pressed = false;		
+			
+			@Override
+			public void onClick(View v) {					
+				if ( LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null && !pressed) {
+					PrefsActivity.enableDisasterMode(getBaseContext()); 	
+					pressed = true;
+					setDisasterPreference(true);
+				} else if (pressed) {
+					PrefsActivity.disableDisasterMode(getBaseContext());
+					pressed = false;
+					setDisasterPreference(false);
+				} 
+				setTopBarBackground();
+			}
+		});
+		
 
 	}
 	
-	private class CheckLocation implements Runnable {
-
-		@Override
-		public void run() {
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
-				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
-				locHelper.unRegisterLocationListener();
-			} else {}
-			
-		}
 		
+	private void setDisasterPreference( boolean value) {
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+		editor.putBoolean("prefDisasterMode", value);
+		editor.commit();
 	}
 	
 
@@ -231,33 +226,31 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		Long pauseTimestamp =  getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {
-			handler = new Handler();			
-			handler.post(new CheckLocation());
-			
-		}
+						
+		}	
 		
 		// Are we in disaster mode?
-		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);
-		
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
-		} else {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background);
-		}
-		
+		setTopBarBackground();	
 		
 		if(positionIndex != 0 | positionTop !=0){
 			timelineListView.setSelectionFromTop(positionIndex, positionTop);
 		}
 	}
 	
-	
-    
 
+
+	private void setTopBarBackground() {
+		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBar);		
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
+		} else {
+			headerBar.setBackgroundResource(R.drawable.top_bar_background);
+		}
+	}
 
 	@Override
 	protected void onPause() {
-		
+
 		super.onPause();
 		setOnPauseTimestamp(System.currentTimeMillis(), this);
 	}
@@ -308,27 +301,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		favoritesButton.setOnClickListener(null);
 		mentionsButton.setOnClickListener(null);
 		tweetButton.setOnClickListener(null);
-		searchButton.setOnClickListener(null);
+		
 
 		timelineListView.setOnItemClickListener(null);
-		timelineListView.setAdapter(null);	
+		timelineListView.setAdapter(null);		
 		
-	
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
-			if (locHelper.count > 0) {			
-				locHelper.unRegisterLocationListener();
-				handler.removeCallbacks(checkLocation);				
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
-			} else {}
-		}
-		
-		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
-			locHelper.unRegisterLocationListener();			
-			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
-		} else {}
-
-		if(c!=null) c.close();
-				
+		if(c!=null) c.close();				
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
@@ -352,6 +330,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(5, OPTIONS_MENU_LOGOUT, 8, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 7, "About").setIcon(R.drawable.ic_menu_info_details);
 		menu.add(7, OPTIONS_MENU_FEEDBACK, 6, "Feedback").setIcon(R.drawable.ic_menu_edit);
+		menu.add(7, OPTIONS_MENU_SEARCH, 9, "Search").setIcon(R.drawable.ic_menu_search);
 		return true;
 	}
 
@@ -416,9 +395,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		case OPTIONS_MENU_FEEDBACK:
 			// Launch FeedbacktActivity
 			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
-			startActivity(i);
-			//i = new Intent(this, FeedbackActivity.class);
-			//startActivity(i);    
+			startActivity(i);			 
+			break;
+		case OPTIONS_MENU_SEARCH:
+			onSearchRequested();		 
 			break;
 		default:
 			return false;
@@ -550,8 +530,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private void resetButtons(){
 		timelineButton.setEnabled(true);
 		favoritesButton.setEnabled(true);
-		mentionsButton.setEnabled(true);
-		searchButton.setEnabled(true);
+		mentionsButton.setEnabled(true);		
 		tweetButton.setEnabled(true);
 	}
 	

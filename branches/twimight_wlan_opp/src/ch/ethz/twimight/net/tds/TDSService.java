@@ -40,7 +40,6 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
@@ -382,12 +381,7 @@ public class TDSService extends Service {
 				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
 				tds.createFollowerObject(fm.getLastUpdate());
 				
-				//send statistics
-				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
-				statisticAdapter.open();
-				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
 				
-
 			} catch(Exception e) {
 				Log.e(TAG, "Exception while assembling request");
 				return false;
@@ -407,10 +401,7 @@ public class TDSService extends Service {
 			Log.i(TAG, "success");
 			try {
 				
-				//delete old logs
-				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
-				statHelper.open();
-				statHelper.deleteOldData();
+				
 				
 				// authentication
 				String twitterId = tds.parseAuthentication();				

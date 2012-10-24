@@ -43,7 +43,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
@@ -90,8 +89,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	//LOGS
 		LocationHelper locHelper ;	
 		Intent intent;
-		ConnectivityManager cm;
-		StatisticsDBHelper locDBHelper;	
+		ConnectivityManager cm;		
 		
 	/** 
 	 * Called when the activity is first created. 
@@ -99,11 +97,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.showtweet);		
+		setContentView(R.layout.showtweet);			
 		
-		
-		locDBHelper = new StatisticsDBHelper(this);
-		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
 		locHelper = new LocationHelper(this);
 				
@@ -412,13 +407,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         }  
       
         @Override  
-        public void onClick(View widget) {  
-           
+        public void onClick(View widget) {    
         	
-        	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
-    			locHelper.unRegisterLocationListener();    			
-    			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
-    		} else {}
+        	
         	Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         	startActivity(intent);
         }  

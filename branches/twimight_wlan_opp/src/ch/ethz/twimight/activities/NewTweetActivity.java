@@ -37,8 +37,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.StatisticsDBHelper;
-import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.util.Constants;
@@ -68,11 +66,9 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	
 	private TextWatcher textWatcher;
 	
-	//LOGS
-		LocationHelper locHelper ;
-		long timestamp;		
-		ConnectivityManager cm;
-		StatisticsDBHelper locDBHelper;	
+	
+	long timestamp;		
+		
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -82,13 +78,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tweet);
 		
-		//Statistics
-		locDBHelper = new StatisticsDBHelper(this);
-		locDBHelper.open();
-		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
-		locHelper = new LocationHelper(this);
-
-		//
+		
 		cancelButton = (Button) findViewById(R.id.tweet_cancel);
 		cancelButton.setOnClickListener(new OnClickListener(){
 
@@ -233,8 +223,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	public void onDestroy(){
 		super.onDestroy();
 		
-		if (locHelper!= null) 
-			locHelper.unRegisterLocationListener();	
+		
 		
 		locationButton.setOnClickListener(null);
 		locationButton = null;
@@ -269,11 +258,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			boolean result=false;
 			
 			timestamp = System.currentTimeMillis();
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
-				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
-				locHelper.unRegisterLocationListener();
-			}
+		
 			// if no connectivity, notify user that the tweet will be send later		
 				
 				ContentValues cv = createContentValues(); 

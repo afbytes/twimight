@@ -123,7 +123,7 @@ public class PrefsActivity extends PreferenceActivity{
 	/**
 	 * Enables Bluetooth when Disaster Mode get's enabled.
 	 */
-	private void enableDisasterMode(Context context) {
+	public static void enableDisasterMode(Context context) {
 		Intent in = new Intent(context, ScanningService.class);
 		context.startService(in);			 
 		
