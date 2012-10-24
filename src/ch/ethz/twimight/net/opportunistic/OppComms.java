@@ -22,8 +22,8 @@ public abstract class OppComms {
 	
 	static final String TAG = OppComms.class.getSimpleName();
 
-	public static final long MIN_UPDATE_INTERVAL = 30*1000L; /** Interval FOR UPDATES */
-	public static final long MAX_UPDATE_INTERVAL = 60*1000L + MIN_UPDATE_INTERVAL; /** Interval FOR UPDATES */
+	public static final long MIN_UPDATE_INTERVAL = 10*1000L; /** Interval FOR UPDATES */
+	public static final long MAX_UPDATE_INTERVAL = 30*1000L; /** Interval FOR UPDATES */
 	long lastUpdate;
 
 	List<Neighbor> neighbors = new CopyOnWriteArrayList<Neighbor>();
@@ -32,7 +32,7 @@ public abstract class OppComms {
 	Cursor neighborCursor;
 	ContentResolver resolver;
 	final String[] projection = { "ip", "device_id" };
-	final int PORT = 19761;
+	final int PORT = 29761;
 	final Handler mHandler;
 
 	MacsDBHelper dbHelper;

@@ -26,8 +26,8 @@
     
    	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
 		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
-		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
-		<CheckBoxPreference android:title="Location Updates" android:key="prefLocationUpdates" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!"></CheckBoxPreference>
+		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
+		<CheckBoxPreference android:title="Location Updates" android:key="prefLocationUpdates" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!"></CheckBoxPreference>
 	</PreferenceCategory>
    	
    	

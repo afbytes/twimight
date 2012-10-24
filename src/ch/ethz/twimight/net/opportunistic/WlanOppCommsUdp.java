@@ -29,8 +29,7 @@ public class WlanOppCommsUdp extends OppComms {
 			
 		}
 		
-		public void broadcast(String data) {
-			
+		public void broadcast(String data) {			
 			for (Neighbor n : neighbors) {
 				new SendingTask(n.ipAddress,data).start();
 			}
@@ -137,10 +136,11 @@ public class WlanOppCommsUdp extends OppComms {
 					}		      
 
 				} catch (SocketException e) {
-					Log.e(TAG,"SocketException",e);
+					startListeningSocket();
 
 				} catch (IOException e) {
 					Log.e(TAG,"IOException",e);
+					startListeningSocket();
 
 				} finally {
 					if (ds != null) {
