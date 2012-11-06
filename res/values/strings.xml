@@ -1,54 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (c) 2011 ETH Zurich.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the GNU Public License v2.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+  
+  Contributors:
+      Paolo Carta - Implementation
+      Theus Hossmann - Implementation
+      Dominik Schatzmann - Message specification
+-->
 <resources>
+    <string name="hello">Hello World, BluetestActivity!</string>
+    <string name="app_name">Twimight</string>
+    <string name="app_label">Twimight</string>
+    <string name="search_hint">Search tweets and users</string>
+    <string name="permDescription">This permission will grant access to content providers. Data might be manipulated by malicious applications</string>
     
-<string name="app_name">Twimight</string>
-<string name="oauth_name">OAuth</string>
-<string name="timeline_label">Timeline</string>
-<string name="friends_label">Friends</string>
-<string name="titlePrefs">Settings</string>
-<string name="labelOAuth">Authorize</string>
-<string name="titleExit">Exit</string>
-<string name="searchHint">Search hashtags or users</string>
-   <string name="labelTimeline">Timeline</string>
-     <string name="permDescription">The app will be allowed to broadcast tweets</string>
-    
+        <!--  DeviceListActivity -->
+    <string name="scanning">scanning for devices...</string>
+    <string name="select_device">select a device to be added</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_other_devices">Available Devices</string>
+    <string name="button_scan">Scan for devices</string>
+    <string name="conditions">By clicking &quot;I Agree&quot; below, I agree to join the Twimight Beta data
+collection. The Twimight Beta application will collect data that samples
+Twimight application usage statistics and my location during application
+usage.
 
- <!--  Database -->
-   <string name="sql">CREATE table timeline ( _id INTEGER NOT NULL
-      PRIMARY KEY,created_at INTEGER  NOT NULL , status TEXT NOT NULL, userCode INTEGER NOT NULL,
-       isDisaster INTEGER, isFavorite INTEGER);</string>
-      
-    <string name="sqlDisaster">CREATE table DisasterTable ( _id INTEGER NOT NULL PRIMARY KEY
-     , created_at INTEGER NOT NULL, added_at INTEGER, status TEXT NOT NULL, userCode INTEGER NOT NULL, sent_by TEXT,
-      isFromServer INTEGER NOT NULL, hasBeenSent INTEGER, isValid INTEGER NOT NULL, hopCount INTEGER, signature BLOB);</string>
-        
-    <string name="sqlAddresses">CREATE table AddressesTable ( _mac TEXT NOT NULL PRIMARY KEY,
-     met_at INTEGER NOT NULL, tweetsNumber INTEGER NOT NULL );</string>
-     
-     <string name="sqlFavorites">CREATE table FavoritesTable ( _id INTEGER NOT NULL
-        PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, userCode INTEGER NOT NULL);</string> 
+I understand that access to any data collected will only be allowed
+to the members of the Twimight research team and only for the purpose of
+research performed in the context of the Twimight project. Any published
+results of this study will only refer to anonymised and obfuscated data,
+and aggregated statistics that do not reveal the identities of the
+participants. As a participant I have the right to opt out of this study at
+any time during this experiment by uninstalling the application. Moreover,
+I have the right to access any information in the data set related to me,
+and request for all collected data to be removed. As a user of Twimight
+Beta I may participate in the Twimight Beta online competition.</string>
     
-    <string name="sqlMentions">CREATE table MentionsTable ( _id INTEGER NOT NULL
-       PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, userCode INTEGER NOT NULL, isDisaster INTEGER);</string> 
-    
-    <string name="sqlProfilePictures">CREATE table PicturesTable ( user TEXT NOT NULL
-       PRIMARY KEY, image BLOB NOT NULL, created_at INTEGER);</string> 
-    
-    <string name="sqlDirect">CREATE table DirectMessagesTable ( _id INTEGER NOT NULL
-    	PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, user TEXT, userCode INTEGER,
-    	 isDisaster INTEGER);</string> 
-    
-    <string name="sqlSearch">CREATE table SearchTable ( _id INTEGER NOT NULL
-       PRIMARY KEY,created_at INTEGER NOT NULL, status TEXT NOT NULL, user TEXT NOT NULL,
-       userCode INTEGER NOT NULL, isDisaster INTEGER);</string> 
-    
-     <string name="sqlFriends">CREATE table FriendsTable ( _id INTEGER NOT NULL
-   		PRIMARY KEY, user TEXT NOT NULL, modulus TEXT, exponent TEXT,
-   		 isDisasterFriend INTEGER NOT NULL, isFollower INTEGER, isFollowed INTEGER);</string>   
-   		
-    <string name="sqlDirectOutgoing">CREATE table DirectOutgoingTable ( _id INTEGER NOT NULL
-    	PRIMARY KEY,created_at INTEGER NOT NULL, status BLOB NOT NULL, recipientUser TEXT NOT NULL, user BLOB NOT NULL,
-    	 isDisaster INTEGER, hasBeenSent INTEGER);</string> 
-     
-
 </resources>

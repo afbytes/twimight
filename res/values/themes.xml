@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="twimightTheme" parent="android:Theme"> 
-        <item name="android:windowTitleBackgroundStyle">@style/WindowTitleNormalBackground</item>   
+    <style name="Twimight" parent="android:style/Theme.Black">
+        <item name="android:buttonStyle">@style/Button</item>
+        <item name="android:imageButtonStyle">@style/ImageButton</item>
+        <item name="android:windowBackground">@color/twimightBackgroundLight</item>
+    	<item name="android:colorBackground">@color/twimightBackgroundLight</item>
+    	<item name="android:textAppearance">@style/twimightDefaultTextAppearance</item>
     </style>
-    <style name="twimightDisasterTheme" parent="android:Theme"> 
-        <item name="android:windowTitleBackgroundStyle">@style/WindowTitleDisasterBackground</item>   
-    </style> 
 </resources>
