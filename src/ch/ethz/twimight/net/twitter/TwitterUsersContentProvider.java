@@ -13,6 +13,8 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.FileNotFoundException;
+
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -21,6 +23,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import ch.ethz.twimight.data.DBOpenHelper;
 
@@ -71,6 +74,24 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 		return true;
 	}
+	
+	 /**
+     * Provides read only access to files that have been downloaded and stored
+     * in the provider cache. Specifically, in this provider, clients can
+     * access the files of downloaded images.
+     */
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode)
+            throws FileNotFoundException
+    {
+    	Log.i(TAG," inside openFile");
+    	// only support read only files
+        if (!"r".equals(mode.toLowerCase())) {
+            throw new FileNotFoundException("Unsupported mode, " + mode + ", for uri: " + uri);
+        }
+
+        return openFileHelper(uri, mode);       
+    }
 
 	/**
 	 * Returns the MIME types (defined in TwitterUsers) of a URI
