@@ -12,6 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -367,14 +369,21 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			
 			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
-			InternalStorageHelper helper = new InternalStorageHelper(this);
-			byte[] imageByteArray = helper.readImage(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
-			if (imageByteArray != null) {				
-				//is = context.getContentResolver().openInputStream(uri);				
-				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-				picture.setImageBitmap(bm);	
-			} else
+			int userId = c.getInt(c.getColumnIndex("userRowId"));
+			Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+			InputStream is;
+			
+			try {
+				is = getContentResolver().openInputStream(imageUri);
+				if (is != null) {						
+					Bitmap bm = BitmapFactory.decodeStream(is);
+					picture.setImageBitmap(bm);	
+				} else
+					picture.setImageResource(R.drawable.default_profile);
+			} catch (FileNotFoundException e) {
+				Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
+			}	
 		}
 		
 	}
