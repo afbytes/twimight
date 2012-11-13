@@ -108,10 +108,14 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText1"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with posting this Tweet (maybe no Internet connection?). We will re-try soon."
-				style="@style/twimightDefaultTextAppearance" />
+
+			<TextView
+			    android:id="@+id/showTweetInfoText1"
+			    style="@style/twimightDefaultTextAppearance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="This tweet will be posted soon (when Internet connection available)." />
+
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetTodelete"
@@ -122,11 +126,15 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText2"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with deleting this Tweet (maybe no Internet connection?). We will re-try soon.
-				Press to abort operation"
-				style="@style/twimightDefaultTextAppearance" />
+
+			<TextView
+			    android:id="@+id/showTweetInfoText2"
+			    style="@style/twimightDefaultTextAppearance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="This tweet will be deleted soon (when Internet connection available). 
+				Press to abort operation" />
+
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetTofavorite"
@@ -137,10 +145,14 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText3"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with favoriting this Tweet (maybe no Internet connection?). We will re-try soon."
-				style="@style/twimightDefaultTextAppearance" />
+
+			<TextView
+			    android:id="@+id/showTweetInfoText3"
+			    style="@style/twimightDefaultTextAppearance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="This tweet will be marked as favorite soon (when Internet connection available)." />
+
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetTounfavorite"
@@ -151,10 +163,14 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText4"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with un-favoriting this Tweet (maybe no Internet connection?). We will re-try soon."
-				style="@style/twimightDefaultTextAppearance" />
+
+			<TextView
+			    android:id="@+id/showTweetInfoText4"
+			    style="@style/twimightDefaultTextAppearance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="This tweet will be un-favorited soon (when Internet connection available)." />
+
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetToretweet"
@@ -165,10 +181,14 @@
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:src="@android:drawable/ic_dialog_alert"
 				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText5"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Something went wrong with retweeting this Tweet (maybe no Internet connection?). We will re-try soon."
-				style="@style/twimightDefaultTextAppearance" />
+
+			<TextView
+			    android:id="@+id/showTweetInfoText5"
+			    style="@style/twimightDefaultTextAppearance"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:text="This retweet will be posted soon (when Internet connection available)." />
+
 		</LinearLayout>
 
 		<LinearLayout android:id="@+id/showTweetButtons"

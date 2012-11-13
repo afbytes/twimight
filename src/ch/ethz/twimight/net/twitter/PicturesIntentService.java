@@ -60,6 +60,7 @@ public class PicturesIntentService extends IntentService {
 		for (int i=0; i<cv.length; i++) {				
 															
 			insertProfileImageIntoInternalStorage(pictures.get(i),screenNames.get(i));
+			//cursorArray[i].getInt(cursorArray[i].getColumnIndex("_id"));
 			
 			cv[i]= new ContentValues();
 			cv[i].put("_id", rowIds[i]);

@@ -84,13 +84,15 @@ public class TwitterUsersContentProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException
     {
-    	Log.i(TAG," inside openFile");
+    	Log.d(TAG," inside openFile");
     	// only support read only files
-        if (!"r".equals(mode.toLowerCase())) {
-            throw new FileNotFoundException("Unsupported mode, " + mode + ", for uri: " + uri);
+        if ("r".equals(mode.toLowerCase())) {
+        	return openFileHelper(uri, mode);       
+        } else {
+        	return null;
         }
 
-        return openFileHelper(uri, mode);       
+        
     }
 
 	/**
