@@ -34,6 +34,7 @@ public abstract class OppComms {
 	final String[] projection = { "ip", "device_id" };
 	final int PORT = 29761;
 	final Handler mHandler;
+	private boolean isBinded = false;
 
 	MacsDBHelper dbHelper;
 	
@@ -58,17 +59,17 @@ public abstract class OppComms {
 		dbHelper.open();		
 		resolver = context.getContentResolver();
 		mHandler = handler;
-		startNeighborUpdates();
-		startListeningSocket();			
 		
 	}
 	
 	public void stop() {
-		Log.i(TAG,"inside stop");
-		stopListeningSocket();
-		stopNeighborUpdates();
+		
 		unbindWifiOppService();			
-		Log.i(TAG,"exiting stop");
+		if (isBinded) {
+			stopListeningSocket();
+			stopNeighborUpdates();			
+		}	
+		
 	}
 	
 	private void bindWifiOppService (){
@@ -76,10 +77,13 @@ public abstract class OppComms {
 			@Override
 			public void onServiceDisconnected (ComponentName arg0 ) {
 				connection = null ;
+				isBinded = false;
 			}
 			@Override
-			public void onServiceConnected (ComponentName arg0 , IBinder arg1 ){
-				// do nothing
+			public void onServiceConnected (ComponentName name , IBinder service ){
+				startNeighborUpdates();
+				startListeningSocket();
+				isBinded = true;
 			}
 		};
 		Intent intent = new Intent ("ch.ethz.csg.burundi.BIND_SERVICE" );
@@ -88,7 +92,7 @@ public abstract class OppComms {
 
 	private void unbindWifiOppService (){
 		if ( connection != null ){
-			context.unbindService ( connection );
+			context.unbindService(connection);
 			connection = null ;
 		}
 	}
@@ -114,8 +118,8 @@ public abstract class OppComms {
 	
 
 	public void forceNeighborUpdate() {
-		Log.i(TAG,"forcing neighbor update");
-		updateNeighbors();
+		if (isBinded)
+			updateNeighbors();
 	}
 	
 	protected abstract void updateNeighbors();
