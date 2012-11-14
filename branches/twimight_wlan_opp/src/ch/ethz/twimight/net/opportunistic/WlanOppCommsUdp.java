@@ -45,41 +45,44 @@ public class WlanOppCommsUdp extends OppComms {
 			if (neighborCursor == null || neighborCursor.isClosed()){
 				neighborCursor = resolver.query(Uri.parse("content://ch.ethz.csg.burundi.NeighborProvider/dictionary"), projection, null, null, null);
 			}
-
-			neighborCursor.moveToFirst();
-			while (!neighborCursor.isAfterLast()){				
-				String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
-				String id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
-				Neighbor temp = new Neighbor(ipAddress,id);
-				temp.time = System.currentTimeMillis();
-				neighbors.add(temp);							
-				neighborCursor.moveToNext();
-			}
 			
-			neighborCursor.close();
-			
-			// Check added
-			/*
-			new_neighbors = new CopyOnWriteArrayList<Neighbor>();
-			for(Neighbor n : neighbors){
-				boolean found = false;
-				for(Neighbor o : old){
-					if(o.ipAddress.equals(n.ipAddress) && o.id.equals(n.id)){
-						found = true;
-						break;
+			if (neighborCursor == null || neighborCursor.isClosed()){
+				neighborCursor.moveToFirst();
+				while (!neighborCursor.isAfterLast()){				
+					String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
+					String id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
+					Neighbor temp = new Neighbor(ipAddress,id);
+					temp.time = System.currentTimeMillis();
+					neighbors.add(temp);							
+					neighborCursor.moveToNext();
+				}
+				
+				neighborCursor.close();
+				
+				// Check added
+				/*
+				new_neighbors = new CopyOnWriteArrayList<Neighbor>();
+				for(Neighbor n : neighbors){
+					boolean found = false;
+					for(Neighbor o : old){
+						if(o.ipAddress.equals(n.ipAddress) && o.id.equals(n.id)){
+							found = true;
+							break;
+						}
+					}
+					if(!found){
+						// new neighbor n
+						Log.d(TAG, "Found Neighbor: "+n.ipAddress);
+						new_neighbors.add(n);
+						
 					}
 				}
-				if(!found){
-					// new neighbor n
-					Log.d(TAG, "Found Neighbor: "+n.ipAddress);
-					new_neighbors.add(n);
-					
-				}
+				*/
+				mHandler.obtainMessage(Constants.MESSAGE_NEW_NEIGHBORS, -1, -1, neighbors)
+		        .sendToTarget();	
+				//old = null;
 			}
-			*/
-			mHandler.obtainMessage(Constants.MESSAGE_NEW_NEIGHBORS, -1, -1, neighbors)
-	        .sendToTarget();	
-			//old = null;
+			
 			
 		}
 		
