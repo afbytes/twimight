@@ -115,8 +115,7 @@ public class ScanningService extends Service{
 	private class UpdateTimeout implements Runnable {
 
 		@Override
-		public void run() {
-			Log.i(TAG,"inside update timeout");
+		public void run() {			
 			if (System.currentTimeMillis() > lastDataExchange + OppComms.MAX_UPDATE_INTERVAL) {
 				wlanHelper.forceNeighborUpdate();
 				Log.i(TAG,"update timeout went off");
@@ -151,7 +150,7 @@ public class ScanningService extends Service{
 	
 	@Override
 	public void onDestroy() {
-		Log.i(TAG,"on Destroy");
+		
 		context=null;
 		releaseWakeLock();
 		handler.removeCallbacks(updateTimeout);
