@@ -41,5 +41,12 @@ any time during this experiment by uninstalling the application. Moreover,
 I have the right to access any information in the data set related to me,
 and request for all collected data to be removed. As a user of Twimight
 Beta I may participate in the Twimight Beta online competition.</string>
+    <string name="dis_mode_description">If you loose Internet connectivity, activate the disaster mode hit
+the &quot;D&quot; button in the menu bar. Disaster tweets will epidemically
+spread among all phones in disaster mode, without the need for
+Internet infrastructure (3G, WLAN).Note that while the disaster
+mode is active, your phone will not connect to the Internet through
+WLAN. If you need Internet connection and you are in range of a WLAN
+access point, disable the disaster mode.</string>
     
 </resources>
