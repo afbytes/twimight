@@ -94,6 +94,7 @@ public abstract class OppComms {
 		if ( connection != null ){
 			context.unbindService(connection);
 			connection = null ;
+			isBinded = false;
 		}
 	}
 	
