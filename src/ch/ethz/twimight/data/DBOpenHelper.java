@@ -39,7 +39,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_DMS = "dms";
 //	static final String TABLE_HTML = "html";
 
-	private static final int DATABASE_VERSION = 43;
+	private static final int DATABASE_VERSION = 44;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -95,6 +95,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "
+			+ Tweets.COL_MEDIA + " string default null, "
 			+ Tweets.COL_ISDISASTER + " integer default 0, "
 			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
