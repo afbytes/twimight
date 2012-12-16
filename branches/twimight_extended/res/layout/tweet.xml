@@ -35,7 +35,35 @@
                         android:paddingLeft="80dp" />
 
         </LinearLayout>
+        
+		<LinearLayout android:id="@+id/linearLayout_photo_view"
+                android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
 
+		    <TextView 
+		        android:id="@+id/description"
+		        android:text="desciption"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"/>    
+		    <Button
+			    android:id="@+id/upload_from_gallery"
+			    android:text="Gallery"
+			    android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+		    <Button
+			    android:id="@+id/upload_from_camera"
+			    android:text="Camera"
+			    android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+		    
+		    <ImageView 
+		        android:contentDescription="desc"
+		        android:id="@+id/image_view"
+		        android:layout_width="80dp"
+		        android:layout_height="80dp"/>
+
+        </LinearLayout>
+        
         <LinearLayout android:id="@+id/linearLayout2"
                 android:layout_width="fill_parent" android:layout_height="wrap_content">
 
