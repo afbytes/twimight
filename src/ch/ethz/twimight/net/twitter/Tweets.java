@@ -67,6 +67,7 @@ public class Tweets implements BaseColumns {
 	public static final String COL_BUFFER = "buffer_flags"; /** which buffer(s) is the tweet in */
 	public static final String COL_FLAGS = "flags"; /** Transactional flags */
 	public static final String COL_URLS = ""; /** url hashtag */
+	public static final String COL_MEDIA = "media_url";
 	
 	// for disaster mode
 	public static final String COL_ISDISASTER = "is_disaster_tweet"; /** disaster or normal tweet? */

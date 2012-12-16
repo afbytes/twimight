@@ -13,22 +13,13 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Status;
@@ -47,7 +38,6 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -1096,6 +1086,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		
 		cv.put(Tweets.COL_USER, tweet.getUser().getId());
 		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
+		
+		//insert the picture url to the database
+		//tweet.getEntities-> List<TweetEntity>
+		//
+		//cv.put(Tweets.PIC_URL, tweet.getEntities(KEntityType.media))
 		//cv.put(Tweets.COL_FLAGS, 0);
 		cv.put(Tweets.COL_BUFFER, buffer);
 		
@@ -2483,6 +2478,13 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+				/*String mediaUrl = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				boolean hasMedia = false;
+				File mediaFile = null;
+				if(mediaUrl != null){
+					mediaFile = new File(mediaUrl);
+					hasMedia = true;
+				}*/
 
 				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
 					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
@@ -2491,10 +2493,21 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					twitter.setMyLocation(null);
 				}
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
-					tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+//					if(hasMedia){
+//						tweet = twitter.updateStatusWithMedia(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)), mediaFile);
+//					}
+//					else{
+						tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+//					}
 				} else {
-					tweet = twitter.updateStatus(text);
-				}
+//					if(hasMedia){
+//						tweet = twitter.updateStatusWithMedia(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)), mediaFile);
+//					}
+//					else{
+						tweet = twitter.updateStatus(text);
+//					}
+				}//judge if there is media and update with media
+				//updateStatusWithMedia(String statusText, BigInteger inReplyToStatusId, File mediaFile)
 
 			} catch(Exception ex) { 
 				this.ex = ex;
