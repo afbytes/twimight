@@ -19,7 +19,7 @@
 			<ImageButton android:id="@+id/headerBarFavoritesButton"
 			    android:src="@drawable/ic_twimight_favorites"
 				android:layout_width="wrap_content" android:layout_height="fill_parent"
-				android:text="Favorites" 
+				android:text="Favorites"
 				android:background="@drawable/header_button" android:paddingLeft="16dp" android:paddingRight="16dp" />
 			<ImageButton android:id="@+id/headerBarMentionsButton"
 			    android:src="@drawable/ic_twimight_mentions"
