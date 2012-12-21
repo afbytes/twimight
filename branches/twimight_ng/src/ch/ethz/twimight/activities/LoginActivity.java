@@ -23,6 +23,7 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -31,9 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -58,7 +56,6 @@ import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
-import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
@@ -116,7 +113,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.login);
 		
-		
+				
 		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
 				new Intent(getIntent()), getIntent().getFlags()));
 		instance = this;
@@ -424,7 +421,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		// Start the alarm for communication with the TDS
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+			//new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 		}		
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){

@@ -14,6 +14,7 @@ package ch.ethz.twimight.activities;
 
 import java.util.Date;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,7 +36,7 @@ import ch.ethz.twimight.security.CertificateManager;
  * @author thossmann
  *
  */
-public class AboutActivity extends TwimightBaseActivity{
+public class AboutActivity extends Activity{
 
 	public static final String TAG = "AboutActivity";
 	Button revokeButton;
@@ -52,7 +53,6 @@ public class AboutActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showabout);
 		
-			
 		keyOk = (TextView) findViewById(R.id.showAboutKeys);
 		revokeButton = (Button) findViewById(R.id.showAboutRevoke);
 		CertificateManager cm = new CertificateManager(this);
@@ -124,7 +124,7 @@ public class AboutActivity extends TwimightBaseActivity{
 		revokeButton.setOnClickListener(null);
 		updateButton.setOnClickListener(null);
 		
-		unbindDrawables(findViewById(R.id.showAboutRoot));
+		//unbindDrawables(findViewById(R.id.showAboutRoot));
 
 
 	}

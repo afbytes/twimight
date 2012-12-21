@@ -13,6 +13,7 @@
 
 package ch.ethz.twimight.activities;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,7 @@ import ch.ethz.twimight.util.Constants;
  * @author thossmann
  *
  */
-public class NewDMActivity extends TwimightBaseActivity{
+public class NewDMActivity extends Activity{
 
 	private static final String TAG = "NewDMActivity";
 	
@@ -166,7 +167,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 		
 		textWatcher = null;
 		
-		unbindDrawables(findViewById(R.id.showNewDMRoot));
+		
 	}
 	
 	/**	

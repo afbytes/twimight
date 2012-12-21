@@ -61,10 +61,8 @@ public class ScanningService extends Service{
 	// manage bluetooth communication
 	public static BluetoothComms bluetoothHelper = null;
 
-	//private Date lastScan;
-			
-	private MacsDBHelper dbHelper;
-	
+	//private Date lastScan;			
+	private MacsDBHelper dbHelper;	
 	private static Context context = null;
 	
 	private Cursor cursor;

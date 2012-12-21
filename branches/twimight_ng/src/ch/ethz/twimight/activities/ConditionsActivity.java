@@ -1,5 +1,6 @@
 package ch.ethz.twimight.activities;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,8 +20,8 @@ public class ConditionsActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean termsAccepted = settings.getBoolean(TERMS, false);		  
-		
+		boolean termsAccepted = settings.getBoolean(TERMS, false);			
+			
 		if (termsAccepted) {
 			startLogin();
 			
@@ -41,7 +42,7 @@ public class ConditionsActivity extends Activity {
 					editor.putBoolean(TERMS, true);
 					editor.commit();  
 					
-					setContentView(R.layout.show_raffle);
+					setContentView(R.layout.show_tips);
 					Button buttonSkip = (Button)findViewById(R.id.buttonSkip);
 					buttonSkip.setOnClickListener(new OnClickListener() {
 

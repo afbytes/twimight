@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -42,8 +43,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	
 	// Views
 	private ListView dmUsersListView;
-	private ImageButton messageButton;
-
+	
 	private DMUserAdapter adapter;
 	private Cursor c;
 	public static boolean running= false;
@@ -84,13 +84,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 			}
 		});
 		
-		messageButton = (ImageButton) findViewById(R.id.headerBarMessageButtonDMUsers);
-		messageButton.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				startActivity(new Intent(getBaseContext(), NewDMActivity.class));
-			}
-		});
+		
 		
 
 	}
@@ -102,13 +96,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	public void onResume(){
 		super.onResume();
 		running = true;
-		// Are we in disaster mode?
-		LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarDMUsers);
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
-		} else {
-			headerBar.setBackgroundResource(R.drawable.top_bar_background);
-		}
+		
 		
 		if(positionIndex != 0 | positionTop !=0){
 			dmUsersListView.setSelectionFromTop(positionIndex, positionTop);
@@ -130,14 +118,28 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	public void onDestroy(){
 		super.onDestroy();
 		running = false;
-		messageButton.setOnClickListener(null);
-
+		
 		dmUsersListView.setOnItemClickListener(null);
 		dmUsersListView.setAdapter(null);
 
 		if(c!=null) c.close();
 				
 		unbindDrawables(findViewById(R.id.showDMUsersListRoot));
+	}
+	
+	
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		if(item.getItemId() == R.id.menu_write_tweet){		
+			startActivity(new Intent(getBaseContext(), NewDMActivity.class));	
+			
+		} else
+			super.onOptionsItemSelected(item);
+		
+		return true;
+		
 	}
 
 	/**

@@ -54,9 +54,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());
 		} 			
-		Log.i(TAG, "instantiated"); 		
-			
-		
+				
 	}	
 	
 		
@@ -124,7 +122,6 @@ public class ScanningAlarm extends BroadcastReceiver {
 				
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 			
-			Log.d(TAG, "scheduling a new Bluetooth scanning in " + Long.toString( time ));
 			AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 			
 			Intent intent = new Intent(context, ScanningAlarm.class);
@@ -133,7 +130,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			
 			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
 			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, time, Constants.SCANNING_INTERVAL+ delay, pendingIntent);
-			Log.i(TAG, "alarm set");
+			
 		} 
 	}
 

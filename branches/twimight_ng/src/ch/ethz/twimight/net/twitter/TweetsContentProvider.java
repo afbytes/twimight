@@ -14,7 +14,6 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import android.app.Notification;
@@ -29,7 +28,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -38,6 +36,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.security.CertificateManager;
@@ -1091,15 +1090,15 @@ public class TweetsContentProvider extends ContentProvider {
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = "You have new mention(s)";
-			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_MENTIONS);			
+			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_MENTIONS);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = "You have new disaster tweet(s)";
-			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_TIMELINE);
 			break;
 		case(NOTIFY_TWEET):
 			contentText = "New tweet(s) in your timeline";
-			notificationIntent.putExtra("filter_request", ShowTweetListActivity.SHOW_TIMELINE);
+			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_TIMELINE);
 			break;
 		default:
 			break;

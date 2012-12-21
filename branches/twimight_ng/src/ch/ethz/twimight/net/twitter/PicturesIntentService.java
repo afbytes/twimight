@@ -43,12 +43,10 @@ public class PicturesIntentService extends IntentService {
 		ShowUserListActivity.setLoading(true);
 		rowIds = intent.getLongArrayExtra(PicturesIntentService.USERS_IDS);
 		downloadProfilePictures(rowIds);
-		insertPictures();
-		
+		insertPictures();		
 		ShowUserListActivity.setLoading(false);
 
-	}
-	
+	}	
 	
 
 	private void insertPictures() {	
