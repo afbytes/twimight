@@ -34,9 +34,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.InternalStorageHelper;
 
 /**
  * Display a user
@@ -105,8 +105,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 			// get data from local DB
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
-			c = getContentResolver().query(uri, null, null, null, null);
-			startManagingCursor(c);
+			c = getContentResolver().query(uri, null, null, null, null);			
 			
 			if(c.getCount() == 0) finish();
 
@@ -321,7 +320,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			@Override
 			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", ShowUserListActivity.SHOW_FOLLOWERS);
+				i.putExtra("filter", UserListFragment.SHOW_FOLLOWERS);
 				startActivity(i);
 
 			}
@@ -335,7 +334,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			@Override
 			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", ShowUserListActivity.SHOW_FRIENDS);
+				i.putExtra("filter", UserListFragment.SHOW_FRIENDS);
 				startActivity(i);
 			}
 
@@ -346,7 +345,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			public void onClick(View v) {
 				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", ShowUserListActivity.SHOW_DISASTER_PEERS);
+				i.putExtra("filter", UserListFragment.SHOW_DISASTER_PEERS);
 				startActivity(i);
 
 			}

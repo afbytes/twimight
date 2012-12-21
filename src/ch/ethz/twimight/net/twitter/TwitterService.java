@@ -2494,6 +2494,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
 				} else {
 					tweet = twitter.updateStatus(text);
+					
 				}
 
 			} catch(Exception ex) { 

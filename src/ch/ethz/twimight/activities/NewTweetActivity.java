@@ -13,6 +13,7 @@
 
 package ch.ethz.twimight.activities;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +49,7 @@ import ch.ethz.twimight.util.Constants;
  * @author thossmann
  * @author pcarta
  */
-public class NewTweetActivity extends TwimightBaseActivity{
+public class NewTweetActivity extends Activity{
 
 	private static final String TAG = "TweetActivity";
 	
@@ -82,6 +83,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tweet);
 		
+		
+		
 		//Statistics
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
@@ -89,7 +92,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		locHelper = new LocationHelper(this);
 
 		//
-		cancelButton = (Button) findViewById(R.id.tweet_cancel);
+		cancelButton = (Button) findViewById(R.id.tweet_cancel);		
 		cancelButton.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -251,7 +254,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		text = null;
 		textWatcher = null;
 		
-		unbindDrawables(findViewById(R.id.showNewTweetRoot));
+		//unbindDrawables(findViewById(R.id.showNewTweetRoot));
 	}
 	
 	/**	

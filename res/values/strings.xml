@@ -12,7 +12,19 @@
       Dominik Schatzmann - Message specification
 -->
 <resources>
-    <string name="hello">Hello World, BluetestActivity!</string>
+    
+    <!--menu strings -->
+    <string name="my_profile">My Profile</string>
+    <string name="messages">Messages</string>
+    <string name="settings">Settings</string>
+    <string name="add_peer">Add Peer</string>
+    <string name="logout">Logout</string>
+    <string name="about">About</string>
+    <string name="feedback">Feedback</string>
+    <string name="write_tweet">Tweet</string>
+    <string name="search">Search</string>
+    
+    
     <string name="app_name">Twimight</string>
     <string name="app_label">Twimight</string>
     <string name="search_hint">Search tweets and users</string>
@@ -41,5 +53,11 @@ any time during this experiment by uninstalling the application. Moreover,
 I have the right to access any information in the data set related to me,
 and request for all collected data to be removed. As a user of Twimight
 Beta I may participate in the Twimight Beta online competition.</string>
+    <string name="dis_mode_description">If you loose Internet connectivity, activate the disaster mode 
+    in the twimight preferences. Disaster tweets will epidemically
+	spread among all phones in disaster mode, without the need for
+	Internet infrastructure (3G, WLAN).Once connectivity is detected
+	your own tweets will be published on the regular twitter servers.
+	</string>
     
 </resources>

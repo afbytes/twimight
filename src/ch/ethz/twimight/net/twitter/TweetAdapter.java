@@ -86,8 +86,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
 			
-			String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			
+			//String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));			
 			//InternalStorageHelper helper = new InternalStorageHelper(context);			
 			//byte[] imageByteArray = helper.readImage(filename);	
 			int userId = cursor.getInt(cursor.getColumnIndex("userRowId"));
