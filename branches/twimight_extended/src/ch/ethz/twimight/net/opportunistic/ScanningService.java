@@ -12,23 +12,27 @@
  ******************************************************************************/
 package ch.ethz.twimight.net.opportunistic;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.util.encoders.Base64;
 
 import android.app.AlarmManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -37,6 +41,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
@@ -44,12 +49,15 @@ import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.SDCardHelper;
 
 /**
  * This is the thread for scanning for Bluetooth peers.
  * @author theus
  * @author pcarta
  */
+
+
 public class ScanningService extends Service{
 
 	
@@ -84,6 +92,17 @@ public class ScanningService extends Service{
 	private static final String TYPE = "message_type";
 	public static final int TWEET=0;
 	public static final int DM=1;
+	public static final int PHOTO=2;
+	
+	//photo
+	private String photoPath;
+	private final String PHOTO_PATH = "twimight_photos";
+	//SDcard helper
+	private SDCardHelper sdCardHelper;
+	//SDcard checking var
+	boolean isSDAvail = false;
+	boolean isSDWritable = false;	
+	File SDcardPath = null;
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -104,7 +123,11 @@ public class ScanningService extends Service{
 			dbHelper = new MacsDBHelper(this);
 			dbHelper.open();			
 	        
-		}		
+		}
+		
+		//sdCard helper
+		sdCardHelper = new SDCardHelper(context);
+		
 		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 		// Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	      
@@ -319,7 +342,7 @@ public class ScanningService extends Service{
 					break;
 					
 				} else {
-					new ProcessDataReceived().execute(msg.obj.toString());								
+					new ProcessDataReceived().execute(msg.obj.toString());	//not String, object instead							
 					break; 
 				}	            
 				
@@ -377,14 +400,20 @@ public class ScanningService extends Service{
 		protected Void doInBackground(String... s) {								
 			JSONObject o;
 			try {
-				
+				//if input parameter is String, then cast it to String
 				o = new JSONObject(s[0]);
 				if (o.getInt(TYPE) == TWEET) {
-					
+					Log.d("disaster", "receive a tweet");
 					processTweet(o);
-				} else {
-					processDM(o);				}
+				} else if(o.getInt(TYPE) == PHOTO){
+					Log.d("disaster", "receive a photo");
+					processPhoto(o);
+				} else{
+					Log.d("disaster", "receive a dm");
+					processDM(o);				
+				}
 				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				//if input parameter is a photo, then extract the photo and save it locally
 				
 			} catch (JSONException e) {
 				Log.e(TAG, "error",e);
@@ -447,6 +476,37 @@ public class ScanningService extends Service{
 		}
 
 	}
+	private void processPhoto(JSONObject o) {
+		try {
+			Log.i(TAG, "processPhoto");
+			String jsonString = o.getString("image");
+			String userID = o.getString("userID");
+			String photoFileName =  o.getString("photoName");
+			byte[] decodedString = Base64.decode(jsonString, Base64.DEFAULT);
+			Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+			//locate the directory where the photos are stored
+			photoPath = PHOTO_PATH + "/" + userID;
+			String[] filePath = {photoPath};
+			sdCardHelper.checkSDStuff(filePath);
+			File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);//photoFileParent, photoFilename));
+			saveMyBitmap(targetFile, decodedByte);
+		} catch (JSONException e1) {
+			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
+		}
+
+	}
+	//save bitmap to local file
+	public void saveMyBitmap(File targetFile, Bitmap mBitmap){
+		FileOutputStream fOut = null;
+		try {
+			fOut = new FileOutputStream(targetFile);
+			mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+			fOut.flush();
+			fOut.close();
+		  } catch (IOException e) {
+		   e.printStackTrace();
+		}
+	}
 
 	private void sendDisasterDM(Long last) {
 		
@@ -498,6 +558,8 @@ public class ScanningService extends Service{
 							Log.i(TAG,"sending tweet");
 							Log.d(TAG, toSend.toString(5));
 							bluetoothHelper.write(toSend.toString());
+							//if there is a photo related to this tweet, send it
+							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null)sendDisasterPhotos(c);
 						}
 						
 					} catch (JSONException e) {								
@@ -510,6 +572,58 @@ public class ScanningService extends Service{
 		//else
 			//bluetoothHelper.write("####CLOSING_REQUEST####");
 		c.close();		
+	}
+	
+	private boolean sendDisasterPhotos(Cursor c) throws JSONException{
+		JSONObject toSendPhoto;
+		String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		Log.d("photo", "photo name:"+ photoFileName);
+		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+		//locate the directory where the photos are stored
+		photoPath = PHOTO_PATH + "/" + userID;
+		String[] filePath = {photoPath};
+		sdCardHelper.checkSDStuff(filePath);
+		Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
+		Log.d(TAG, "photo path:"+ photoUri.getPath());
+		Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri.getPath());
+		Log.d("photo", "photo ready");
+		if(photoBitmap != null){
+			Log.d("photo", "photo ready to be sent");
+			toSendPhoto = getJSONFromBitmap(photoBitmap);
+			toSendPhoto.put("userID", userID);
+			toSendPhoto.put("photoName", photoFileName);
+			Log.i(TAG,"sending photo");
+			Log.d(TAG, toSendPhoto.toString(5));
+			bluetoothHelper.write(toSendPhoto.toString());
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * convert photo attached to this tweet to JSONobject
+	 * @param bitmapPicture
+	 * @return
+	 */
+	private JSONObject getJSONFromBitmap(Bitmap bitmapPicture) {
+		
+		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+		try {
+			bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
+			Log.d("photo", "bitmap array size:" + String.valueOf(byteArrayBitmapStream.size()));
+			byte[] b = byteArrayBitmapStream.toByteArray();
+			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+			JSONObject jsonObj;
+		
+			jsonObj = new JSONObject("{\"image\":\"" + encodedImage + "\"}");
+			jsonObj.put(TYPE, PHOTO);
+			return jsonObj;
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			Log.d(TAG, "exception:" + e.getMessage());
+			return null;
+		}
+
 	}
 	
 	/**
@@ -595,10 +709,12 @@ public class ScanningService extends Service{
 				o.put(Tweets.COL_LAT, c.getDouble(c.getColumnIndex(Tweets.COL_LAT)));
 			if(c.getColumnIndex(Tweets.COL_LNG) >=0)
 				o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
+			if(c.getColumnIndex(Tweets.COL_MEDIA) >=0)
+				o.put(Tweets.COL_MEDIA, c.getString(c.getColumnIndex(Tweets.COL_MEDIA)));
 			if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
 				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
 			if(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE) >=0)
-				o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)))));
+				o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)), 0)));
 			return o;
 		}
 			
@@ -641,6 +757,9 @@ public class ScanningService extends Service{
 		
 		if(o.has(Tweets.COL_SOURCE))
 			cv.put(Tweets.COL_SOURCE, o.getString(Tweets.COL_SOURCE));
+		
+		if(o.has(Tweets.COL_MEDIA))
+			cv.put(Tweets.COL_MEDIA, o.getString(Tweets.COL_MEDIA));
 		
 		if(o.has(TwitterUsers.COL_SCREENNAME)) {			
 			cv.put(Tweets.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));
@@ -699,7 +818,7 @@ public class ScanningService extends Service{
 			
 		}
 		if(o.has(TwitterUsers.COL_PROFILEIMAGE))
-			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE)));
+			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE), 0));
 		if(o.has(Tweets.COL_USER)) {
 			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
 			

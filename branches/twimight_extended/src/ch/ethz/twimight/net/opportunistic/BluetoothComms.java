@@ -455,6 +455,7 @@ public class BluetoothComms{
          * Write to the connected OutStream.
          * @param buffer  The bytes to write
          */
+        //not to write String, but Object
         public void write(String buffer) {
             try {
             	out = new ObjectOutputStream(mmOutStream);

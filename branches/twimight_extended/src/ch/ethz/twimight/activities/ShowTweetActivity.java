@@ -12,6 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -50,6 +51,7 @@ import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.InternalStorageHelper;
+import ch.ethz.twimight.util.SDCardHelper;
 import ch.ethz.twimight.util.TweetTagHandler;
 
 /**
@@ -92,6 +94,12 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		Intent intent;
 		ConnectivityManager cm;
 		StatisticsDBHelper locDBHelper;	
+	
+	//photo
+	private String photoPath;
+	private final String PHOTO_PATH = "twimight_photos";
+	//SDcard helper
+	private SDCardHelper sdCardHelper;
 		
 	/** 
 	 * Called when the activity is first created. 
@@ -101,6 +109,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showtweet);		
 		
+		sdCardHelper = new SDCardHelper(this);
 		
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
@@ -113,7 +122,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		tweetTextView = (TextView) findViewById(R.id.showTweetText);
 		createdTextView = (TextView) findViewById(R.id.showTweetCreatedAt);
 		createdWithView = (TextView) findViewById(R.id.showTweetCreatedWith);
-		
 		rowId = getIntent().getIntExtra("rowId", 0);
 		
 		// If we don't know which tweet to show, we stop the activity
@@ -130,9 +138,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				startManagingCursor(c);	
 				handler = new Handler();											
 				
+				String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+				//locate the directory where the photos are stored
+				photoPath = PHOTO_PATH + "/" + userID;
+				
 				setTweetInfo();
 				setUserInfo();			
-				setProfilePicture();		
+				setProfilePicture();
+				setPhotoAttached();
 				
 				// Tweet background and disaster info
 				if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
@@ -185,6 +198,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 		String userString = Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
 		String localUserString = LoginActivity.getTwitterId(this);		
+
 		
 		// Retweet Button
 		retweetButton = (ImageButton) findViewById(R.id.showTweetRetweet);
@@ -378,7 +392,29 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		}
 		
 	}
+	
+	/**
+	 *  method to set the photo attached with thi tweet
+	 *  
+	 */
+	
+	private void setPhotoAttached() {
+		// Profile image
+		String[] filePath = {photoPath};
+		if(sdCardHelper.checkSDStuff(filePath)){
+			if(!c.isNull(c.getColumnIndex(Tweets.COL_MEDIA))){
+				ImageView photoView = (ImageView) findViewById(R.id.showPhotoAttached);
+				
+				String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
+				Bitmap photo = sdCardHelper.decodeBitmapFile(photoUri.getPath());
+				photoView.setImageBitmap(photo);
+			}
+		}
 
+		
+	}
+		
 	/**
 	 *  The user info
 	 *  
@@ -539,6 +575,18 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		        	   uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);	        	   
 		        	
 		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
+		        	   String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+		        	   String delPhotoName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		        	   if(delPhotoName != null){
+		        		   photoPath = PHOTO_PATH + "/" + userID;
+		        		   String[] filePath = {photoPath};
+		       			   if(sdCardHelper.checkSDStuff(filePath)){
+		       				   File photoFile = sdCardHelper.getFileFromSDCard(photoPath, delPhotoName);//photoFileParent, photoFilename));
+				        	   photoFile.delete();
+		       			   }
+		       			   
+		        	   }
+		  
 		        	   if (tid != null && tid != 0)
 		        		   getContentResolver().update(uri, setDeleteFlag(flags), null, null);
 		        	   else
@@ -720,6 +768,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			
 
 		}
+		
+		
+		
 	}
 	
 	

@@ -13,20 +13,13 @@
 
 package ch.ethz.twimight.activities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,7 +28,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -46,7 +38,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -56,6 +50,7 @@ import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.SDCardHelper;
 
 /**
  * The activity to write a new tweet.
@@ -65,7 +60,7 @@ import ch.ethz.twimight.util.Constants;
 public class NewTweetActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "TweetActivity";
-	
+	private static Context CONTEXT; 
 	private boolean useLocation;
 	private EditText text;
 	private TextView characters;
@@ -85,17 +80,25 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	//uploading photos
 	private static final int PICK_FROM_CAMERA = 1;
 	private static final int PICK_FROM_FILE = 2;
-	private String photoPath = "twimight_photos"; //path for storing photos on SDcard
-	private Uri mImageCaptureUri; //uri for storing photos taken from camera
-	private TextView infoTextView; //showing information
+	private String tmpPhotoPath; //path storing photos on SDcard
+	private String finalPhotoPath; //path storing photos on SDcard
+	private String finalPhotoName; //file name of uploaded photo
+	private final String PHOTO_PATH = "twimight_photos";
+	private Uri tmpPhotoUri; //uri storing temp photos
+	private Uri photoUri; //uri storing photos
 	private ImageView mImageView; //to display the photo to be uploaded
-	static Context CONTEXT; 
+
 	private boolean hasMedia = false;
-	File SDcardPath = null;
+	private ImageButton uploadFromGallery;
+	private ImageButton uploadFromCamera;
+	private ImageButton deletePhoto;
+	private ImageButton previewPhoto;
+	private ImageButton photoButton;
+	private Bitmap photo = null;
+	private LinearLayout photoLayout;
 	
-	//SDcard checking var
-	boolean isSDAvail = false;
-	boolean isSDWritable = false;
+	//SDcard helper
+	private SDCardHelper sdCardHelper;
 	
 	//LOGS
 		LocationHelper locHelper ;
@@ -116,14 +119,17 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
 		locHelper = new LocationHelper(this);
-
-		//
+		
+		//SDCard helper
+		sdCardHelper = new SDCardHelper(CONTEXT);
+		
 		cancelButton = (Button) findViewById(R.id.tweet_cancel);
 		cancelButton.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View v) {
-				finish();
+				
+				finish();		
 			}
 			
 		});
@@ -143,9 +149,6 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		
 		text = (EditText) findViewById(R.id.tweetText);
 		
-		//components for uploading photos
-		infoTextView = (TextView) findViewById(R.id.description);
-		mImageView = (ImageView) findViewById(R.id.image_view);
 		
 		// Did we get some extras in the intent?
 		Intent i = getIntent();
@@ -236,24 +239,85 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		
 		
 		//uploading photos
-		photoPath = photoPath + "/" + LoginActivity.getTwitterId(this);
-		infoTextView = (TextView) findViewById(R.id.description);
-		mImageView = (ImageView) findViewById(R.id.image_view);
-		Button uploadFromGallery = (Button) findViewById(R.id.upload_from_gallery);
+		tmpPhotoPath = PHOTO_PATH + "/" + "tmp";
+		finalPhotoPath = PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
+		mImageView = new ImageView(this);
+		
+		photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
+		photoLayout.setVisibility(View.GONE);
+		uploadFromGallery = (ImageButton) findViewById(R.id.upload_from_gallery);
 		uploadFromGallery.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
 				uploadFromGallery();
 			}
 		});
-		Button uploadFromCamera = (Button) findViewById(R.id.upload_from_camera);
+		
+		uploadFromCamera = (ImageButton) findViewById(R.id.upload_from_camera);
 		uploadFromCamera.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
 				uploadFromCamera();
+			}
+		});
+		
+		previewPhoto = (ImageButton) findViewById(R.id.preview_photo);
+		previewPhoto.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				
+				mImageView = new ImageView(CONTEXT);
+				mImageView.setImageBitmap(photo);
+				AlertDialog.Builder photoPreviewDialog = new AlertDialog.Builder(CONTEXT);
+				photoPreviewDialog.setView(mImageView);
+				photoPreviewDialog.setNegativeButton("close",null);
+				photoPreviewDialog.show();
+				
+			}
+		});
+		
+		deletePhoto = (ImageButton) findViewById(R.id.delete_photo);
+		deletePhoto.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				
+				sdCardHelper.deleteFile(tmpPhotoUri.getPath());
+				hasMedia = false;
+				setButtonStatus(true,false);
 			}		
 		});
-		checkSDStuff();
 		
+		photoButton = (ImageButton) findViewById(R.id.tweet_photo);		
+		photoButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				if(photoLayout.getVisibility() == View.GONE){
+					photoLayout.setVisibility(View.VISIBLE);
+				}
+				else{
+					photoLayout.setVisibility(View.GONE);
+				}
+			}
+		});
+		
+		String[] filePaths = {tmpPhotoPath, finalPhotoPath};
+		if(sdCardHelper.checkSDStuff(filePaths)){
+			
+			sdCardHelper.clearTempDirectory(tmpPhotoPath);
+			setButtonStatus(true,false);
+		}
+		else setButtonStatus(false,false);
+
 		Log.v(TAG, "onCreated");
+	}
+
+	/**
+	 * set button status with different operations
+	 * 
+	 * @param statusUpload
+	 * @param statusDelete
+	 */
+	private void setButtonStatus(boolean statusUpload, boolean statusDelete){
+		uploadFromGallery.setEnabled(statusUpload);
+		uploadFromCamera.setEnabled(statusUpload);
+		deletePhoto.setEnabled(statusDelete);
+		previewPhoto.setEnabled(statusDelete);
 	}
 	
 	/**
@@ -265,7 +329,6 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		if(useLocation){
 			registerLocationListener();
 		}
-
 	}
 	
 	/**
@@ -283,7 +346,11 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		Log.d(TAG, "onDestroy");
+		if(hasMedia){
+			sdCardHelper.deleteFile(tmpPhotoUri.getPath());
+			hasMedia = false;
+		}
 		if (locHelper!= null) 
 			locHelper.unRegisterLocationListener();	
 		
@@ -320,10 +387,31 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			boolean result=false;
 			
 			timestamp = System.currentTimeMillis();
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
+			/*if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
+				Log.i(TAG, String.valueOf(hasMedia));
+			}*/
+			Log.i(TAG, String.valueOf(hasMedia));
+			if(hasMedia){
+				try {
+					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
+					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));//photoFileParent, photoFilename));
+					String fromFile = tmpPhotoUri.getPath();
+					String toFile = photoUri.getPath();
+					Log.i(TAG, fromFile);
+					Log.i(TAG, toFile);
+					if(sdCardHelper.copyFile(fromFile, toFile)){
+
+						Log.i(TAG, "file copy successful");
+
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					Log.d("photo", "exception!!!!!");
+					e.printStackTrace();
+				}
 			}
 			// if no connectivity, notify user that the tweet will be send later		
 				
@@ -401,7 +489,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		}
 		//if there is a photo, put the path of photo in the cv
 		if (hasMedia){
-			tweetContentValues.put(Tweets.COL_MEDIA, mImageCaptureUri.getPath());//extra?tweetContentValues.put(Tweets.COL_MEDIA, ); the url of the media?
+			tweetContentValues.put(Tweets.COL_MEDIA, finalPhotoName);
+			Log.i(TAG, Tweets.COL_MEDIA + ":" + finalPhotoName);
 		}
 		
 		return tweetContentValues;
@@ -452,139 +541,88 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		return null;
 	}
 	
-	//methods handling photo uploading
 	
-	//check SDcard availability
-	private void checkSDStuff(){
-		String state = Environment.getExternalStorageState();
-		if(Environment.MEDIA_MOUNTED.equals(state)){
-			isSDAvail = true;
-			isSDWritable = true;
-			SDcardPath = Environment.getExternalStoragePublicDirectory(photoPath);
-			SDcardPath.mkdirs();
-			//uri where the photo will be
-			mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(photoPath), "twimight" + String.valueOf(System.currentTimeMillis()) + ".jpg"));//photoFileParent, photoFilename));
-
-		}
-		else if(Environment.MEDIA_MOUNTED_READ_ONLY.endsWith(state)){
-			isSDAvail = true;
-			isSDWritable = false;
+	
+	
+	
+	//methods photo uploading
+	
+	/**
+	 * upload photo from camera
+	 */
+	private void uploadFromCamera() {
+		
+		if((tmpPhotoUri = sdCardHelper.createTmpPhotoStoragePath(tmpPhotoPath)) != null){
+			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			
+			intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, tmpPhotoUri);
+			
+			try {
+				intent.putExtra("return-data", true);
+				startActivityForResult(intent, PICK_FROM_CAMERA);
+			} 
+			catch (ActivityNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		else{
-			isSDAvail = false;
-			isSDWritable = false;
+			Log.i(TAG, "path for storing photos cannot be created!");
+			setButtonStatus(false, false);
 		}
-		Log.d("check", "check success");
-	}
-	
-	//upload picture by taking a picture using camera
-	private void uploadFromCamera() {
-			
-		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-							
-		intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
 		
-		try {
-			intent.putExtra("return-data", true);
-			startActivityForResult(intent, PICK_FROM_CAMERA);
-		} 
-		catch (ActivityNotFoundException e) {
-			e.printStackTrace();
-		}
 	}
 	
-	//upload from local gallery
+	/**
+	 * upload photo by taking a picture
+	 */
 	private void uploadFromGallery(){
-		Intent intent = new Intent();
-		intent.setType("image/*");
-		intent.setAction(Intent.ACTION_GET_CONTENT);
-		startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
+		if((tmpPhotoUri = sdCardHelper.createTmpPhotoStoragePath(tmpPhotoPath)) != null){
+			Intent intent = new Intent();
+			intent.setType("image/*");
+			intent.setAction(Intent.ACTION_GET_CONTENT);
+			startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
+		}
+		else{
+			Log.i(TAG, "path for storing photos cannot be created!");
+			setButtonStatus(false, false);
+		}
+		
 	}
 	
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    if (resultCode != RESULT_OK) return;
-	    Bitmap photo = null;
+	    setButtonStatus(false,true);
+	    hasMedia = true;
 	    switch (requestCode) {
 		    case PICK_FROM_CAMERA:
 		    	
 		    	//display the picture
 		    	
-		    	photo = decodeFile(mImageCaptureUri.getPath());
-		    	infoTextView.setText(mImageCaptureUri.getPath());
+		    	photo = sdCardHelper.decodeBitmapFile(tmpPhotoUri.getPath());
 		    	mImageView.setImageBitmap(photo);
 
-		        //File f = new File(mImageCaptureUri.getPath());            
-		        //if (f.exists()) f.delete();
-		        break;
+		    	break;
 
 		    case PICK_FROM_FILE: 
 		    	
+		    	//display the photo
 		    	Uri mImageGalleryUri = data.getData();
-		    	//display the picture
-		    	//Uri filePathFromActivity = (Uri) extras.get(Intent.EXTRA_STREAM);
-		    	mImageGalleryUri = Uri.parse(getRealPathFromUri( (Activity) NewTweetActivity.this, mImageGalleryUri));
 		    	
-		    	//copy the photo from gallery to SDcard
+		    	//get the real path for chosen photo
+		    	mImageGalleryUri = Uri.parse(sdCardHelper.getRealPathFromUri( (Activity) NewTweetActivity.this, mImageGalleryUri));
+		    	
+		    	//copy the photo from gallery to tmp directory
 
 		    	String fromFile = mImageGalleryUri.getPath();
-		    	String toFile = mImageCaptureUri.getPath();
-				try {
-					InputStream fosfrom = new FileInputStream(fromFile);
-					OutputStream fosto = new FileOutputStream(toFile);
-					byte bt[] = new byte[1024];
-					int count;
-					while ((count = fosfrom.read(bt)) > 0) {
-						fosto.write(bt, 0, count);
-					}
-					fosfrom.close();
-					fosto.close();
-				} catch (Exception e) {
-					// TODO: handle exception
-					Log.d("copy", "file io error");
+		    	String toFile = tmpPhotoUri.getPath();
+				if(sdCardHelper.copyFile(fromFile, toFile)){
+			    	photo = sdCardHelper.decodeBitmapFile(toFile);
+			    	mImageView.setImageBitmap(photo);
 				}
-				infoTextView.setText(toFile);
-		    	photo = decodeFile(toFile);
-		    	mImageView.setImageBitmap(photo);
-		    	
 		    	break;    	
 	    }
-	    //upload the new Tweet with the picture and refresh the TweetList to show the new Tweet
 	}
-
-	//resize the picture to fit the size of imageView
-	private Bitmap decodeFile(String path){
-		//Decode image size
-		BitmapFactory.Options o = new BitmapFactory.Options();
-		o.inJustDecodeBounds = true;
-	    BitmapFactory.decodeFile(path,o);
-
-	    //The new size we want to scale to
-	    final int REQUIRED_SIZE=mImageView.getWidth();
-
-	    //Find the correct scale value. It should be the power of 2.
-	    int scale=1;
-	    while(o.outWidth/scale/2>=REQUIRED_SIZE && o.outHeight/scale/2>=REQUIRED_SIZE)
-	    	scale*=2;
-
-	    //Decode with inSampleSize
-	    BitmapFactory.Options o2 = new BitmapFactory.Options();
-	    o2.inSampleSize=scale;
-	    return BitmapFactory.decodeFile(path, o2);
-	}
-	
-	//get real file path from uri for picking a picture from the gallery
-	public static String getRealPathFromUri(Activity activity, Uri contentUri) {
-	    String[] proj = { MediaStore.Images.Media.DATA };
-	    //Cursor cursor = (new CursorLoader(CONTEXT, contentUri, proj, null, null, null)).loadInBackground();
-		@SuppressWarnings("deprecation")
-		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
-	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-	    cursor.moveToFirst();
-	    return cursor.getString(column_index);
-	}
-	
-
 	
 }
