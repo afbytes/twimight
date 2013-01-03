@@ -82,6 +82,12 @@
 				android:textSize="16sp" android:textStyle="italic"
 				android:layout_marginTop="5dp" android:layout_marginBottom="5dp"
 				android:visibility="gone" />
+			
+			<ImageView android:id="@+id/showPhotoAttached"
+			    android:contentDescription="Photo attached with this tweet"
+			    android:layout_width="wrap_content" android:layout_height="wrap_content"
+			    android:layout_marginBottom="2dp" android:layout_gravity="center"
+			    />
 
 		</LinearLayout>
 

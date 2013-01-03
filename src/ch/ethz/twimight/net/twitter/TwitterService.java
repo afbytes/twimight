@@ -201,7 +201,6 @@ public class TwitterService extends Service {
 					if(intent.hasExtra("rowId")){
 						// get the flags
 						long rowId = intent.getLongExtra("rowId", -1);
-						
 						if (rowId >= 0) {
 							new TweetQueryTask().execute(rowId);										
 						}				
@@ -273,10 +272,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected Cursor doInBackground(Long... params) {
+			
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+params[0]);
 			Cursor c = null;					
 			c = getContentResolver().query(queryUri, null, null, null, null);
-
+			
 			if(c.getCount() == 1){
 				c.moveToFirst();
 				return c;				
@@ -2455,37 +2455,36 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected winterwell.jtwitter.Status doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: UpdateStatusTask");
+			
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
 			this.notify= rowId[2];
-
+			
 			winterwell.jtwitter.Status tweet = null;
 			Cursor c = null;
-			
+	
 			try {
 				
 				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 				c = getContentResolver().query(queryUri, null, null, null, null);
 
 				if(c.getCount() == 0){
-					Log.w(TAG, "UpdateStatusTask: Tweet not found " + this.rowId);
 					return null;
 				}
 				c.moveToFirst();
 				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
-
+				
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-				/*String mediaUrl = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
-				boolean hasMedia = false;
-				File mediaFile = null;
-				if(mediaUrl != null){
-					mediaFile = new File(mediaUrl);
-					hasMedia = true;
-				}*/
-
+				
+				String mediaUrl = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				Log.d("upload", "media url =" + mediaUrl);
+				boolean hasMedia;
+				if(mediaUrl != null)hasMedia = true;
+				else	hasMedia = false;
+				Log.d("upload", "hasMedia = " + String.valueOf(hasMedia));
+				
 				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
 					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
 					twitter.setMyLocation(location);
@@ -2493,21 +2492,23 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					twitter.setMyLocation(null);
 				}
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
-//					if(hasMedia){
-//						tweet = twitter.updateStatusWithMedia(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)), mediaFile);
-//					}
+					/*if(hasMedia){
+						Log.d("upload", "upload media with reply");
+						BigInteger replyToId = BigInteger.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+						tweet = twitter.updateStatusWithMedia(text, replyToId, new File(mediaUrl));
+					}*/
 //					else{
 						tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
 //					}
 				} else {
-//					if(hasMedia){
-//						tweet = twitter.updateStatusWithMedia(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)), mediaFile);
-//					}
+					/*if(hasMedia){
+						Log.d("upload", "upload media without reply");
+						tweet = twitter.updateStatusWithMedia(text, null, new File(mediaUrl));
+					}*/
 //					else{
 						tweet = twitter.updateStatus(text);
 //					}
-				}//judge if there is media and update with media
-				//updateStatusWithMedia(String statusText, BigInteger inReplyToStatusId, File mediaFile)
+				}
 
 			} catch(Exception ex) { 
 				this.ex = ex;
