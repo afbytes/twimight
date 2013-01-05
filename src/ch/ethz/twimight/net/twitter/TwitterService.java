@@ -38,6 +38,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -46,6 +47,7 @@ import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewDMActivity;
+import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
@@ -2463,9 +2465,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 			winterwell.jtwitter.Status tweet = null;
 			Cursor c = null;
-	
+
 			try {
-				
+
 				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 				c = getContentResolver().query(queryUri, null, null, null, null);
 
@@ -2475,39 +2477,43 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				c.moveToFirst();
 				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
-				
+
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-				
-				String mediaUrl = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				String mediaUrl = Environment.getExternalStoragePublicDirectory(NewTweetActivity.PHOTO_PATH +
+																				"/" + LoginActivity.getTwitterId(TwitterService.this) + "/" + mediaName).getAbsolutePath();
 				Log.d("upload", "media url =" + mediaUrl);
 				boolean hasMedia;
-				if(mediaUrl != null)hasMedia = true;
-				else	hasMedia = false;
+				if(mediaUrl != null)
+					hasMedia = true;
+				else	
+					hasMedia = false;
 				Log.d("upload", "hasMedia = " + String.valueOf(hasMedia));
-				
+
 				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
 					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
 					twitter.setMyLocation(location);
 				} else {
 					twitter.setMyLocation(null);
 				}
+
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
-					/*if(hasMedia){
+					if(hasMedia){
 						Log.d("upload", "upload media with reply");
 						BigInteger replyToId = BigInteger.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
 						tweet = twitter.updateStatusWithMedia(text, replyToId, new File(mediaUrl));
-					}*/
-//					else{
+					}
+					else{
 						tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
-//					}
+					}
 				} else {
-					/*if(hasMedia){
+					if(hasMedia){
 						Log.d("upload", "upload media without reply");
 						tweet = twitter.updateStatusWithMedia(text, null, new File(mediaUrl));
-					}*/
-//					else{
+					}
+					else{
 						tweet = twitter.updateStatus(text);
-//					}
+					}
 				}
 
 			} catch(Exception ex) { 
