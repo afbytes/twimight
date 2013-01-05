@@ -83,7 +83,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private String tmpPhotoPath; //path storing photos on SDcard
 	private String finalPhotoPath; //path storing photos on SDcard
 	private String finalPhotoName; //file name of uploaded photo
-	private final String PHOTO_PATH = "twimight_photos";
+	public static final String PHOTO_PATH = "twimight_photos";
 	private Uri tmpPhotoUri; //uri storing temp photos
 	private Uri photoUri; //uri storing photos
 	private ImageView mImageView; //to display the photo to be uploaded
@@ -245,6 +245,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		
 		photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
 		photoLayout.setVisibility(View.GONE);
+		
 		uploadFromGallery = (ImageButton) findViewById(R.id.upload_from_gallery);
 		uploadFromGallery.setOnClickListener(new OnClickListener(){
 			public void onClick(View v){
@@ -393,7 +394,6 @@ public class NewTweetActivity extends TwimightBaseActivity{
 				locHelper.unRegisterLocationListener();
 				Log.i(TAG, String.valueOf(hasMedia));
 			}*/
-			Log.i(TAG, String.valueOf(hasMedia));
 			if(hasMedia){
 				try {
 					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
@@ -555,7 +555,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		if((tmpPhotoUri = sdCardHelper.createTmpPhotoStoragePath(tmpPhotoPath)) != null){
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			
-			intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, tmpPhotoUri);
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, tmpPhotoUri);
 			
 			try {
 				intent.putExtra("return-data", true);
