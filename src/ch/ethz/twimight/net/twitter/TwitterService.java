@@ -385,7 +385,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			Log.d(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
+			Log.i(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
 			// get the flagged tweets
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 			Cursor c = null;
@@ -2480,15 +2480,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 				String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
-				String mediaUrl = Environment.getExternalStoragePublicDirectory(NewTweetActivity.PHOTO_PATH +
-																				"/" + LoginActivity.getTwitterId(TwitterService.this) + "/" + mediaName).getAbsolutePath();
-				Log.d("upload", "media url =" + mediaUrl);
+				String mediaUrl =  null;
+				
+				if (mediaName != null)
+					mediaUrl = Environment.getExternalStoragePublicDirectory(NewTweetActivity.PHOTO_PATH +
+												"/" + LoginActivity.getTwitterId(TwitterService.this) + "/" + mediaName).getAbsolutePath();
+				
 				boolean hasMedia;
 				if(mediaUrl != null)
 					hasMedia = true;
 				else	
-					hasMedia = false;
-				Log.d("upload", "hasMedia = " + String.valueOf(hasMedia));
+					hasMedia = false;				
 
 				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
 					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
@@ -2572,7 +2574,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					return;
 				}
 			}
-
+			
+			Log.i(TAG,"inside status update on post execute");
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 
 			ContentValues cv = null;
