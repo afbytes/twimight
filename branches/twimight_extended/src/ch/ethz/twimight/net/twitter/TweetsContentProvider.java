@@ -804,7 +804,7 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 		if(c.getCount() == 1){   
-
+			
 			c.moveToFirst();
 			if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
 				// clear the to insert flag
@@ -862,9 +862,8 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		
-		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);		
+		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);			
 		
-		Log.i(TAG,"inside update");
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
 			getContext().getContentResolver().notifyChange(uri, null);		

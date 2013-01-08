@@ -48,7 +48,7 @@ public class SDCardHelper {
 			Log.d("check", "check success");
 			return true;
 		}
-		else if(Environment.MEDIA_MOUNTED_READ_ONLY.endsWith(state)){
+		else if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
 			isSDAvail = true;
 			isSDWritable = false;
 		}
