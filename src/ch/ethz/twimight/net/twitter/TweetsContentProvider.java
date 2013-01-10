@@ -801,41 +801,55 @@ public class TweetsContentProvider extends ContentProvider {
 		 *    Probability of this should be small.  
 		 */		
 		disasterId = getDisasterID(values);
-		
+
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId, null, null, null, null);
 		if(c.getCount() == 1){   
-			
+
 			c.moveToFirst();
 			if(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(getContext()))) {
 				// clear the to insert flag
 				int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				values.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_INSERT));
-				
+
 			} else if ( values.getAsInteger(Tweets.COL_BUFFER) == Tweets.BUFFER_TIMELINE &&
 					(c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_MENTIONS) == Tweets.BUFFER_MENTIONS ) {
-				
-				Log.i(TAG,"updating content values");
+
+
 				values.put(Tweets.COL_BUFFER, c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) | Tweets.BUFFER_TIMELINE);
-				
+
 			} else if ( values.getAsInteger(Tweets.COL_BUFFER) == Tweets.BUFFER_TIMELINE &&
 					(c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) == Tweets.BUFFER_FAVORITES ) {
-				
+
 				values.put(Tweets.COL_BUFFER, c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) | Tweets.BUFFER_TIMELINE); 
-				
+
 			} else if( !c.isNull(c.getColumnIndex(Tweets.COL_TID)) &&
 					c.getLong(c.getColumnIndex(Tweets.COL_TID))==values.getAsLong(Tweets.COL_TID) ){
-				
+
 				return null;
 			}
-			
+
+			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+			update(updateUri, values, null, null);
+			c.close();
+
+			return updateUri;			
+		} 
+
+
+		//this situation happens in case a tweet with media is posted to the servers
+		c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_TID+"="+values.getAsLong(Tweets.COL_TID), null, null, null, null);
+		if(c.getCount() == 1){   
+			c.moveToFirst();
+
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 			update(updateUri, values, null, null);
 			c.close();
 			
-			return updateUri;
-			
-		}
+			return updateUri;		
+		}	
+		
 		c.close();
+		
 		// if none of the before was true, this is a proper new tweet which we now insert
 		try {
 			Uri insertUri = insertTweet(values);
@@ -979,6 +993,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * @return
 	 */
 	private int getDisasterID(ContentValues cv){
+			
 		if ( cv != null ) {
 			String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
 			

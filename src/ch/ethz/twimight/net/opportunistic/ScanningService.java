@@ -487,9 +487,11 @@ public class ScanningService extends Service{
 			//locate the directory where the photos are stored
 			photoPath = PHOTO_PATH + "/" + userID;
 			String[] filePath = {photoPath};
-			sdCardHelper.checkSDStuff(filePath);
-			File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);//photoFileParent, photoFilename));
-			saveMyBitmap(targetFile, decodedByte);
+			if (sdCardHelper.checkSDStuff(filePath)) {
+				File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);//photoFileParent, photoFilename));
+				saveMyBitmap(targetFile, decodedByte);
+			}
+			
 		} catch (JSONException e1) {
 			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
 		}
@@ -559,7 +561,8 @@ public class ScanningService extends Service{
 							Log.d(TAG, toSend.toString(5));
 							bluetoothHelper.write(toSend.toString());
 							//if there is a photo related to this tweet, send it
-							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null)sendDisasterPhotos(c);
+							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) 
+								sendDisasterPhoto(c);
 						}
 						
 					} catch (JSONException e) {								
@@ -574,7 +577,7 @@ public class ScanningService extends Service{
 		c.close();		
 	}
 	
-	private boolean sendDisasterPhotos(Cursor c) throws JSONException{
+	private boolean sendDisasterPhoto(Cursor c) throws JSONException{
 		JSONObject toSendPhoto;
 		String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		Log.d("photo", "photo name:"+ photoFileName);
@@ -582,21 +585,24 @@ public class ScanningService extends Service{
 		//locate the directory where the photos are stored
 		photoPath = PHOTO_PATH + "/" + userID;
 		String[] filePath = {photoPath};
-		sdCardHelper.checkSDStuff(filePath);
-		Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
-		Log.d(TAG, "photo path:"+ photoUri.getPath());
-		Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri.getPath());
-		Log.d("photo", "photo ready");
-		if(photoBitmap != null){
-			Log.d("photo", "photo ready to be sent");
-			toSendPhoto = getJSONFromBitmap(photoBitmap);
-			toSendPhoto.put("userID", userID);
-			toSendPhoto.put("photoName", photoFileName);
-			Log.i(TAG,"sending photo");
-			Log.d(TAG, toSendPhoto.toString(5));
-			bluetoothHelper.write(toSendPhoto.toString());
-			return true;
+		
+		if (sdCardHelper.checkSDStuff(filePath)) {
+			Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
+			Log.d(TAG, "photo path:"+ photoUri.getPath());
+			Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri.getPath());
+			Log.d("photo", "photo ready");
+			if(photoBitmap != null){
+				Log.d("photo", "photo ready to be sent");
+				toSendPhoto = getJSONFromBitmap(photoBitmap);
+				toSendPhoto.put("userID", userID);
+				toSendPhoto.put("photoName", photoFileName);
+				Log.i(TAG,"sending photo");
+				Log.d(TAG, toSendPhoto.toString(5));
+				bluetoothHelper.write(toSendPhoto.toString());
+				return true;
+			}
 		}
+		
 		return false;
 	}
 	
@@ -609,7 +615,7 @@ public class ScanningService extends Service{
 		
 		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
 		try {
-			bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
+		    bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
 			Log.d("photo", "bitmap array size:" + String.valueOf(byteArrayBitmapStream.size()));
 			byte[] b = byteArrayBitmapStream.toByteArray();
 			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);

@@ -1159,10 +1159,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		}
 		entities = tweet.getTweetEntities(Twitter.KEntityType.urls);
 		if(entities != null){
-			for (TweetEntity entity: entities) {
+			
+			for (TweetEntity entity: entities) {				
 				allEntities.add(entity);
 			}
-		}
+		} 			
 		// do we have entities at all?
 		if(allEntities.isEmpty()) return new SpanResult(tweet.getText(),urls);
 
@@ -1190,8 +1191,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
 				} else if(curEntity.type == KEntityType.urls){
 					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-					urls.add(curEntity.displayVersion());	
-					
+					urls.add(curEntity.displayVersion());				    
+				  
 					
 				} else if(curEntity.type == KEntityType.user_mentions){
 					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
@@ -2452,7 +2453,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		long rowId;
 		int flags;
 		int buffer;
-
+		String mediaName = null;
 		Exception ex;
 
 		@Override
@@ -2479,7 +2480,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-				String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 				String mediaUrl =  null;
 				
 				if (mediaName != null)
@@ -2573,9 +2574,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
 				}
-			}
+			}			
 			
-			Log.i(TAG,"inside status update on post execute");
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 
 			ContentValues cv = null;

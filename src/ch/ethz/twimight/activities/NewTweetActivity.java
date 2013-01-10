@@ -598,8 +598,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	    switch (requestCode) {
 		    case PICK_FROM_CAMERA:
 		    	
-		    	//display the picture
-		    	
+		    	//display the picture		    	
 		    	photo = sdCardHelper.decodeBitmapFile(tmpPhotoUri.getPath());
 		    	mImageView.setImageBitmap(photo);
 

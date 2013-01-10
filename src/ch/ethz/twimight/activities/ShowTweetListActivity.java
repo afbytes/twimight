@@ -183,10 +183,13 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 		@Override
 		public void run() {
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
-				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
-				locHelper.unRegisterLocationListener();
+			if (locHelper != null &&  locDBHelper != null && cm != null ) {
+				if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null) {
+					locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+					locHelper.unRegisterLocationListener();
+				}
+				
+				
 			} else {}
 			
 		}
@@ -199,7 +202,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		setIntent(intent);
 		
 	}
-	
 
 
 	/**
@@ -315,14 +317,14 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 	
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
-			if (locHelper.count > 0) {			
+			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
 				locHelper.unRegisterLocationListener();
 				handler.removeCallbacks(checkLocation);				
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
-		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
+		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
 			locHelper.unRegisterLocationListener();			
 			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
