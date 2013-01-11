@@ -20,12 +20,13 @@ public class UserListFragment extends ListFragment {
 	
 	Cursor c;
 	
+	public UserListFragment(){};
+	
 	public UserListFragment(Activity activity, String tag) {
 		super();
 		
-		type = SHOW_FRIENDS;
+		type = SHOW_FRIENDS;		
 		
-		this.mActivity = activity;
 		if (tag.equals("Followers"))
 			type = this.SHOW_FOLLOWERS;
 		else if (tag.equals("Peers"))

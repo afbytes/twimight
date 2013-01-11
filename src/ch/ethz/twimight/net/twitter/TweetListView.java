@@ -27,12 +27,14 @@ public class TweetListView extends ListView {
 		this.context = context;
 	}
 	
-	public void setOverscrollIntent(Intent i){		
+	public void setOverscrollIntent(Intent i){			
 		overscrollIntent = i;
 	}
 
-	private void sendOverscrollIntent(boolean topOverscroll){		
-		if(overscrollIntent!=null && context!=null) {
+	private void sendOverscrollIntent(boolean topOverscroll){	
+		
+		if(overscrollIntent!=null ) {
+			Log.i(TAG, "calling twitter service");
 			if (topOverscroll) {
 				overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_TOP);
 				if (Constants.TIMELINE_BUFFER_SIZE >= 150)
@@ -45,7 +47,8 @@ public class TweetListView extends ListView {
 			}
 			context.startService(overscrollIntent);
 			
-		}
+		} else
+			Log.i(TAG, "intent null");
 	}
 		/*
 	 * 

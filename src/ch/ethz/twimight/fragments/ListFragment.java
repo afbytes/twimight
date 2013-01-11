@@ -18,16 +18,11 @@ import ch.ethz.twimight.net.twitter.TweetListView;
 
 public abstract class ListFragment extends Fragment {
 	
-	Cursor c;	
-	Activity mActivity;
-	
+	Cursor c;
+	Intent overscrollIntent ;
 	int type ;
 	ContentResolver resolver;
-	
-	public ListFragment(){	
 		
-	}
-	
 	
 	
 	@Override
@@ -37,7 +32,9 @@ public abstract class ListFragment extends Fragment {
         // Inflate the layout for this fragment	
 	    View view = inflater.inflate(R.layout.main, container, false);
 		TweetListView list = (TweetListView) view.findViewById(R.id.tweetListView);
+		
 		list.setAdapter(getData(type));
+		list.setOverscrollIntent(overscrollIntent);
 		
 		// Click listener when the user clicks on a tweet
 		list.setClickable(true);
