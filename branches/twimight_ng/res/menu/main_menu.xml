@@ -6,6 +6,7 @@
           android:icon="@drawable/ic_twimight_compose"
           android:title="@string/write_tweet"
           android:actionBarItemBackground="@drawable/header_button"
+          
 		  android:showAsAction="ifRoom" />
     
     <item android:id="@+id/menu_search"

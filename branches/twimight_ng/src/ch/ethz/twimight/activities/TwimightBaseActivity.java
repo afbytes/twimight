@@ -68,7 +68,9 @@ public class TwimightBaseActivity extends Activity{
 		Resources resources = getResources();
 		dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
 		dn = resources.getDrawable(R.drawable.top_bar_background);
-		
+		actionBar.setBackgroundDrawable(dd);	
+		actionBar.setBackgroundDrawable(dn);	
+
 	}
 
 
@@ -78,19 +80,43 @@ public class TwimightBaseActivity extends Activity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		instance = this;
+		instance = this;	
+		
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) 
+			actionBar.setBackgroundDrawable(dd);		
+		else 			
+			actionBar.setBackgroundDrawable(dn);			
+		
 
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {			
-			actionBar.setBackgroundDrawable(dd);	
-		}
-		else {			
-			actionBar.setBackgroundDrawable(dn);	
-		}
+	}
+	
 
+	/*
+
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		super.onRestart();
+		restartOnThemeSwitch(TwimightBaseActivity.this);
 	}
 
 
+	public static void restartOnThemeSwitch(Activity act) {
 
+	    
+
+	    if (PreferenceManager.getDefaultSharedPreferences(act).getBoolean("prefDisasterMode", false) == true) {
+
+
+	        Intent it = act.getIntent();
+	        it.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+	        act.startActivity(it);
+
+	    }
+
+	}
+*/
 	/**
 	 * Populate the Options menu with the "home" option. 
 	 * For the "main" activity ShowTweetListActivity we don't add the home option.
