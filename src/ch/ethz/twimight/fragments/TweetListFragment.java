@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -18,21 +19,13 @@ import ch.ethz.twimight.net.twitter.TwitterService;
 public class TweetListFragment extends ListFragment {	
 	
 	
-	public static final int SHOW_TIMELINE = 10;
-	public static final int SHOW_FAVORITES = 20;
-	public static final int SHOW_MENTIONS = 30;	
-	
+    
 		
 	public TweetListFragment(){};
 	
-	public TweetListFragment(Activity activity, String tag) {
+	public TweetListFragment(Activity activity, int type) {
 		super();
-		type = SHOW_TIMELINE;
-		
-		if (tag.equals("favorites"))
-			type = this.SHOW_FAVORITES;
-		else if (tag.equals("mentions"))
-			type = this.SHOW_MENTIONS;
+		this.type=type;		
 	}
 
 
@@ -43,12 +36,12 @@ public class TweetListFragment extends ListFragment {
 	 */
 	ListAdapter getData(int filter){
 		// set all header button colors to transparent
-		
+		Log.i("TweetListFragment", "inside getData");
 		if(c!=null) c.close();
 		overscrollIntent = new Intent(getActivity(), TwitterService.class); 
 
 		switch(filter) {
-		case SHOW_TIMELINE: 
+		case ShowTweetListActivity.TIMELINE_KEY: 
 
 			//b = timelineButton;
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_TIMELINE);
@@ -58,7 +51,7 @@ public class TweetListFragment extends ListFragment {
 
 
 			break;
-		case SHOW_FAVORITES: 
+		case ShowTweetListActivity.FAVORITES_KEY: 
 
 			//b = favoritesButton;			
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_FAVORITES);
@@ -68,7 +61,7 @@ public class TweetListFragment extends ListFragment {
 
 
 			break;
-		case SHOW_MENTIONS: 
+		case ShowTweetListActivity.MENTIONS_KEY: 
 
 			//b = mentionsButton;			
 			overscrollIntent.putExtra("synch_request", TwitterService.SYNCH_MENTIONS);

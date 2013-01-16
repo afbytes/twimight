@@ -1,26 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"    
-        android:layout_height="fill_parent" android:layout_width="fill_parent"
-        android:orientation="vertical" android:id="@+id/showTweetListRoot">
-        
-        <ch.ethz.twimight.net.twitter.TweetListView 
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent" 
-            android:id="@+id/tweetListView"
-            android:fastScrollEnabled="true" 
-            android:scrollingCache="true" 
-            android:divider="@color/twimightBackgroundLight"/>
-        
-        <TextView
-            android:id="@id/android:empty"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingTop="20dp"
-            android:text="loading..."
-            android:textSize="16sp"
-            android:visibility="gone" />
-
-</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+ 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    />
+</RelativeLayout>
 

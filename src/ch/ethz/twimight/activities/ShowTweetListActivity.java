@@ -12,6 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.util.HashMap;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
@@ -22,11 +24,15 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
+import ch.ethz.twimight.fragments.adapters.PageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.util.Constants;
@@ -66,14 +72,20 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public static final String TWEET_WRITTEN = "tweet_written";
 	
 	ActionBar actionBar;
+	public static final String FILTER_REQUEST = "filter_request";
 	
-
+	public static final int TIMELINE_KEY = 0;	
+	public static final int FAVORITES_KEY = 1;
+	public static final int MENTIONS_KEY = 2;
+	ViewPager viewPager;
+	
 	/** 
 	 * Called when the activity is first created. 
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);				
+		setContentView(R.layout.main);
 		
 		//statistics
 		locDBHelper = new StatisticsDBHelper(this);
@@ -85,32 +97,54 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		checkLocation = new CheckLocation();
 		handler.postDelayed(checkLocation, 1*60*1000L);	  
 		
+		HashMap<Integer,? extends ListFragment> fragmentMap = createFragments();		
+		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap);		
+        viewPager = (ViewPager)  findViewById(R.id.viewpager);	
+		
+		viewPager.setAdapter(pagAdapter);
+		viewPager.setOnPageChangeListener(
+	            new ViewPager.SimpleOnPageChangeListener() {
+	                @Override
+	                public void onPageSelected(int position) {
+	                    // When swiping between pages, select the
+	                    // corresponding tab.	                	
+	                    getActionBar().setSelectedNavigationItem(position);
+	                }
+	            });
+		
 		//action bar
 		actionBar = getActionBar();	
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		Tab tab = actionBar.newTab()
 				.setIcon(R.drawable.ic_twimight_speech)
-				.setTabListener(new TabListener<TweetListFragment>(
-						this, "timeline", TweetListFragment.class));
+				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		tab = actionBar.newTab()
 				.setIcon(R.drawable.ic_twimight_favorites)
-				.setTabListener(new TabListener<TweetListFragment>(
-						this, "favorites",TweetListFragment.class));
+				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		tab = actionBar.newTab()
 				.setIcon(R.drawable.ic_twimight_mentions)
-				.setTabListener(new TabListener<TweetListFragment>(
-						this, "mentions",TweetListFragment.class));
+				.setTabListener(new TabListener(viewPager ));
 		actionBar.addTab(tab);
 		
 		running = true;				
 
 	}
 	
+	private HashMap<Integer,TweetListFragment> createFragments() {
+		
+		HashMap<Integer,TweetListFragment> map = new HashMap<Integer,TweetListFragment>();
+		map.put(TIMELINE_KEY, new TweetListFragment(this,TIMELINE_KEY));
+		map.put(FAVORITES_KEY, new TweetListFragment(this,FAVORITES_KEY));
+		map.put(MENTIONS_KEY, new TweetListFragment(this,MENTIONS_KEY));
+		
+		return map;
+	}
+
 	private class CheckLocation implements Runnable {
 
 		@Override
@@ -138,18 +172,27 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onResume(){
-		
+
 		super.onResume();
 		running = true;
-		
+
+		Intent intent = getIntent();
+
+		// if we just got logged in, we load the timeline
+		//if(intent.hasExtra(FILTER_REQUEST)) {
+			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST, TIMELINE_KEY));
+			//intent.removeExtra(FILTER_REQUEST);
+
+	//	}
+
 		Long pauseTimestamp =  getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {
 			handler = new Handler();			
 			handler.post(new CheckLocation());
-			
+
 		}		
-			
-		
+
+
 	}
     
 

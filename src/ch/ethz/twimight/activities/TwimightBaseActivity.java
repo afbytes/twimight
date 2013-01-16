@@ -13,7 +13,6 @@
 package ch.ethz.twimight.activities;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
@@ -24,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,7 +41,7 @@ import ch.ethz.twimight.util.Constants;
  * @author thossmann
  *
  */
-public class TwimightBaseActivity extends Activity{
+public class TwimightBaseActivity extends FragmentActivity{
 	
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";	

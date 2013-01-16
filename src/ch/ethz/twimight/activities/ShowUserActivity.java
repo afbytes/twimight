@@ -320,7 +320,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			@Override
 			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", UserListFragment.SHOW_FOLLOWERS);
+				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,ShowUserListActivity.FOLLOWERS_KEY 	);
 				startActivity(i);
 
 			}
@@ -334,7 +334,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			@Override
 			public void onClick(View v) {				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", UserListFragment.SHOW_FRIENDS);
+				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,ShowUserListActivity.FRIENDS_KEY );
 				startActivity(i);
 			}
 
@@ -345,7 +345,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 			public void onClick(View v) {
 				
 				Intent i = new Intent(getBaseContext(), ShowUserListActivity.class);
-				i.putExtra("filter", UserListFragment.SHOW_DISASTER_PEERS);
+				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,ShowUserListActivity.PEERS_KEY );
 				startActivity(i);
 
 			}

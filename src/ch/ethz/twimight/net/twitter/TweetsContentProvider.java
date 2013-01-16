@@ -1090,15 +1090,15 @@ public class TweetsContentProvider extends ContentProvider {
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = "You have new mention(s)";
-			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_MENTIONS);			
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.MENTIONS_KEY);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = "You have new disaster tweet(s)";
-			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_TIMELINE);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.FAVORITES_KEY);
 			break;
 		case(NOTIFY_TWEET):
 			contentText = "New tweet(s) in your timeline";
-			notificationIntent.putExtra("filter_request", TweetListFragment.SHOW_TIMELINE);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.TIMELINE_KEY);
 			break;
 		default:
 			break;
