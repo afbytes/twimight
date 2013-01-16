@@ -1,6 +1,6 @@
 package ch.ethz.twimight.fragments;
 
-import android.app.Activity;
+
 import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -28,9 +28,10 @@ public abstract class ListFragment extends Fragment {
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+		Log.i("ListFragment","inside on create view");
 		resolver = getActivity().getContentResolver();
         // Inflate the layout for this fragment	
-	    View view = inflater.inflate(R.layout.main, container, false);
+	    View view = inflater.inflate(R.layout.fragment_layout, container, false);
 		TweetListView list = (TweetListView) view.findViewById(R.id.tweetListView);
 		
 		list.setAdapter(getData(type));
@@ -47,7 +48,7 @@ public abstract class ListFragment extends Fragment {
 				startActivity(i);
 			}
 		});
-        return view;
+        return list;
         
     }	
 		

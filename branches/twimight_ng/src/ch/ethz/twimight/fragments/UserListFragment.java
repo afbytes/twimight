@@ -9,28 +9,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
+import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 public class UserListFragment extends ListFragment {
 	
-	public static final int SHOW_FRIENDS = 0;
-	public static final int SHOW_FOLLOWERS = 1;
-	public static final int SHOW_DISASTER_PEERS = 2;
+	
 	
 	Cursor c;
 	
 	public UserListFragment(){};
 	
-	public UserListFragment(Activity activity, String tag) {
-		super();
+	public UserListFragment(Activity activity, int type) {
+		super();		
+		this.type = type;		
 		
-		type = SHOW_FRIENDS;		
 		
-		if (tag.equals("Followers"))
-			type = this.SHOW_FOLLOWERS;
-		else if (tag.equals("Peers"))
-			type = this.SHOW_DISASTER_PEERS;
 	}
 	
 	@Override
@@ -47,21 +42,21 @@ public class UserListFragment extends ListFragment {
 
 		switch(filter) {
 
-		case SHOW_FRIENDS: 
+		case ShowUserListActivity.FRIENDS_KEY: 
 			
 			c = resolver.query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + 
 					"/" + TwitterUsers.TWITTERUSERS_FRIENDS), null, null, null, null);
 			
 
 			break;
-		case SHOW_FOLLOWERS: 
+		case ShowUserListActivity.FOLLOWERS_KEY: 
 			
 			c = resolver.query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
 					+ "/" + TwitterUsers.TWITTERUSERS_FOLLOWERS), null, null, null, null);
 			
 
 			break;
-		case SHOW_DISASTER_PEERS:
+		case ShowUserListActivity.PEERS_KEY:
 			
 			c = resolver.query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
 					+ "/" + TwitterUsers.TWITTERUSERS_DISASTER), null, null, null, null);

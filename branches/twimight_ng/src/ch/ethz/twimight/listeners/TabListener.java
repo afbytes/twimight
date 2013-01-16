@@ -2,19 +2,13 @@ package ch.ethz.twimight.listeners;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import ch.ethz.twimight.fragments.ListFragment;
-import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.fragments.UserListFragment;
 
-public class TabListener<T extends Fragment> implements ActionBar.TabListener {
-    private ListFragment mFragment;
-    private final Activity mActivity;
-    private final String mTag;
-    private final Class<T> mClass;
+ public class TabListener implements ActionBar.TabListener {
+    ViewPager vPager;
+
    
 
     /** Constructor used each time a new tab is created.
@@ -22,14 +16,12 @@ public class TabListener<T extends Fragment> implements ActionBar.TabListener {
       * @param tag  The identifier tag for the fragment
       * @param clz  The fragment's Class, used to instantiate the fragment
       */
-    public TabListener(Activity activity, String tag, Class<T> clz) {
-        mActivity = activity;
-        mTag = tag;	
-        mClass = clz;
+    public TabListener(ViewPager pg) {
+       this.vPager=pg;
         
     }
 
-    /* The following are each of the ActionBar.TabListener callbacks */
+    /* The following are each of the ActionBar.TabListener callbacks 
 
     public void onTabSelected(Tab tab, FragmentTransaction ft) {
         // Check if the fragment is already initialized
@@ -48,15 +40,25 @@ public class TabListener<T extends Fragment> implements ActionBar.TabListener {
        
         }
     }
-
+    */
+    
     public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-        if (mFragment != null) {
+       //if (mFragment != null) {
             // Detach the fragment, because another one is being attached
-            ft.detach(mFragment);
-        }
+            //ft.detach(mFragment);
+       // }
     }
 
     public void onTabReselected(Tab tab, FragmentTransaction ft) {
         // User selected the already selected tab. Usually do nothing.
     }
+
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		// When the tab is selected, switch to the
+        // corresponding page in the ViewPager.
+		Log.i("TabListener", "inside onTabSelecred, position = " + tab.getPosition());
+        vPager.setCurrentItem(tab.getPosition());
+		
+	}
 }
