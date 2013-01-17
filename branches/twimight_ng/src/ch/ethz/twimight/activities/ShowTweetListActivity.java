@@ -102,6 +102,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
         viewPager = (ViewPager)  findViewById(R.id.viewpager);	
 		
 		viewPager.setAdapter(pagAdapter);
+		viewPager.setOffscreenPageLimit(2);
 		viewPager.setOnPageChangeListener(
 	            new ViewPager.SimpleOnPageChangeListener() {
 	                @Override
@@ -178,12 +179,11 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 		Intent intent = getIntent();
 
-		// if we just got logged in, we load the timeline
-		//if(intent.hasExtra(FILTER_REQUEST)) {
+		if(intent.hasExtra(FILTER_REQUEST)) {
 			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST, TIMELINE_KEY));
-			//intent.removeExtra(FILTER_REQUEST);
+			intent.removeExtra(FILTER_REQUEST);
 
-	//	}
+		}
 
 		Long pauseTimestamp =  getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {

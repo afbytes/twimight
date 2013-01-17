@@ -10,7 +10,7 @@ import ch.ethz.twimight.fragments.ListFragment;
 
 public class PageAdapter extends FragmentStatePagerAdapter {
     
-	private static final int NUM_ITEMS = 3;
+	
 	HashMap<Integer, ? extends ListFragment> fragmentsMap;
 	
 	public PageAdapter(FragmentManager fm, HashMap<Integer, ? extends ListFragment> map) {
@@ -28,7 +28,7 @@ public class PageAdapter extends FragmentStatePagerAdapter {
 	@Override
 	public int getCount() {
 		
-		return NUM_ITEMS;
+		return fragmentsMap.size();
 	}
 
 }
