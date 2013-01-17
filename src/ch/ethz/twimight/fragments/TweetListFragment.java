@@ -21,14 +21,20 @@ public class TweetListFragment extends ListFragment {
 	
     
 		
-	public TweetListFragment(){};
+	public TweetListFragment(){
+		Log.i("TweetListFragment", "inside empty constructor");
+	};
 	
 	public TweetListFragment(Activity activity, int type) {
 		super();
-		this.type=type;		
+		this.type=type;
+		Log.i("TweetListFragment", "inside constructor");
+		
 	}
 
+    
 
+	
 
 	/**
 	 * Which tweets do we show? Timeline, favorites, mentions?
