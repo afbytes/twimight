@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.support.v13.app.FragmentStatePagerAdapter;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.util.Log;
 import ch.ethz.twimight.fragments.ListFragment;
 
-public class PageAdapter extends FragmentStatePagerAdapter {
+public class PageAdapter extends FragmentPagerAdapter {
     
 	
 	HashMap<Integer, ? extends ListFragment> fragmentsMap;

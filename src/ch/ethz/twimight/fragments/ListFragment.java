@@ -27,7 +27,7 @@ public abstract class ListFragment extends Fragment {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d("ListFragment","onCreate");
+		
 		super.onCreate(savedInstanceState);
 		resolver = getActivity().getContentResolver();
 		adapter = getData(type);
@@ -36,7 +36,7 @@ public abstract class ListFragment extends Fragment {
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-		Log.i("ListFragment","onCreateView");		
+			
         // Inflate the layout for this fragment	
 	    View view = inflater.inflate(R.layout.fragment_layout, container, false);
 		TweetListView list = (TweetListView) view.findViewById(R.id.tweetListView);
@@ -48,10 +48,11 @@ public abstract class ListFragment extends Fragment {
 		list.setClickable(true);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
 				Cursor c = (Cursor) arg0.getItemAtPosition(position);
 				Intent i = new Intent(getActivity(), ShowTweetActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
+				i.putExtra("type", type);
 				startActivity(i);
 			}
 		});
@@ -65,29 +66,6 @@ public abstract class ListFragment extends Fragment {
 	 */
 	abstract ListAdapter getData(int filter);
 
-	@Override
-	public void onDestroy() {
-		Log.d("ListFragment","onDestroy");
-		super.onDestroy();
-	}
-
-	@Override
-	public void onDestroyView() {
-		Log.d("ListFragment","onDestroyView");
-		super.onDestroyView();
-	}
-
-	@Override
-	public void onDetach() {
-		Log.d("ListFragment","onDetach");
-		super.onDetach();
-	}
-
-	@Override
-	public void onAttach(Activity activity) {
-		Log.d("ListFragment","onAttach");
-		super.onAttach(activity);
-	}
 	
 	
 
