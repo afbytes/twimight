@@ -22,13 +22,12 @@ public class TweetListFragment extends ListFragment {
     
 		
 	public TweetListFragment(){
-		Log.i("TweetListFragment", "inside empty constructor");
+		
 	};
 	
 	public TweetListFragment(Activity activity, int type) {
 		super();
 		this.type=type;
-		Log.i("TweetListFragment", "inside constructor");
 		
 	}
 
@@ -86,10 +85,8 @@ public class TweetListFragment extends ListFragment {
 					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 
 
-		}
-
+		}	
 		
-		Log.i("TLF",overscrollIntent.toString());
 		return new TweetAdapter(getActivity(), c);	
 
 		

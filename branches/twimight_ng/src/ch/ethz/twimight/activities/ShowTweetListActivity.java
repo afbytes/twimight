@@ -99,8 +99,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		HashMap<Integer,? extends ListFragment> fragmentMap = createFragments();		
 		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap);		
-        viewPager = (ViewPager)  findViewById(R.id.viewpager);	
-		
+        viewPager = (ViewPager)  findViewById(R.id.viewpager);			
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
 		viewPager.setOnPageChangeListener(
@@ -112,7 +111,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	                    getActionBar().setSelectedNavigationItem(position);
 	                }
 	            });
-		
+
 		//action bar
 		actionBar = getActionBar();	
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
