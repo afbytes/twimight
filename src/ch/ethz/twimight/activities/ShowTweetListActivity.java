@@ -51,8 +51,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	// handler
 	static Handler handler;
-	
-	public static final int SHOW_USERTWEETS = 4;	
 
 	private int positionIndex;
 	private int positionTop;
@@ -74,9 +72,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	ActionBar actionBar;
 	public static final String FILTER_REQUEST = "filter_request";
 	
-	public static final int TIMELINE_KEY = 0;	
-	public static final int FAVORITES_KEY = 1;
-	public static final int MENTIONS_KEY = 2;
+	public static final int TIMELINE_KEY = 10;	
+	public static final int FAVORITES_KEY = 11;
+	public static final int MENTIONS_KEY = 12;
 	ViewPager viewPager;
 	
 	/** 
@@ -97,8 +95,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		checkLocation = new CheckLocation();
 		handler.postDelayed(checkLocation, 1*60*1000L);	  
 		
-		HashMap<Integer,? extends ListFragment> fragmentMap = createFragments();		
-		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap);		
+		HashMap<Integer,TweetListFragment> fragmentMap = createFragments();		
+		PageAdapter pagAdapter = new PageAdapter(this,getFragmentManager(),fragmentMap);		
         viewPager = (ViewPager)  findViewById(R.id.viewpager);			
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
@@ -138,9 +136,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private HashMap<Integer,TweetListFragment> createFragments() {
 		
 		HashMap<Integer,TweetListFragment> map = new HashMap<Integer,TweetListFragment>();
-		map.put(TIMELINE_KEY, new TweetListFragment(this,TIMELINE_KEY));
-		map.put(FAVORITES_KEY, new TweetListFragment(this,FAVORITES_KEY));
-		map.put(MENTIONS_KEY, new TweetListFragment(this,MENTIONS_KEY));
+		map.put(PageAdapter.POS_ZERO, new TweetListFragment(this,TIMELINE_KEY));
+		map.put(PageAdapter.POS_ONE, new TweetListFragment(this,FAVORITES_KEY));
+		map.put(PageAdapter.POS_TWO, new TweetListFragment(this,MENTIONS_KEY));
 		
 		return map;
 	}

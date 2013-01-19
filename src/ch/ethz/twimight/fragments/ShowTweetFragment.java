@@ -564,8 +564,8 @@ public class ShowTweetFragment extends Fragment{
 			replyButton.setOnClickListener(null);
 		if (favoriteButton != null)
 			favoriteButton.setOnClickListener(null);
-		
-		c.close();
+		if (c != null)
+			c.close();
 		
 				
 	}

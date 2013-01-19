@@ -60,7 +60,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		HashMap<Integer,UserListFragment> fragmentMap = createUserFragments();
-		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap);
+		PageAdapter pagAdapter = new PageAdapter(this,getFragmentManager(),fragmentMap);
 		
 		LayoutInflater inflater =  (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		viewPager = (ViewPager)  findViewById(R.id.viewpager);	
@@ -101,9 +101,9 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 private HashMap<Integer,UserListFragment> createUserFragments() {
 		
 		HashMap<Integer,UserListFragment> map = new HashMap<Integer,UserListFragment>();
-		map.put(FRIENDS_KEY, new UserListFragment(this,FRIENDS_KEY));
-		map.put(FOLLOWERS_KEY, new UserListFragment(this,FOLLOWERS_KEY));
-		map.put(PEERS_KEY, new UserListFragment(this,PEERS_KEY));
+		map.put(PageAdapter.POS_ZERO, new UserListFragment(this,FRIENDS_KEY));
+		map.put(PageAdapter.POS_ONE, new UserListFragment(this,FOLLOWERS_KEY));
+		map.put(PageAdapter.POS_TWO, new UserListFragment(this,PEERS_KEY));
 		
 		return map;
 	}

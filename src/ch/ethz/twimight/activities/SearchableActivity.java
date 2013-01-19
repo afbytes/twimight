@@ -12,6 +12,10 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.util.HashMap;
+
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +35,11 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.fragments.ListFragment;
+import ch.ethz.twimight.fragments.TweetListFragment;
+import ch.ethz.twimight.fragments.UserListFragment;
+import ch.ethz.twimight.fragments.adapters.PageAdapter;
+import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
@@ -45,21 +55,14 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "SearchableActivity";
 
-	// Views
-	private ListView searchListView;
-	private Button searchTweetsButton;
-	private Button searchUsersButton;
-	private ImageButton searchButton;
-
-	private ListAdapter adapter;
-	private Cursor c;
-	private int positionIndex;
-	private int positionTop;
 	
-	private static String query;
+		
+	ViewPager viewPager;
 	
-	private static final int SHOW_TWEETS = 1;
-	private static final int SHOW_USERS = 2;
+	public static String query;
+	
+	public static final int SHOW_SEARCH_TWEETS = 13;
+	public static final int SHOW_SEARCH_USERS = 14;
 	
 	/** 
 	 * Called when the activity is first created. 	
@@ -68,25 +71,45 @@ public class SearchableActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.showsearch);		
+		setContentView(R.layout.main);		
+
+		//action bar
+		actionBar = getActionBar();	
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);		
 		
-		searchListView = (ListView) findViewById(R.id.searchList);
-		searchListView.setEmptyView(findViewById(R.id.searchListEmpty));
-		searchButton = (ImageButton) findViewById(R.id.headerBarSearchButtonS);
-		searchButton.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {				
-				onSearchRequested();
-			}
-		});
+		PageAdapter pagAdapter = new PageAdapter(this, getFragmentManager(),null);		
+        viewPager = (ViewPager)  findViewById(R.id.viewpager);			
+		viewPager.setAdapter(pagAdapter);		
+		viewPager.setOnPageChangeListener(
+	            new ViewPager.SimpleOnPageChangeListener() {
+	                @Override
+	                public void onPageSelected(int position) {
+	                    // When swiping between pages, select the
+	                    // corresponding tab.	                	
+	                    getActionBar().setSelectedNavigationItem(position);
+	                }
+	            });
+
+		
+		Tab tab = actionBar.newTab()
+				.setText("Tweets")
+				.setTabListener(new TabListener(viewPager));
+		actionBar.addTab(tab);
+
+		tab = actionBar.newTab()
+				.setText("Users")
+				.setTabListener(new TabListener(viewPager));
+		actionBar.addTab(tab);
+		//viewPager.setCurrentItem(PageAdapter.POS_ZERO);
 		// Get the intent and get the query
 		Intent intent = getIntent();		
 		processIntent(intent);
-		
+
 
 	}
-	
-	
+
+
+
 
 	private void processIntent(Intent intent) {
 		if (intent.hasExtra(SearchManager.QUERY)) {
@@ -96,30 +119,11 @@ public class SearchableActivity extends TwimightBaseActivity{
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-	        suggestions.saveRecentQuery(query, null);
-	        
-	        searchUsersButton = (Button) findViewById(R.id.headerBarUsersButton);
-	        searchTweetsButton = (Button) findViewById(R.id.headerBarTweetsButton);		
-	        setFilter(SHOW_TWEETS);	        
+	        suggestions.saveRecentQuery(query, null); 
 	        	        
-			searchTweetsButton.setOnClickListener(new OnClickListener(){
-				@Override
-				public void onClick(View v) {
-					setFilter(SHOW_TWEETS);
-				}
-			});
-			
-					
-			searchUsersButton.setOnClickListener(new OnClickListener(){
-				@Override
-				public void onClick(View v) {
-					setFilter(SHOW_USERS);
-				}
-			});
 		
-		} else 
-			//finish();	
-			Log.i(TAG,"intent has no extra");
+		
+		} 
 	}
 
 
@@ -132,57 +136,12 @@ public class SearchableActivity extends TwimightBaseActivity{
 	}
 
 
-	/**
-	 * On resume
-	 */
-	@Override
-	public void onResume(){
-		super.onResume();		
-		// Are we in disaster mode?
-				LinearLayout headerBar = (LinearLayout) findViewById(R.id.headerBarSearch);
-				if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
-					headerBar.setBackgroundResource(R.drawable.top_bar_background_disaster);
-				} else {
-					headerBar.setBackgroundResource(R.drawable.top_bar_background);
-				}
-		if(positionIndex != 0 | positionTop !=0){
-			if(searchListView!=null) searchListView.setSelectionFromTop(positionIndex, positionTop);
-		}
-	}
 
-	/**
-	 * On pause
-	 */
-	@Override
-	public void onPause(){
-
-		super.onPause();
-
-	}
-
-	/**
-	 * Called at the end of the Activity lifecycle
-	 */
-	@Override
-	public void onDestroy(){
-		super.onDestroy();
-
-		if(searchListView != null) {
-			searchListView.setOnItemClickListener(null);
-			searchListView.setAdapter(null);
-		}
-
-
-		if(c!=null) c.close();
-
-		unbindDrawables(findViewById(R.id.showSearchListRoot));
-
-	}
 
 
 	/**
 	 * Saves the current selection
-	 */
+	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 
@@ -201,7 +160,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 	/**
 	 * Loads the current user selection
-	 */
+	
 	@Override
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
@@ -213,130 +172,8 @@ public class SearchableActivity extends TwimightBaseActivity{
 	}
 	
 	
-	/**
-	 * WWhat do we wanna show, tweets or users?
-	 * @param filter
 	 */
-	private void setFilter(int filter){
-		// set all colors to transparent
-		resetButtons();
-		Button b=null;
-		
-		switch(filter) {
-			
-		case SHOW_TWEETS: 
-			b = searchTweetsButton;
-			new PerformSearchTweetsTask().execute(query);	
-			//currentFilter=;
-
-			break;
-			
-		case SHOW_USERS	: 
-			b = searchUsersButton;
-			new PerformSearchUsersTask().execute(query);	
-			//currentFilter=;
-
-			break;
-		
-		default:
-			break;
-		}
-		
-		// style button
-		if(b!=null){
-			b.setEnabled(false);
-		} 	
-	}
 	
-	/**
-	 * Enables all header buttons
-	 */
-	private void resetButtons(){
-		searchTweetsButton.setEnabled(true);
-		searchUsersButton.setEnabled(true);
-		
-	}
 	
-	/**
-	 * Perform the tweets search to Twitter
-	 * @author pcarta
-	 */
-	private class PerformSearchTweetsTask extends AsyncTask<String, Void, Void> {			
-
-		@Override
-		protected void onPostExecute(Void result) {
-			
-			adapter = new TweetAdapter(SearchableActivity.this, c);		
-			searchListView.setAdapter(adapter);	
-			
-			// Click listener when the user clicks on a tweet
-			searchListView.setClickable(true);
-			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-					Cursor c = (Cursor) searchListView.getItemAtPosition(position);	
-					Log.i(TAG, "text: " + c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
-					Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
-					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-					startActivity(i);
-					
-				}
-			});
-			super.onPostExecute(result);
-		}
-
-		@Override
-		protected Void doInBackground(String... query) {
-			Log.i(TAG, "AsynchTask: PerformSearchTask");
-			
-			// TODO : check input
-						Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
-						c = getContentResolver().query(uri, null, query[0], null, null);
-						startManagingCursor(c); 
-						return null;
-			
-		}
-	}
-	
-	/**
-	 * Perform the user search to Twitter
-	 * @author pcarta
-	 */
-	private class PerformSearchUsersTask extends AsyncTask<String, Void, Void> {			
-
-		@Override
-		protected void onPostExecute(Void result) {
-			
-			adapter = new TwitterUserAdapter(SearchableActivity.this, c);		
-			searchListView.setAdapter(adapter);	
-			
-			// Click listener when the user clicks on a tweet
-			searchListView.setClickable(true);
-			searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-					Cursor c = (Cursor) searchListView.getItemAtPosition(position);					
-					Intent i = new Intent(getBaseContext(), ShowUserActivity.class);
-					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-					startActivity(i);
-					
-				}
-			});
-			super.onPostExecute(result);
-		}
-
-		@Override
-		protected Void doInBackground(String... query) {
-			Log.i(TAG, "AsynchTask: PerformSearchTask");
-			
-			// TODO : check input
-						Uri uri = Uri.parse("content://"+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 
-								+ "/" + TwitterUsers.TWITTERUSERS_SEARCH);
-						c = getContentResolver().query(uri, null, query[0], null, null);
-						startManagingCursor(c); 
-						return null;
-			
-		}
-	}
 
 }
