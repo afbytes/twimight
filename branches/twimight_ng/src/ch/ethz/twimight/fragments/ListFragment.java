@@ -44,18 +44,7 @@ public abstract class ListFragment extends Fragment {
 		list.setAdapter(adapter);
 		list.setOverscrollIntent(overscrollIntent);
 		
-		// Click listener when the user clicks on a tweet
-		list.setClickable(true);
-		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
-				Cursor c = (Cursor) arg0.getItemAtPosition(position);
-				Intent i = new Intent(getActivity(), ShowTweetActivity.class);
-				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-				i.putExtra("type", type);
-				startActivity(i);
-			}
-		});
+		
         return list;
         
     }	

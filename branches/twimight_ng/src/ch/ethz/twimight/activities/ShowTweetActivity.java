@@ -82,6 +82,11 @@ public class ShowTweetActivity extends TwimightBaseActivity {
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 					+ Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			break;
+		case SearchableActivity.SHOW_SEARCH_TWEETS:
+			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+					+ Tweets.SEARCH), null, SearchableActivity.query, null, null);
+			break;
+			
 		}
 		return c;
 		
