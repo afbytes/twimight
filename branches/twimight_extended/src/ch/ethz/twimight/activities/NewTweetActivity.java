@@ -440,7 +440,6 @@ public class NewTweetActivity extends TwimightBaseActivity{
 					}
 				}
 
-					
 				return result;
 			
 		}

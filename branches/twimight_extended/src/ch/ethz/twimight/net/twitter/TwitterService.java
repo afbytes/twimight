@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -54,6 +55,8 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
+import ch.ethz.twimight.net.Html.HtmlService;
+import ch.ethz.twimight.net.Html.InternetStatusReceiver;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -139,7 +142,7 @@ public class TwitterService extends Service {
 			
 			twitter.setSinceId(null);
 			twitter.setUntilId(null);
-			
+
 			if (intent != null) {
 				// check what we are asked to synch
 				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);	
@@ -289,6 +292,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected void onPostExecute(Cursor c) {
+			Log.d(TAG, "synchTweet");
 			synchTweet(c,TRUE);
 			if(c!=null) c.close();	
 		}
@@ -714,7 +718,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		if (id != null) {			
 			return new BigInteger(Long.toString(id));
 		}
-		else 
+		else
 			return null;
 		
 	}
@@ -1069,7 +1073,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
 		
-		cv.put(Tweets.COL_TEXT, createSpans(tweet).getText());
+		String tweetSpanText = createSpans(tweet).getText();
+		cv.put(Tweets.COL_TEXT, tweetSpanText);
+		
+		//if there are urls to this tweet, change the status of html field to 1
+		if(tweetSpanText.indexOf("http://") > 0){
+			cv.put(Tweets.COL_HTMLS, 1);
+		}
+		
+		
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
 		
@@ -1092,7 +1104,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		//insert the picture url to the database
 		//tweet.getEntities-> List<TweetEntity>
 		//
-		//cv.put(Tweets.PIC_URL, tweet.getEntities(KEntityType.media))
+		//cv.put(Tweets.COL_MEDIA tweet.getEntities(KEntityType.media))
 		//cv.put(Tweets.COL_FLAGS, 0);
 		cv.put(Tweets.COL_BUFFER, buffer);
 		
@@ -1768,7 +1780,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);	
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);			
+			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			
+			//send broadcast 
+			Intent i = new Intent(getBaseContext(),InternetStatusReceiver.class);
+			getBaseContext().sendBroadcast(i);
 			Log.i(TAG,"Insert onPost Execute");
 		}
 
@@ -2499,7 +2515,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				} else {
 					twitter.setMyLocation(null);
 				}
-
+				
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
 					if(hasMedia){
 						Log.d("upload", "upload media with reply");
