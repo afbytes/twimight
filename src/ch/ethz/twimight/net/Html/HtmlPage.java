@@ -19,9 +19,10 @@ public class HtmlPage implements BaseColumns {
 	
 	// here start the column names
 	public static final String COL_URL = "url"; /** url of the page */
-//	public static final String COL_HTML = "text"; /** the page */
+	public static final String COL_HTML = "text"; /** the page */
 	public static final String COL_FILENAME = "filename"; /** xml file filename of the web page stored locally */	
 	public static final String COL_TID = "t_id"; /** the tweet id associated with this page*/
+	public static final String COL_USER = "user_id"; /** the tweet id associated with this page*/
 	public static final String COL_DOWNLOADED = "downloaded"; /** if the page has been downloaded*/
 
 	// flags for synchronizing with twitter

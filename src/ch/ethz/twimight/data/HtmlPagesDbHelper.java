@@ -1,6 +1,6 @@
 package ch.ethz.twimight.data;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -47,9 +47,9 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean insertPage(String url, String filename, String tweetId, int downloaded) {
+	public boolean insertPage(String url, String filename, String tweetId, String userId, int downloaded) {
 		Log.i(TAG,"url: " + url);
-		ContentValues cv = createContentValues(url,filename, tweetId, downloaded);
+		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded);
 		
 		try {
 			long result = database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
@@ -70,9 +70,9 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean updatePage(String url, String filename, String tweetId, int downloaded){
+	public boolean updatePage(String url, String filename, String tweetId, String userId, int downloaded){
 		
-		ContentValues cv = createContentValues(url,filename, tweetId, downloaded);
+		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded);
 		Log.d(TAG, "update an entry:" + cv.toString());
 		String sql = HtmlPage.COL_URL + " = '" + url +"' and " + HtmlPage.COL_TID + " = '" + tweetId + "'";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
@@ -111,21 +111,45 @@ public class HtmlPagesDbHelper {
 	 */
 	public ContentValues getPageInfo(String url, String tweetId) {
 		
-		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"'" , null, null, null, null);
-		
-		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
-		{
-				if(tweetId.equals(c.getString(c.getColumnIndex(HtmlPage.COL_TID)))){
-					ContentValues htmlCV = createContentValues(c.getString(c.getColumnIndex(HtmlPage.COL_URL)),
-							c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
-							c.getString(c.getColumnIndex(HtmlPage.COL_TID)),
-							c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)));
-					Log.d(TAG, "page info:" + htmlCV.toString());
-					return htmlCV;
-				}
+		if(tweetId.equals("0")){
+			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url + "'", null, null, null, null);
+			
+			c.moveToFirst();
+			
+			if(c.getCount() == 0)return null;		
+			
+			ContentValues htmlCV = createContentValues(c.getString(c.getColumnIndex(HtmlPage.COL_URL)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_TID)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_USER)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)));
+			Log.d(TAG, "page info:" + htmlCV.toString());
+			
+			return htmlCV;
+		}else{
+			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"' and " + HtmlPage.COL_TID + " = '" + tweetId + "'" , null, null, null, null);
+			
+			c.moveToFirst();
+			
+			if(c.getCount() == 0)return null;		
+			
+			ContentValues htmlCV = createContentValues(c.getString(c.getColumnIndex(HtmlPage.COL_URL)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_TID)),
+					c.getString(c.getColumnIndex(HtmlPage.COL_USER)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)));
+			Log.d(TAG, "page info:" + htmlCV.toString());
+			
+			return htmlCV;
 		}
 		
-		return null;
+	}
+
+	//return all urls for a tweet
+	public Cursor getUrlsByTweetId(String tweetId){
+		
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_TID + " = '" + tweetId + "'" , null, null, null, null);
+		return c;
 	}
 	
 	/**
@@ -148,23 +172,9 @@ public class HtmlPagesDbHelper {
 	public Cursor getUndownloadedHtmls(){
 		Log.d(TAG, "get undownloaded htmls");
 		String sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "'";
-		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, null);
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " DESC");
 		return c;
 	}
-	
-	/**
-	 * return user id for a specific tweet
-	 * @param tweetId
-	 * @return
-	 */
-	public String getUserId(String tweetId){
-		Log.d(TAG, "get user id for tweet:" + tweetId);
-		String sql = Tweets.COL_TID + " = '" + tweetId + "'";
-		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, sql, null, null, null, null);
-		c.moveToFirst();
-		return String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_USER)));
-	}
-	
 	
 	/**
 	 * Creates a Html page record to insert in the DB
@@ -174,11 +184,12 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	private ContentValues createContentValues(String url, String filename, String tweetId, int downloaded) {
+	private ContentValues createContentValues(String url, String filename, String tweetId, String userId, int downloaded) {
 		ContentValues values = new ContentValues();
 		values.put(HtmlPage.COL_FILENAME ,filename);
 		values.put(HtmlPage.COL_URL ,url);
 		values.put(HtmlPage.COL_TID, tweetId);
+		values.put(HtmlPage.COL_USER, userId);
 		values.put(HtmlPage.COL_DOWNLOADED, downloaded);
 		return values;
 	}
@@ -189,7 +200,15 @@ public class HtmlPagesDbHelper {
 	 */
 	public Cursor getAll(){
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, null, null, null, null, null, null);
+		Log.d(TAG, "all html pages:" + String.valueOf(c.getCount()));
 		return c;
 	}	
+	
+	public String getTweetId(int id){
+		String[] col = {Tweets.COL_TID};
+		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, col, "_id = '" + String.valueOf(id)+ "'", null, null, null, null);
+		c.moveToFirst();
+		return String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
+	}
 
 }

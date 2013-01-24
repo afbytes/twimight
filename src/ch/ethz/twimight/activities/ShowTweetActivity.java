@@ -537,7 +537,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 				}else{
 					String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, 0);
+					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, userID, tweetId, 0);
 
 				}
 			}
