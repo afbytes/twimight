@@ -64,7 +64,9 @@ public class TwimightBaseActivity extends FragmentActivity{
 
 		//action bar
 		actionBar = getActionBar();				
-		actionBar.setHomeButtonEnabled(true);
+		actionBar.setHomeButtonEnabled(true);		
+		actionBar.setDisplayShowTitleEnabled(true);		
+		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
 		Resources resources = getResources();
 		dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
 		dn = resources.getDrawable(R.drawable.top_bar_background);

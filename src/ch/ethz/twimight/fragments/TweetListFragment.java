@@ -32,9 +32,7 @@ public class TweetListFragment extends ListFragment {
 		super();
 		this.type=type;
 		
-	}
-
-    
+	}    
 
 	
 
@@ -66,7 +64,7 @@ public class TweetListFragment extends ListFragment {
 	 */
 	ListAdapter getData(int filter){
 		// set all header button colors to transparent
-		Log.i("TweetListFragment", "inside getData");
+	
 		if(c!=null) c.close();
 		overscrollIntent = new Intent(getActivity(), TwitterService.class); 
 

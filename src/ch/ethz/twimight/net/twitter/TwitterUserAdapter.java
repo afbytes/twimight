@@ -67,7 +67,7 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 				} else
 					picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG,"error opening input stream",e);
+				Log.e(TAG,"error opening input stream");
 				picture.setImageResource(R.drawable.default_profile);
 			}	
 

@@ -72,14 +72,16 @@ public class SearchableActivity extends TwimightBaseActivity{
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);		
-
+		
+		viewPager = (ViewPager)  findViewById(R.id.viewpager);        
+		// Get the intent and get the query
+		Intent intent = getIntent();		
+		processIntent(intent);
+		
 		//action bar
 		actionBar = getActionBar();	
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);		
-		
-		PageAdapter pagAdapter = new PageAdapter(this, getFragmentManager(),null);		
-        viewPager = (ViewPager)  findViewById(R.id.viewpager);			
-		viewPager.setAdapter(pagAdapter);		
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);	  	
+        
 		viewPager.setOnPageChangeListener(
 	            new ViewPager.SimpleOnPageChangeListener() {
 	                @Override
@@ -100,10 +102,8 @@ public class SearchableActivity extends TwimightBaseActivity{
 				.setText("Users")
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
-		//viewPager.setCurrentItem(PageAdapter.POS_ZERO);
-		// Get the intent and get the query
-		Intent intent = getIntent();		
-		processIntent(intent);
+		
+	
 
 
 	}
@@ -120,7 +120,9 @@ public class SearchableActivity extends TwimightBaseActivity{
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
 	        suggestions.saveRecentQuery(query, null); 
-	        	        
+	        PageAdapter pagAdapter = new PageAdapter(this, getFragmentManager(),null);      
+	        viewPager.setAdapter(pagAdapter);	
+	        viewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
 		
 		
 		} 
