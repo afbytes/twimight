@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.util.Log;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
@@ -23,13 +24,14 @@ public class PageAdapter extends FragmentPagerAdapter {
 		super(fm);
 		this.fragmentsMap=map;
 		this.act = act;
+		Log.i("PageAdapter","creating new page adapter");
 	}
 	
 	
 
 	@Override
 	public Fragment getItem(int pos) {
-		
+		Log.i("PageAdapter","getting item");
 		if (fragmentsMap != null)
 			return fragmentsMap.get(pos );
 		else if(pos == 0) 

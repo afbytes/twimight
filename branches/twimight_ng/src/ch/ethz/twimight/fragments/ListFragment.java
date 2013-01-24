@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
 import ch.ethz.twimight.net.twitter.TweetListView;
 
@@ -26,17 +27,21 @@ public abstract class ListFragment extends Fragment {
 	ListAdapter adapter;	
 	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		
+	public void onCreate(Bundle savedInstanceState) {		
+
 		super.onCreate(savedInstanceState);
+		
 		resolver = getActivity().getContentResolver();
-		adapter = getData(type);
+		if (type != SearchableActivity.SHOW_SEARCH_TWEETS && type != SearchableActivity.SHOW_SEARCH_USERS) 
+			adapter = getData(type);
 	}
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-			
+		
+		if (type == SearchableActivity.SHOW_SEARCH_TWEETS || type == SearchableActivity.SHOW_SEARCH_USERS) 
+			adapter = getData(type);
         // Inflate the layout for this fragment	
 	    View view = inflater.inflate(R.layout.fragment_layout, container, false);
 		TweetListView list = (TweetListView) view.findViewById(R.id.tweetListView);
