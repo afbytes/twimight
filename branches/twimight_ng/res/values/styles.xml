@@ -44,9 +44,15 @@
      <item name="android:homeAsUpIndicator">@drawable/action_button</item> 
      <item name="android:icon">@drawable/mightybird02</item>
      <item name="android:titleTextStyle">@style/TitleTextStyle</item>
-     
+     <item name="android:indeterminateProgressStyle">@style/IndeterminateProgress</item>
     </style>
     
+	
+	 
+	
+   <style name="IndeterminateProgress" parent="@android:style/Widget.ProgressBar.Small">
+    <item name="android:indeterminateDrawable">@drawable/progress_spinner_actionbar</item>
+   </style> 
 
 
   <style name="TitleTextStyle" parent="@android:style/TextAppearance">
