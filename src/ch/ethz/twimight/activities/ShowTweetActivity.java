@@ -499,9 +499,24 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			for(String htmlUrl : htmlUrls){
 				
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+				boolean fileStatusNormal = true;
+				if(htmlCV!=null){
+					//check if file status normal, exists and size
+					String[] filePath = {HtmlPage.HTML_PATH + "/" + htmlCV.getAsString(HtmlPage.COL_USER)}; 
+					
+					if(sdCardHelper.checkSDStuff(filePath)){
+						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
+						if(!sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() || sdCardHelper.getFileFromSDCard(filePath[0], filename).length() < 500){
+							fileStatusNormal = false;
+						}
+					}
+					
+				}
+				
 				//if entry does not exist, add the url in to be downloaded list
 				
-				if(htmlCV == null || (htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 0)){
+				if(htmlCV == null || (htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 0) || !fileStatusNormal){
+					
 					htmlsToDownload.add(htmlUrl);
 					buttonStatus = true;
 					if(htmlCV != null){
@@ -537,22 +552,26 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 				}else{
 					String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, userID, tweetId, 0);
+					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, userID, 0);
 
 				}
 			}
 			
 			//insert database
-			Intent i = new Intent(ShowTweetActivity.this, HtmlService.class);
-			Bundle mBundle = new Bundle();
-			mBundle.putInt(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_SINGLE);
-			mBundle.putString("user_id", userID);
-			mBundle.putString("tweetId", tweetId);
-			mBundle.putStringArrayList("urls", htmlsToDownload);
+			if(result){
+				Intent i = new Intent(ShowTweetActivity.this, HtmlService.class);
+				Bundle mBundle = new Bundle();
+				mBundle.putInt(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_SINGLE);
+				mBundle.putString("user_id", userID);
+				Log.d(TAG, userID);
+				mBundle.putString("tweetId", tweetId);
+				Log.d(TAG, tweetId);
+				mBundle.putStringArrayList("urls", htmlsToDownload);
 
-
-			i.putExtras(mBundle);
-			startService(i);
+				i.putExtras(mBundle);
+				startService(i);
+			}
+			
 			
 			htmlsDownloaded = result;
 		}

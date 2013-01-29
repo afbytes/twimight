@@ -133,7 +133,10 @@ public class HtmlService extends Service {
 				//web view declaration
 
 				String htmlUrl = htmlUrls.get(i);
+				Log.d(TAG, "id:" + tweetId);
+				Log.d(TAG, "url"+ htmlUrl);
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+				
 				webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME)));
 				webDownload(htmlCV, webUri.getPath());
 
