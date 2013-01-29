@@ -44,7 +44,7 @@ public class SDCardHelper {
 				SDcardPath = Environment.getExternalStoragePublicDirectory(path);
 				SDcardPath.mkdirs();
 			}
-			Log.d("check", "check success");
+			Log.d(TAG, "sdcard storage check success");
 			return true;
 		}
 		else if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){

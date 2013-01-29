@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -330,6 +332,22 @@ public class ScanningService extends Service{
 		
 	}
 
+	
+	private Timer timer = new Timer();  
+    private static Handler timerHandler = new Handler(){  
+  
+        public void handleMessage(Message msg) {  
+            switch (msg.what) {      
+            case 1:
+            	Log.i(TAG, "sending closing request");
+            	bluetoothHelper.write("####CLOSING_REQUEST####");  
+                break;      
+            }      
+            super.handleMessage(msg);  
+        }  
+          
+    };  
+    
 
 	/**
 	 *  The Handler that gets information back from the BluetoothService
@@ -374,9 +392,17 @@ public class ScanningService extends Service{
 				sendDisasterTweets(last);
 				sendDisasterDM(last);			
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
-				
-				Log.i(TAG, "sending closing request");
-				bluetoothHelper.write("####CLOSING_REQUEST####");		
+				TimerTask timerTask = new TimerTask(){  
+					  
+			        public void run() {  
+			            Message message = new Message();      
+			            message.what = 1;      
+			            handler.sendMessage(message);    
+			        }
+			          
+			    };
+				timer.schedule(timerTask, 10000);
+//				bluetoothHelper.write("####CLOSING_REQUEST####");		
 				
 				
 				break;   

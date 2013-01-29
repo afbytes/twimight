@@ -48,7 +48,7 @@ public class HtmlPagesDbHelper {
 	 * @return
 	 */
 	public boolean insertPage(String url, String filename, String tweetId, String userId, int downloaded) {
-		Log.i(TAG,"url: " + url);
+		Log.i(TAG,"insert page url: " + url);
 		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded);
 		
 		try {
