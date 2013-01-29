@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -96,6 +97,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private int currentFilter = SHOW_TIMELINE;
 	private int positionIndex;
 	private int positionTop;
+	private static Context CONTEXT;
 	
 	//LOGS
 	LocationHelper locHelper ;
@@ -120,7 +122,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.main);	
-		
+		CONTEXT = this;
 		//statistics
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
@@ -402,9 +404,34 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		case OPTIONS_MENU_CLEAR:
 			
-			i = new Intent(this, HtmlService.class);
-			i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.CLEAR_ALL);
-			startService(i); 
+			
+			
+			AlertDialog.Builder confirmDialog = new AlertDialog.Builder(CONTEXT);
+			confirmDialog.setMessage("Are you sure you want to clear all files and data created 24 hours before?");
+			confirmDialog.setTitle("Clear Cache");
+			confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+					Intent i = new Intent(getBaseContext(), HtmlService.class);
+					Long timeSpan = (long) (0*24*3600*1000);
+					i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.CLEAR_ALL);
+					i.putExtra("timespan", timeSpan);
+					startService(i); 
+				}
+				
+			});
+			confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+				}
+			});
+			confirmDialog.show();
 			
 			break;
 		

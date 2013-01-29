@@ -54,7 +54,7 @@ public class WebViewActivity extends Activity {
 			htmlDbHelper.open();
 			String filename = htmlDbHelper.getPageInfo(url, tweetId).getAsString(HtmlPage.COL_FILENAME);
 			Log.d(TAG, filename);
-			if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists()){
+			if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() && sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 500){
 				progressBar = ProgressDialog.show(this, "LOADING...", url);
 				Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 				Log.d(TAG, webUri.getPath());

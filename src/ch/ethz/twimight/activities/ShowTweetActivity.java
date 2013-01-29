@@ -943,5 +943,4 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	
 	
 	
-	
 }
