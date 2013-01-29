@@ -96,7 +96,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		handler.postDelayed(checkLocation, 1*60*1000L);	  
 		
 		HashMap<Integer,TweetListFragment> fragmentMap = createFragments();		
-		PageAdapter pagAdapter = new PageAdapter(this,getFragmentManager(),fragmentMap);		
+		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap,null);		
         viewPager = (ViewPager)  findViewById(R.id.viewpager);			
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
@@ -136,9 +136,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private HashMap<Integer,TweetListFragment> createFragments() {
 		
 		HashMap<Integer,TweetListFragment> map = new HashMap<Integer,TweetListFragment>();
-		map.put(PageAdapter.POS_ZERO, new TweetListFragment(this,TIMELINE_KEY));
-		map.put(PageAdapter.POS_ONE, new TweetListFragment(this,FAVORITES_KEY));
-		map.put(PageAdapter.POS_TWO, new TweetListFragment(this,MENTIONS_KEY));
+		map.put(PageAdapter.POS_ZERO, new TweetListFragment(TIMELINE_KEY));
+		map.put(PageAdapter.POS_ONE, new TweetListFragment(FAVORITES_KEY));
+		map.put(PageAdapter.POS_TWO, new TweetListFragment(MENTIONS_KEY));
 		
 		return map;
 	}

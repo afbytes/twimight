@@ -26,7 +26,7 @@ public class UserListFragment extends ListFragment {
 	
 	public UserListFragment(){};
 	
-	public UserListFragment(Activity activity, int type) {
+	public UserListFragment(int type) {
 		super();		
 		this.type = type;		
 		
