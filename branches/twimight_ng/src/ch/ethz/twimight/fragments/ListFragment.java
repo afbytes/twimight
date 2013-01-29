@@ -24,7 +24,10 @@ public abstract class ListFragment extends Fragment {
 	Intent overscrollIntent ;
 	int type ;
 	ContentResolver resolver;
-	ListAdapter adapter;	
+	ListAdapter adapter;
+	String query;
+	
+	public static final String EXTRA_DATA = "extra_data";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {		

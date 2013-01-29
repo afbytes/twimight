@@ -15,32 +15,50 @@ import android.widget.ListView;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.ShowUserTweetListActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 
 public class TweetListFragment extends ListFragment {	
 	
+	long userId;	
 	
-    
-		
 	public TweetListFragment(){
 		
 	};
 	
-	public TweetListFragment(Activity activity, int type) {
+	public TweetListFragment(int type) {
 		super();
 		this.type=type;
+		
 		
 	}    
 
 	
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		Log.i("TweetListFragment","onCreate");
+		if (savedInstanceState != null) {
+			Log.i("TweetListFragment","bundle not null");
+			if (type == SearchableActivity.SHOW_SEARCH_TWEETS)
+				query = savedInstanceState.getString(ListFragment.EXTRA_DATA);
+			else if (type == ShowUserTweetListActivity.USER_TWEETS_KEY)
+				userId = savedInstanceState.getLong(ListFragment.EXTRA_DATA);
+		}
+
+		
+			
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
-		
+		Log.i("TweetListFragment","onCreateView");
 		ListView list = (ListView)super.onCreateView(inflater, container, savedInstanceState);
 		// Click listener when the user clicks on a tweet
 		list.setClickable(true);
@@ -67,7 +85,7 @@ public class TweetListFragment extends ListFragment {
 	
 		if(c!=null) c.close();
 		overscrollIntent = new Intent(getActivity(), TwitterService.class); 
-
+		Log.i("TweetListFragment","inside getData");
 		switch(filter) {
 		case ShowTweetListActivity.TIMELINE_KEY: 
 
@@ -101,7 +119,12 @@ public class TweetListFragment extends ListFragment {
 			break;
 		case SearchableActivity.SHOW_SEARCH_TWEETS:
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
-					+ Tweets.SEARCH), null, SearchableActivity.query, null, null);
+					+ Tweets.SEARCH), null, query , null, null);
+			break;
+			
+		case ShowUserTweetListActivity.USER_TWEETS_KEY:
+			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS +
+					"/" + Tweets.TWEETS_TABLE_USER + "/" + userId), null, SearchableActivity.query, null, null);
 			break;
 		default:
 

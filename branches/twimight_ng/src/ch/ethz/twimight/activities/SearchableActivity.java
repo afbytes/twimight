@@ -12,38 +12,18 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.util.HashMap;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.SearchManager;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ListFragment;
-import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.fragments.adapters.PageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
-import ch.ethz.twimight.net.twitter.TweetAdapter;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterUserAdapter;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
@@ -102,13 +82,9 @@ public class SearchableActivity extends TwimightBaseActivity{
 				.setText("Users")
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
-		
-	
 
 
 	}
-
-
 
 
 	private void processIntent(Intent intent) {
@@ -120,7 +96,9 @@ public class SearchableActivity extends TwimightBaseActivity{
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
 	        suggestions.saveRecentQuery(query, null); 
-	        PageAdapter pagAdapter = new PageAdapter(this, getFragmentManager(),null);      
+	        Bundle bundle = new Bundle();
+	        bundle.putString(ListFragment.EXTRA_DATA, query);
+	        PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),null, bundle);      
 	        viewPager.setAdapter(pagAdapter);	
 	        viewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
 		
