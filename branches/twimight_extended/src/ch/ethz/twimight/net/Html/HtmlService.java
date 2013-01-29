@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -86,7 +87,8 @@ public class HtmlService extends Service {
 					
 				case CLEAR_ALL:
 					Log.d(TAG, "clear cache request");
-					clearAllHtmlPages();
+					Long timeSpan = extras.getLong("timeSpan");
+					new clearAllHtmlPages().execute(timeSpan);
 					break;
 						
 				default:
@@ -156,6 +158,8 @@ public class HtmlService extends Service {
 			return;
 		}
 		else{
+			checkCacheSize();
+			
 			Log.d(TAG, "downloadBulkHtmlPages since:" + String.valueOf(lastTime));
 			//get the timestamp of the last tweet we download
 			
@@ -207,13 +211,24 @@ public class HtmlService extends Service {
 		
 
 	}
-
+	
+	//if downloaded pages > 100, clear those created 2 days ago
+	private void checkCacheSize(){
+		
+		Log.i(TAG, "check cache size");
+		Cursor c = htmlDbHelper.getDownloadedHtmls();
+		if(c.getCount() > 100){
+			new clearAllHtmlPages().execute((long) 2*24*3600*1000);
+		}
+	}
+	
 	
 	private void downloadPages(){
+		
 		setRecentDownloadedTime(System.currentTimeMillis(), getBaseContext());
 		
 		int downloadCount = 1;
-		
+		cleanupMess();
 		//download unsuccessfully downloaded pages
 		Cursor c = htmlDbHelper.getUndownloadedHtmls();
 
@@ -245,10 +260,39 @@ public class HtmlService extends Service {
 		Log.d(TAG, "download finished");
 	}
 	
+	//correct download errors caused by instability
+	private void cleanupMess(){
+		Cursor c = htmlDbHelper.getDownloadedHtmls();
+		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
+		{
+			String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
+			String tweetId = c.getString(c.getColumnIndex(HtmlPage.COL_TID));
+			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
+			
+			String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
+			
+			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+				
+			if(sdCardHelper.checkSDStuff(filePath)){
+					
+				File htmlPage = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+				
+				if(!htmlPage.exists() || htmlPage.length() < 500){
+					Log.d(TAG, "update ###" + filename);
+					htmlDbHelper.updatePage(htmlUrl, filename, tweetId, userId, 0);
+					
+				}	
+			
+			}
+
+		}
+	}
+	
 	private boolean webDownload(ContentValues htmlCV, String filePath){
 		boolean result = true;
 		
-		webHandler.post(new webRunnable(filePath, htmlCV));
+		//webHandler.post(new webRunnable(filePath, htmlCV));
+		new Thread(new webRunnable(filePath, htmlCV)){}.run();
 		
 		return result;
 	}
@@ -304,28 +348,47 @@ public class HtmlService extends Service {
 		
 	}
 	
-	//clear all downloaded html pages and set the database to status undownloaded (int downloaded =0) for all rows
-	private void clearAllHtmlPages(){
-		
-		Cursor c = htmlDbHelper.getAll();
-		
-		for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+	/**
+	 * clear all downloaded html pages and set the database to status undownloaded (int downloaded =0) for all rows
+	 * @author fshi
+	 *
+	 */
+	private class clearAllHtmlPages extends AsyncTask<Long, Void, Boolean>{
+
+		@Override
+		protected Boolean doInBackground(Long... params) {
+			// TODO Auto-generated method stub
 			
-			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
-			String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
-			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-			if(sdCardHelper.checkSDStuff(filePath)){
-				File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
-				if(deleteFile.exists()){
-					if(deleteFile.delete()){
+			long timeSpan = params[0];
+			
+			Cursor c = htmlDbHelper.getAll();
+			
+			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+				
+				String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
 
-						htmlDbHelper.updatePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)), filename,
-								c.getString(c.getColumnIndex(HtmlPage.COL_TID)), userId, 0);
-
+				Long createdTime = Long.parseLong(filename.substring(8,filename.length()-4));
+				
+				if((System.currentTimeMillis() - createdTime) > timeSpan){
+					String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
+					String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+					if(sdCardHelper.checkSDStuff(filePath)){
+						File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+						if(deleteFile.exists()){
+							if(deleteFile.delete()){
+								htmlDbHelper.deletePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)), c.getString(c.getColumnIndex(HtmlPage.COL_TID)));
+							}
+						}
+						else{
+							htmlDbHelper.deletePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)), c.getString(c.getColumnIndex(HtmlPage.COL_TID)));
+						}
 					}
 				}
+				
 			}
+			return null;
 		}
+		
 	}
 	
 	

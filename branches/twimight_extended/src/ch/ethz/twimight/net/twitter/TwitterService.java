@@ -1785,6 +1785,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			//send broadcast 
 			Intent i = new Intent(getBaseContext(),InternetStatusReceiver.class);
 			getBaseContext().sendBroadcast(i);
+
 			Log.i(TAG,"Insert onPost Execute");
 		}
 

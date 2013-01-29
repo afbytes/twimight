@@ -608,7 +608,7 @@ public class ScanningService extends Service{
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
 		Log.d(TAG, "count:" + String.valueOf(c.getCount()));
-		if(c.getCount()>0){			
+		if(c.getCount()>0){		
 			c.moveToFirst();
 			while(!c.isAfterLast()){
 				

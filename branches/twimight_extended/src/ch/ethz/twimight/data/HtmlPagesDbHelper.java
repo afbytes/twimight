@@ -94,7 +94,7 @@ public class HtmlPagesDbHelper {
 		try {
 			String sql = HtmlPage.COL_URL + " = '" + url +"' and " + HtmlPage.COL_TID + " = '" + tweetId + "'";
 			int result = database.delete(DBOpenHelper.TABLE_HTML, sql, null);
-			Log.i(TAG,"row: " + result);
+			Log.i(TAG,"delete row: " + result);
 			if(result!=0)
 				return true;
 		} catch (SQLException ex) {
@@ -173,6 +173,18 @@ public class HtmlPagesDbHelper {
 		Log.d(TAG, "get undownloaded htmls");
 		String sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "'";
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " DESC");
+		return c;
+	}
+	
+	
+	/**
+	 * get downloaded pages for cleaning mess
+	 * @return
+	 */
+	public Cursor getDownloadedHtmls(){
+		Log.d(TAG, "get downloaded htmls");
+		String sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(1) + "'";
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, null);
 		return c;
 	}
 	
