@@ -52,12 +52,20 @@
 			android:text="The latest status " android:textColor="@color/twimightTextDark"
 			android:textSize="15sp" android:layout_marginBottom="12dip"/>
 		
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:id="@+id/textRetweeted_by"
-			android:text="" android:textColor="@color/twimightTextLight"
-			android:textSize="12sp" android:layout_marginLeft="2dip" 
-			android:visibility="gone" android:layout_marginBottom="12dip"
-			android:layout_marginTop="-12dip"/>
+		<LinearLayout android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:layout_marginTop="-12dip" 
+			android:orientation="horizontal">
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/textRetweeted_by"
+				android:text="" android:textColor="@color/twimightTextLight"
+				android:textSize="12sp" android:layout_marginLeft="2dip" 
+				android:visibility="gone" android:layout_marginBottom="12dip"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/linkDownloaded"
+				android:text="" android:textColor="@color/twimightTextLight"
+				android:textSize="12sp" android:layout_marginLeft="2dip" 
+				android:visibility="gone" android:layout_marginBottom="12dip"/>
+		</LinearLayout>
 
 	</LinearLayout>
 </LinearLayout>

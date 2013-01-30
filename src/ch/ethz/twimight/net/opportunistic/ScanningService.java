@@ -334,21 +334,7 @@ public class ScanningService extends Service{
 
 	
 	private Timer timer = new Timer();  
-    private static Handler timerHandler = new Handler(){  
-  
-        public void handleMessage(Message msg) {  
-            switch (msg.what) {      
-            case 1:
-            	Log.i(TAG, "sending closing request");
-            	bluetoothHelper.write("####CLOSING_REQUEST####");  
-                break;      
-            }      
-            super.handleMessage(msg);  
-        }  
-          
-    };  
     
-
 	/**
 	 *  The Handler that gets information back from the BluetoothService
 	 */
@@ -396,8 +382,8 @@ public class ScanningService extends Service{
 					  
 			        public void run() {  
 			            Message message = new Message();      
-			            message.what = 1;      
-			            handler.sendMessage(message);    
+			            message.what = Constants.MESSAGE_CONNECTION_TO_CLOSE;      
+			            mHandler.sendMessage(message);    
 			        }
 			          
 			    };
@@ -422,6 +408,11 @@ public class ScanningService extends Service{
 				removeConnectionTimeout();
 				nextScanning();				
 				break;
+				
+			case Constants.MESSAGE_CONNECTION_TO_CLOSE:
+				Log.i(TAG, "sending closing request");
+            	bluetoothHelper.write("####CLOSING_REQUEST####");  
+                break;
 			}			
 		}
 	};

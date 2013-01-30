@@ -119,7 +119,7 @@ public class HtmlService extends Service {
 
 		Log.d(TAG, "downloadTweetHtmlPages");
 			
-		Uri webUri;	
+		Uri webUri;
 		String tweetId = mBundle.getString("tweetId");
 		String userId = mBundle.getString("user_id");
 		ArrayList<String> htmlUrls = mBundle.getStringArrayList("urls");
@@ -135,7 +135,7 @@ public class HtmlService extends Service {
 				String htmlUrl = htmlUrls.get(i);
 				Log.d(TAG, "id:" + tweetId);
 				Log.d(TAG, "url"+ htmlUrl);
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
 				
 				webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME)));
 				webDownload(htmlCV, webUri.getPath());
@@ -178,7 +178,6 @@ public class HtmlService extends Service {
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 				String tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 				String userId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_USER)));
-				String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 				
 				SpannableString str = new SpannableString(Html.fromHtml(text, null, new TweetTagHandler(this)));
 				String substr = str.toString().substring(str.toString().indexOf("http"));
@@ -186,14 +185,14 @@ public class HtmlService extends Service {
 				ArrayList<String> htmlUrls = new ArrayList<String>();
 				//save the urls of the tweet in a list
 				for(String subStrarr : strarr)
-					if(subStrarr.indexOf("http://") == 0)
+					if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0)
 						htmlUrls.add(subStrarr);
 
 
 				for(String htmlUrl : htmlUrls){
 
 					//find if it's already being downloaded
-					ContentValues isExist = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+					ContentValues isExist = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
 					if(isExist==null){
 						//if not
 
@@ -250,7 +249,7 @@ public class HtmlService extends Service {
 					
 				Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 					
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
 
 				webDownload(htmlCV, webUri.getPath());
 					
@@ -263,7 +262,9 @@ public class HtmlService extends Service {
 		Log.d(TAG, "download finished");
 	}
 	
-	//correct download errors caused by instability
+	/**
+	 * correct download errors caused by network interrupt
+	 */
 	private void cleanupMess(){
 		Cursor c = htmlDbHelper.getDownloadedHtmls();
 		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
@@ -287,9 +288,10 @@ public class HtmlService extends Service {
 				}	
 			
 			}
-
+			
 		}
 	}
+	
 	
 	private boolean webDownload(ContentValues htmlCV, String filePath){
 		boolean result = true;
