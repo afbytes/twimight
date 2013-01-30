@@ -498,7 +498,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		if(!htmlUrls.isEmpty()){
 			for(String htmlUrl : htmlUrls){
 				
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId);
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userID);
 				boolean fileStatusNormal = true;
 				if(htmlCV!=null){
 					//check if file status normal, exists and size
@@ -636,7 +636,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		screenNameView.setText("@"+screenName);
 		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-				
+		
 		SpannableString str = new SpannableString(Html.fromHtml(text, null, new TweetTagHandler(this)));
 		
 		try {
@@ -648,7 +648,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			int passedLen = 0;
 			for(String subStrarr : strarr){
 
-				if(subStrarr.indexOf("http://") == 0){
+				if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0){
 					htmlUrls.add(subStrarr);
 					int startIndex = passedLen;
 					int endIndex = passedLen + subStrarr.length() - 1;
@@ -759,7 +759,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		        	   //delete html pages
 		        	   if(!htmlUrls.isEmpty()){
 		        		   for(String htmlUrl:htmlUrls){
-		        			   ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, String.valueOf(tid));
+		        			   ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, String.valueOf(tid), userID);
 		        			   if(htmlCV != null){
 		        				   String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
 				       			   if(sdCardHelper.checkSDStuff(filePath)){

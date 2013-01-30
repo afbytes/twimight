@@ -109,10 +109,10 @@ public class HtmlPagesDbHelper {
 	 * @param tweetId
 	 * @return
 	 */
-	public ContentValues getPageInfo(String url, String tweetId) {
+	public ContentValues getPageInfo(String url, String tweetId, String userId) {
 		
 		if(tweetId.equals("0")){
-			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url + "'", null, null, null, null);
+			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"' and " + HtmlPage.COL_USER + " = '" + userId + "'", null, null, null, null);
 			
 			c.moveToFirst();
 			
@@ -144,7 +144,7 @@ public class HtmlPagesDbHelper {
 		}
 		
 	}
-
+	
 	//return all urls for a tweet
 	public Cursor getUrlsByTweetId(String tweetId){
 		

@@ -13,11 +13,13 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.Html;
+import android.text.Spannable;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +29,8 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.util.InternalStorageHelper;
 
 /** 
@@ -38,6 +42,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	static final int[] to = {R.id.textUser};
 	Context context;
 	private static final String TAG = "tweet adapter";
+	private HtmlPagesDbHelper htmlDbHelper;
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {		
@@ -49,7 +54,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
 		super.bindView(row, context, cursor);
-		
+		htmlDbHelper = new HtmlPagesDbHelper(context);
+		htmlDbHelper.open();
 		// if we don't have a real name, we use the screen name
 		if(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME))==null){
 			TextView usernameTextView = (TextView) row.findViewById(R.id.textUser);
@@ -62,8 +68,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 		TextView tweetText = (TextView) row.findViewById(R.id.textText);
 		// here, we don't want the entities to be clickable, so we use the standard tag handler
+		
 		tweetText.setText(Html.fromHtml(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT))));
 		
+		boolean retweeted = false;
 		//add the retweet message in case it is a retweet
 		int col = cursor.getColumnIndex(Tweets.COL_RETWEETED_BY);
 		if (col > -1) {
@@ -71,14 +79,82 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			TextView textRetweeted_by = (TextView) row.findViewById(R.id.textRetweeted_by);
 			if (retweeted_by != null) {
 				textRetweeted_by.setText("retweeted by " + retweeted_by);		
-				textRetweeted_by.setVisibility(View.VISIBLE);					
+				textRetweeted_by.setVisibility(View.VISIBLE);	
+				retweeted = true;
 			}
 			else {
 				//textRetweeted_by.setText("");
 				textRetweeted_by.setVisibility(View.GONE);		
 			}
-		}		
+		}
+		//add the download status message in case it has a link
+		boolean downloaded = false;
+
+		String userId = String.valueOf(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER)));
+
+		int colTid = cursor.getColumnIndex(Tweets.COL_TID);
+		String tweetId = "0";
+		if(colTid > -1){
+			tweetId = String.valueOf(cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID)));
+		}
 		
+		
+
+		String substr = Html.fromHtml(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT))).toString();
+
+		String[] strarr = substr.split(" ");
+
+		//check the urls of the tweet
+		for(String subStrarr : strarr){
+
+			if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0){
+				Log.d("test", subStrarr);
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(subStrarr, tweetId, userId);
+				if(htmlCV!=null){
+					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
+						downloaded = true;
+					}
+					else{
+						downloaded = false;
+					}
+				}
+				else{
+					downloaded = false;
+				}
+				
+			}	
+		}	
+		
+		
+		int col_html = cursor.getColumnIndex(Tweets.COL_HTMLS);
+		if (col_html > -1) {
+			int hasHtml = cursor.getInt(col_html);
+			TextView textHtml = (TextView) row.findViewById(R.id.linkDownloaded);
+			if(hasHtml == 1){
+				//if webpages have been downloaded
+				String text = null;
+				if(retweeted){
+					if(downloaded){
+						text = " | downloaded";
+					}
+					else text = " | not downloaded";
+					
+				}
+				else{
+					if(downloaded){
+						text = "downloaded";
+					}
+					else text = "not downloaded";
+				}
+				textHtml.setText(text);
+				textHtml.setVisibility(View.VISIBLE);
+				
+			}
+			else {
+				//textRetweeted_by.setText("");
+				textHtml.setVisibility(View.GONE);		
+			}
+		}
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
