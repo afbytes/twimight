@@ -84,9 +84,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			
-			String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
 			
 			//InternalStorageHelper helper = new InternalStorageHelper(context);			
 			//byte[] imageByteArray = helper.readImage(filename);	
@@ -98,9 +96,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				if (is != null) {						
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					picture.setImageBitmap(bm);	
+					
 				} else
 					picture.setImageResource(R.drawable.default_profile);
-			} catch (FileNotFoundException e) {
+			} catch (Exception e) {
 				Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
 			}				

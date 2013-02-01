@@ -271,7 +271,7 @@ public class BluetoothComms{
 
             // Create a new listening server socket
                          
-            tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);         
+            tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);         
             mmServerSocket = tmp;
         }
 
@@ -349,7 +349,7 @@ public class BluetoothComms{
             // given BluetoothDevice
             try {
                  
-                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                    tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
                 
             } catch (IOException e) {
                 Log.e(TAG, "create() failed", e);

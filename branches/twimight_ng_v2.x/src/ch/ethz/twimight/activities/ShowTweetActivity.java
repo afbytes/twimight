@@ -366,7 +366,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void setProfilePicture() {
 		// Profile image
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
 			
 			ImageView picture = (ImageView) findViewById(R.id.showTweetProfileImage);			
 			int userId = c.getInt(c.getColumnIndex("userRowId"));

@@ -261,6 +261,10 @@ public class MacsDBHelper {
 			return -1;
 		}
 	}
+	
+	public boolean clearMacTable() {
+		return database.delete(DBOpenHelper.TABLE_MACS, null, null) > 0;
+	}
 
 	/**
 	 * Deletes a MAC address from list

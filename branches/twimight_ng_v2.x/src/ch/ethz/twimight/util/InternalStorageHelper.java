@@ -44,7 +44,7 @@ public class InternalStorageHelper {
 		
 	}
 	
-	/*
+
 	public byte[] readImage(String filename) {
 		FileInputStream fis = null;
 		try {
@@ -62,7 +62,7 @@ public class InternalStorageHelper {
 			        baf.append((byte) current);			
 			}	
 			return baf.toByteArray();
-			
+			*/
 		} catch (FileNotFoundException e) {			
 			Log.e(TAG,"file not found exception" );
 			return null;
@@ -79,7 +79,7 @@ public class InternalStorageHelper {
 		}
 	}
 	
-	*/
+	
 	
 	    		
 			

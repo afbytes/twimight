@@ -45,7 +45,7 @@ public class BootReceiver extends BroadcastReceiver {
 			
 			// Start the service for communication with the TDS
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+				//new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 			}
 			
 			
