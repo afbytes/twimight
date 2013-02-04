@@ -361,7 +361,7 @@ public class HtmlService extends Service {
 						Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 
 						webDownload(htmlCV, webUri.getPath());
-						
+						break;
 					case SDCardHelper.TYPE_PDF:
 
 						processFiles(htmlCV, "pdf");
