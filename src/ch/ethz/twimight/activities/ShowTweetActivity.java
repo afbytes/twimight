@@ -16,12 +16,15 @@ import java.io.File;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -533,6 +536,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		}
 		
 		if(!buttonStatus){
+			
 			htmlsDownloaded = true;
 			offlineButton.setVisibility(View.GONE);
 		}
@@ -610,12 +614,78 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         	}
         	else{
         		if(htmlsDownloaded){
-        			//set up our own web view
-            		Intent intent = new Intent(getBaseContext(), WebViewActivity.class);
-            		intent.putExtra("url", url);
-            		intent.putExtra("user_id", userID);
-            		intent.putExtra("tweet_id", tweetId);
-            		startActivity(intent);
+        			String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
+        			PackageManager pm;
+        			switch(sdCardHelper.checkFileType(url)){
+        				case SDCardHelper.TYPE_XML:
+        					//set up our own web view
+                    		Intent intentToWeb = new Intent(getBaseContext(), WebViewActivity.class);
+                    		intentToWeb.putExtra("url", url);
+                    		intentToWeb.putExtra("user_id", userID);
+                    		intentToWeb.putExtra("tweet_id", tweetId);
+                    		startActivity(intentToWeb);
+                    		break;
+        					
+        				case SDCardHelper.TYPE_PDF:
+        					Log.i(TAG, "view pdf");
+        					Intent intentToPDF = new Intent(Intent.ACTION_VIEW, Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME))));
+        					pm = getPackageManager();
+        					List<ResolveInfo> activitiesPDF = pm.queryIntentActivities(intentToPDF, 0);
+        					if (activitiesPDF.size() > 0) {
+        					    startActivity(intentToPDF);
+        					} else {
+        					    // Do something else here. Maybe pop up a Dialog or Toast
+        					}
+        					break;
+        				case SDCardHelper.TYPE_PNG:
+        				case SDCardHelper.TYPE_GIF:
+        				case SDCardHelper.TYPE_JPG:
+        					Log.i(TAG, "view picture");
+        					File picFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
+        					Intent intentToPic = new Intent(Intent.ACTION_VIEW);
+        					intentToPic.setDataAndType(Uri.parse("file://" + Uri.fromFile(picFile).getPath()), "image/*");
+        					pm = getPackageManager();
+        					List<ResolveInfo> activitiesPic = pm.queryIntentActivities(intentToPic, 0);
+        					if (activitiesPic.size() > 0) {
+        					    startActivity(intentToPic);
+        					} else {
+        					    // Do something else here. Maybe pop up a Dialog or Toast
+        						Toast.makeText(getBaseContext(), "new valid application for viewing pictures", Toast.LENGTH_LONG).show();
+        					}
+        					
+        					break;
+        				case SDCardHelper.TYPE_MP3:
+        					Log.i(TAG, "play audio");
+        					File mp3File = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
+        					Intent intentToMp3 = new Intent(Intent.ACTION_VIEW);
+        					intentToMp3.setDataAndType(Uri.parse("file://" + Uri.fromFile(mp3File).getPath()), "audio/mp3");
+        					pm = getPackageManager();
+        					List<ResolveInfo> activitiesAudio = pm.queryIntentActivities(intentToMp3, 0);
+        					if (activitiesAudio.size() > 0) {
+        					    startActivity(intentToMp3);
+        					} else {
+        					    // Do something else here. Maybe pop up a Dialog or Toast
+        						Toast.makeText(getBaseContext(), "new valid application for playing audio files", Toast.LENGTH_LONG).show();
+        					}
+        					break;
+        				case SDCardHelper.TYPE_MP4:
+        				case SDCardHelper.TYPE_RMVB:
+        				case SDCardHelper.TYPE_FLV:
+        					Log.i(TAG, "play video");
+        					File videoFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
+        					Intent intentToVideo = new Intent(Intent.ACTION_VIEW);
+        					intentToVideo.setDataAndType(Uri.parse("file://" + Uri.fromFile(videoFile).getPath()), "video/flv");
+        					pm = getPackageManager();
+        					List<ResolveInfo> activitiesVideo = pm.queryIntentActivities(intentToVideo, 0);
+        					if (activitiesVideo.size() > 0) {
+        					    startActivity(intentToVideo);
+        					} else {
+        					    // Do something else here. Maybe pop up a Dialog or Toast
+        						Toast.makeText(getBaseContext(), "new valid application for playing video files", Toast.LENGTH_LONG).show();
+        					}
+        					break;
+        				
+        			}
         		}
         		else{
         			Toast.makeText(getBaseContext(), "unable to view in offline mode because pages have not been downloaded", Toast.LENGTH_LONG).show();

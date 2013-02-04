@@ -18,8 +18,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.text.Html;
-import android.text.Spannable;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.R.color;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
@@ -130,29 +131,45 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		if (col_html > -1) {
 			int hasHtml = cursor.getInt(col_html);
 			TextView textHtml = (TextView) row.findViewById(R.id.linkDownloaded);
+			TextView splitBar = (TextView) row.findViewById(R.id.split_bar);
+			splitBar.setVisibility(View.GONE);
 			if(hasHtml == 1){
+				
 				//if webpages have been downloaded
 				String text = null;
 				if(retweeted){
 					if(downloaded){
-						text = " | downloaded";
+						splitBar.setText("|");
+						splitBar.setVisibility(View.VISIBLE);
+						text = "downloaded";
+						textHtml.setTextColor(Color.parseColor("#90CA77"));
+						
 					}
-					else text = " | not downloaded";
+					else{
+						splitBar.setText("|");
+						splitBar.setVisibility(View.VISIBLE);
+						text = "not downloaded";
+						textHtml.setTextColor(Color.parseColor("#9E3B33"));
+					}
 					
 				}
 				else{
 					if(downloaded){
 						text = "downloaded";
+						textHtml.setTextColor(Color.parseColor("#90CA77"));
 					}
-					else text = "not downloaded";
+					else{
+						text = "not downloaded";
+						textHtml.setTextColor(Color.parseColor("#9E3B33"));
+					}
+					
 				}
 				textHtml.setText(text);
 				textHtml.setVisibility(View.VISIBLE);
 				
 			}
 			else {
-				//textRetweeted_by.setText("");
-				textHtml.setVisibility(View.GONE);		
+				textHtml.setVisibility(View.GONE);	
 			}
 		}
 		// Profile image

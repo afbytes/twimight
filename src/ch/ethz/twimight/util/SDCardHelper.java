@@ -26,6 +26,22 @@ public class SDCardHelper {
 	private Uri tmpPhotoUri;
 	public final static int IMAGE_WIDTH = 250;
 	public final static int IMAGE_HEIGHT = 250;
+	public static final int TYPE_XML = 1;
+	//document type
+	public static final int TYPE_PDF = 20;
+	//picture type
+	public static final int TYPE_JPG = 30;
+	public static final int TYPE_PNG = 31;
+	public static final int TYPE_GIF = 32;
+	//audio type
+	public static final int TYPE_MP3 = 40;
+	//video type
+	public static final int TYPE_FLV = 50;
+	public static final int TYPE_RMVB = 51;
+	public static final int TYPE_MP4 = 52;
+	
+	
+	
 	
 	public SDCardHelper(Context context) {
 		SDcardPath = null;
@@ -157,6 +173,38 @@ public class SDCardHelper {
 		}
 		else return false;
 		
+	}
+	
+	public int checkFileType(String url){
+
+		if(url.endsWith(".pdf")){
+			return TYPE_PDF;
+		}
+		else if(url.endsWith(".jpg")){
+			return TYPE_JPG;
+		}
+		else if(url.endsWith(".png")){
+			return TYPE_PNG;
+		}
+		else if(url.endsWith(".gif")){
+			return TYPE_GIF;
+		}
+		else if(url.endsWith(".mp3")){
+			return TYPE_MP3;
+		}
+		else if(url.endsWith(".flv")){
+			return TYPE_FLV;
+		}
+		else if(url.endsWith(".rmvb")){
+			return TYPE_RMVB;
+		}
+		else if(url.endsWith(".mp4")){
+			return TYPE_MP4;
+		}
+		else{
+			return TYPE_XML;
+		}
+
 	}
 
 

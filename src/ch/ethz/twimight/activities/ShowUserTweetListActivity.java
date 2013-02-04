@@ -12,8 +12,10 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,7 +53,6 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		
 		if(!getIntent().hasExtra("userId")) finish();
-		
 		
 		setContentView(R.layout.showusertweets);
 		

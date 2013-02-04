@@ -1,6 +1,13 @@
 package ch.ethz.twimight.net.Html;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
@@ -9,6 +16,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
@@ -16,6 +24,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -41,6 +50,7 @@ public class HtmlService extends Service {
 	private SDCardHelper sdCardHelper;
 	private HtmlPagesDbHelper htmlDbHelper;
 	private Handler webHandler;
+
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -127,7 +137,7 @@ public class HtmlService extends Service {
 		
 			
 		Log.d(TAG, htmlUrls.toString());
-		if(sdCardHelper.checkSDStuff(filePath)){	
+		if(sdCardHelper.checkSDStuff(filePath)){
 			
 			for(int i=0;i<htmlUrls.size();i++){
 				//web view declaration
@@ -136,10 +146,51 @@ public class HtmlService extends Service {
 				Log.d(TAG, "id:" + tweetId);
 				Log.d(TAG, "url"+ htmlUrl);
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
-				
-				webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME)));
-				webDownload(htmlCV, webUri.getPath());
+				String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
+				switch(sdCardHelper.checkFileType(htmlUrl)){
+					case SDCardHelper.TYPE_XML:
+						Log.i(TAG, "file type: xml");
+						webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
+						webDownload(htmlCV, webUri.getPath());
+						break;
+					
+					case SDCardHelper.TYPE_PDF:
 
+						processFiles(htmlCV, "pdf");
+						break;
+					
+					case SDCardHelper.TYPE_JPG:
+						processFiles(htmlCV, "jpg");
+						break;
+						
+					case SDCardHelper.TYPE_PNG:
+						processFiles(htmlCV, "png");
+						break;	
+						
+					case SDCardHelper.TYPE_GIF:
+						processFiles(htmlCV, "gif");
+						break;
+					case SDCardHelper.TYPE_MP3:
+						processFiles(htmlCV, "mp3");
+						break;
+					
+					case SDCardHelper.TYPE_FLV:
+						processFiles(htmlCV, "flv");
+						break;	
+						
+					case SDCardHelper.TYPE_RMVB:
+						processFiles(htmlCV, "rmvb");
+						break;
+						
+					case SDCardHelper.TYPE_MP4:
+						processFiles(htmlCV, "mp4");
+						break;
+					
+					default:
+						break;
+					
+				}
+				Log.d(TAG, "filename:" + htmlCV.getAsString(HtmlPage.COL_FILENAME));
 
 			}
 			
@@ -220,8 +271,61 @@ public class HtmlService extends Service {
 		Log.i(TAG, "check cache size");
 		Cursor c = htmlDbHelper.getDownloadedHtmls();
 		if(c.getCount() > 100){
-			new clearAllHtmlPages().execute((long) 2*24*3600*1000);
+			new clearAllHtmlPages().execute((long) 1*24*3600*1000);
 		}
+	}
+	
+	
+	
+	private class fileDownload extends AsyncTask<ContentValues, Void, Boolean>{
+
+		@Override
+		protected Boolean doInBackground(ContentValues... params) {
+			// TODO Auto-generated method stub
+			
+			ContentValues fileCV = params[0];
+			
+			String tweetId = fileCV.getAsString(HtmlPage.COL_TID);
+			String userId = fileCV.getAsString(HtmlPage.COL_USER);
+			String url = fileCV.getAsString(HtmlPage.COL_URL);
+			String filename = fileCV.getAsString(HtmlPage.COL_FILENAME);
+			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+			if(sdCardHelper.checkSDStuff(filePath)){
+				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+				try {
+			        URL fileUrl = new URL(url);
+			        
+		            URLConnection connection = fileUrl.openConnection();
+		            connection.connect();
+
+		            // download the file
+		            InputStream input = new BufferedInputStream(fileUrl.openStream());
+		            OutputStream output = new FileOutputStream(targetFile);
+
+		            byte data[] = new byte[1024];
+		            int count;
+		            while ((count = input.read(data)) != -1) {
+		                
+		                output.write(data, 0, count);
+		            }
+
+		            output.flush();
+		            output.close();
+		            input.close();
+					htmlDbHelper.updatePage(url, filename, tweetId, userId, 1);
+					Log.d(TAG, "file download finished");
+				} catch (NotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			return null;
+		}
+		
 	}
 	
 	
@@ -246,12 +350,57 @@ public class HtmlService extends Service {
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 				
 			if(sdCardHelper.checkSDStuff(filePath)){
-					
-				Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
-					
+				
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
+				
+				switch(sdCardHelper.checkFileType(htmlUrl)){
+					case SDCardHelper.TYPE_XML:
+						
+						Log.i(TAG, "file type: xml");
+						
+						Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 
-				webDownload(htmlCV, webUri.getPath());
+						webDownload(htmlCV, webUri.getPath());
+						
+					case SDCardHelper.TYPE_PDF:
+
+						processFiles(htmlCV, "pdf");
+						break;
+					
+					case SDCardHelper.TYPE_JPG:
+						processFiles(htmlCV, "jpg");
+						break;
+						
+					case SDCardHelper.TYPE_PNG:
+						processFiles(htmlCV, "png");
+						break;	
+						
+					case SDCardHelper.TYPE_GIF:
+						processFiles(htmlCV, "gif");
+						break;
+					case SDCardHelper.TYPE_MP3:
+						processFiles(htmlCV, "mp3");
+						break;
+					
+					case SDCardHelper.TYPE_FLV:
+						processFiles(htmlCV, "flv");
+						break;		
+						
+					case SDCardHelper.TYPE_RMVB:
+						processFiles(htmlCV, "rmvb");
+						break;
+					
+					case SDCardHelper.TYPE_MP4:
+						processFiles(htmlCV, "mp4");
+						break;
+						
+					default:
+						break;
+						
+					
+				}
+				
+				
 					
 				downloadCount++;
 
@@ -260,6 +409,15 @@ public class HtmlService extends Service {
 		}
 		c.close();
 		Log.d(TAG, "download finished");
+	}
+	
+	private void processFiles(ContentValues fileCV, String fileSuffix){
+		Log.i(TAG, "file type: " + fileSuffix);
+		int len = fileSuffix.length();
+		String filename = fileCV.getAsString(HtmlPage.COL_FILENAME).substring(0, fileCV.getAsString(HtmlPage.COL_FILENAME).length()-len-1) + "." + fileSuffix;
+		fileCV.put(HtmlPage.COL_FILENAME, filename);
+		htmlDbHelper.updatePage(fileCV.getAsString(HtmlPage.COL_URL), filename, fileCV.getAsString(HtmlPage.COL_TID), fileCV.getAsString(HtmlPage.COL_USER), fileCV.getAsInteger(HtmlPage.COL_DOWNLOADED));
+		new fileDownload().execute(fileCV);
 	}
 	
 	/**
@@ -276,19 +434,21 @@ public class HtmlService extends Service {
 			String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
 			
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-				
-			if(sdCardHelper.checkSDStuff(filePath)){
-					
-				File htmlPage = sdCardHelper.getFileFromSDCard(filePath[0], filename);
-				
-				if(!htmlPage.exists() || htmlPage.length() < 500){
-					Log.d(TAG, "update ###" + filename);
-					htmlDbHelper.updatePage(htmlUrl, filename, tweetId, userId, 0);
-					
-				}	
-			
+			switch(sdCardHelper.checkFileType(htmlUrl)){
+				case SDCardHelper.TYPE_XML:
+					if(sdCardHelper.checkSDStuff(filePath)){
+	
+						File htmlPage = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+	
+						if(!htmlPage.exists() || htmlPage.length() < 4000){
+							Log.d(TAG, "update ###" + filename);
+							htmlDbHelper.updatePage(htmlUrl, filename, tweetId, userId, 0);
+						}	
+					}
+					break;	
+				default:
+					break;
 			}
-			
 		}
 	}
 	

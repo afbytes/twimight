@@ -61,8 +61,13 @@
 				android:textSize="12sp" android:layout_marginLeft="2dip" 
 				android:visibility="gone" android:layout_marginBottom="12dip"/>
 			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/linkDownloaded"
+				android:layout_height="wrap_content" android:id="@+id/split_bar"
 				android:text="" android:textColor="@color/twimightTextLight"
+				android:textSize="12sp" android:layout_marginLeft="2dip" 
+				android:visibility="gone" android:layout_marginBottom="12dip"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/linkDownloaded"
+				android:text=""
 				android:textSize="12sp" android:layout_marginLeft="2dip" 
 				android:visibility="gone" android:layout_marginBottom="12dip"/>
 		</LinearLayout>

@@ -53,6 +53,8 @@
   		<color name="twimightButtonActive">#9e838e</color>
   		<color name="twimightHeaderBackgroundDisaster">#bb5454</color>
   		<color name="twimightImageBorder">#747474</color>
+  		<color name="downloaded_page">#90CA77</color>
+  		<color name="undownloaded_page">#9E3B33</color>
          
   		
     </resources>
