@@ -1077,7 +1077,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		cv.put(Tweets.COL_TEXT, tweetSpanText);
 		
 		//if there are urls to this tweet, change the status of html field to 1
-		if(tweetSpanText.indexOf("http://") > 0){
+		if(tweetSpanText.indexOf("http://") > 0 || tweetSpanText.indexOf("https://") > 0 ){
 			cv.put(Tweets.COL_HTMLS, 1);
 		}
 		
