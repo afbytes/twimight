@@ -183,7 +183,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 		@Override
 		public void run() {
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
+			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
@@ -314,7 +314,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		timelineListView.setAdapter(null);	
 		
 	
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
+				cm.getActiveNetworkInfo() != null) {
+			
 			if (locHelper.count > 0) {			
 				locHelper.unRegisterLocationListener();
 				handler.removeCallbacks(checkLocation);				

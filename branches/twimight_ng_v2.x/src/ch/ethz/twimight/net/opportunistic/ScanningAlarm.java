@@ -145,9 +145,6 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
 			Intent i = new Intent(context,ScanningService.class);
-			//MacsDBHelper dbHelper = new MacsDBHelper(context);
-			//dbHelper.open();	
-			//dbHelper.clearMacTable();
 			context.startService(i);
 		}
 

@@ -92,7 +92,7 @@ public class MacsDBHelper {
 		}
 		return result;
 	}
-
+	
 
 	/**
 	 * Update the active status of a MAC address entry

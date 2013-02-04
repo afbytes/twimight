@@ -120,17 +120,18 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 	        registerReceiver(receiver, filter);
 	        receiver.setListener(this);
+	        mBtAdapter = BluetoothAdapter.getDefaultAdapter();	
 	        
-		}			
-        
-		mBtAdapter = BluetoothAdapter.getDefaultAdapter();	
+		}		        
+		
 		if (mBtAdapter != null) {
 			// If we're already discovering, stop it
 	        if (mBtAdapter.isDiscovering()) {
 	            mBtAdapter.cancelDiscovery();
 	        }
 	        // Request discover from BluetoothAdapter
-	        mBtAdapter.startDiscovery();
+	        dbHelper.updateMacsDeActive();	        
+	        mBtAdapter.startDiscovery();	        
 	        return START_STICKY; 
 	        
 		} else {
@@ -650,17 +651,12 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 					Log.e(TAG,"error",e);
 					
 				};
-
-
 			}
-
 			return o;
 		}
-
 	}
 
 	public static byte[] toByteArray(InputStream in) throws IOException {
-
 
 		BufferedInputStream bis = new BufferedInputStream(in);
 		ByteArrayBuffer baf = new ByteArrayBuffer(2048);	

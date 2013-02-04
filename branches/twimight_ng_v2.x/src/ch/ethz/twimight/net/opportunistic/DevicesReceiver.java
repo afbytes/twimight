@@ -34,14 +34,22 @@ public class DevicesReceiver extends BroadcastReceiver {
 		sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 		
 		mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+		
+	}
+	
+	private void addPairedDevices() {
 		// Get a set of currently paired devices
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	      
     	
         if (pairedDevices != null) {
         	// If there are paired devices, add each one to the ArrayAdapter
-	        if (pairedDevices.size() > 0) {	        	
-	            for (BluetoothDevice device : pairedDevices) {	            	
-	            		dbHelper.createMac(device.getAddress().toString(), 1); 
+	        if (pairedDevices.size() > 0) {
+	        	
+	            for (BluetoothDevice device : pairedDevices) {	 
+	            	    if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
+	            	    	dbHelper.createMac(device.getAddress().toString(), 1); 
+	            	    	
+	            	    }
 	            }
 	        } 
         }	
@@ -50,28 +58,32 @@ public class DevicesReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
-
+				
         // When discovery finds a device
 		if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 			
 			// Get the BluetoothDevice object from the Intent
 			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);    
-			
+
 			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART &&
 					device.getBondState() != BluetoothDevice.BOND_BONDED) {
-						dbHelper.createMac(device.getAddress(), 1);
-						Log.i(TAG,"device found, mac: " + device.getAddress());
-				                                  
-			}
+				
+				if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
+					dbHelper.createMac(device.getAddress().toString(), 1);					
+				} 
+				
+
+			} 
 
 
 			// When discovery is finished...
 		} else  if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {        
-			    if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000
-			    		) {
+			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000
+					) {
 			    	SharedPreferences.Editor edit = sharedPref.edit();
 			    	edit.putLong(DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
 			    	edit.commit();
+			    	addPairedDevices();
 			    	sf.onScanningFinished();
 			    }
 				

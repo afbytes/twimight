@@ -424,7 +424,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         public void onClick(View widget) {  
            
         	
-        	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
+        	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
     			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
     		} else {}
