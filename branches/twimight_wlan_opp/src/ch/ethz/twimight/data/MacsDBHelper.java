@@ -100,7 +100,7 @@ public class MacsDBHelper {
 		}
 		return result;
 	}
-
+	
 
 	/**
 	 * Update the active status of a MAC address entry
@@ -268,6 +268,10 @@ public class MacsDBHelper {
 			
 			return -1;
 		}
+	}
+	
+	public boolean clearMacTable() {
+		return database.delete(DBOpenHelper.TABLE_MACS, null, null) > 0;
 	}
 
 	/**

@@ -46,7 +46,7 @@ public class CommunicationReceiver extends BroadcastReceiver {
 				// TDS communication
 				if(TDSAlarm.isTdsEnabled(context)){
 					// remove currently scheduled updates and schedule an immediate one
-					new TDSAlarm();
+					//new TDSAlarm();
 				}
 				
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);

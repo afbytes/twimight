@@ -181,6 +181,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	}
 	
+
 		
 	private void setDisasterPreference( boolean value) {
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
@@ -306,7 +307,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		timelineListView.setOnItemClickListener(null);
 		timelineListView.setAdapter(null);		
 		
+
 		if(c!=null) c.close();				
+
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)

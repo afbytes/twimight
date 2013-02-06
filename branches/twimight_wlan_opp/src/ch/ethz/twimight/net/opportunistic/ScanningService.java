@@ -12,13 +12,17 @@
  ******************************************************************************/
 package ch.ethz.twimight.net.opportunistic;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
+import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.util.encoders.Base64;
 
 import android.app.AlarmManager;
 import android.app.Service;
@@ -34,6 +38,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
@@ -42,6 +47,7 @@ import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.InternalStorageHelper;
 
 /**
  * This is the thread for scanning for Bluetooth peers.
@@ -398,7 +404,6 @@ public class ScanningService extends Service{
 	}	  		
 
 
-	 
 	/**
 	 * Creates a JSON Object from a Tweet
 	 * TODO: Move this where it belongs!
@@ -435,11 +440,35 @@ public class ScanningService extends Service{
 				o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
 			if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
 				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
-			if(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE) >=0)
-				o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)))));
+			if( c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH) >=0 && c.getColumnIndex("userRowId") >= 0 ) {
+				Log.i(TAG,"adding picture");
+				int userId = c.getInt(c.getColumnIndex("userRowId"));
+				Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+				try {
+					InputStream is = getContentResolver().openInputStream(imageUri);	
+					byte[] image = toByteArray(is);
+					o.put(TwitterUsers.COL_PROFILEIMAGE, Base64.encodeToString(image, Base64.DEFAULT) );
+
+				} catch (Exception e) {
+					Log.e(TAG,"error",e);
+					
+				};
+			}
 			return o;
 		}
-			
+	}
+
+	public static byte[] toByteArray(InputStream in) throws IOException {
+
+		BufferedInputStream bis = new BufferedInputStream(in);
+		ByteArrayBuffer baf = new ByteArrayBuffer(2048);	
+		//get the bytes one by one			
+		int current = 0;			
+		while ((current = bis.read()) != -1) {			
+			baf.append((byte) current);			
+		}	
+		return baf.toByteArray();
+
 	}
 	
 	/**
@@ -532,15 +561,25 @@ public class ScanningService extends Service{
 
 		// create the content values for the user
 		ContentValues cv = new ContentValues();
+		String screenName = null;
+		
 		if(o.has(TwitterUsers.COL_SCREENNAME)) {
+			screenName = o.getString(TwitterUsers.COL_SCREENNAME);
 			cv.put(TwitterUsers.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));
-			
+
 		}
-		if(o.has(TwitterUsers.COL_PROFILEIMAGE))
-			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE)));
+		if(o.has(TwitterUsers.COL_PROFILEIMAGE) && screenName != null) {
+
+			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());			
+			byte[] image = Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE), Base64.DEFAULT);
+			helper.writeImage(image, screenName);
+			cv.put(TwitterUsers.COL_PROFILEIMAGE_PATH, new File(getFilesDir(),screenName).getPath());
+
+		}
+
 		if(o.has(Tweets.COL_USER)) {
 			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
-			
+
 		}
 		cv.put(TwitterUsers.COL_ISDISASTER_PEER, 1);
 

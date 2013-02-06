@@ -114,12 +114,12 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_ISFRIEND = "follow"; /** are we following the user? */
 	public static final String COL_ISDISASTER_PEER = "disaster_peer"; /** have we met the user in disaster mode */
 	public static final String COL_IS_SEARCH_RESULT = "search_result"; /** have we met the user in disaster mode */
-	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */
-	public static final String COL_PROFILEIMAGE = "_data";
-	
+	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */	
 	public static final String COL_LASTUPDATE = "last_update";
 	public static final String COL_LAST_PICTURE_UPDATE = "last_picture_update";
 	public static final String COL_FLAGS = "u_flags";
+	public static final String COL_PROFILEIMAGE_PATH = "_data";
+	public static final String COL_PROFILEIMAGE = "image";  /** this is used only in disaster mode to sent the profile image */
 	
 	public static final String DEFAULT_SORT_ORDER = COL_SCREENNAME;
 	

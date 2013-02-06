@@ -41,8 +41,8 @@ public class UserAdapter extends SimpleCursorAdapter {
 			
 		// Profile image
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE));
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
+			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		} else {
 			picture.setImageResource(R.drawable.default_profile);

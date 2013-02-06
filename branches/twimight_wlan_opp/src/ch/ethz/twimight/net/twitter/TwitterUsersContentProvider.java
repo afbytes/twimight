@@ -13,6 +13,8 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.FileNotFoundException;
+
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -21,6 +23,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import ch.ethz.twimight.data.DBOpenHelper;
 
@@ -71,6 +74,26 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 		return true;
 	}
+	
+	 /**
+     * Provides read only access to files that have been downloaded and stored
+     * in the provider cache. Specifically, in this provider, clients can
+     * access the files of downloaded images.
+     */
+    @Override
+    public ParcelFileDescriptor openFile(Uri uri, String mode)
+            throws FileNotFoundException
+    {
+    	Log.d(TAG," inside openFile");
+    	// only support read only files
+        if ("r".equals(mode.toLowerCase())) {
+        	return openFileHelper(uri, mode);       
+        } else {
+        	return null;
+        }
+
+        
+    }
 
 	/**
 	 * Returns the MIME types (defined in TwitterUsers) of a URI
@@ -162,30 +185,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if(twitterusersUriMatcher.match(uri) != USERS) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if(checkValues(values)){
-			Cursor c = isUserAlreadyStored(values);
 			
-			if(c != null){
-				Log.d(TAG, "we already have the user");
-				
-				
-				// we flag the user for updating the profile image if
-				// - the flag is set
-				// - and we do not yet have a profile image
-				// - otherwise, we clear the profile image flag
-				if(values.containsKey(TwitterUsers.COL_FLAGS) && ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) >0)){
-					if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
-						values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS) & (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
-						Log.d(TAG, "we already have profile picture, deleting flag");
-					} 
-				}
-				Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"
-											+Integer.toString(c.getInt(c.getColumnIndex("_id"))));
-				update(updateUri, values, null, null);
-				c.close();
-				return updateUri;
-				
-			} else 							
-				return insertNewUser(values);				
+			return insertNewUser(values);				
 			
 
 		} else {
@@ -196,7 +197,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	private Cursor isUserAlreadyStored(ContentValues values) {
 		// if we already have the user, we update with the new info
-		String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE};
+		String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE_PATH};
 		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" = '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
 		if(c.getCount()==1){			
 			c.moveToFirst();
@@ -218,7 +219,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			// - and we do not yet have a profile image
 			// - otherwise, we clear the profile image flag
 			if(values.containsKey(TwitterUsers.COL_FLAGS) && ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) >0)){
-				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
 					values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS) & (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
 					Log.d(TAG, "we already have profile picture, deleting flag");
 				} 
@@ -260,7 +261,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		try {			
 
 			for (ContentValues value : values){
-				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE)) {					
+				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE_PATH)) {					
 					updateUser(uri,value);
 
 				} else {					
