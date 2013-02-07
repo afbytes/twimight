@@ -47,7 +47,7 @@ public class WlanOppCommsUdp extends OppComms {
 				neighborCursor = resolver.query(Uri.parse(PROVIDER_URI), projection, null, null, null);
 			}
 			
-			if (neighborCursor == null || neighborCursor.isClosed()){
+			if (neighborCursor.getCount() > 0 ){
 				neighborCursor.moveToFirst();
 				while (!neighborCursor.isAfterLast()){				
 					String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
