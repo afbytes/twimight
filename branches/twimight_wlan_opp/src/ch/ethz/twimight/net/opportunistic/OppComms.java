@@ -38,7 +38,6 @@ public abstract class OppComms {
 	final int PORT = 29761;
 	final Handler mHandler;	
 
-	MacsDBHelper dbHelper;
 	public static boolean isBinded = false;
 	protected static final String NEW_PACKAGE = "ch.ethz.csg.wlanopp.START_WLANOPP";
 	protected static final String NEW_PROVIDER_URI = "content://ch.ethz.csg.wlanopp.provider/neighbors/current";
@@ -60,9 +59,7 @@ public abstract class OppComms {
 	Context context;
 
 	public OppComms(Context context, Handler handler) {
-		this.context = context;		
-		dbHelper = MacsDBHelper.getInstance(context);
-		dbHelper.open();		
+		this.context = context;			
 		resolver = context.getContentResolver();
 		mHandler = handler;
 		bindWifiOppService();
