@@ -24,26 +24,27 @@ public class WlanOppCommsUdp extends OppComms {
 		}
 		
 		public void write(String data, String ip) {		
-			Log.i(TAG,"inside write");
-			new SendingTask(ip,data).start();			
+			if (isBinded )	
+				new SendingTask(ip,data).start();			
 			
 		}
-		
-		public void broadcast(String data) {			
-			for (Neighbor n : neighbors) {
-				new SendingTask(n.ipAddress,data).start();
-			}
+
+		public void broadcast(String data) {
+			if (isBinded )
+				for (Neighbor n : neighbors) {
+					new SendingTask(n.ipAddress,data).start();
+				}
 		}		
-	
-		
+
+
 		/** Updates the local list of available neighbors **/
 		protected void updateNeighbors(){
-			Log.i(TAG, "Update Neighbors...");
+			
 			lastUpdate = System.currentTimeMillis();
 			//List<Neighbor> old = neighbors;
 			neighbors = new CopyOnWriteArrayList<Neighbor>();
 			if (neighborCursor == null || neighborCursor.isClosed()){
-				neighborCursor = resolver.query(Uri.parse("content://ch.ethz.csg.burundi.NeighborProvider/dictionary"), projection, null, null, null);
+				neighborCursor = resolver.query(Uri.parse(PROVIDER_URI), projection, null, null, null);
 			}
 			
 			if (neighborCursor == null || neighborCursor.isClosed()){
@@ -92,7 +93,7 @@ public class WlanOppCommsUdp extends OppComms {
 		}
 		
 		protected void stopListeningSocket(){
-			if (lTask != null) {
+			if (lTask != null && isBinded ) {
 				lTask.cancel();
 				lTask = null;
 			}

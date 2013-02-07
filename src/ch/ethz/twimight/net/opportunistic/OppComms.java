@@ -18,6 +18,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 import ch.ethz.twimight.data.MacsDBHelper;
 
 public abstract class OppComms {
@@ -38,6 +39,11 @@ public abstract class OppComms {
 	final Handler mHandler;	
 
 	MacsDBHelper dbHelper;
+	public static boolean isBinded = false;
+	protected static final String NEW_PACKAGE = "ch.ethz.csg.wlanopp.START_WLANOPP";
+	protected static final String NEW_PROVIDER_URI = "content://ch.ethz.csg.wlanopp.provider/neighbors/current";
+	protected static final String PACKAGE = "ch.ethz.csg.burundi.BIND_SERVICE";
+	protected static final String PROVIDER_URI = "content://ch.ethz.csg.burundi.NeighborProvider/dictionary";
 
 	public class Neighbor{
 		public String ipAddress;
@@ -54,23 +60,18 @@ public abstract class OppComms {
 	Context context;
 
 	public OppComms(Context context, Handler handler) {
-		this.context = context;
-		bindWifiOppService();
+		this.context = context;		
 		dbHelper = MacsDBHelper.getInstance(context);
 		dbHelper.open();		
 		resolver = context.getContentResolver();
 		mHandler = handler;
-		startNeighborUpdates();
-		startListeningSocket();
+		bindWifiOppService();
+		
 	}
 
 	public void stop() {
-
 		unbindWifiOppService();	
-		stopListeningSocket();
-		stopNeighborUpdates();			
-
-
+		
 	}
 
 	private void bindWifiOppService (){
@@ -86,17 +87,27 @@ public abstract class OppComms {
 			}
 		};
 		
-		Intent intent = new Intent ("ch.ethz.csg.burundi.BIND_SERVICE" );
+		Intent intent = new Intent (PACKAGE );
 		PackageManager packageManager = context.getPackageManager();
-		List<ResolveInfo> activities = packageManager.queryIntentServices(intent, 0);
-		if (activities.size() > 0)
-			context.bindService(intent, connection , Context.BIND_AUTO_CREATE );
+		List<ResolveInfo> services = packageManager.queryIntentServices(intent, 0);
+		
+		if (services.size() > 0) {			
+			if (context.bindService(intent, connection , Context.BIND_AUTO_CREATE )) {
+				isBinded = true;
+				startNeighborUpdates();
+				startListeningSocket();
+			}
+			
+		} else 
+			Toast.makeText(context, "WlanOpp not installed, please install it first", Toast.LENGTH_LONG).show();
 	}
 
 	private void unbindWifiOppService (){
-		if ( connection != null ){
+		if ( isBinded ){
 			context.unbindService(connection);
 			connection = null ;
+			stopListeningSocket();
+			stopNeighborUpdates();		
 
 		}
 	}
@@ -113,17 +124,18 @@ public abstract class OppComms {
 			}
 		};
 		updateNeighbors();
-		context.getContentResolver().registerContentObserver(Uri.parse("content://ch.ethz.csg.burundi.NeighborProvider/dictionary"), false, neighborObserver);
+		context.getContentResolver().registerContentObserver(Uri.parse(PROVIDER_URI), false, neighborObserver);
 	}
 
 	private void stopNeighborUpdates(){
-		context.getContentResolver().unregisterContentObserver(neighborObserver);
+		if (isBinded)
+			context.getContentResolver().unregisterContentObserver(neighborObserver);
 	}
 
 
 	public void forceNeighborUpdate() {
-
-		updateNeighbors();
+		if (isBinded)
+			updateNeighbors();
 	}
 
 	protected abstract void updateNeighbors();
