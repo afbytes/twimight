@@ -42,13 +42,12 @@ public class WlanOppCommsUdp extends OppComms {
 			
 			lastUpdate = System.currentTimeMillis();
 			//List<Neighbor> old = neighbors;
-			neighbors = new CopyOnWriteArrayList<Neighbor>();
-			if (neighborCursor == null || neighborCursor.isClosed()){
-				neighborCursor = resolver.query(Uri.parse(PROVIDER_URI), projection, null, null, null);
-			}
+			neighbors = new CopyOnWriteArrayList<Neighbor>();			
+			neighborCursor = resolver.query(Uri.parse(PROVIDER_URI), projection, null, null, null);			
 			
 			if (neighborCursor.getCount() > 0 ){
 				neighborCursor.moveToFirst();
+				
 				while (!neighborCursor.isAfterLast()){				
 					String ipAddress = neighborCursor.getString(neighborCursor.getColumnIndex("ip"));
 					String id = neighborCursor.getString(neighborCursor.getColumnIndex("device_id"));
@@ -56,9 +55,7 @@ public class WlanOppCommsUdp extends OppComms {
 					temp.time = System.currentTimeMillis();
 					neighbors.add(temp);							
 					neighborCursor.moveToNext();
-				}
-				
-				neighborCursor.close();
+				}				
 				
 				// Check added
 				/*
@@ -83,6 +80,7 @@ public class WlanOppCommsUdp extends OppComms {
 		        .sendToTarget();	
 				//old = null;
 			}
+			neighborCursor.close();
 			
 			
 		}
