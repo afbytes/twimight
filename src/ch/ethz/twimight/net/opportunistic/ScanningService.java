@@ -561,7 +561,7 @@ public class ScanningService extends Service{
 					downloaded = 1;
 				}
 			}
-			htmlDbHelper.insertPage(htmlUrl, filename, tweetId, userId, downloaded);
+			htmlDbHelper.insertPage(htmlUrl, filename, tweetId, userId, downloaded, 0);
 			
 		} catch (JSONException e1) {
 			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);

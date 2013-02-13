@@ -28,11 +28,19 @@ public class InternetStatusReceiver extends BroadcastReceiver {
 			Log.d(TAG, "wifi connected");
 			Intent i = new Intent(context, HtmlService.class);
 			i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_ALL);
+			i.putExtra(HtmlPage.OFFLINE_MANUAL, false);
 			context.startService(i);
 			//start html service
 		}
+		else if(networkType == ConnectivityManager.TYPE_MOBILE){
+			Log.i(TAG, "mobile data connected");
+			Intent i = new Intent(context, HtmlService.class);
+			i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_FORCE);
+			context.startService(i);
+			
+		}
 		else{
-			Log.d(TAG, "wifi not connected");
+			Log.i(TAG, "no valid connection");
 			return;
 		}
 		

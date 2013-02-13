@@ -1783,7 +1783,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			
 			//send broadcast 
-			Intent i = new Intent(getBaseContext(),InternetStatusReceiver.class);
+			Intent i = new Intent(getBaseContext(), InternetStatusReceiver.class);
 			getBaseContext().sendBroadcast(i);
 
 			Log.i(TAG,"Insert onPost Execute");
@@ -2501,7 +2501,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				String mediaUrl =  null;
 				
 				if (mediaName != null)
-					mediaUrl = Environment.getExternalStoragePublicDirectory(NewTweetActivity.PHOTO_PATH +
+					mediaUrl = Environment.getExternalStoragePublicDirectory(Tweets.PHOTO_PATH +
 												"/" + LoginActivity.getTwitterId(TwitterService.this) + "/" + mediaName).getAbsolutePath();
 				
 				boolean hasMedia;

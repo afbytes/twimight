@@ -30,6 +30,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -106,7 +107,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	
 	//photo
 	private String photoPath;
-	private final String PHOTO_PATH = "twimight_photos";
 	//SDcard helper
 	private SDCardHelper sdCardHelper;
 	private String userID = null;
@@ -120,6 +120,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private ArrayList<String> htmlsToDownload;
 	private boolean htmlsDownloaded = false; // whether htmls of this tweet have been downloaded
 	private boolean downloadNotSuccess = false; // whether it's a not successfully downloaded tweet
+	private int forcedDownload = 0;
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -166,7 +167,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				
 				userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
 				//locate the directory where the photos are stored
-				photoPath = PHOTO_PATH + "/" + userID;
+				photoPath = Tweets.PHOTO_PATH + "/" + userID;
 				
 				setTweetInfo();
 				setUserInfo();			
@@ -323,6 +324,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		//download the pages and store them locally, set up the html database
 		int networkActive = 1; 
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected())networkActive = 0;
+		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+		if(networkInfo != null){
+			int networkType = networkInfo.getType();
+			if(networkType == ConnectivityManager.TYPE_MOBILE){
+				forcedDownload = 1;
+			}
+		}
+		
 			
 		if( htmlStatus == 0 || networkActive == 0)
 		{
@@ -334,7 +343,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			public void onClick(View v) {
 
 				if(downloadAndInsert()){
-					offlineButton.setVisibility(View.GONE);
+					offlineButton.setImageResource(R.drawable.btn_twimight_archive_on);
 				}
 
 			}
@@ -542,6 +551,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		}
 	}
 	
+	//perform downloading task when user click download button 
 	private boolean downloadAndInsert(){
 		
 		//insert database
@@ -553,15 +563,17 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 
 				if(downloadNotSuccess){
 					result = true;
-
+					ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlsToDownload.get(i), tweetId, userID);
+					if(! (htmlCV.getAsInteger(HtmlPage.COL_TRIES) < HtmlPage.DOWNLOAD_LIMIT)){
+						htmlDbHelper.updatePage(htmlsToDownload.get(i),	htmlCV.getAsString(HtmlPage.COL_FILENAME), tweetId, userID, 0, htmlCV.getAsInteger(HtmlPage.COL_FORCED), 0);
+					}
 				}else{
 					String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, userID, 0);
-
+					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, userID, 0, forcedDownload);
 				}
 			}
 			
-			//insert database
+			//insert database and start downloading service
 			if(result){
 				Intent i = new Intent(ShowTweetActivity.this, HtmlService.class);
 				Bundle mBundle = new Bundle();
@@ -595,7 +607,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         public InternalURLSpan(String url) {  
            
         	this.url=url;
-        }  
+        }
       
         @Override  
         public void onClick(View widget) {  
@@ -635,6 +647,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         					    startActivity(intentToPDF);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
+        						Toast.makeText(getBaseContext(), "no valid application for viewing pdf files", Toast.LENGTH_LONG).show();
         					}
         					break;
         				case SDCardHelper.TYPE_PNG:
@@ -650,7 +663,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         					    startActivity(intentToPic);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "new valid application for viewing pictures", Toast.LENGTH_LONG).show();
+        						Toast.makeText(getBaseContext(), "no valid application for viewing pictures", Toast.LENGTH_LONG).show();
         					}
         					
         					break;
@@ -665,7 +678,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         					    startActivity(intentToMp3);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "new valid application for playing audio files", Toast.LENGTH_LONG).show();
+        						Toast.makeText(getBaseContext(), "no valid application for playing audio files", Toast.LENGTH_LONG).show();
         					}
         					break;
         				case SDCardHelper.TYPE_MP4:
@@ -681,7 +694,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         					    startActivity(intentToVideo);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "new valid application for playing video files", Toast.LENGTH_LONG).show();
+        						Toast.makeText(getBaseContext(), "no valid application for playing video files", Toast.LENGTH_LONG).show();
         					}
         					break;
         				
@@ -817,7 +830,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		        	   String delPhotoName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		        	   if(delPhotoName != null){
-		        		   photoPath = PHOTO_PATH + "/" + userID;
+		        		   photoPath = Tweets.PHOTO_PATH + "/" + userID;
 		        		   String[] filePath = {photoPath};
 		       			   if(sdCardHelper.checkSDStuff(filePath)){
 		       				   File photoFile = sdCardHelper.getFileFromSDCard(photoPath, delPhotoName);//photoFileParent, photoFilename));

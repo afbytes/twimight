@@ -161,6 +161,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ HtmlPage.COL_TID + " string not null, "
 			+ HtmlPage.COL_USER + " string not null, "
 			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
+			+ HtmlPage.COL_FORCED + " integer default 0, "
+			+ HtmlPage.COL_TRIES + " integer default 0, "
 			+ HtmlPage.COL_FILENAME + " string);";
 	
 	

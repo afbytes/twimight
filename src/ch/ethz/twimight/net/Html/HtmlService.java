@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -46,10 +45,10 @@ public class HtmlService extends Service {
 	public static final int DOWNLOAD_SINGLE = 0;
 	public static final int DOWNLOAD_ALL = 1;
 	public static final int CLEAR_ALL = 2;
+	public static final int DOWNLOAD_FORCE = 3;
 	public static final String DOWNLOAD_REQUEST = "download_request";
 	private SDCardHelper sdCardHelper;
 	private HtmlPagesDbHelper htmlDbHelper;
-	private Handler webHandler;
 
 
 	@Override
@@ -67,9 +66,11 @@ public class HtmlService extends Service {
 			sdCardHelper = new SDCardHelper(this);
 			htmlDbHelper = new HtmlPagesDbHelper(this);
 			htmlDbHelper.open();
-			webHandler = new Handler();
 			Bundle extras = intent.getExtras();
 			
+			if(extras.containsKey(HtmlPage.OFFLINE_PREFERENCE)){
+				setOfflinePreference(extras.getBoolean(HtmlPage.OFFLINE_PREFERENCE), this);
+			}
 			
 			int serviceCommand = extras.getInt(DOWNLOAD_REQUEST);
 			switch(serviceCommand){
@@ -91,8 +92,16 @@ public class HtmlService extends Service {
 						Log.w(TAG, "Error synching: no connectivity");
 						return START_NOT_STICKY;
 					}
-					Log.d(TAG, "bulk download request");
-					bulkDownloadTweetHtmlPages();
+
+					if(getOfflinePreference(this)){
+						bulkDownloadTweetHtmlPages(false);
+					}else{
+						if(extras.getBoolean(HtmlPage.OFFLINE_MANUAL)){
+							Log.i(TAG, "manual download");
+							bulkDownloadTweetHtmlPages(false);
+						}
+					}
+					
 					break;
 					
 				case CLEAR_ALL:
@@ -100,6 +109,9 @@ public class HtmlService extends Service {
 					Long timeSpan = extras.getLong("timeSpan");
 					new clearAllHtmlPages().execute(timeSpan);
 					break;
+				case DOWNLOAD_FORCE:
+					Log.d(TAG, "forced download");
+					bulkDownloadTweetHtmlPages(true);
 						
 				default:
 					throw new IllegalArgumentException("Exception: Unknown download request");
@@ -110,8 +122,24 @@ public class HtmlService extends Service {
 		
 	}
 
+	//set offline mode preference
+	public static void setOfflinePreference(boolean pref, Context context) {
+		
+		Log.i(TAG,"set offline preference to:" + String.valueOf(pref));
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putBoolean(HtmlPage.OFFLINE_PREFERENCE, pref);
+		prefEditor.commit();
+	}	
+	//get offline mode preference
+	public static boolean getOfflinePreference(Context context) {
 
-
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean offlinePref = prefs.getBoolean(HtmlPage.OFFLINE_PREFERENCE, false);
+		Log.i(TAG, "offline preference:" + String.valueOf(offlinePref));
+		return offlinePref;
+	}
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
@@ -205,7 +233,7 @@ public class HtmlService extends Service {
 	 * @author fshi
 	 *
 	 */
-	private void bulkDownloadTweetHtmlPages(){
+	private void bulkDownloadTweetHtmlPages(boolean forced){
 		
 		long lastTime = getLastDownloadedTime(getBaseContext());
 		if((System.currentTimeMillis() - lastTime) < 1000*30){
@@ -248,7 +276,7 @@ public class HtmlService extends Service {
 						//if not
 
 						String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-						htmlDbHelper.insertPage(htmlUrl, filename, tweetId, userId, 0);
+						htmlDbHelper.insertPage(htmlUrl, filename, tweetId, userId, 0, 0);
 
 					}
 
@@ -258,14 +286,14 @@ public class HtmlService extends Service {
 			
 			c.close();
 			
-			downloadPages();
+			downloadPages(forced);
 			
 		}
 		
 
 	}
-	
-	//if downloaded pages > 100, clear those created 2 days ago
+		
+	//if downloaded pages > 100, clear those created 1 days ago
 	private void checkCacheSize(){
 		
 		Log.i(TAG, "check cache size");
@@ -289,6 +317,8 @@ public class HtmlService extends Service {
 			String userId = fileCV.getAsString(HtmlPage.COL_USER);
 			String url = fileCV.getAsString(HtmlPage.COL_URL);
 			String filename = fileCV.getAsString(HtmlPage.COL_FILENAME);
+			int forced = fileCV.getAsInteger(HtmlPage.COL_FORCED);
+			int tries = fileCV.getAsInteger(HtmlPage.COL_TRIES);
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 			if(sdCardHelper.checkSDStuff(filePath)){
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
@@ -312,7 +342,7 @@ public class HtmlService extends Service {
 		            output.flush();
 		            output.close();
 		            input.close();
-					htmlDbHelper.updatePage(url, filename, tweetId, userId, 1);
+					htmlDbHelper.updatePage(url, filename, tweetId, userId, 1, forced, tries + 1);
 					Log.d(TAG, "file download finished");
 				} catch (NotFoundException e) {
 					// TODO Auto-generated catch block
@@ -329,14 +359,20 @@ public class HtmlService extends Service {
 	}
 	
 	
-	private void downloadPages(){
+	private void downloadPages(boolean forced){
 		
 		setRecentDownloadedTime(System.currentTimeMillis(), getBaseContext());
 		
 		int downloadCount = 1;
 		cleanupMess();
 		//download unsuccessfully downloaded pages
-		Cursor c = htmlDbHelper.getUndownloadedHtmls();
+		Cursor c = null;
+		if(forced){
+			c = htmlDbHelper.getUndownloadedHtmls(true);
+		}
+		else{
+			c = htmlDbHelper.getUndownloadedHtmls(false);
+		}
 
 		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
 		{
@@ -363,7 +399,7 @@ public class HtmlService extends Service {
 						webDownload(htmlCV, webUri.getPath());
 						break;
 					case SDCardHelper.TYPE_PDF:
-
+					
 						processFiles(htmlCV, "pdf");
 						break;
 					
@@ -378,6 +414,7 @@ public class HtmlService extends Service {
 					case SDCardHelper.TYPE_GIF:
 						processFiles(htmlCV, "gif");
 						break;
+						
 					case SDCardHelper.TYPE_MP3:
 						processFiles(htmlCV, "mp3");
 						break;
@@ -396,8 +433,7 @@ public class HtmlService extends Service {
 						
 					default:
 						break;
-						
-					
+							
 				}
 				
 				
@@ -416,7 +452,7 @@ public class HtmlService extends Service {
 		int len = fileSuffix.length();
 		String filename = fileCV.getAsString(HtmlPage.COL_FILENAME).substring(0, fileCV.getAsString(HtmlPage.COL_FILENAME).length()-len-1) + "." + fileSuffix;
 		fileCV.put(HtmlPage.COL_FILENAME, filename);
-		htmlDbHelper.updatePage(fileCV.getAsString(HtmlPage.COL_URL), filename, fileCV.getAsString(HtmlPage.COL_TID), fileCV.getAsString(HtmlPage.COL_USER), fileCV.getAsInteger(HtmlPage.COL_DOWNLOADED));
+		htmlDbHelper.updatePage(fileCV.getAsString(HtmlPage.COL_URL), filename, fileCV.getAsString(HtmlPage.COL_TID), fileCV.getAsString(HtmlPage.COL_USER), fileCV.getAsInteger(HtmlPage.COL_DOWNLOADED), fileCV.getAsInteger(HtmlPage.COL_FORCED), fileCV.getAsInteger(HtmlPage.COL_TRIES));
 		new fileDownload().execute(fileCV);
 	}
 	
@@ -430,6 +466,8 @@ public class HtmlService extends Service {
 			String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
 			String tweetId = c.getString(c.getColumnIndex(HtmlPage.COL_TID));
 			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
+			int forced = c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED));
+			int tries = c.getInt(c.getColumnIndex(HtmlPage.COL_TRIES));
 			
 			String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
 			
@@ -442,7 +480,7 @@ public class HtmlService extends Service {
 	
 						if(!htmlPage.exists() || htmlPage.length() < 4000){
 							Log.d(TAG, "update ###" + filename);
-							htmlDbHelper.updatePage(htmlUrl, filename, tweetId, userId, 0);
+							htmlDbHelper.updatePage(htmlUrl, filename, tweetId, userId, 0, forced, tries);
 						}	
 					}
 					break;	
@@ -456,7 +494,6 @@ public class HtmlService extends Service {
 	private boolean webDownload(ContentValues htmlCV, String filePath){
 		boolean result = true;
 		
-		//webHandler.post(new webRunnable(filePath, htmlCV));
 		new Thread(new webRunnable(filePath, htmlCV)){}.run();
 		
 		return result;
@@ -476,8 +513,9 @@ public class HtmlService extends Service {
 		public void run() {
 			// TODO Auto-generated method stub
 			WebView web = new WebView(getBaseContext());
-
+			
 			web.setWebViewClient(new WebClientDownload(filePath, htmlCV));
+			
 			web.getSettings().setJavaScriptEnabled(true);
 			web.getSettings().setDomStorageEnabled(true);
 			web.loadUrl(htmlCV.getAsString(HtmlPage.COL_URL));
@@ -512,6 +550,8 @@ public class HtmlService extends Service {
 		return lastTime;
 		
 	}
+	
+	
 	
 	/**
 	 * clear all downloaded html pages and set the database to status undownloaded (int downloaded =0) for all rows
@@ -565,6 +605,8 @@ public class HtmlService extends Service {
 		private String tweetId;
 		private String filename;
 		private String userId;
+		private int forced;
+		private int tries;
 		private boolean loadingFailed;
 
 		public WebClientDownload(String filePath, ContentValues htmlCV){
@@ -574,14 +616,16 @@ public class HtmlService extends Service {
 			this.filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
 			this.tweetId = htmlCV.getAsString(HtmlPage.COL_TID);
 			this.userId = htmlCV.getAsString(HtmlPage.COL_USER);
+			this.forced = htmlCV.getAsInteger(HtmlPage.COL_FORCED);
+			this.tries = htmlCV.getAsInteger(HtmlPage.COL_TRIES) + 1;
 			this.loadingFailed = false;
 		}
 		
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			// TODO Auto-generated method stub
-			if(htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0)){
-				Log.d(TAG, "on page started");	
+			if(htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0, this.forced, this.tries)){
+				Log.d(TAG, "on page started");
 			}
 			super.onPageStarted(view, url, favicon);
 		}
@@ -592,7 +636,7 @@ public class HtmlService extends Service {
 				String description, String failingUrl) {
 			// TODO Auto-generated method stub
 			Log.d(TAG, "on received error" + failingUrl);
-			htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0);
+			htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0, this.forced, this.tries);
 			loadingFailed = true;
 			super.onReceivedError(view, errorCode, description, failingUrl);
 		}
@@ -603,7 +647,7 @@ public class HtmlService extends Service {
 				SslError error) {
 			// TODO Auto-generated method stub
 			Log.d(TAG, "on received ssl error");
-			htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0);
+			htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 0, this.forced, this.tries);
 			loadingFailed = true;
 			super.onReceivedSslError(view, handler, error);
 		}
@@ -613,7 +657,7 @@ public class HtmlService extends Service {
 			// TODO Auto-generated method stub
 			if(!loadingFailed){
 				view.saveWebArchive(filePath);
-				if(htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 1)){
+				if(htmlDbHelper.updatePage(this.baseUrl, this.filename, this.tweetId, this.userId, 1, this.forced, this.tries)){
 					Log.d(TAG, "onPageFinished and downloaded:" + url + " in " + filePath);
 				}
 			}
@@ -628,8 +672,7 @@ public class HtmlService extends Service {
 			view.loadUrl(url);
 			Log.d(TAG, baseUrl + "redirect to:" + url);
 			return true;
-		}		
-		
+		}	
 
 	}
 

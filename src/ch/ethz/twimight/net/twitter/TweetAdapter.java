@@ -90,7 +90,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		}
 		//add the download status message in case it has a link
 		boolean downloaded = false;
-
+		boolean downloading = false;
+		boolean downloadfailed = false;
 		String userId = String.valueOf(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER)));
 
 		int colTid = cursor.getColumnIndex(Tweets.COL_TID);
@@ -109,22 +110,21 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		for(String subStrarr : strarr){
 
 			if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0){
-				Log.d("test", subStrarr);
+
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(subStrarr, tweetId, userId);
 				if(htmlCV!=null){
 					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
 						downloaded = true;
 					}
+					else if(htmlCV.getAsInteger(HtmlPage.COL_TRIES) < HtmlPage.DOWNLOAD_LIMIT){
+						downloading = true;
+					}
 					else{
-						downloaded = false;
+						downloadfailed = true;
 					}
 				}
-				else{
-					downloaded = false;
-				}
-				
-			}	
-		}	
+			}
+		}
 		
 		
 		int col_html = cursor.getColumnIndex(Tweets.COL_HTMLS);
@@ -142,8 +142,20 @@ public class TweetAdapter extends SimpleCursorAdapter {
 						splitBar.setText("|");
 						splitBar.setVisibility(View.VISIBLE);
 						text = "downloaded";
-						textHtml.setTextColor(Color.parseColor("#90CA77"));
+						textHtml.setTextColor(Color.parseColor("#1d8a04"));
 						
+					}
+					else if(downloading){
+						splitBar.setText("|");
+						splitBar.setVisibility(View.VISIBLE);
+						text = "downloading";
+						textHtml.setTextColor(Color.parseColor("#9ea403"));
+					}
+					else if(downloadfailed){
+						splitBar.setText("|");
+						splitBar.setVisibility(View.VISIBLE);
+						text = "download failed";
+						textHtml.setTextColor(Color.parseColor("#9E3B33"));
 					}
 					else{
 						splitBar.setText("|");
@@ -156,7 +168,15 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				else{
 					if(downloaded){
 						text = "downloaded";
-						textHtml.setTextColor(Color.parseColor("#90CA77"));
+						textHtml.setTextColor(Color.parseColor("#1d8a04"));
+					}
+					else if(downloading){
+						text = "downloading";
+						textHtml.setTextColor(Color.parseColor("#9ea403"));
+					}
+					else if(downloadfailed){
+						text = "download failed";
+						textHtml.setTextColor(Color.parseColor("#9E3B33"));
 					}
 					else{
 						text = "not downloaded";

@@ -398,6 +398,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			
 			i = new Intent(this, HtmlService.class);
 			i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_ALL);
+			i.putExtra(HtmlPage.OFFLINE_MANUAL, true);
 			startService(i); 
 			
 			break;
@@ -407,7 +408,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			
 			
 			AlertDialog.Builder confirmDialog = new AlertDialog.Builder(CONTEXT);
-			confirmDialog.setMessage("Are you sure you want to clear all files and data created 24 hours before?");
+			confirmDialog.setMessage("Are you sure you want to clear all files and data of webpage?");
 			confirmDialog.setTitle("Clear Cache");
 			confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
 

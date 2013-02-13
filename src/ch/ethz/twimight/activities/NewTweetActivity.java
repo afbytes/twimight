@@ -70,11 +70,11 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private long isReplyTo;
 	
 	// the following are all to deal with location
-	private ToggleButton locationButton;
+	private ImageButton locationButton;
 	private Location loc;
 	private LocationManager lm;
 	private LocationListener locationListener;
-	
+	private boolean locationChecked;
 	private TextWatcher textWatcher;
 	
 	//uploading photos
@@ -83,7 +83,6 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private String tmpPhotoPath; //path storing photos on SDcard
 	private String finalPhotoPath; //path storing photos on SDcard
 	private String finalPhotoName; //file name of uploaded photo
-	public static final String PHOTO_PATH = "twimight_photos";
 	private Uri tmpPhotoUri; //uri storing temp photos
 	private Uri photoUri; //uri storing photos
 	private ImageView mImageView; //to display the photo to be uploaded
@@ -222,25 +221,35 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// User settings: do we use location or not?
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
-		locationButton = (ToggleButton) findViewById(R.id.tweet_location);
-		locationButton.setChecked(useLocation);		
-		locationButton.setOnClickListener(new OnClickListener() {
-			
+		
+		locationButton = (ImageButton) findViewById(R.id.tweet_location);
+		locationChecked = false;
+		if(useLocation){
+			locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+			locationChecked = true;
+		}
+		locationButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				useLocation = locationButton.isChecked();
-				if(useLocation){
+				if(!locationChecked){
 					registerLocationListener();
+					Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
+					locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+					locationChecked = true;
 				} else {
 					unRegisterLocationListener();
+					Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
+					locationButton.setImageResource(R.drawable.ic_menu_mylocation);
+					locationChecked = false;
 				}
 			}
 		});
 		
 		
+		
 		//uploading photos
-		tmpPhotoPath = PHOTO_PATH + "/" + "tmp";
-		finalPhotoPath = PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
+		tmpPhotoPath = Tweets.PHOTO_PATH + "/" + "tmp";
+		finalPhotoPath = Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
 		mImageView = new ImageView(this);
 		
 		photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
@@ -290,9 +299,11 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			public void onClick(View v) {
 				if(photoLayout.getVisibility() == View.GONE){
 					photoLayout.setVisibility(View.VISIBLE);
+					photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
 				}
 				else{
 					photoLayout.setVisibility(View.GONE);
+					photoButton.setImageResource(R.drawable.ic_menu_gallery);
 				}
 			}
 		});
@@ -319,6 +330,20 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		uploadFromCamera.setEnabled(statusUpload);
 		deletePhoto.setEnabled(statusDelete);
 		previewPhoto.setEnabled(statusDelete);
+		if(statusUpload){
+			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow);
+			uploadFromCamera.setImageResource(R.drawable.ic_camera);
+		}else{
+			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow_off);
+			uploadFromCamera.setImageResource(R.drawable.ic_camera_off);
+		}
+		if(statusDelete){
+			deletePhoto.setImageResource(R.drawable.ic_menu_delete);
+			previewPhoto.setImageResource(R.drawable.ic_menu_zoom);
+		}else{
+			deletePhoto.setImageResource(R.drawable.ic_menu_delete_off);
+			previewPhoto.setImageResource(R.drawable.ic_menu_zoom_off);
+		}
 	}
 	
 	/**
