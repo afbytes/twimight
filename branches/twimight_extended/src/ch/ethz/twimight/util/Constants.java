@@ -44,6 +44,7 @@ public final class Constants {
     public static final long MIN_LISTEN_TIME = 10*1000L; /** Interval for Bluetooth scans */
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */
+	public static final boolean OFFLINE_DEFAULT_ON = false;
 	public static final long WAIT_FOR_BLUETOOTH = 20*1000L; /** If Bluetooth is off, how long to we wait for it to enable? */
 	public static final long MEETINGS_INTERVAL = 60*1000L; /** time interval between to successive encounters */
     

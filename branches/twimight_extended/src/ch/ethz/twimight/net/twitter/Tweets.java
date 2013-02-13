@@ -47,6 +47,9 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_ID = "id"; /** a specific tweet */
 	public static final String SEARCH = "search"; /** a search request */
 	
+	//photo path
+	public static final String PHOTO_PATH = "twimight_photos";
+	
 	// here start the column names
 	public static final String COL_TEXT = "text"; /** the tweet text */
 	public static final String COL_USER = "user_id"; /** the user id of the author */

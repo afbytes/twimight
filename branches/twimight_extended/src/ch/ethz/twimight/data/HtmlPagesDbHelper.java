@@ -1,7 +1,5 @@
 package ch.ethz.twimight.data;
 
-import java.util.ArrayList;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -47,9 +45,9 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean insertPage(String url, String filename, String tweetId, String userId, int downloaded) {
+	public boolean insertPage(String url, String filename, String tweetId, String userId, int downloaded, int forced) {
 		Log.i(TAG,"insert page url: " + url);
-		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded);
+		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded, forced, 0);
 		
 		try {
 			long result = database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
@@ -70,9 +68,9 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean updatePage(String url, String filename, String tweetId, String userId, int downloaded){
+	public boolean updatePage(String url, String filename, String tweetId, String userId, int downloaded, int forced, int tries){
 		
-		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded);
+		ContentValues cv = createContentValues(url,filename, tweetId, userId, downloaded, forced, tries);
 		Log.d(TAG, "update an entry:" + cv.toString());
 		String sql = HtmlPage.COL_URL + " = '" + url +"' and " + HtmlPage.COL_TID + " = '" + tweetId + "'";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
@@ -122,7 +120,9 @@ public class HtmlPagesDbHelper {
 					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
 					c.getString(c.getColumnIndex(HtmlPage.COL_TID)),
 					c.getString(c.getColumnIndex(HtmlPage.COL_USER)),
-					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)));
+					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_TRIES)));
 			Log.d(TAG, "page info:" + htmlCV.toString());
 			
 			return htmlCV;
@@ -137,7 +137,9 @@ public class HtmlPagesDbHelper {
 					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
 					c.getString(c.getColumnIndex(HtmlPage.COL_TID)),
 					c.getString(c.getColumnIndex(HtmlPage.COL_USER)),
-					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)));
+					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED)),
+					c.getInt(c.getColumnIndex(HtmlPage.COL_TRIES)));
 			Log.d(TAG, "page info:" + htmlCV.toString());
 			
 			return htmlCV;
@@ -169,9 +171,14 @@ public class HtmlPagesDbHelper {
 	 * get undownloaded pages
 	 * @return
 	 */
-	public Cursor getUndownloadedHtmls(){
+	public Cursor getUndownloadedHtmls(boolean forced){
 		Log.d(TAG, "get undownloaded htmls");
-		String sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "'";
+		String sql = null;
+		if(forced){
+			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_FORCED + " = '" + String.valueOf(1) + "' and " + HtmlPage.COL_TRIES + " < '" + String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+		}else{
+			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_TRIES + " < '" + String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+		}
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " DESC");
 		return c;
 	}
@@ -196,13 +203,15 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	private ContentValues createContentValues(String url, String filename, String tweetId, String userId, int downloaded) {
+	private ContentValues createContentValues(String url, String filename, String tweetId, String userId, int downloaded, int forced, int tries) {
 		ContentValues values = new ContentValues();
 		values.put(HtmlPage.COL_FILENAME ,filename);
 		values.put(HtmlPage.COL_URL ,url);
 		values.put(HtmlPage.COL_TID, tweetId);
 		values.put(HtmlPage.COL_USER, userId);
 		values.put(HtmlPage.COL_DOWNLOADED, downloaded);
+		values.put(HtmlPage.COL_FORCED, forced);
+		values.put(HtmlPage.COL_TRIES, tries);
 		return values;
 	}
 	

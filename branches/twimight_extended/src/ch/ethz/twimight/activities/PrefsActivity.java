@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.Html.HtmlPage;
+import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSAlarm;
@@ -72,7 +74,7 @@ public class PrefsActivity extends PreferenceActivity{
 						
 					} else {
 						disableDisasterMode(getBaseContext());						
-						finish();						
+						finish();
 					}
 					
 				} else if(key.equals("prefTDSCommunication")){
@@ -106,6 +108,18 @@ public class PrefsActivity extends PreferenceActivity{
 					if(PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
 						new TwitterAlarm(getBaseContext(), false);
 					}
+				} else if (key.equals("prefOfflineMode")) {		
+
+					if(preferences.getBoolean("prefOfflineMode", Constants.OFFLINE_DEFAULT_ON)){
+
+						preferenceChange(true);
+					}
+					else{
+						
+						preferenceChange(false);
+
+					}
+
 				}
 			}
 
@@ -114,6 +128,11 @@ public class PrefsActivity extends PreferenceActivity{
 
 	}
 	
+	private void preferenceChange(boolean offlinePreference){
+		Intent i = new Intent(getBaseContext(), HtmlService.class);
+		i.putExtra(HtmlPage.OFFLINE_PREFERENCE, offlinePreference);
+		startService(i);
+	}
 	
 	public static void disableDisasterMode(Context context) {
 		if (getBluetoothInitialState(context) == false) {
