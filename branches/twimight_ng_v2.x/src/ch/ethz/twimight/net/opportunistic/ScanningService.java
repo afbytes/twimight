@@ -412,6 +412,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 				stateReceiver = new StateChangedReceiver();
 				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+				stateReceiver.setListener(ScanningService.this);
 				registerReceiver(stateReceiver, filter);
 				if (mBtAdapter != null)
 					mBtAdapter.disable();
@@ -819,9 +820,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 	@Override
 	public void onSwitchingFinished() {
-		bluetoothHelper.start();		
-		unregisterReceiver(stateReceiver);
-		
+		bluetoothHelper.start();	
+		if (stateReceiver != null)
+			unregisterReceiver(stateReceiver);
+
 	}
 	
 };
