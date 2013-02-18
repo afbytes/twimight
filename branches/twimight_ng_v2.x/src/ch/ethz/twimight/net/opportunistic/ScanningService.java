@@ -56,7 +56,8 @@ import ch.ethz.twimight.util.InternalStorageHelper;
  * @author theus
  * @author pcarta
  */
-public class ScanningService extends Service implements DevicesReceiver.ScanningFinished{
+public class ScanningService extends Service implements DevicesReceiver.ScanningFinished,
+														StateChangedReceiver.BtSwitchingFinished {
 
 	
 	private static final String TAG = "ScanningService"; /** For Debugging */
@@ -72,7 +73,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private MacsDBHelper dbHelper;
 	
 	private static Context context = null;
-	
+	StateChangedReceiver stateReceiver;
 	private Cursor cursor;
 	
 	
@@ -409,7 +410,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			case Constants.BLUETOOTH_RESTART:         	 
 				Log.i(TAG, "blue restart"); 
 				
-				StateChangedReceiver stateReceiver = new StateChangedReceiver(bluetoothHelper);
+				stateReceiver = new StateChangedReceiver();
 				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 				registerReceiver(stateReceiver, filter);
 				if (mBtAdapter != null)
@@ -811,6 +812,15 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	public void onScanningFinished() {
 		startScanning();
 		ShowTweetListActivity.setLoading(false);
+		
+	}
+
+
+
+	@Override
+	public void onSwitchingFinished() {
+		bluetoothHelper.start();		
+		unregisterReceiver(stateReceiver);
 		
 	}
 	
