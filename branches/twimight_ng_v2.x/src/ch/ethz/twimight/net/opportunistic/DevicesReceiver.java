@@ -31,8 +31,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 	public DevicesReceiver(Context context){
 		dbHelper = new MacsDBHelper(context);
 		dbHelper.open();		
-		sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-		
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(context);		
 		mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 		
 	}

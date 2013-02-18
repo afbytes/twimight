@@ -349,11 +349,11 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
+		//menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
 		//menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 8, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 7, "About").setIcon(R.drawable.ic_menu_info_details);
-		menu.add(7, OPTIONS_MENU_FEEDBACK, 6, "Feedback").setIcon(R.drawable.ic_menu_edit);
+		menu.add(7, OPTIONS_MENU_FEEDBACK, 3, "Feedback").setIcon(R.drawable.ic_menu_edit);
 		return true;
 	}
 
@@ -419,7 +419,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
+				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
 				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
 
 			} else  {

@@ -55,7 +55,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());
 		} 			
-		Log.i(TAG, "instantiated"); 		
+			
 
 
 	}	
@@ -131,7 +131,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			Intent intent = new Intent(context, ScanningAlarm.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			alarmMgr.cancel(pendingIntent);
-
+			
 			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
 			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, time, Constants.SCANNING_INTERVAL+ delay, pendingIntent);
 			Log.i(TAG, "alarm set");

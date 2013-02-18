@@ -43,6 +43,7 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -98,8 +99,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		super.onStartCommand(intent, flags, startId);
 		
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 	
-		Log.i(TAG,"onStartCommand");
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 			
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
 			
@@ -131,7 +131,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	        }
 	        // Request discover from BluetoothAdapter
 	        dbHelper.updateMacsDeActive();	        
-	        mBtAdapter.startDiscovery();	        
+	        mBtAdapter.startDiscovery();
+	        ShowTweetListActivity.setLoading(true);
 	        return START_STICKY; 
 	        
 		} else {
@@ -377,8 +378,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				// Here starts the protocol for Tweet exchange.
 				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
 				//new SendDisasterData(msg.obj.toString()).execute(last);				
-				sendDisasterTweets(last);
-				sendDisasterDM(last);			
+				//sendDisasterTweets(last);
+				//sendDisasterDM(last);		
+				sendDisasterTweets(0L);
+				sendDisasterDM(0L);	
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
 				
 				Log.i(TAG, "sending closing request");
@@ -402,11 +405,23 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				removeConnectionTimeout();
 				nextScanning();				
 				break;
+				
+			case Constants.BLUETOOTH_RESTART:         	 
+				Log.i(TAG, "blue restart"); 
+				
+				StateChangedReceiver stateReceiver = new StateChangedReceiver(bluetoothHelper);
+				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+				registerReceiver(stateReceiver, filter);
+				if (mBtAdapter != null)
+					mBtAdapter.disable();
+				break;
+				
+			
 			}			
 		}
 	};
 
-
+	
 	
 	/**
 	 * process all the data received via bluetooth
@@ -794,7 +809,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 	@Override
 	public void onScanningFinished() {
-		startScanning();			
+		startScanning();
+		ShowTweetListActivity.setLoading(false);
 		
 	}
 	

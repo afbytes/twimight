@@ -113,11 +113,15 @@ public class BluetoothComms{
             mInsecureAcceptThread = null;
         }
         try {
-        	mInsecureAcceptThread = new AcceptThread();
-        	mInsecureAcceptThread.start();
+        	mInsecureAcceptThread = new AcceptThread();        	
+        	mInsecureAcceptThread.start();        
+        	
         	setState(STATE_LISTEN);
         } catch (IOException e) {
         	Log.e(TAG,"listen() failed");
+        	Message msg = mHandler.obtainMessage(Constants.BLUETOOTH_RESTART, -1, -1, null);
+        	mHandler.sendMessage(msg);
+        	
         }
            
         
@@ -264,7 +268,7 @@ public class BluetoothComms{
     private class AcceptThread extends Thread {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
-       
+        
 
         public AcceptThread() throws IOException {
             BluetoothServerSocket tmp = null;          
