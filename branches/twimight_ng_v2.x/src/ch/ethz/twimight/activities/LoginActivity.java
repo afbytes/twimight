@@ -87,9 +87,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TWITTER_REQUEST_TOKEN_SECRET = "twitter_request_token_secret"; /** Name of the request token secret in preferences */
 	
 	// twitter urls
-	private static final String TWITTER_REQUEST_TOKEN_URL = "http://twitter.com/oauth/request_token"; 
-	private static final String TWITTER_ACCESS_TOKEN_URL = "http://twitter.com/oauth/access_token";
-	private static final String TWITTER_AUTHORIZE_URL = "http://twitter.com/oauth/authorize";
+	private static final String TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"; 
+	private static final String TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token";
+	private static final String TWITTER_AUTHORIZE_URL = "https://api.twitter.com/oauth/authorize";
 	private static final Uri CALLBACK_URI = Uri.parse("my-app://bluetest");
 	
 	public static final String LOGIN_RESULT_ACTION = "twitter_login_result_action";
@@ -158,7 +158,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}
 
 		} else {
-			// if we don't have request token and secret, we show the login button
+			// if we don't have request token and secret, we show the loginhttps://www.facebook.com/ button
 			Log.i(TAG, "we do not have the tokens, enabling login button");			
 			setupLoginButton();
 		}	
@@ -207,8 +207,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			if(cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()){
 				// disabling button
-				buttonLogin.setEnabled(false);
-									
+				buttonLogin.setEnabled(false);									
 				new GetRequestTokenTask().execute();
 			} else {
 				Toast.makeText(this,"Not connected to the Internet, please try again later!", Toast.LENGTH_LONG).show();
@@ -249,7 +248,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
 			OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
 
-			provider.setOAuth10a(true);
+			//provider.setOAuth10a(true);
 			
 			try {				
 				String authUrl = provider.retrieveRequestToken(consumer, CALLBACK_URI.toString());
