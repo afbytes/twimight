@@ -15,5 +15,6 @@ Unfortunately, some Android devices cause problems when automatically connecting
 || Samsung Galaxy Nexus || 4.2.2 || OK || ||
 || HTC One X || 4.1.1 || OK || Sometimes freezes in disaster mode! ||
 || HTC Nexus One || 2.3.6 || OK || ||
+|| Samsung Galaxy Y Duos || 2.3.6 || OK ||  ||
 || Samsung Galaxy S || 2.3.3 || NOT OK || Requires pairing ||
 || Samsung Galaxy S3 || 4.0.4 || NOT OK || Requires pairing ||
