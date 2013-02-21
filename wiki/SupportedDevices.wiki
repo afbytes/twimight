@@ -17,4 +17,5 @@ Unfortunately, some Android devices cause problems when automatically connecting
 || HTC Nexus One || 2.3.6 || OK || ||
 || Samsung Galaxy Y Duos || 2.3.6 || OK ||  ||
 || Samsung Galaxy S || 2.3.3 || NOT OK || Requires pairing ||
+|| Samsung Galaxy S2 || 4.0.3 || OK || ||
 || Samsung Galaxy S3 || 4.0.4 || NOT OK || Requires pairing ||
