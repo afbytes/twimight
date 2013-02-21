@@ -16,6 +16,7 @@ Unfortunately, some Android devices cause problems when automatically connecting
 || HTC One X || 4.1.1 || OK || Sometimes freezes in disaster mode! ||
 || HTC Nexus One || 2.3.6 || OK || ||
 || Samsung Galaxy Y Duos || 2.3.6 || OK ||  ||
-|| Samsung Galaxy S || 2.3.3 || NOT OK || Requires pairing ||
 || Samsung Galaxy S2 || 4.0.3 || OK || ||
+|| HTC Wildfire S || 2.3.5 || NOT OK || ||
+|| Samsung Galaxy S || 2.3.3 || NOT OK || Requires pairing ||
 || Samsung Galaxy S3 || 4.0.4 || NOT OK || Requires pairing ||
