@@ -413,7 +413,9 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			boolean result=false;
 			
 			timestamp = System.currentTimeMillis();
+
 			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
+
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();

@@ -13,6 +13,9 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -106,14 +109,21 @@ public class DMAdapter extends SimpleCursorAdapter {
 		// Profile image
 		ImageView picture = (ImageView) dmrow.findViewById(R.id.showDMProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
-			InternalStorageHelper helper = new InternalStorageHelper(context);
-			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
-			if (imageByteArray != null) {				
-				//is = context.getContentResolver().openInputStream(uri);				
-				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-				picture.setImageBitmap(bm);	
-			} else
+			int userId = cursor.getInt(cursor.getColumnIndex("userRowId"));
+			Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+			InputStream is;
+			
+			try {
+				is = context.getContentResolver().openInputStream(imageUri);
+				if (is != null) {						
+					Bitmap bm = BitmapFactory.decodeStream(is);
+					picture.setImageBitmap(bm);	
+				} else
+					picture.setImageResource(R.drawable.default_profile);
+			} catch (FileNotFoundException e) {
+				Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
+			}	
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
 		}

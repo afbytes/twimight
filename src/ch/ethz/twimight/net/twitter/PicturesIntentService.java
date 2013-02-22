@@ -1,5 +1,6 @@
 package ch.ethz.twimight.net.twitter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,12 +60,13 @@ public class PicturesIntentService extends IntentService {
 		for (int i=0; i<cv.length; i++) {				
 															
 			insertProfileImageIntoInternalStorage(pictures.get(i),screenNames.get(i));
+			//cursorArray[i].getInt(cursorArray[i].getColumnIndex("_id"));
 			
 			cv[i]= new ContentValues();
 			cv[i].put("_id", rowIds[i]);
 			if (!cursorArray[i].isClosed()) {
 				cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & cursorArray[i].getInt(cursorArray[i].getColumnIndex(TwitterUsers.COL_FLAGS)));
-				cv[i].put(TwitterUsers.COL_PROFILEIMAGE,screenNames.get(i) );				
+				cv[i].put(TwitterUsers.COL_PROFILEIMAGE_PATH, new File(getFilesDir(),screenNames.get(i)).getPath() );				
 				cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());	
 				cursorArray[i].close();
 			}				

@@ -113,11 +113,15 @@ public class BluetoothComms{
             mInsecureAcceptThread = null;
         }
         try {
-        	mInsecureAcceptThread = new AcceptThread();
-        	mInsecureAcceptThread.start();
+        	mInsecureAcceptThread = new AcceptThread();        	
+        	mInsecureAcceptThread.start();        
+        	
         	setState(STATE_LISTEN);
         } catch (IOException e) {
         	Log.e(TAG,"listen() failed");
+        	Message msg = mHandler.obtainMessage(Constants.BLUETOOTH_RESTART, -1, -1, null);
+        	mHandler.sendMessage(msg);
+        	
         }
            
         
@@ -264,14 +268,14 @@ public class BluetoothComms{
     private class AcceptThread extends Thread {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
-       
+        
 
         public AcceptThread() throws IOException {
             BluetoothServerSocket tmp = null;          
 
             // Create a new listening server socket
                          
-            tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);         
+            tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);         
             mmServerSocket = tmp;
         }
 
@@ -349,7 +353,7 @@ public class BluetoothComms{
             // given BluetoothDevice
             try {
                  
-                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                    tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
                 
             } catch (IOException e) {
                 Log.e(TAG, "create() failed", e);

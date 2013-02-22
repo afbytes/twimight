@@ -13,12 +13,15 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.InputStream;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -28,11 +31,11 @@ import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.R.color;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
-import ch.ethz.twimight.util.InternalStorageHelper;
+
+
 
 /** 
  * Cursor adapter for a cursor containing tweets.
@@ -194,17 +197,25 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		}
 		// Profile image
 		ImageView picture = (ImageView) row.findViewById(R.id.imageView1);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE))){
+		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
 			
-			String filename = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			
-			InternalStorageHelper helper = new InternalStorageHelper(context);			
-			byte[] imageByteArray = helper.readImage(filename);				
-			if (imageByteArray != null) {						
-				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-				picture.setImageBitmap(bm);	
-			} else
+			//InternalStorageHelper helper = new InternalStorageHelper(context);			
+			//byte[] imageByteArray = helper.readImage(filename);	
+			int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
+			Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userRowId);
+			InputStream is;
+			try {
+				is = context.getContentResolver().openInputStream(imageUri);
+				if (is != null) {						
+					Bitmap bm = BitmapFactory.decodeStream(is);
+					picture.setImageBitmap(bm);	
+					
+				} else
+					picture.setImageResource(R.drawable.default_profile);
+			} catch (Exception e) {
+				Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
+			}				
 
 		} else {			
 			picture.setImageResource(R.drawable.default_profile);
