@@ -13,10 +13,11 @@ Unfortunately, some Android devices cause problems when automatically connecting
 
 || *Devices* || *Android version* || *Disaster Mode* || *Notes* ||
 || Samsung Galaxy Nexus || 4.2.2 || OK || ||
-|| HTC One X || 4.1.1 || OK || Sometimes freezes in disaster mode! ||
-|| HTC Nexus One || 2.3.6 || OK || ||
-|| Samsung Galaxy Y Duos || 2.3.6 || OK ||  ||
+|| Samsung Galaxy S3 || 4.1.2 || OK || ||
 || Samsung Galaxy S2 || 4.0.3 || OK || ||
 || Samsung Galaxy S || 2.3.3 || OK ||  ||
+|| Samsung Galaxy Y Duos || 2.3.6 || OK ||  ||
+|| HTC One X || 4.1.1 || OK || Sometimes freezes in disaster mode! ||
+|| HTC Nexus One || 2.3.6 || OK || ||
 || HTC Wildfire S || 2.3.5 || NOT OK || Requires pairing ||
 || Sony Ericsson Xperia Mini Pro SK17i|| 2.3.4 || NOT OK || ||
