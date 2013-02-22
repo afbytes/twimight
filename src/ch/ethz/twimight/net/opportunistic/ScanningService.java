@@ -780,7 +780,7 @@ public class ScanningService extends Service{
 		    bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
 			Log.d("photo", "bitmap array size:" + String.valueOf(byteArrayBitmapStream.size()));
 			byte[] b = byteArrayBitmapStream.toByteArray();
-			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT); 
 			JSONObject jsonObj;
 		
 			jsonObj = new JSONObject("{\"image\":\"" + encodedImage + "\"}");
