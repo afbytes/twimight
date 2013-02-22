@@ -187,13 +187,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 		@Override
 		public void run() {
-			if (locHelper != null &&  locDBHelper != null && cm != null ) {
-				if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null) {
-					locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
-					locHelper.unRegisterLocationListener();
-				}
-				
-				
+
+			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
+				Log.i(TAG,"writing log");
+				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				locHelper.unRegisterLocationListener();
+
 			} else {}
 			
 		}
@@ -320,7 +319,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		timelineListView.setAdapter(null);	
 		
 	
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
+				cm.getActiveNetworkInfo() != null) {
+			
 			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
 				locHelper.unRegisterLocationListener();
 				handler.removeCallbacks(checkLocation);				
@@ -353,12 +354,13 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);				 
+		//menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);
 		menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
 		menu.add(4, OPTIONS_MENU_CLEAR, 6, "Clear File Cache").setIcon(R.drawable.ic_menu_delete);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 9, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 8, "About").setIcon(R.drawable.ic_menu_info_details);
 		menu.add(7, OPTIONS_MENU_FEEDBACK, 7, "Feedback").setIcon(R.drawable.ic_menu_edit);
+
 		return true;
 	}
 
@@ -461,7 +463,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
+				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
 				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
 
 			} else  {

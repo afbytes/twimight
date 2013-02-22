@@ -29,7 +29,6 @@ import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
-import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.util.Constants;
 
@@ -81,11 +80,11 @@ public class PrefsActivity extends PreferenceActivity{
 					
 					// toggle TDS communication
 					if(preferences.getBoolean("prefTDSCommunication",	Constants.TDS_DEFAULT_ON) == true){
-						new TDSAlarm(getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
+						//new TDSAlarm(getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
 						Log.i(TAG, "start TDS communication");
 					} else {
 						//stopService(new Intent(getApplicationContext(), TDSService.class));
-						TDSAlarm.stopTDSCommuniction(getApplicationContext());						
+						//TDSAlarm.stopTDSCommuniction(getApplicationContext());						
 					}
 					
 				}  else if (key.equals("prefRunAtBoot")) {

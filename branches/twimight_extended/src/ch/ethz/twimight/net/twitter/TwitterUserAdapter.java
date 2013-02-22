@@ -13,10 +13,15 @@
 
 package ch.ethz.twimight.net.twitter;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,6 +33,8 @@ import ch.ethz.twimight.util.InternalStorageHelper;
  * Cursor adapter for a cursor containing users.
  */
 public class TwitterUserAdapter extends SimpleCursorAdapter {
+	
+	private static final String TAG = "TwitterUserAdapter";
 	
 	static final String[] from = {TwitterUsers.COL_SCREENNAME, TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION};
 	static final int[] to = {R.id.showUserScreenName, R.id.showUserRealName, R.id.showUserLocation};
@@ -45,15 +52,24 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 		// Profile image
 		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
-			InternalStorageHelper helper = new InternalStorageHelper(context);
 
-			byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
-			if (imageByteArray != null) {				
-				//is = context.getContentResolver().openInputStream(uri);				
-				Bitmap bm = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
-				picture.setImageBitmap(bm);	
-			} else
+			//InternalStorageHelper helper = new InternalStorageHelper(context);
+			//byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+			int userId = cursor.getInt(cursor.getColumnIndex("_id"));
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+			InputStream is;
+			
+			try {
+				is = context.getContentResolver().openInputStream(imageUri);
+				if (is != null) {						
+					Bitmap bm = BitmapFactory.decodeStream(is);
+					picture.setImageBitmap(bm);	
+				} else
+					picture.setImageResource(R.drawable.default_profile);
+			} catch (FileNotFoundException e) {
+				Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
+			}	
 
 		} else {
 			picture.setImageResource(R.drawable.default_profile);
@@ -63,3 +79,7 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 	}
 
 }
+
+
+
+			

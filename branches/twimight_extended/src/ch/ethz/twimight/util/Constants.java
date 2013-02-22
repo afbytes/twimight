@@ -55,6 +55,8 @@ public final class Constants {
 	public static final int MESSAGE_CONNECTION_FAILED =8;
 	public static final int MESSAGE_CONNECTION_LOST =10;
 	public static final int MESSAGE_CONNECTION_TO_CLOSE = 12;
+	public static final int BLUETOOTH_RESTART =14;
+
 	
 	// Key names from the BluetoothService Handler
 	public static final String DEVICE_NAME = "device_name";

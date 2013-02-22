@@ -21,7 +21,7 @@ public class InternalStorageHelper {
 	public boolean writeImage(byte[] image, String filename) {
 		FileOutputStream out = null ;
 		try {				
-			out = context.openFileOutput(filename, Context.MODE_WORLD_READABLE);
+			out = context.openFileOutput(filename, Context.MODE_PRIVATE);
 			out.write(image);			
 			return true;
 			
@@ -44,6 +44,7 @@ public class InternalStorageHelper {
 		
 	}
 	
+
 	public byte[] readImage(String filename) {
 		FileInputStream fis = null;
 		try {
@@ -77,6 +78,7 @@ public class InternalStorageHelper {
 			} catch (IOException e) {}
 		}
 	}
+	
 	
 	
 	    		

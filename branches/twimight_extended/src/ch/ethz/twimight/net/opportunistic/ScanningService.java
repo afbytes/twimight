@@ -12,18 +12,25 @@
  ******************************************************************************/
 package ch.ethz.twimight.net.opportunistic;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.http.util.ByteArrayBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +41,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,14 +56,22 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
+
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
+
+import ch.ethz.twimight.activities.ShowTweetListActivity;
+
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+
 import ch.ethz.twimight.util.SDCardHelper;
+
+import ch.ethz.twimight.util.InternalStorageHelper;
+
 
 /**
  * This is the thread for scanning for Bluetooth peers.
@@ -64,7 +80,11 @@ import ch.ethz.twimight.util.SDCardHelper;
  */
 
 
-public class ScanningService extends Service{
+
+
+public class ScanningService extends Service implements DevicesReceiver.ScanningFinished,
+														StateChangedReceiver.BtSwitchingFinished {
+
 
 	
 	private static final String TAG = "ScanningService"; /** For Debugging */
@@ -73,14 +93,14 @@ public class ScanningService extends Service{
 	public Handler handler; /** Handler for delayed execution of the thread */
 	
 	// manage bluetooth communication
-	public static BluetoothComms bluetoothHelper = null;
+	public BluetoothComms bluetoothHelper = null;
 
 	//private Date lastScan;
 			
 	private MacsDBHelper dbHelper;
 	
 	private static Context context = null;
-	
+	StateChangedReceiver stateReceiver;
 	private Cursor cursor;
 	
 	
@@ -101,6 +121,7 @@ public class ScanningService extends Service{
 	public static final int PHOTO=2;
 	public static final int HTML=3;
 	
+
 	//photo
 	private String photoPath;
 	private static final String PHOTO_PATH = "twimight_photos";
@@ -115,12 +136,17 @@ public class ScanningService extends Service{
 	boolean isSDWritable = false;	
 	File SDcardPath = null;
 	
+
+	DevicesReceiver receiver;
+	BluetoothAdapter mBtAdapter;
+	
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
-		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 	
 		
+		Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 			
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
 			
@@ -132,8 +158,17 @@ public class ScanningService extends Service{
 	        bluetoothHelper = new BluetoothComms(mHandler);
 	        bluetoothHelper.start();
 			dbHelper = new MacsDBHelper(this);
-			dbHelper.open();			
-	        
+			dbHelper.open();	
+			
+			receiver = new DevicesReceiver(this);
+			IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);		
+			registerReceiver(receiver,filter);
+			// Register for broadcasts when discovery has finished
+	        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+	        registerReceiver(receiver, filter);
+	        receiver.setListener(this);
+	        mBtAdapter = BluetoothAdapter.getDefaultAdapter();		        
+
 		}
 		
 		//sdCard helper
@@ -142,22 +177,26 @@ public class ScanningService extends Service{
 		htmlDbHelper = new HtmlPagesDbHelper(context);
 		htmlDbHelper.open();
 		
-		BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-		// Get a set of currently paired devices
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();	      
-    	
-        if (pairedDevices != null) {
-        	// If there are paired devices, add each one to the ArrayAdapter
-	        if (pairedDevices.size() > 0) {	        	
-	            for (BluetoothDevice device : pairedDevices) {	            	
-	            		dbHelper.createMac(device.getAddress().toString(), 1); 
-	            }
-	        } 
-        }	    	
-		startScanning();			
-		return START_STICKY; 
+		if (mBtAdapter != null) {
+			// If we're already discovering, stop it
+	        if (mBtAdapter.isDiscovering()) {
+	            mBtAdapter.cancelDiscovery();
+	        }
+	        // Request discover from BluetoothAdapter
+	        dbHelper.updateMacsDeActive();	        
+	        mBtAdapter.startDiscovery();
+	        ShowTweetListActivity.setLoading(true);
+	        return START_STICKY; 
+	        
+		} else {
+			stopSelf();
+			return START_NOT_STICKY; 
+	        
+		}		
 		
 	}
+	
+	
 
 	public static int getState() {
 		return state;
@@ -205,6 +244,13 @@ public class ScanningService extends Service{
 		Log.i(TAG,"on Destroy");
 		context=null;
 		releaseWakeLock();
+		bluetoothHelper.stop();
+		bluetoothHelper = null;
+	   // Make sure we're not doing discovery anymore
+        if (mBtAdapter != null) {
+            mBtAdapter.cancelDiscovery();
+        }
+		unregisterReceiver(receiver);
 		super.onDestroy();
 	}
 
@@ -216,7 +262,7 @@ public class ScanningService extends Service{
 		
 		// Get a cursor over all "active" MACs in the DB
 		cursor = dbHelper.fetchActiveMacs();
-		Log.d(TAG,"active macs: " + cursor.getCount());
+		Log.i(TAG,"active macs: " + cursor.getCount());
 		
 		state = STATE_SCANNING;		
 		
@@ -228,16 +274,20 @@ public class ScanningService extends Service{
             if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {            	
 
             	//if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) {
-            		bluetoothHelper.connect(mac);                	
-            		connTimeout = new ConnectingTimeout();
-            		handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
+            	// If we're already discovering, stop it
+            	if (mBtAdapter.isDiscovering()) {
+            		mBtAdapter.cancelDiscovery();
+            	}
+            	bluetoothHelper.connect(mac);                	
+            	connTimeout = new ConnectingTimeout();
+            	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
             	//} else {
-            		//Log.i(TAG,"skipping connection, last meeting was too recent");
+            	//Log.i(TAG,"skipping connection, last meeting was too recent");
             	//	nextScanning();
             	//}
             } else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {            	
             	bluetoothHelper.start();
-            	
+
             }
             
             
@@ -286,7 +336,11 @@ public class ScanningService extends Service{
 	           // if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) { 
 	            	
 	            	Log.i(TAG, "Connection attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
-		            bluetoothHelper.connect(mac);
+	            	// If we're already discovering, stop it
+	                if (mBtAdapter.isDiscovering()) {
+	                    mBtAdapter.cancelDiscovery();
+	                }
+	            	bluetoothHelper.connect(mac);
 		            connTimeout = new ConnectingTimeout();
 	            	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	
 	          //  } else {
@@ -375,8 +429,10 @@ public class ScanningService extends Service{
 				// Here starts the protocol for Tweet exchange.
 				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
 				//new SendDisasterData(msg.obj.toString()).execute(last);				
-				sendDisasterTweets(last);
-				sendDisasterDM(last);			
+				//sendDisasterTweets(last);
+				//sendDisasterDM(last);		
+				sendDisasterTweets(0L);
+				sendDisasterDM(0L);	
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
 				TimerTask timerTask = new TimerTask(){  
 					  
@@ -413,11 +469,26 @@ public class ScanningService extends Service{
 				Log.i(TAG, "sending closing request");
             	bluetoothHelper.write("####CLOSING_REQUEST####");  
                 break;
+
+				
+			case Constants.BLUETOOTH_RESTART:         	 
+				Log.i(TAG, "blue restart"); 
+				
+				stateReceiver = new StateChangedReceiver();
+				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+				stateReceiver.setListener(ScanningService.this);
+				registerReceiver(stateReceiver, filter);
+				if (mBtAdapter != null)
+					mBtAdapter.disable();
+				break;
+				
+			
+
 			}			
 		}
 	};
 
-
+	
 	
 	/**
 	 * process all the data received via bluetooth
@@ -883,13 +954,39 @@ public class ScanningService extends Service{
 				o.put(Tweets.COL_HTMLS, c.getString(c.getColumnIndex(Tweets.COL_HTMLS)));
 			if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
 				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
-			if(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE) >=0)
-				o.put(TwitterUsers.COL_PROFILEIMAGE, new String(Base64.encode(c.getBlob(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE)), 0)));
+
+			if( c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH) >=0 && c.getColumnIndex("userRowId") >= 0 ) {
+				Log.i(TAG,"adding picture");
+				int userId = c.getInt(c.getColumnIndex("userRowId"));
+				Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+				try {
+					InputStream is = getContentResolver().openInputStream(imageUri);	
+					byte[] image = toByteArray(is);
+					o.put(TwitterUsers.COL_PROFILEIMAGE, Base64.encodeToString(image, Base64.DEFAULT) );
+
+				} catch (Exception e) {
+					Log.e(TAG,"error",e);
+					
+				};
+			}
+
 			return o;
 		}
-			
 	}
-	
+
+	public static byte[] toByteArray(InputStream in) throws IOException {
+
+		BufferedInputStream bis = new BufferedInputStream(in);
+		ByteArrayBuffer baf = new ByteArrayBuffer(2048);	
+		//get the bytes one by one			
+		int current = 0;			
+		while ((current = bis.read()) != -1) {			
+			baf.append((byte) current);			
+		}	
+		return baf.toByteArray();
+
+	}
+
 	/**
 	 * Creates content values for a Tweet from a JSON object
 	 * TODO: Move this to where it belongs
@@ -986,15 +1083,27 @@ public class ScanningService extends Service{
 
 		// create the content values for the user
 		ContentValues cv = new ContentValues();
+		String screenName = null;
+		
 		if(o.has(TwitterUsers.COL_SCREENNAME)) {
+			screenName = o.getString(TwitterUsers.COL_SCREENNAME);
 			cv.put(TwitterUsers.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));
-			
+
 		}
-		if(o.has(TwitterUsers.COL_PROFILEIMAGE))
-			cv.put(TwitterUsers.COL_PROFILEIMAGE, Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE), 0));
+
+		if(o.has(TwitterUsers.COL_PROFILEIMAGE) && screenName != null) {
+
+			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());			
+			byte[] image = Base64.decode(o.getString(TwitterUsers.COL_PROFILEIMAGE), Base64.DEFAULT);
+			helper.writeImage(image, screenName);
+			cv.put(TwitterUsers.COL_PROFILEIMAGE_PATH, new File(getFilesDir(),screenName).getPath());
+
+		}
+
+
 		if(o.has(Tweets.COL_USER)) {
 			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
-			
+
 		}
 		cv.put(TwitterUsers.COL_ISDISASTER_PEER, 1);
 
@@ -1005,6 +1114,25 @@ public class ScanningService extends Service{
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+
+	@Override
+	public void onScanningFinished() {
+		startScanning();
+		ShowTweetListActivity.setLoading(false);
+		
+	}
+
+
+
+	@Override
+	public void onSwitchingFinished() {
+		bluetoothHelper.start();	
+		if (stateReceiver != null)
+			unregisterReceiver(stateReceiver);
+
 	}
 	
 };
