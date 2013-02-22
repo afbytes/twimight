@@ -20,4 +20,4 @@ Unfortunately, some Android devices cause problems when automatically connecting
 || HTC One X || 4.1.1 || OK || Sometimes freezes in disaster mode! ||
 || HTC Nexus One || 2.3.6 || OK || ||
 || HTC Wildfire S || 2.3.5 || NOT OK || Requires pairing ||
-|| Sony Ericsson Xperia Mini Pro SK17i|| 2.3.4 || NOT OK || ||
+|| Sony Ericsson Xperia Mini Pro SK17i|| 2.3.4 || NOT OK || Twitter login does not work ||
