@@ -87,9 +87,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 	private static final String TWITTER_REQUEST_TOKEN_SECRET = "twitter_request_token_secret"; /** Name of the request token secret in preferences */
 	
 	// twitter urls
-	private static final String TWITTER_REQUEST_TOKEN_URL = "http://twitter.com/oauth/request_token"; 
-	private static final String TWITTER_ACCESS_TOKEN_URL = "http://twitter.com/oauth/access_token";
-	private static final String TWITTER_AUTHORIZE_URL = "http://twitter.com/oauth/authorize";
+	private static final String TWITTER_REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"; 
+	private static final String TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token";
+	private static final String TWITTER_AUTHORIZE_URL = "https://api.twitter.com/oauth/authorize";
 	private static final Uri CALLBACK_URI = Uri.parse("my-app://bluetest");
 	
 	public static final String LOGIN_RESULT_ACTION = "twitter_login_result_action";

@@ -107,11 +107,11 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	
 	//photo
 	private String photoPath;
+	
 	//SDcard helper
 	private SDCardHelper sdCardHelper;
 	private String userID = null;
-	private String tweetId;
-	
+	private String tweetId;	
 	
 	//offline html pages
 	private int htmlStatus;
@@ -130,8 +130,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.showtweet);		
 		
-		sdCardHelper = new SDCardHelper(this);
-		
+		sdCardHelper = new SDCardHelper(this);		
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
@@ -323,32 +322,31 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		offlineButton = (ImageButton) findViewById(R.id.showTweetOfflineview);
 		//download the pages and store them locally, set up the html database
 		int networkActive = 1; 
-		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected())networkActive = 0;
+		if(cm.getActiveNetworkInfo()== null || !cm.getActiveNetworkInfo().isConnected()) networkActive = 0;
 		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 		if(networkInfo != null){
 			int networkType = networkInfo.getType();
 			if(networkType == ConnectivityManager.TYPE_MOBILE){
 				forcedDownload = 1;
 			}
-		}
-		
-			
+		}	
+
 		if( htmlStatus == 0 || networkActive == 0)
 		{
 			offlineButton.setVisibility(View.GONE);
-		}
-		offlineButton.setOnClickListener(new OnClickListener() {
+		} else
+			offlineButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
+				@Override
+				public void onClick(View v) {
 
-				if(downloadAndInsert()){
-					offlineButton.setImageResource(R.drawable.btn_twimight_archive_on);
+					if(downloadAndInsert()){
+						offlineButton.setImageResource(R.drawable.btn_twimight_archive_on);
+					}
+
 				}
 
-			}
-			
-		});
+			});
 		
 	}
 		
@@ -558,7 +556,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		boolean result = true;
 		String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
 		if(sdCardHelper.checkSDStuff(filePath)){
-			String tweetId = String.valueOf(Long.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID))));
+			String tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 			for(int i=0; i<htmlsToDownload.size();i++){
 
 				if(downloadNotSuccess){
