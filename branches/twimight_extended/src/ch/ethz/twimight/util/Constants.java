@@ -40,7 +40,7 @@ public final class Constants {
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     
     // Bluetooth scanning configuration
-    public static final long SCANNING_INTERVAL = 2*60*1000L; /** Interval for Bluetooth scans */
+    public static final long SCANNING_INTERVAL = 1*60*1000L; /** Interval for Bluetooth scans */
     public static final long MIN_LISTEN_TIME = 10*1000L; /** Interval for Bluetooth scans */
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */

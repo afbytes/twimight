@@ -742,11 +742,13 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			int passedLen = 0;
 			for(String subStrarr : strarr){
 
-				if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0){
-					htmlUrls.add(subStrarr);
-					int startIndex = passedLen;
+				if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
+					int offset = Math.max(subStrarr.indexOf("http://"),subStrarr.indexOf("https://"));
+					
+					htmlUrls.add(subStrarr.substring(offset));
+					int startIndex = passedLen + offset;
 					int endIndex = passedLen + subStrarr.length() - 1;
-					str.setSpan(new InternalURLSpan(subStrarr), startIndex, endIndex, Spannable.SPAN_MARK_MARK);
+					str.setSpan(new InternalURLSpan(subStrarr.substring(offset)), startIndex, endIndex, Spannable.SPAN_MARK_MARK);
 				}	
 				passedLen = passedLen + subStrarr.length() + 1;
 			}

@@ -13,20 +13,17 @@
 package ch.ethz.twimight.net.opportunistic;
 
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,9 +41,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -56,21 +53,16 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
-
-import ch.ethz.twimight.data.HtmlPagesDbHelper;
-
 import ch.ethz.twimight.activities.ShowTweetListActivity;
-
+import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
-
-import ch.ethz.twimight.util.SDCardHelper;
-
 import ch.ethz.twimight.util.InternalStorageHelper;
+import ch.ethz.twimight.util.SDCardHelper;
 
 
 /**
@@ -89,6 +81,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	
 	private static final String TAG = "ScanningService"; /** For Debugging */
 	private static final String WAKE_LOCK = "ScanningServiceWakeLock"; 
+	
 	
 	public Handler handler; /** Handler for delayed execution of the thread */
 	
@@ -152,7 +145,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			
 		if (context == null) {
 			context = this;
-			handler = new Handler();		
+			handler = new Handler();
 	        // set up Bluetooth
 			
 	        bluetoothHelper = new BluetoothComms(mHandler);
@@ -161,6 +154,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			dbHelper.open();	
 			
 			receiver = new DevicesReceiver(this);
+			
 			IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);		
 			registerReceiver(receiver,filter);
 			// Register for broadcasts when discovery has finished
@@ -171,21 +165,34 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 		}
 		
+		Bundle scanInfo = receiver.getScanInfo();
+		float scanRef = scanInfo.getFloat(receiver.SCAN_PROBABILITY);
+//		String[] deviceList = scanInfo.getStringArray(receiver.DEVICE_LIST);
 		//sdCard helper
 		sdCardHelper = new SDCardHelper(context);
 		//htmldb helper
 		htmlDbHelper = new HtmlPagesDbHelper(context);
 		htmlDbHelper.open();
 		
+		//get a random number
+		Random r = new Random(System.currentTimeMillis());
+		float scanProb = r.nextFloat();
+		
+		Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
+		
 		if (mBtAdapter != null) {
-			// If we're already discovering, stop it
-	        if (mBtAdapter.isDiscovering()) {
-	            mBtAdapter.cancelDiscovery();
-	        }
-	        // Request discover from BluetoothAdapter
-	        dbHelper.updateMacsDeActive();	        
-	        mBtAdapter.startDiscovery();
-	        ShowTweetListActivity.setLoading(true);
+			if(scanProb < scanRef){
+				Log.i(TAG, "begin scanning");
+				receiver.initDeivceList();
+				// If we're already discovering, stop it
+				if (mBtAdapter.isDiscovering()) {
+					mBtAdapter.cancelDiscovery();
+				}
+				// Request discover from BluetoothAdapter
+				dbHelper.updateMacsDeActive();
+				mBtAdapter.startDiscovery();
+				ShowTweetListActivity.setLoading(true);
+			}
 	        return START_STICKY; 
 	        
 		} else {
@@ -264,7 +271,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		cursor = dbHelper.fetchActiveMacs();
 		Log.i(TAG,"active macs: " + cursor.getCount());
 		
-		state = STATE_SCANNING;		
+		state = STATE_SCANNING;
 		
 		if (cursor.moveToFirst()) {
             // Get the field values
@@ -403,9 +410,16 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 					
 					//synchronized(this){
 						//if (closing_request_sent) {
+							TimerTask timerTask = new TimerTask(){  
+								  
+						        public void run() {  
+						        	Log.d(TAG,"closing request received, connection shutdown");
+						        	bluetoothHelper.start();
+						        }
+						          
+						    };
+							timer.schedule(timerTask, 10000);
 							
-							Log.d(TAG,"closing request received, connection shutdown");
-							bluetoothHelper.start();
 							//closing_request_sent = false;
 						//}
 					//}				
@@ -429,10 +443,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				// Here starts the protocol for Tweet exchange.
 				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
 				//new SendDisasterData(msg.obj.toString()).execute(last);				
-				//sendDisasterTweets(last);
-				//sendDisasterDM(last);		
-				sendDisasterTweets(0L);
-				sendDisasterDM(0L);	
+				sendDisasterTweets(last);
+				sendDisasterDM(last);		
+//				sendDisasterTweets(0L);
+//				sendDisasterDM(0L);	
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
 				TimerTask timerTask = new TimerTask(){  
 					  
@@ -585,14 +599,12 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			String jsonString = o.getString("image");
 			String userID = o.getString("userID");
 			String photoFileName =  o.getString("photoName");
-			byte[] decodedString = Base64.decode(jsonString, Base64.DEFAULT);
-			Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 			//locate the directory where the photos are stored
 			photoPath = PHOTO_PATH + "/" + userID;
 			String[] filePath = {photoPath};
 			if (sdCardHelper.checkSDStuff(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);//photoFileParent, photoFilename));
-				saveMyBitmap(targetFile, decodedByte);
+				saveFile(targetFile, jsonString);
 			}
 			
 		} catch (JSONException e1) {
@@ -600,20 +612,6 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		}
 
 	}
-	
-	//save bitmap to local file
-	public void saveMyBitmap(File targetFile, Bitmap mBitmap){
-		FileOutputStream fOut = null;
-		try {
-			fOut = new FileOutputStream(targetFile);
-			mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
-			fOut.flush();
-			fOut.close();
-		  } catch (IOException e) {
-		   e.printStackTrace();
-		}
-	}
-
 	
 	private void processHtml(JSONObject o){
 		try {
@@ -628,7 +626,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 			if (sdCardHelper.checkSDStuff(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);//photoFileParent, photoFilename));
-				if(saveXml(targetFile, xmlContent)){
+				if(saveFile(targetFile, xmlContent)){
 					downloaded = 1;
 				}
 			}
@@ -639,11 +637,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		}
 	}
 	
-	private boolean saveXml(File xml, String xmlContent){
+	private boolean saveFile(File file, String fileContent){
 		
 		try {
-			FileOutputStream fOut = new FileOutputStream(xml);
-			byte[] decodedString = Base64.decode(xmlContent, Base64.DEFAULT);
+			FileOutputStream fOut = new FileOutputStream(file);
+			byte[] decodedString = Base64.decode(fileContent, Base64.DEFAULT);
 			fOut.write(decodedString);
 			fOut.close();
 			return true;
@@ -668,7 +666,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			c.moveToFirst();
 			
 			while (!c.isAfterLast()){
-				if (c.getLong(c.getColumnIndex(DirectMessages.COL_RECEIVED)) > (last - 5000) ) {
+				if (c.getLong(c.getColumnIndex(DirectMessages.COL_RECEIVED)) > (last - 5*60000) ) {
 						JSONObject dmToSend;
 						
 						try {
@@ -700,7 +698,9 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			c.moveToFirst();
 			while(!c.isAfterLast()){
 				
-				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5000)){
+				
+				Log.d(TAG, String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))) + ":" + String.valueOf(last));
+				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5*60000)){
 					JSONObject toSend;
 					try {								
 						toSend = getJSON(c);

@@ -112,9 +112,15 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		//check the urls of the tweet
 		for(String subStrarr : strarr){
 
-			if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0){
+			if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
+				String subUrl = null;
+				if(subStrarr.indexOf("http://") >= 0){
+					subUrl = subStrarr.substring(subStrarr.indexOf("http://"));
+				}else if(subStrarr.indexOf("https://") >= 0){
+					subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
+				}
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(subUrl, tweetId, userId);
 
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(subStrarr, tweetId, userId);
 				if(htmlCV!=null){
 					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
 						downloaded = true;
