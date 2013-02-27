@@ -24,8 +24,8 @@ public class SDCardHelper {
 	private boolean isSDAvail;
 	private boolean isSDWritable;
 	private Uri tmpPhotoUri;
-	public final static int IMAGE_WIDTH = 300;
-	public final static int IMAGE_HEIGHT = 400;
+	public final static int IMAGE_WIDTH = 500;
+	public final static int IMAGE_HEIGHT = 500;
 	public static final int TYPE_XML = 1;
 	//document type
 	public static final int TYPE_PDF = 20;
@@ -143,7 +143,7 @@ public class SDCardHelper {
 
 	    //Find the correct scale value. It should be the power of 2.
 	    int scale=1;
-	    while(o.outWidth/scale > IMAGE_WIDTH || o.outHeight/scale > IMAGE_HEIGHT)
+	    while(o.outWidth/scale > IMAGE_WIDTH && o.outHeight/scale > IMAGE_HEIGHT)
 	    	scale*=2;
 	    
 	    //Decode with inSampleSize

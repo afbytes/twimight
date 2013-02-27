@@ -264,8 +264,11 @@ public class HtmlService extends Service {
 				ArrayList<String> htmlUrls = new ArrayList<String>();
 				//save the urls of the tweet in a list
 				for(String subStrarr : strarr)
-					if(subStrarr.indexOf("http://") == 0 || subStrarr.indexOf("https://") == 0)
-						htmlUrls.add(subStrarr);
+					if(subStrarr.indexOf("http://") >= 0){
+						htmlUrls.add(subStrarr.substring(subStrarr.indexOf("http://")));
+					}else if(subStrarr.indexOf("https://") >= 0){
+						htmlUrls.add(subStrarr.substring(subStrarr.indexOf("https://")));
+					}
 
 
 				for(String htmlUrl : htmlUrls){
