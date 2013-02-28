@@ -93,9 +93,7 @@
 		<activity android:name=".activities.NewTweetActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
-		<activity android:name=".activities.FeedbackActivity"
-			android:label="Twimight" android:theme="@style/Theme.Transparent"
-			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
+	
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />
@@ -105,18 +103,12 @@
 			android:label="About Twimight" />
 
 		
-		<activity android:name=".activities.WebViewActivity"
-			android:label="WebView" android:theme="@android:style/Theme.NoTitleBar" />
-		
-		 <activity android:name=".activities.DeviceListActivity"
-                  android:label="Select Device"
-                  android:theme="@android:style/Theme.Dialog"
-                  android:configChanges="orientation|keyboardHidden" />
+	
+	
 
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
-		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />
-		<service android:enabled="true" android:name=".net.Html.HtmlService" />
+		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />	
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
 			<intent-filter>
 				<action android:name="twimight_synch" />
@@ -154,12 +146,7 @@
 		<receiver android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
 			android:enabled="true" />
 		
-		
-		<receiver android:name=".net.Html.InternetStatusReceiver">
-		   <intent-filter>
-		      <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-		   </intent-filter>
-		</receiver>
+	
 
 
 		<provider android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
