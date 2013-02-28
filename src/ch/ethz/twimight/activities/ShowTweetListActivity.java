@@ -12,13 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,14 +36,11 @@ import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
-import ch.ethz.twimight.net.Html.HtmlPage;
-import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -84,10 +76,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	private static final int OPTIONS_MENU_SETTINGS = 40;
 	private static final int OPTIONS_MENU_ABOUT = 60;
 	private static final int OPTIONS_MENU_LOGOUT = 70;
-	private static final int OPTIONS_MENU_PAIR= 80;
-	private static final int OPTIONS_MENU_HTML= 90;
 	private static final int OPTIONS_MENU_FEEDBACK= 100;
-	private static final int OPTIONS_MENU_CLEAR = 91;
 
 	public static final int SHOW_TIMELINE = 1;
 	public static final int SHOW_FAVORITES = 2;
@@ -354,9 +343,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
 		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
 		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		//menu.add(1, OPTIONS_MENU_PAIR, 3, "Add peer").setIcon(R.drawable.ic_menu_mark);
-		menu.add(4, OPTIONS_MENU_HTML, 5, "Get WebPages").setIcon(R.drawable.ic_menu_archive);
-		menu.add(4, OPTIONS_MENU_CLEAR, 6, "Clear File Cache").setIcon(R.drawable.ic_menu_delete);
 		menu.add(5, OPTIONS_MENU_LOGOUT, 9, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
 		menu.add(6, OPTIONS_MENU_ABOUT, 8, "About").setIcon(R.drawable.ic_menu_info_details);
 		menu.add(7, OPTIONS_MENU_FEEDBACK, 7, "Feedback").setIcon(R.drawable.ic_menu_edit);
@@ -396,48 +382,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			startActivity(i);    
 			break;
 			
-		case OPTIONS_MENU_HTML:
-			
-			i = new Intent(this, HtmlService.class);
-			i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_ALL);
-			i.putExtra(HtmlPage.OFFLINE_MANUAL, true);
-			startService(i); 
-			
-			break;
-		
-		case OPTIONS_MENU_CLEAR:
-			
-			
-			
-			AlertDialog.Builder confirmDialog = new AlertDialog.Builder(CONTEXT);
-			confirmDialog.setMessage("Are you sure you want to clear all files and data of webpage?");
-			confirmDialog.setTitle("Clear Cache");
-			confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
-					dialog.dismiss();
-					Intent i = new Intent(getBaseContext(), HtmlService.class);
-					Long timeSpan = (long) (0*24*3600*1000);
-					i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.CLEAR_ALL);
-					i.putExtra("timespan", timeSpan);
-					startService(i); 
-				}
-				
-			});
-			confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
-					dialog.dismiss();
-				}
-			});
-			confirmDialog.show();
-			
-			break;
-		
+	
 		
 		case OPTIONS_MENU_SETTINGS:
 			// Launch PrefsActivity
@@ -458,21 +403,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			i = new Intent(this, AboutActivity.class);
 			startActivity(i);    
 			break;
-		case OPTIONS_MENU_PAIR:
-			   // Get the local Bluetooth adapter
-	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
-				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
-				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
-
-			} else  {
-				Intent intent = new Intent(this, DeviceListActivity.class);
-				startActivity(intent);
-			}
-				
-				
-			break;
+		
 		case OPTIONS_MENU_FEEDBACK:
 			// Launch FeedbacktActivity
 			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
