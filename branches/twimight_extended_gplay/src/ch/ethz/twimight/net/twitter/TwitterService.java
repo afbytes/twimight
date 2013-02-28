@@ -36,7 +36,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -48,15 +47,12 @@ import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewDMActivity;
-import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
-import ch.ethz.twimight.net.Html.HtmlService;
-import ch.ethz.twimight.net.Html.InternetStatusReceiver;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -1782,9 +1778,6 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			ShowTweetListActivity.setLoading(false);	
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			
-			//send broadcast 
-			Intent i = new Intent(getBaseContext(), InternetStatusReceiver.class);
-			getBaseContext().sendBroadcast(i);
 
 			Log.i(TAG,"Insert onPost Execute");
 		}
