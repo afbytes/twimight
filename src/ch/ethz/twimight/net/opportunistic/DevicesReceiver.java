@@ -72,12 +72,12 @@ public class DevicesReceiver extends BroadcastReceiver {
 		if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 			
 			// Get the BluetoothDevice object from the Intent
-			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);    
+			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); 
 			
 			Log.i(TAG, "found a new device:" + device.getAddress().toString());
-			newDeviceList.add(device.getAddress().toString());
-			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART &&
-					device.getBondState() != BluetoothDevice.BOND_BONDED) {
+			newDeviceList.add(device.getAddress().toString());			
+				
+			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART) {
 				
 				if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
 					dbHelper.createMac(device.getAddress().toString(), 1);					
@@ -90,8 +90,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
 			    	SharedPreferences.Editor edit = sharedPref.edit();
 			    	edit.putLong(DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
-			    	edit.commit();
-			    	addPairedDevices();
+			    	edit.commit();			    	
 			    	sf.onScanningFinished();
 			    	compareDevice();
 			    }
