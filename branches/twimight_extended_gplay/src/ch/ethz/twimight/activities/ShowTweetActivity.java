@@ -14,28 +14,21 @@ package ch.ethz.twimight.activities;
 
 
 import java.io.File;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,18 +46,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
-import ch.ethz.twimight.net.Html.HtmlPage;
-import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
-import ch.ethz.twimight.util.InternalStorageHelper;
 import ch.ethz.twimight.util.SDCardHelper;
 import ch.ethz.twimight.util.TweetTagHandler;
 
@@ -118,14 +106,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	private String userID = null;
 	private String tweetId;	
 	
-	//offline html pages
-	private int htmlStatus;
-	private ArrayList<String> htmlUrls;
-	private HtmlPagesDbHelper htmlDbHelper;
-	private ArrayList<String> htmlsToDownload;
-	private boolean htmlsDownloaded = false; // whether htmls of this tweet have been downloaded
-	private boolean downloadNotSuccess = false; // whether it's a not successfully downloaded tweet
-	private int forcedDownload = 0;
+
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -141,10 +122,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
 		locHelper = new LocationHelper(this);
 		
-		//html database
-		htmlDbHelper = new HtmlPagesDbHelper(this);
-		htmlDbHelper.open();
-		htmlUrls = new ArrayList<String>();
+		
 		
 		screenNameView = (TextView) findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) findViewById(R.id.showTweetRealName);
@@ -192,7 +170,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				
 				handleTweetFlags();					
 				setupButtons();					
-				setHtml();
 				
 				// If there are any flags, schedule the Tweet for synch
 				if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
@@ -319,39 +296,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			
 		});
 		
-		// offline view button
 		
-		//get the html status of this tweet
-		htmlStatus = c.getInt(c.getColumnIndex(Tweets.COL_HTMLS));
-		
-		offlineButton = (ImageButton) findViewById(R.id.showTweetOfflineview);
-		//download the pages and store them locally, set up the html database
-		int networkActive = 1; 
-		if(cm.getActiveNetworkInfo()== null || !cm.getActiveNetworkInfo().isConnected()) networkActive = 0;
-		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-		if(networkInfo != null){
-			int networkType = networkInfo.getType();
-			if(networkType == ConnectivityManager.TYPE_MOBILE){
-				forcedDownload = 1;
-			}
-		}	
-
-		if( htmlStatus == 0 || networkActive == 0)
-		{
-			offlineButton.setVisibility(View.GONE);
-		} else
-			offlineButton.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-
-					if(downloadAndInsert()){
-						offlineButton.setImageResource(R.drawable.btn_twimight_archive_on);
-					}
-
-				}
-
-			});
 		
 	}
 		
@@ -511,104 +456,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 	}
 
-	private void setHtml() {
 
-		htmlsToDownload = new ArrayList<String>();
-		tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
-		boolean buttonStatus = false;
-		//try to retrieve the filename of attached html pages
-		if(!htmlUrls.isEmpty()){
-			for(String htmlUrl : htmlUrls){
-				
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userID);
-				boolean fileStatusNormal = true;
-				if(htmlCV!=null){
-					//check if file status normal, exists and size
-					String[] filePath = {HtmlPage.HTML_PATH + "/" + htmlCV.getAsString(HtmlPage.COL_USER)}; 
-					
-					if(sdCardHelper.checkSDStuff(filePath)){
-						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
-						if(!sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() || sdCardHelper.getFileFromSDCard(filePath[0], filename).length() < 500){
-							fileStatusNormal = false;
-						}
-					}
-					
-				}
-				
-				//if entry does not exist, add the url in to be downloaded list
-				
-				if(htmlCV == null || (htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 0) || !fileStatusNormal){
-					
-					htmlsToDownload.add(htmlUrl);
-					buttonStatus = true;
-					if(htmlCV != null){
-						downloadNotSuccess = true;
-						Log.d(TAG, "not downloaded" + htmlCV.toString());
-					}
-					
-				}
-				else{
-					Log.d(TAG, htmlCV.toString());
-				}
-			}
-			Log.d(TAG, "htmls to be downloaded:" + htmlsToDownload.toString());
-		}
-		
-		if(!buttonStatus){
-			
-			htmlsDownloaded = true;
-			offlineButton.setVisibility(View.GONE);
-		}
-	}
 	
-	//perform downloading task when user click download button 
-	private boolean downloadAndInsert(){
-		
-		//insert database
-		boolean result = true;
-		String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
-		if(sdCardHelper.checkSDStuff(filePath)){
-			String tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
-			for(int i=0; i<htmlsToDownload.size();i++){
-
-				if(downloadNotSuccess){
-					result = true;
-					ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlsToDownload.get(i), tweetId, userID);
-					if(! (htmlCV.getAsInteger(HtmlPage.COL_TRIES) < HtmlPage.DOWNLOAD_LIMIT)){
-						htmlDbHelper.updatePage(htmlsToDownload.get(i),	htmlCV.getAsString(HtmlPage.COL_FILENAME), tweetId, userID, 0, htmlCV.getAsInteger(HtmlPage.COL_FORCED), 0);
-					}
-				}else{
-					String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-					result = result && htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, userID, 0, forcedDownload);
-				}
-			}
-			
-			//insert database and start downloading service
-			if(result){
-				Intent i = new Intent(ShowTweetActivity.this, HtmlService.class);
-				Bundle mBundle = new Bundle();
-				mBundle.putInt(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_SINGLE);
-				mBundle.putString("user_id", userID);
-				Log.d(TAG, userID);
-				mBundle.putString("tweetId", tweetId);
-				Log.d(TAG, tweetId);
-				mBundle.putStringArrayList("urls", htmlsToDownload);
-
-				i.putExtras(mBundle);
-				startService(i);
-			}
-			
-			
-			htmlsDownloaded = result;
-		}
-		else{
-			htmlsDownloaded = false;
-			result = false;
-		}
-		
-		
-		return result;
-	}
+	
 	
 
 	private class InternalURLSpan extends ClickableSpan {      
@@ -627,94 +477,13 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
     			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
-    		} else {}
+    		} 
         	
 	        if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){	
         		//if there is active internet access, use normal browser
             	Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             	startActivity(intent);
-        	}
-        	else{
-        		if(htmlsDownloaded){
-        			String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
-        			PackageManager pm;
-        			switch(sdCardHelper.checkFileType(url)){
-        				case SDCardHelper.TYPE_XML:
-        					//set up our own web view
-                    		Intent intentToWeb = new Intent(getBaseContext(), WebViewActivity.class);
-                    		intentToWeb.putExtra("url", url);
-                    		intentToWeb.putExtra("user_id", userID);
-                    		intentToWeb.putExtra("tweet_id", tweetId);
-                    		startActivity(intentToWeb);
-                    		break;
-        					
-        				case SDCardHelper.TYPE_PDF:
-        					Log.i(TAG, "view pdf");
-        					Intent intentToPDF = new Intent(Intent.ACTION_VIEW, Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME))));
-        					pm = getPackageManager();
-        					List<ResolveInfo> activitiesPDF = pm.queryIntentActivities(intentToPDF, 0);
-        					if (activitiesPDF.size() > 0) {
-        					    startActivity(intentToPDF);
-        					} else {
-        					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "no valid application for viewing pdf files", Toast.LENGTH_LONG).show();
-        					}
-        					break;
-        				case SDCardHelper.TYPE_PNG:
-        				case SDCardHelper.TYPE_GIF:
-        				case SDCardHelper.TYPE_JPG:
-        					Log.i(TAG, "view picture");
-        					File picFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
-        					Intent intentToPic = new Intent(Intent.ACTION_VIEW);
-        					intentToPic.setDataAndType(Uri.parse("file://" + Uri.fromFile(picFile).getPath()), "image/*");
-        					pm = getPackageManager();
-        					List<ResolveInfo> activitiesPic = pm.queryIntentActivities(intentToPic, 0);
-        					if (activitiesPic.size() > 0) {
-        					    startActivity(intentToPic);
-        					} else {
-        					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "no valid application for viewing pictures", Toast.LENGTH_LONG).show();
-        					}
-        					
-        					break;
-        				case SDCardHelper.TYPE_MP3:
-        					Log.i(TAG, "play audio");
-        					File mp3File = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
-        					Intent intentToMp3 = new Intent(Intent.ACTION_VIEW);
-        					intentToMp3.setDataAndType(Uri.parse("file://" + Uri.fromFile(mp3File).getPath()), "audio/mp3");
-        					pm = getPackageManager();
-        					List<ResolveInfo> activitiesAudio = pm.queryIntentActivities(intentToMp3, 0);
-        					if (activitiesAudio.size() > 0) {
-        					    startActivity(intentToMp3);
-        					} else {
-        					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "no valid application for playing audio files", Toast.LENGTH_LONG).show();
-        					}
-        					break;
-        				case SDCardHelper.TYPE_MP4:
-        				case SDCardHelper.TYPE_RMVB:
-        				case SDCardHelper.TYPE_FLV:
-        					Log.i(TAG, "play video");
-        					File videoFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url, tweetId, userID).getAsString(HtmlPage.COL_FILENAME));
-        					Intent intentToVideo = new Intent(Intent.ACTION_VIEW);
-        					intentToVideo.setDataAndType(Uri.parse("file://" + Uri.fromFile(videoFile).getPath()), "video/flv");
-        					pm = getPackageManager();
-        					List<ResolveInfo> activitiesVideo = pm.queryIntentActivities(intentToVideo, 0);
-        					if (activitiesVideo.size() > 0) {
-        					    startActivity(intentToVideo);
-        					} else {
-        					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(getBaseContext(), "no valid application for playing video files", Toast.LENGTH_LONG).show();
-        					}
-        					break;
-        				
-        			}
-        		}
-        		else{
-        			Toast.makeText(getBaseContext(), "unable to view in offline mode because pages have not been downloaded", Toast.LENGTH_LONG).show();
-        		}
-        	}
-    		
+        	}		
 
 
         }  
@@ -725,55 +494,50 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 *  
 	 */
 	private void setTweetInfo() {
-		
-		screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-		screenNameView.setText("@"+screenName);
-		realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
-		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-		
-		SpannableString str = new SpannableString(Html.fromHtml(text, null, new TweetTagHandler(this)));
-		
-		try {
-			String substr = str.toString();
-			
-			String[] strarr = substr.split(" ");
+        
+        screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+        screenNameView.setText("@"+screenName);
+        realNameView.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
+        text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+       
+        SpannableString str = new SpannableString(Html.fromHtml(text, null, new TweetTagHandler(this)));
+                       
+        try {
+                String substr = str.toString().substring(str.toString().indexOf("http"));
+               
+                String[] strarr = substr.split(" ");
+               
+                int endIndex = substr.indexOf(" ");
+                if (endIndex == -1 )
+                        endIndex = str.toString().length()-1;
+                else
+                        endIndex += str.toString().indexOf("http");
+                       
+               
+                str.setSpan(new InternalURLSpan(strarr[0]), str.toString().indexOf("http"),endIndex , Spannable.SPAN_MARK_MARK);
+                                       
+        } catch (Exception ex) {                        
+        }
+        tweetTextView.setText(str);
+        tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-			//save the urls of the tweet in a list
-			int passedLen = 0;
-			for(String subStrarr : strarr){
+        createdTextView.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))).toString());
+        if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
+                createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
+        } else {
+                createdWithView.setVisibility(TextView.GONE);
+        }
 
-				if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
-					int offset = Math.max(subStrarr.indexOf("http://"),subStrarr.indexOf("https://"));
-					
-					htmlUrls.add(subStrarr.substring(offset));
-					int startIndex = passedLen + offset;
-					int endIndex = passedLen + subStrarr.length() - 1;
-					str.setSpan(new InternalURLSpan(subStrarr.substring(offset)), startIndex, endIndex, Spannable.SPAN_MARK_MARK);
-				}	
-				passedLen = passedLen + subStrarr.length() + 1;
-			}
-			Log.d("test1", htmlUrls.toString());			
-		} catch (Exception ex) {
-		}
-		tweetTextView.setText(str);
-		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
+                       
+        String retweeted_by = c.getString(c.getColumnIndex(Tweets.COL_RETWEETED_BY));
+        TextView textRetweeted_by = (TextView) findViewById(R.id.showTweetRetweeted_by);
+        if (retweeted_by != null) {
+                textRetweeted_by.append(retweeted_by);          
+                textRetweeted_by.setVisibility(View.VISIBLE);                                  
+        }                                      
+       
+}
 
-		createdTextView.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))).toString());
-		if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
-			createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
-		} else {
-			createdWithView.setVisibility(TextView.GONE);
-		}
-
-				
-		String retweeted_by = c.getString(c.getColumnIndex(Tweets.COL_RETWEETED_BY));
-		TextView textRetweeted_by = (TextView) findViewById(R.id.showTweetRetweeted_by);
-		if (retweeted_by != null) {
-			textRetweeted_by.append(retweeted_by);		
-			textRetweeted_by.setVisibility(View.VISIBLE);					
-		}					
-		
-	}
 
 	/**
 	 * On resume
@@ -850,25 +614,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				        	   photoFile.delete();
 		       			   }
 		       			   
-		        	   }
+		        	   }	        	   
 		        	   
-		        	   //delete html pages
-		        	   if(!htmlUrls.isEmpty()){
-		        		   for(String htmlUrl:htmlUrls){
-		        			   ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, String.valueOf(tid), userID);
-		        			   if(htmlCV != null){
-		        				   String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
-				       			   if(sdCardHelper.checkSDStuff(filePath)){
-				       				   File htmlFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME));//photoFileParent, photoFilename));
-				       				   htmlFile.delete();
-				       				   htmlDbHelper.deletePage(htmlUrl, String.valueOf(tid));
-				       			   }
-		        				   
-				       			   htmlDbHelper.deletePage(htmlUrl, String.valueOf(tid));
-		        		
-		        			   }
-		        		   }
-		        	   }
 		  
 		        	   if (tid != null && tid != 0)
 		        		   getContentResolver().update(uri, setDeleteFlag(flags), null, null);
