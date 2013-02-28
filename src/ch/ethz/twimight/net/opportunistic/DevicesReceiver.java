@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.data.MacsDBHelper;
-import ch.ethz.twimight.net.Html.HtmlPage;
 
 public class DevicesReceiver extends BroadcastReceiver {
 	
