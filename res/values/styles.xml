@@ -1,22 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<style name="title">
-    <item name="android:textSize">40sp</item>
-    <item name="android:textColor">@color/title</item>
-    <item name="android:gravity">center</item>
-    <item name="android:layout_gravity">center</item>
-    <item name="android:padding">10px</item>
-    <item name="android:layout_width">fill_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-  </style>
-<style name="Button">
-	<item name="android:textSize">20sp</item>
-	<item name="android:padding">10px</item>
-</style>
-<style name="WindowTitleNormalBackground">     
-	<item name="android:background">@color/titlenormalbackgroundcolor</item>                   
-</style>
-<style name="WindowTitleDisasterBackground">     
-	<item name="android:background">@color/titledisasterbackgroundcolor</item>                   
-</style>
+	<style name="Button" parent="@android:style/Widget.Button">
+		<item name="android:gravity">center_vertical|center_horizontal</item>
+		<item name="android:textColor">#FFFFFFFF</item>
+		<item name="android:textSize">16dip</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:background">@drawable/button_custom</item>
+		<item name="android:focusable">true</item>
+		<item name="android:clickable">true</item>
+		<item name="android:paddingTop">7dp</item>
+		<item name="android:paddingBottom">7dp</item>
+	</style>
+	<style name="ImageButton" parent="@android:style/Widget.ImageButton">
+		<item name="android:gravity">center_vertical|center_horizontal</item>
+		<item name="android:background">@android:color/transparent</item>
+		<item name="android:focusable">true</item>
+		<item name="android:clickable">true</item>
+		<item name="android:paddingTop">7dp</item>
+		<item name="android:paddingBottom">7dp</item>
+
+	</style>
+	<style name="twimightTheme" parent="android:Theme">
+		<item name="android:windowTitleBackgroundStyle">@style/WindowTitleNormalBackground</item>
+	</style>
+	<style name="twimightDisasterTheme" parent="android:Theme">
+		<item name="android:windowTitleBackgroundStyle">@style/WindowTitleDisasterBackground</item>
+	</style>
+	<style name="Theme.Transparent" parent="android:Theme">
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowBackground">@color/transparent</item>
+		<item name="android:windowContentOverlay">@null</item>
+		<item name="android:windowNoTitle">true</item>
+		<item name="android:windowIsFloating">true</item>
+		<item name="android:backgroundDimEnabled">true</item>
+	</style>
+	<style name="title">
+		<item name="android:textSize">40sp</item>
+		<item name="android:textColor">@color/title</item>
+		<item name="android:gravity">center</item>
+		<item name="android:layout_gravity">center</item>
+		<item name="android:padding">10px</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+	</style>
+	<style name="WindowTitleNormalBackground">
+		<item name="android:background">@color/titlenormalbackgroundcolor</item>
+	</style>
+	<style name="WindowTitleDisasterBackground">
+		<item name="android:background">@color/titledisasterbackgroundcolor</item>
+	</style>
+
+	<style name="twimightDefaultTextAppearance" parent="@android:style/TextAppearance">
+		<item name="android:textSize">16sp</item>
+		<item name="android:textColor">@color/twimightTextDark</item>
+	</style>
 </resources>
