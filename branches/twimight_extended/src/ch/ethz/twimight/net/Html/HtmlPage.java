@@ -19,6 +19,7 @@ public class HtmlPage implements BaseColumns {
 	public static final String OFFLINE_PREFERENCE = "offline_preference";
 	public static final String OFFLINE_MANUAL = "offline_manual";
 	public static final int DOWNLOAD_LIMIT = 15;
+	public static final String WEB_SHARE = "web_share";
 	
 	// here start the column names
 	public static final String COL_URL = "url"; /** url of the page */
