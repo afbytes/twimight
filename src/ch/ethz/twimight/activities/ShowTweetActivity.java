@@ -751,8 +751,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 					str.setSpan(new InternalURLSpan(subStrarr.substring(offset)), startIndex, endIndex, Spannable.SPAN_MARK_MARK);
 				}	
 				passedLen = passedLen + subStrarr.length() + 1;
-			}
-			Log.d("test1", htmlUrls.toString());			
+			}			
 		} catch (Exception ex) {
 		}
 		tweetTextView.setText(str);

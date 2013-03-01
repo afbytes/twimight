@@ -34,10 +34,12 @@ public class DevicesReceiver extends BroadcastReceiver {
 	
 	public final String SCAN_PROBABILITY = "scan_probability";
 	public final String DEVICE_LIST = "device_list";
+	public final String SCAN_COUNT = "scan_count";
 	
 	private static final float INIT_PROB = (float) 0.5;
 	private static final float MAX_PROB = (float) 1.0;
 	private static final float MIN_PROB = (float) 0.1;
+	private static final int MAX_SCAN_COUNT = 30;
 	
 	public DevicesReceiver(Context context){
 		dbHelper = new MacsDBHelper(context);
@@ -72,11 +74,10 @@ public class DevicesReceiver extends BroadcastReceiver {
 		if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 			
 			// Get the BluetoothDevice object from the Intent
-			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); 
+			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);    
 			
 			Log.i(TAG, "found a new device:" + device.getAddress().toString());
-			newDeviceList.add(device.getAddress().toString());			
-				
+			newDeviceList.add(device.getAddress().toString());
 			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART) {
 				
 				if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
@@ -90,7 +91,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
 			    	SharedPreferences.Editor edit = sharedPref.edit();
 			    	edit.putLong(DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
-			    	edit.commit();			    	
+			    	edit.commit();
 			    	sf.onScanningFinished();
 			    	compareDevice();
 			    }
@@ -99,38 +100,56 @@ public class DevicesReceiver extends BroadcastReceiver {
 
 	}
 	
+	
+	//determine the probability for next scan
 	private void compareDevice(){
 		Bundle scanInfo = getScanInfo();
 		ArrayList<String> oldDeviceList = scanInfo.getStringArrayList(DEVICE_LIST);
 		float oldProb = scanInfo.getFloat(SCAN_PROBABILITY);
+		int scanCount = scanInfo.getInt(SCAN_COUNT);
 		int newDevice = 0;
 		int oldDevice = 0;
-		for( String device:newDeviceList ){
-			if(oldDeviceList.indexOf(device)!= -1){
-				oldDevice ++;
-			}
-			else{
-				newDevice ++;
+		
+		if(newDeviceList.size() > 0){
+			for( String device:newDeviceList ){
+				if(oldDeviceList.indexOf(device)!= -1){
+					oldDevice ++;
+				}
+				else{
+					newDevice ++;
+				}
 			}
 		}
-		float dp = 0;
 		
-		if(oldDevice>0 || newDevice >0){
-			if(oldDeviceList.size() == 0){
-				dp = oldProb;
+		if(oldDevice == oldDeviceList.size() && newDevice == 0){
+			if(scanCount != 0){
+				scanCount --;
 			}
-			else{
-				dp = (float)oldProb * (float)0.5* ( (float)newDevice/(float)(newDeviceList.size()) + (1 - (float)oldDevice/(float)(oldDeviceList.size())));
-			}
-			
-			Log.i(TAG, "delta p is:" + String.valueOf(dp));
-			oldProb = Math.min(oldProb + dp, MAX_PROB);
-			
 		}
 		else{
+			scanCount = MAX_SCAN_COUNT;
+		}
+		
+		float dp = 0;
+		if(scanCount == 0){
 			oldProb = Math.max((float)oldProb / (float)2, MIN_PROB);
 		}
-		setScanInfo(oldProb, newDeviceList);
+		else{
+			if(oldDevice>0 || newDevice >0){
+
+				dp = (float) (MAX_PROB - oldProb) * ((float)newDevice/(float)(newDeviceList.size()) + (1 - (float)oldDevice/(float)(oldDeviceList.size())));
+				
+				Log.i(TAG, "delta p is:" + String.valueOf(dp));
+				oldProb = Math.min(oldProb + dp, MAX_PROB);
+				
+			}
+			else{
+				oldProb = Math.max((float)oldProb / (float)2, MIN_PROB);
+			}
+		}
+		
+		
+		setScanInfo(oldProb, newDeviceList, scanCount);
 	}
 	
 	public void setListener(ScanningFinished sf) {
@@ -138,11 +157,14 @@ public class DevicesReceiver extends BroadcastReceiver {
 	}
 	
 	//set scan info(device list and probability) to current scan
-	public void setScanInfo(float probability, ArrayList<String> deviceList) {
+	public void setScanInfo(float probability, ArrayList<String> deviceList, int scanCount) {
 
 		Log.i(TAG,"set scan probability to:" + String.valueOf(probability));
 		
 		SharedPreferences.Editor prefEditor = sharedPref.edit();
+		
+		Log.i(TAG, "set scan count to:" + String.valueOf(scanCount));
+		prefEditor.putInt(SCAN_COUNT, scanCount);
 		prefEditor.putFloat(SCAN_PROBABILITY, probability);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < deviceList.size(); i++) {
@@ -165,6 +187,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 
 		float probability = sharedPref.getFloat(SCAN_PROBABILITY, INIT_PROB);
 		String[] tmpList = sharedPref.getString(DEVICE_LIST, "").split(",");
+		int scanCount = sharedPref.getInt(SCAN_COUNT, MAX_SCAN_COUNT);
 
 		ArrayList<String> deviceList = new ArrayList<String>();
 		for(String device:tmpList){
@@ -172,8 +195,10 @@ public class DevicesReceiver extends BroadcastReceiver {
 		}
 		Log.i(TAG, "current scan probability is:" + String.valueOf(probability));
 		Log.i(TAG, "devices scanned during last time are:" + deviceList.toString());
+		Log.i(TAG, "scan count now is:" + String.valueOf(scanCount));
 		Bundle mBundle = new Bundle();
 		mBundle.putFloat(SCAN_PROBABILITY, probability);
+		mBundle.putInt(SCAN_COUNT, scanCount);
 		mBundle.putStringArrayList(DEVICE_LIST, deviceList);
 		return mBundle;
 	}

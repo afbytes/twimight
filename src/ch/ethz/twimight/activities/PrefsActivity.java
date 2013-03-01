@@ -43,6 +43,7 @@ public class PrefsActivity extends PreferenceActivity{
 
 	private OnSharedPreferenceChangeListener prefListener;
 	private SharedPreferences prefs;
+	private static Context context;
 	BluetoothAdapter mBluetoothAdapter;
 
 	// the menu
@@ -58,14 +59,14 @@ public class PrefsActivity extends PreferenceActivity{
 		addPreferencesFromResource(R.xml.prefs);
 		
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
+		context = this;
 		prefListener = new OnSharedPreferenceChangeListener() {
 
 			// this is where we take action after the user changes a setting!
 			public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
 
 				if (key.equals("prefDisasterMode")) { // toggle disaster mode
-					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
+					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
 							enableDisasterMode(); 								
@@ -79,7 +80,7 @@ public class PrefsActivity extends PreferenceActivity{
 				} else if(key.equals("prefTDSCommunication")){
 					
 					// toggle TDS communication
-					if(preferences.getBoolean("prefTDSCommunication",	Constants.TDS_DEFAULT_ON) == true){
+					if(preferences.getBoolean("prefTDSCommunication",	Constants.TDS_DEFAULT_ON)){
 						//new TDSAlarm(getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
 						Log.i(TAG, "start TDS communication");
 					} else {
@@ -119,6 +120,18 @@ public class PrefsActivity extends PreferenceActivity{
 
 					}
 
+				}else if(key.equals("prefWebShare")){
+					if(preferences.getBoolean("prefWebShare", Constants.OFFLINE_DEFAULT_ON)){
+
+						webShare(true);
+					}
+					else{
+						
+						webShare(false);
+
+					}
+					
+					
 				}
 			}
 
@@ -131,6 +144,13 @@ public class PrefsActivity extends PreferenceActivity{
 		Intent i = new Intent(getBaseContext(), HtmlService.class);
 		i.putExtra(HtmlPage.OFFLINE_PREFERENCE, offlinePreference);
 		startService(i);
+	}
+	
+	private void webShare(boolean toShare){
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = pref.edit();
+		prefEditor.putBoolean(HtmlPage.WEB_SHARE, toShare);
+		prefEditor.commit();
 	}
 	
 	public static void disableDisasterMode(Context context) {
@@ -156,8 +176,7 @@ public class PrefsActivity extends PreferenceActivity{
 		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
-			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);           
-			
+			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);
 		} else {
 			new ScanningAlarm(getApplicationContext(),0,true);
 			finish();
