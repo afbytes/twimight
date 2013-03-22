@@ -422,32 +422,35 @@ public class TDSService extends Service {
 
 				// bluetooth
 				List<String> macsList = tds.parseBluetooth();
-				//TODO: 
-				///////////////////////////////////////////////////////////////////////
-				macsList.clear();
-				///////////////////////////////////////////////////////////////////////
-				if(!macsList.isEmpty()){
-					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
-					dbHelper.open();
+				
+				if (macsList != null) {					
+					//TODO: 
+					///////////////////////////////////////////////////////////////////////
+					macsList.clear();
+					///////////////////////////////////////////////////////////////////////
+					if(!macsList.isEmpty()){
+						MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
+						dbHelper.open();
 
-					// temporarily de-activate all local MACs
-					dbHelper.updateMacsDeActive();
+						// temporarily de-activate all local MACs
+						dbHelper.updateMacsDeActive();
 
-					// insert new macs in the DB
-					Iterator<String> iterator = macsList.iterator();
-					while(iterator.hasNext()) {
+						// insert new macs in the DB
+						Iterator<String> iterator = macsList.iterator();
+						while(iterator.hasNext()) {
 
-						String mac = iterator.next();
-						if(dbHelper.createMac(mac, 1) == -1){
-							dbHelper.updateMacActive(mac, 1);
-							Log.d(TAG, "Already have MAC: " + mac);
-						} else {
-							Log.d(TAG,"New MAC: " + mac);
+							String mac = iterator.next();
+							if(dbHelper.createMac(mac, 1) == -1){
+								dbHelper.updateMacActive(mac, 1);
+								Log.d(TAG, "Already have MAC: " + mac);
+							} else {
+								Log.d(TAG,"New MAC: " + mac);
+							}
 						}
+					} else {
+						Log.d(TAG, "bluetooth mac list empty");
 					}
-				} else {
-					Log.d(TAG, "bluetooth mac list empty");
-				}
+				}			
 				
 				// location, nothing to do here
 
