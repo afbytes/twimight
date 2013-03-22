@@ -35,7 +35,7 @@ public final class Constants {
     public static final long TDS_UPDATE_RETRY_INTERVAL = 30*1000L; /** Initial interval for re-trying to connect to TDS */
     public static final boolean TDS_DEFAULT_ON = true; /** Opt in or opt out for TDS communication? */
     public static final long WAIT_FOR_CONNECTIVITY = 5*1000L; /** After waking up we have to wait to get connectivity */
-    public static final String TDS_BASE_URL = "https://dev.twimight.com"; /** The URL of the TDS */  
+    public static final String TDS_BASE_URL = "https://twimightserver-ethz.rhcloud.com/"; /** The URL of the TDS */  
     public static final int HTTP_CONNECTION_TIMEOUT = 3*1000; /** How long do we wait for a connection? */
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     

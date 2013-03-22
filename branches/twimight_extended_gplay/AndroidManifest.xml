@@ -7,7 +7,7 @@
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="ch.ethz.twimight" android:versionCode="6" android:versionName="0.9.3 preview">
-	<uses-sdk android:minSdkVersion="11"/>
+	<uses-sdk android:minSdkVersion="10"/>
 	<permission android:description="@string/permDescription"
 		android:label="Access to Twimight content providers" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
 		android:protectionLevel="dangerous" />
@@ -93,7 +93,9 @@
 		<activity android:name=".activities.NewTweetActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
-	
+		<activity android:name=".activities.FeedbackActivity"
+			android:label="Twimight" android:theme="@style/Theme.Transparent"
+			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />
@@ -103,12 +105,18 @@
 			android:label="About Twimight" />
 
 		
-	
-	
+		<activity android:name=".activities.WebViewActivity"
+			android:label="WebView" android:theme="@android:style/Theme.NoTitleBar" />
+		
+		 <activity android:name=".activities.DeviceListActivity"
+                  android:label="Select Device"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:configChanges="orientation|keyboardHidden" />
 
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
-		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />	
+		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />
+		<service android:enabled="true" android:name=".net.Html.HtmlService" />
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
 			<intent-filter>
 				<action android:name="twimight_synch" />
@@ -145,9 +153,6 @@
 			android:enabled="true" />
 		<receiver android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
 			android:enabled="true" />
-		
-	
-
 
 		<provider android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
 			android:authorities="ch.ethz.twimight.Tweets" android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
