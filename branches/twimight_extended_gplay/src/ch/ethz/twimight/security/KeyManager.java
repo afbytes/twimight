@@ -39,6 +39,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.util.Constants;
 
@@ -98,7 +99,7 @@ public class KeyManager {
 				return kp;
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while getting keys!");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while getting keys!");
 			}
 		} else {
 			KeyPair kp = generateKey();
@@ -143,7 +144,7 @@ public class KeyManager {
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 			kpg.initialize(Constants.SECURITY_KEY_SIZE);
 			KeyPair kp = kpg.genKeyPair();	        
-			Log.i(TAG,"keys created");
+			if (TwimightBaseActivity.D) Log.i(TAG,"keys created");
 
 			// now we have to save the newly created keys!
 			if(saveKey(kp)){
@@ -154,7 +155,7 @@ public class KeyManager {
 
 		}
 		catch(Exception e){
-			Log.e(TAG , "Exception while generating keys!");
+			if (TwimightBaseActivity.D) Log.e(TAG , "Exception while generating keys!");
 			return null;
 		}
 	}
@@ -183,10 +184,10 @@ public class KeyManager {
 			// finally, commit the changes to shared preferences
 			editor.commit();
 
-			Log.i(TAG, "keys saved");
+			if (TwimightBaseActivity.D) Log.i(TAG, "keys saved");
 			return true;
 		} catch(Exception e) {
-			Log.e(TAG, "Exception while saving keys!");
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception while saving keys!");
 			return false;
 		}
 
@@ -218,7 +219,7 @@ public class KeyManager {
 		try {
 			PUBLIC = (RSAPublicKey) pem.readObject();
 		} catch (IOException e) {
-			Log.e(TAG, "error reading key");
+			if (TwimightBaseActivity.D) Log.e(TAG, "error reading key");
 		}
 
 		return PUBLIC;
@@ -243,7 +244,7 @@ public class KeyManager {
 			byte[] signature = cipher.doFinal(hash.getBytes());
 
 			String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
-			Log.d(TAG, "Signature: "+signatureString);
+			if (TwimightBaseActivity.D) Log.d(TAG, "Signature: "+signatureString);
 
 			return signatureString;			
 
@@ -296,7 +297,7 @@ public class KeyManager {
 				FriendsKeysDBHelper kHelper = new FriendsKeysDBHelper(context);
 				kHelper.open();
 				if (kHelper.hasKey(twitterId)) {
-					Log.i(TAG,"has Key");
+					if (TwimightBaseActivity.D) Log.i(TAG,"has Key");
 					String publicKeyString =  kHelper.getKey(twitterId);					
 					RSAPublicKey publicKey = parsePem(publicKeyString);
 					cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -309,15 +310,15 @@ public class KeyManager {
 						
 
 			} catch (NoSuchAlgorithmException e) {
-				Log.e(TAG,"NoSuchAlgorithmException",e);
+				if (TwimightBaseActivity.D) Log.e(TAG,"NoSuchAlgorithmException",e);
 			} catch (NoSuchPaddingException e) {
-				Log.e(TAG,"NoSuchPaddingException",e);
+				if (TwimightBaseActivity.D) Log.e(TAG,"NoSuchPaddingException",e);
 			} catch (IllegalBlockSizeException e) {	
-				Log.e(TAG,"IllegalBlockSizeException",e);
+				if (TwimightBaseActivity.D) Log.e(TAG,"IllegalBlockSizeException",e);
 			} catch (BadPaddingException e) {
-				Log.e(TAG,"error",e);
+				if (TwimightBaseActivity.D) Log.e(TAG,"error",e);
 			} catch (InvalidKeyException e) {	
-				Log.e(TAG,"error",e);
+				if (TwimightBaseActivity.D) Log.e(TAG,"error",e);
 			} 
 			return null;
 

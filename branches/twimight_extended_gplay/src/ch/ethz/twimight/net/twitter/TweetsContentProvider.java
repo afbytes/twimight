@@ -14,7 +14,6 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import android.app.Notification;
@@ -29,7 +28,6 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -37,6 +35,7 @@ import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
@@ -172,13 +171,13 @@ public class TweetsContentProvider extends ContentProvider {
 		Intent i;
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS: 
-				Log.d(TAG, "Query TWEETS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS");
 				c = database.query(DBOpenHelper.TABLE_TWEETS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				break;
 			
 			case TWEETS_ID: 
-				Log.d(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
@@ -215,7 +214,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 						
 			case TWEETS_SEARCH: // the search query must be given in the where argument
-				Log.d(TAG, "Query SEARCH");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query SEARCH");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
@@ -258,7 +257,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_TIMELINE_NORMAL:
-				Log.d(TAG, "Query TIMELINE_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_NORMAL");
 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
@@ -297,7 +296,7 @@ public class TweetsContentProvider extends ContentProvider {
 				getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_DISASTER: 
-				Log.d(TAG, "Query TIMELINE_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -336,7 +335,7 @@ public class TweetsContentProvider extends ContentProvider {
 				//getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_ALL:
-				Log.d(TAG, "Query TIMELINE_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -375,7 +374,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_USER_ID:
-				Log.i(TAG, "Query TWEETS_USER_ID");
+				if (TwimightBaseActivity.D) Log.i(TAG, "Query TWEETS_USER_ID");
 				
 				// get the screenname for updating user tweets
 				Uri userUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
@@ -430,7 +429,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 			
 			case TWEETS_FAVORITES_NORMAL: 
-				Log.d(TAG, "Query FAVORITES_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -468,7 +467,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_FAVORITES_DISASTER: 
-				Log.d(TAG, "Query FAVORITES_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -506,7 +505,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_FAVORITES_ALL: 
-				Log.d(TAG, "Query FAVORITES_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -543,7 +542,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_MENTIONS_NORMAL: 
-				Log.d(TAG, "Query MENTIONS_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -581,7 +580,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_DISASTER: 
-				Log.d(TAG, "Query MENTIONS_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -619,7 +618,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_ALL: 
-				Log.d(TAG, "Query MENTIONS_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -701,7 +700,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_TIMELINE_DISASTER:
-				Log.d(TAG, "Insert TWEETS_TIMELINE_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Insert TWEETS_TIMELINE_DISASTER");
 				// in disaster mode, we set the is disaster flag 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(Tweets.COL_ISDISASTER, 1);
@@ -864,7 +863,7 @@ public class TweetsContentProvider extends ContentProvider {
 			return insertUri;
 			
 		} catch (Exception ex) {
-			Log.e(TAG,"exception while inserting", ex);
+			if (TwimightBaseActivity.D) Log.e(TAG,"exception while inserting", ex);
 			return null;
 		}
 		
@@ -882,7 +881,7 @@ public class TweetsContentProvider extends ContentProvider {
 		int nrRows = database.update(DBOpenHelper.TABLE_TWEETS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){			
 			getContext().getContentResolver().notifyChange(uri, null);		
-			Log.i(TAG,"updated");
+			if (TwimightBaseActivity.D) Log.i(TAG,"updated");
 			// Trigger synch if needed
 			if(values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS)!=0){
 				
@@ -905,7 +904,7 @@ public class TweetsContentProvider extends ContentProvider {
 	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
-		Log.d(TAG, "Delete TWEETS_ID");
+		if (TwimightBaseActivity.D) Log.d(TAG, "Delete TWEETS_ID");
 		
 		int nrRows = database.delete(DBOpenHelper.TABLE_TWEETS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
@@ -936,7 +935,7 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		// now delete			
 		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "=0" , null);
-		Log.d(TAG,"deleted " + result + " tweets");		
+		if (TwimightBaseActivity.D) Log.d(TAG,"deleted " + result + " tweets");		
 
 		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);		
 	}
@@ -950,37 +949,37 @@ public class TweetsContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
 		
 		if((bufferFlags & Tweets.BUFFER_TIMELINE) != 0){
-			Log.d(TAG, "Purging timeline buffer "+ Constants.TIMELINE_BUFFER_SIZE);
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging timeline buffer "+ Constants.TIMELINE_BUFFER_SIZE);
 			purgeBuffer(Tweets.BUFFER_TIMELINE, Constants.TIMELINE_BUFFER_SIZE);
 		}
 			
 		if((bufferFlags & Tweets.BUFFER_FAVORITES) != 0){
-			Log.d(TAG, "Purging favorites buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging favorites buffer");
 			purgeBuffer(Tweets.BUFFER_FAVORITES, Constants.FAVORITES_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_MENTIONS) != 0){
-			Log.d(TAG, "Purging mentions buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging mentions buffer");
 			purgeBuffer(Tweets.BUFFER_MENTIONS, Constants.MENTIONS_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_DISASTER) != 0){
-			Log.d(TAG, "Purging disaster buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging disaster buffer");
 			purgeBuffer(Tweets.BUFFER_DISASTER, Constants.DTWEET_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & Tweets.BUFFER_MYDISASTER) != 0){
-			Log.d(TAG, "Purging mydisaster buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging mydisaster buffer");
 			purgeBuffer(Tweets.BUFFER_MYDISASTER, Constants.MYDTWEET_BUFFER_SIZE);
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_USERS) != 0){
-			Log.d(TAG, "Purging user tweets buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging user tweets buffer");
 			purgeBuffer(Tweets.BUFFER_USERS, Constants.USERTWEETS_BUFFER_SIZE);
 		}
 		
 		if((bufferFlags & Tweets.BUFFER_SEARCH) != 0){
-			Log.d(TAG, "Purging search tweets buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Purging search tweets buffer");
 			purgeBuffer(Tweets.BUFFER_SEARCH, Constants.SEARCHTWEETS_BUFFER_SIZE);
 		}
 
@@ -1079,7 +1078,7 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 				
 			} catch (Exception ex) {
-				Log.e(TAG,"could not insert tweet in the table",ex);
+				if (TwimightBaseActivity.D) Log.e(TAG,"could not insert tweet in the table",ex);
 				return null;
 			}
 			
@@ -1098,7 +1097,7 @@ public class TweetsContentProvider extends ContentProvider {
 			  try {
 				  File tempFile = new File("../../../../../sdcard/twimight.tmp");
 				  FileOutputStream writer;
-				  //Log.d("LogThread", Environment.getRootDirectory().getAbsolutePath());
+				  //if (TwimightBaseActivity.D) Log.d("LogThread", Environment.getRootDirectory().getAbsolutePath());
 				  writer = new FileOutputStream(tempFile);
 				  writer.write(time.getBytes());
 				  writer.flush();

@@ -119,14 +119,14 @@ public class SearchableActivity extends TwimightBaseActivity{
 		
 		} else 
 			//finish();	
-			Log.i(TAG,"intent has no extra");
+			if (D) Log.i(TAG,"intent has no extra");
 	}
 
 
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		Log.i(TAG,"on new intent");
+		if (D) Log.i(TAG,"on new intent");
 		setIntent(intent);
 		processIntent(intent);		
 	}
@@ -193,7 +193,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 			savedInstanceState.putInt("positionIndex", positionIndex);
 			savedInstanceState.putInt("positionTop", positionTop);
 
-			Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+			if (D) Log.i(TAG, "saving" + positionIndex + " " + positionTop);
 		}
 
 		super.onSaveInstanceState(savedInstanceState);
@@ -209,7 +209,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 		positionIndex = savedInstanceState.getInt("positionIndex");
 		positionTop = savedInstanceState.getInt("positionTop");
 
-		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+		if (D) Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
 	}
 	
 	
@@ -275,7 +275,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 					Cursor c = (Cursor) searchListView.getItemAtPosition(position);	
-					Log.i(TAG, "text: " + c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
+					if (D) Log.i(TAG, "text: " + c.getString(c.getColumnIndex(Tweets.COL_TEXT)));
 					Intent i = new Intent(getBaseContext(), ShowTweetActivity.class);
 					i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 					startActivity(i);
@@ -287,7 +287,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 		@Override
 		protected Void doInBackground(String... query) {
-			Log.i(TAG, "AsynchTask: PerformSearchTask");
+			if (D) Log.i(TAG, "AsynchTask: PerformSearchTask");
 			
 			// TODO : check input
 						Uri uri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+ "/"+Tweets.SEARCH);
@@ -327,7 +327,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 		@Override
 		protected Void doInBackground(String... query) {
-			Log.i(TAG, "AsynchTask: PerformSearchTask");
+			if (D) Log.i(TAG, "AsynchTask: PerformSearchTask");
 			
 			// TODO : check input
 						Uri uri = Uri.parse("content://"+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS 

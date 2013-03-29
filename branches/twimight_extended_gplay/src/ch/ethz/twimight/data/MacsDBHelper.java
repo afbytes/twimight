@@ -20,7 +20,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.util.Log;
+
 
 /**
  * Manages the macs table in the DB.
@@ -105,7 +105,7 @@ public class MacsDBHelper {
 		try{
 			result = database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac +"'", null);
 		} catch (SQLiteException e){
-			Log.e(TAG, "SQLiteException " +e.toString());
+			
 			return false;
 		}
 
@@ -125,7 +125,7 @@ public class MacsDBHelper {
 		try{
 			resultCode = database.update(DBOpenHelper.TABLE_MACS, values, null, null);
 		} catch (SQLiteException e){
-			Log.e(TAG, "SQLiteException: " + e.toString());
+			
 			
 		}
 		
@@ -152,7 +152,7 @@ public class MacsDBHelper {
 			try{
 				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 			} catch (SQLiteException e){
-				Log.e(TAG, "SQLiteException: " + e.toString());
+				
 			}
 			if(resultCode > 0){
 				return true;
@@ -198,7 +198,7 @@ public class MacsDBHelper {
 			try{
 				database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 			} catch (SQLiteException e){
-				Log.e(TAG, "SQLiteException: " + e.toString());
+				
 			}
 			if(resultCode > 0){
 				return true;
@@ -223,7 +223,7 @@ public class MacsDBHelper {
 		try{
 			database.update(DBOpenHelper.TABLE_MACS, values, KEY_MAC + "='" + mac + "'", null);
 		} catch (SQLiteException e){
-			Log.e(TAG, "SQLiteException: " + e.toString());
+			
 		}
 	}
 	

@@ -173,7 +173,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				
 				// If there are any flags, schedule the Tweet for synch
 				if(c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) >0){
-					Log.i(TAG,"requesting tweet update to twitter");
+					if (D) Log.i(TAG,"requesting tweet update to twitter");
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
 					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
@@ -316,7 +316,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			} else
 				toSendNotification.setVisibility(LinearLayout.VISIBLE);	
 		} else 
-			Log.i(TAG,"toSendNotification");
+			if (D) Log.i(TAG,"toSendNotification");
 		
 		if (toDeleteNotification != null) {
 			if((flags & Tweets.FLAG_TO_DELETE) ==0){						
@@ -345,15 +345,15 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 									}												
 								}
 							} else 
-								Log.i(TAG,"toDeleteNotification");
+								if (D) Log.i(TAG,"toDeleteNotification");
 															 
 						}							
 					});
 				} else
-					Log.i(TAG,"toSendNotification");						
+					if (D) Log.i(TAG,"toSendNotification");						
 			}
 		} else 
-			Log.i(TAG,"toDeleteNotification");
+			if (D) Log.i(TAG,"toDeleteNotification");
 		
 		if ( toFavoriteNotification != null) {
 			if((flags & Tweets.FLAG_TO_FAVORITE) ==0){						
@@ -362,7 +362,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			} else
 				toFavoriteNotification.setVisibility(LinearLayout.VISIBLE);
 		} else 
-			Log.i(TAG,"toFavoriteNotification");
+			if (D) Log.i(TAG,"toFavoriteNotification");
 
 		if (toUnfavoriteNotification != null) {
 			if((flags & Tweets.FLAG_TO_UNFAVORITE) ==0){						
@@ -371,7 +371,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			} else
 				toUnfavoriteNotification.setVisibility(LinearLayout.VISIBLE);
 		} else 
-			Log.i(TAG,"toUnFavoriteNotification");
+			if (D) Log.i(TAG,"toUnFavoriteNotification");
 
 		if (toRetweetNotification != null) {
 			if((flags & Tweets.FLAG_TO_RETWEET) ==0){						
@@ -404,7 +404,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 				} else
 					picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG,"error opening input stream",e);
+				if (D) Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
 			}	
 		}
@@ -559,14 +559,14 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onPause(){
-		Log.i(TAG, "on pause");
+		if (D) Log.i(TAG, "on pause");
 		super.onPause();
 		if(c!=null){
 			if(observer != null) 
 				try {
 					c.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
-					//Log.e(TAG,"error unregistering observer",ex);
+					//if (D) Log.e(TAG,"error unregistering observer",ex);
 				}
 		}
 		
@@ -724,7 +724,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 			cv.put(Tweets.COL_BUFFER, buffer|Tweets.BUFFER_FAVORITES);
 			return cv;
 		} catch (Exception ex){
-			Log.e(TAG,"error: ",ex);
+			if (D) Log.e(TAG,"error: ",ex);
 			return null;
 		}
 		

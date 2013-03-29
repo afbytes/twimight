@@ -18,7 +18,6 @@ package ch.ethz.twimight.activities;
 
 import java.util.Set;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -51,10 +50,9 @@ import ch.ethz.twimight.util.Constants;
  * by the user, the MAC address of the device is sent back to the parent
  * Activity in the result Intent.
  */
-public class DeviceListActivity extends Activity {
+public class DeviceListActivity extends TwimightBaseActivity {
     // Debugging
-    private static final String TAG = "DeviceListActivity";
-    private static final boolean D = true;
+    private static final String TAG = "DeviceListActivity";    
 
     // Return Intent extra
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
@@ -68,7 +66,7 @@ public class DeviceListActivity extends Activity {
     private MacsDBHelper dbHelper;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Setup the window

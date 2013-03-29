@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -101,7 +100,7 @@ public class AboutActivity extends TwimightBaseActivity{
 		}
 		catch (NameNotFoundException e)
 		{
-		    Log.v(TAG, e.getMessage());
+		   
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package ch.ethz.twimight.util;
 
+import ch.ethz.twimight.R;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ public class AppRater {
     
     private final static int DAYS_UNTIL_PROMPT = 0;
     private final static int LAUNCHES_UNTIL_PROMPT = 3;
+    static Context context;
     
     public static void app_launched(Context mContext) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -45,43 +47,35 @@ public class AppRater {
             }
         }
         
+        context = mContext;
         editor.commit();
     }   
     
     public static void showRateDialog(final Context mContext, final SharedPreferences.Editor editor) {
         final Dialog dialog = new Dialog(mContext);
         dialog.setTitle("Rate " + APP_TITLE);
-
-        LinearLayout ll = new LinearLayout(mContext);
-        ll.setOrientation(LinearLayout.VERTICAL);
+        dialog.setContentView(R.layout.apprater);    
         
-        TextView tv = new TextView(mContext);
-        tv.setText("If you enjoy using " + APP_TITLE + ", please take a moment to rate it. Thanks for your support!");
-        tv.setWidth(240);
-        tv.setPadding(4, 0, 4, 10);
-        ll.addView(tv);
         
-        Button b1 = new Button(mContext);
-        b1.setText("Rate " + APP_TITLE);
+        Button b1 = (Button) dialog.findViewById(R.id.rater_rate);
+       
         b1.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
+                mContext.startActivity(new Intent(Intent.ACTION_VIEW, 
+                		Uri.parse("https://play.google.com/store/apps/details?id=com.viber.voip" + APP_PNAME)));
                 dialog.dismiss();
             }
-        });        
-        ll.addView(b1);
+        });          
 
-        Button b2 = new Button(mContext);
-        b2.setText("Remind me later");
+        Button b2 = (Button) dialog.findViewById(R.id.rater_remind);        
         b2.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 dialog.dismiss();
             }
         });
-        ll.addView(b2);
+        
 
-        Button b3 = new Button(mContext);
-        b3.setText("No, thanks");
+        Button b3 =  (Button) dialog.findViewById(R.id.rater_nothanks);       
         b3.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 if (editor != null) {
@@ -90,10 +84,8 @@ public class AppRater {
                 }
                 dialog.dismiss();
             }
-        });
-        ll.addView(b3);
-
-        dialog.setContentView(ll);        
+        }); 
+          
         dialog.show();        
     }
 }

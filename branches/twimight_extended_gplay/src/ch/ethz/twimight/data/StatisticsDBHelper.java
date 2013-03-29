@@ -23,7 +23,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
-import android.util.Log;
+
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -96,8 +96,7 @@ public class StatisticsDBHelper {
 			 update = createContentValues(null, null, null, timestamp,
 					null, network, event, link, timestamp);
 		
-		Log.i("LocationDBHelper","latitude: " + loc.getLatitude() + " Longitude: " + loc.getLongitude() + " accuracy: " + loc.getAccuracy() + 
-				" provider: " + loc.getProvider() + " network: " + network + " timestamp: " + timestamp );
+	
 		
 		try{
 			database.insert(DBOpenHelper.TABLE_LOCATIONS, null, update);
@@ -133,7 +132,7 @@ public class StatisticsDBHelper {
 		Cursor cursor = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_ISFOLLOWER + "= 1", null,null,null,null);
 		if (cursor != null){
 			cursor.moveToFirst();
-			Log.i("StatisticsDBHelper","number of followers: " + cursor.getCount());
+		
 			return cursor.getCount();	
 		}
 		return 0;

@@ -16,7 +16,6 @@ package ch.ethz.twimight.net.opportunistic;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,6 +53,7 @@ import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -171,11 +171,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		Random r = new Random(System.currentTimeMillis());
 		float scanProb = r.nextFloat();
 		
-		Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
+		if (TwimightBaseActivity.D) Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
 		
 		if (mBtAdapter != null) {
 			if(scanProb < scanRef){
-				Log.i(TAG, "begin scanning");
+				if (TwimightBaseActivity.D) Log.i(TAG, "begin scanning");
 				receiver.initDeivceList();
 				// If we're already discovering, stop it
 				if (mBtAdapter.isDiscovering()) {
@@ -206,7 +206,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 		@Override
 		public void uncaughtException(Thread t, Throwable e) {		
-			 Log.e(TAG, "error ", e);
+			 if (TwimightBaseActivity.D) Log.e(TAG, "error ", e);
 			context= null; 
 			ScanningService.this.stopSelf();
 			AlarmManager mgr = (AlarmManager) LoginActivity.getInstance().getSystemService(Context.ALARM_SERVICE);
@@ -242,7 +242,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	
 	@Override
 	public void onDestroy() {
-		Log.i(TAG,"on Destroy");
+		if (TwimightBaseActivity.D) Log.i(TAG,"on Destroy");
 		context=null;
 		releaseWakeLock();
 		bluetoothHelper.stop();
@@ -263,14 +263,14 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		// Get a cursor over all "active" MACs in the DB
 		cursor = dbHelper.fetchActiveMacs();
-		Log.i(TAG,"active macs: " + cursor.getCount());
+		if (TwimightBaseActivity.D) Log.i(TAG,"active macs: " + cursor.getCount());
 		
 		state = STATE_SCANNING;
 		
 		if (cursor.moveToFirst()) {
             // Get the field values
             String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));			
-            Log.i(TAG, "Connection Attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+            if (TwimightBaseActivity.D) Log.i(TAG, "Connection Attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
             
             if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {            	
 
@@ -283,7 +283,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
             	connTimeout = new ConnectingTimeout();
             	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	 	
             	//} else {
-            	//Log.i(TAG,"skipping connection, last meeting was too recent");
+            	//if (TwimightBaseActivity.D) Log.i(TAG,"skipping connection, last meeting was too recent");
             	//	nextScanning();
             	//}
             } else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {            	
@@ -332,11 +332,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		else {
 			// do we have another MAC in the cursor?
 			if(cursor.moveToNext()){
-				Log.d(TAG, "scanning for the next peer");
+				if (TwimightBaseActivity.D) Log.d(TAG, "scanning for the next peer");
 	            String mac = cursor.getString(cursor.getColumnIndex(MacsDBHelper.KEY_MAC));
 	           // if ( (System.currentTimeMillis() - dbHelper.getLastSuccessful(mac) ) > Constants.MEETINGS_INTERVAL) { 
 	            	
-	            	Log.i(TAG, "Connection attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
+	            	if (TwimightBaseActivity.D) Log.i(TAG, "Connection attempt to: " + mac + " (" + dbHelper.fetchMacSuccessful(mac) + "/" + dbHelper.fetchMacAttempts(mac) + ")");
 	            	// If we're already discovering, stop it
 	                if (mBtAdapter.isDiscovering()) {
 	                    mBtAdapter.cancelDiscovery();
@@ -345,7 +345,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		            connTimeout = new ConnectingTimeout();
 	            	handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); //timeout for the conn attempt	
 	          //  } else {
-	            	//Log.i(TAG,"skipping connection, last meeting was too recent");
+	            	//if (TwimightBaseActivity.D) Log.i(TAG,"skipping connection, last meeting was too recent");
 	            	//nextScanning();
 	           // }
 			} else 
@@ -366,7 +366,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			removeConnectingTimer()	;	    
 			// start listening mode
 			bluetoothHelper.start();
-			Log.i(TAG, "Listening...");
+			if (TwimightBaseActivity.D) Log.i(TAG, "Listening...");
 		}
 	 }
 	
@@ -407,7 +407,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 							TimerTask timerTask = new TimerTask(){  
 								  
 						        public void run() {  
-						        	Log.d(TAG,"closing request received, connection shutdown");
+						        	if (TwimightBaseActivity.D) Log.d(TAG,"closing request received, connection shutdown");
 						        	bluetoothHelper.start();
 						        }
 						          
@@ -425,7 +425,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				}	            
 				
 			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
-				Log.i(TAG, "connection succeeded");   			
+				if (TwimightBaseActivity.D) Log.i(TAG, "connection succeeded");   			
 				
 				removeConnectingTimer();
 				connectionTimeout = new ConnectionTimeout();
@@ -455,7 +455,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 				break;   
 			case Constants.MESSAGE_CONNECTION_FAILED:             
-				Log.i(TAG, "connection failed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "connection failed");
 				
 				// Insert failed connection into DB
 				dbHelper.updateMacAttempts(msg.obj.toString(), 1);
@@ -465,20 +465,20 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				break;
 				
 			case Constants.MESSAGE_CONNECTION_LOST:         	 
-				Log.i(TAG, "connection lost");  				
+				if (TwimightBaseActivity.D) Log.i(TAG, "connection lost");  				
 				// Next scan
 				removeConnectionTimeout();
 				nextScanning();				
 				break;
 				
 			case Constants.MESSAGE_CONNECTION_TO_CLOSE:
-				Log.i(TAG, "sending closing request");
+				if (TwimightBaseActivity.D) Log.i(TAG, "sending closing request");
             	bluetoothHelper.write("####CLOSING_REQUEST####");  
                 break;
 
 				
 			case Constants.BLUETOOTH_RESTART:         	 
-				Log.i(TAG, "blue restart"); 
+				if (TwimightBaseActivity.D) Log.i(TAG, "blue restart"); 
 				
 				stateReceiver = new StateChangedReceiver();
 				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -509,20 +509,20 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				//if input parameter is String, then cast it to String
 				o = new JSONObject(s[0]);
 				if (o.getInt(TYPE) == TWEET) {
-					Log.d("disaster", "receive a tweet");
+					if (TwimightBaseActivity.D) Log.d("disaster", "receive a tweet");
 					processTweet(o);
 				} else if(o.getInt(TYPE) == PHOTO){
-					Log.d("disaster", "receive a photo");
+					if (TwimightBaseActivity.D) Log.d("disaster", "receive a photo");
 					processPhoto(o);
 				} else{
-					Log.d("disaster", "receive a dm");
+					if (TwimightBaseActivity.D) Log.d("disaster", "receive a dm");
 					processDM(o);				
 				}
 				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 				//if input parameter is a photo, then extract the photo and save it locally
 				
 			} catch (JSONException e) {
-				Log.e(TAG, "error",e);
+				if (TwimightBaseActivity.D) Log.e(TAG, "error",e);
 			}			
 			return null;
 		}
@@ -530,7 +530,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	
 		
 	private void processDM(JSONObject o) {
-		Log.i(TAG,"processing DM");
+		if (TwimightBaseActivity.D) Log.i(TAG,"processing DM");
 		try {		
 			
 			ContentValues dmValues = getDmContentValues(o);
@@ -549,7 +549,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			}
 			
 		} catch (JSONException e1) {
-			Log.e(TAG, "Exception while receiving disaster dm " , e1);
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception while receiving disaster dm " , e1);
 		}
 		
 		
@@ -559,7 +559,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 	private void processTweet(JSONObject o) {
 		try {
-			Log.i(TAG, "processTweet");
+			if (TwimightBaseActivity.D) Log.i(TAG, "processTweet");
 			ContentValues cvTweet = getTweetCV(o);
 			cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);			
 
@@ -578,13 +578,13 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			}
 
 		} catch (JSONException e1) {
-			Log.e(TAG, "Exception while receiving disaster tweet " , e1);
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception while receiving disaster tweet " , e1);
 		}
 
 	}
 	private void processPhoto(JSONObject o) {
 		try {
-			Log.i(TAG, "processPhoto");
+			if (TwimightBaseActivity.D) Log.i(TAG, "processPhoto");
 			String jsonString = o.getString("image");
 			String userID = o.getString("userID");
 			String photoFileName =  o.getString("photoName");
@@ -597,7 +597,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			}
 			
 		} catch (JSONException e1) {
-			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
 		}
 
 	}
@@ -628,7 +628,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		Uri uriQuery = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + 
 									DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_DISASTER );
 		Cursor c = getContentResolver().query(uriQuery, null, null, null, null);
-		Log.i(TAG, "c.getCount: "+ c.getCount());
+		if (TwimightBaseActivity.D) Log.i(TAG, "c.getCount: "+ c.getCount());
 		if (c.getCount() >0){
 			c.moveToFirst();
 			
@@ -639,7 +639,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 						try {
 							dmToSend = getDmJSON(c);
 							if (dmToSend != null) {	
-								Log.i(TAG, "sending dm");
+								if (TwimightBaseActivity.D) Log.i(TAG, "sending dm");
 
 								bluetoothHelper.write(dmToSend.toString());
 							}
@@ -660,20 +660,20 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
-		Log.d(TAG, "count:" + String.valueOf(c.getCount()));
+		if (TwimightBaseActivity.D) Log.d(TAG, "count:" + String.valueOf(c.getCount()));
 		if(c.getCount()>0){		
 			c.moveToFirst();
 			while(!c.isAfterLast()){
 				
 				
-				Log.d(TAG, String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))) + ":" + String.valueOf(last));
+				if (TwimightBaseActivity.D) Log.d(TAG, String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))) + ":" + String.valueOf(last));
 				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5*60000)){
 					JSONObject toSend;
 					try {								
 						toSend = getJSON(c);
 						if (toSend != null) {
-							Log.i(TAG,"sending tweet");
-							Log.d(TAG, toSend.toString(5));
+							if (TwimightBaseActivity.D) Log.i(TAG,"sending tweet");
+							if (TwimightBaseActivity.D) Log.d(TAG, toSend.toString(5));
 							bluetoothHelper.write(toSend.toString());
 							//if there is a photo related to this tweet, send it
 							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) 
@@ -683,7 +683,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 						}
 						
 					} catch (JSONException e) {								
-						Log.e(TAG,"exception ", e);
+						if (TwimightBaseActivity.D) Log.e(TAG,"exception ", e);
 					}					
 				}
 				c.moveToNext();				
@@ -697,7 +697,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private boolean sendDisasterPhoto(Cursor c) throws JSONException{
 		JSONObject toSendPhoto;
 		String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
-		Log.d("photo", "photo name:"+ photoFileName);
+		if (TwimightBaseActivity.D) Log.d("photo", "photo name:"+ photoFileName);
 		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
 		//locate the directory where the photos are stored
 		photoPath = PHOTO_PATH + "/" + userID;
@@ -705,16 +705,16 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		if (sdCardHelper.checkSDStuff(filePath)) {
 			Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
-			Log.d(TAG, "photo path:"+ photoUri.getPath());
+			if (TwimightBaseActivity.D) Log.d(TAG, "photo path:"+ photoUri.getPath());
 			Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri.getPath());
-			Log.d("photo", "photo ready");
+			if (TwimightBaseActivity.D) Log.d("photo", "photo ready");
 			if(photoBitmap != null){
-				Log.d("photo", "photo ready to be sent");
+				if (TwimightBaseActivity.D) Log.d("photo", "photo ready to be sent");
 				toSendPhoto = getJSONFromBitmap(photoBitmap);
 				toSendPhoto.put("userID", userID);
 				toSendPhoto.put("photoName", photoFileName);
-				Log.i(TAG,"sending photo");
-				Log.d(TAG, toSendPhoto.toString(5));
+				if (TwimightBaseActivity.D) Log.i(TAG,"sending photo");
+				if (TwimightBaseActivity.D) Log.d(TAG, toSendPhoto.toString(5));
 				bluetoothHelper.write(toSendPhoto.toString());
 				return true;
 			}
@@ -734,7 +734,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
 		try {
 		    bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
-			Log.d("photo", "bitmap array size:" + String.valueOf(byteArrayBitmapStream.size()));
+			if (TwimightBaseActivity.D) Log.d("photo", "bitmap array size:" + String.valueOf(byteArrayBitmapStream.size()));
 			byte[] b = byteArrayBitmapStream.toByteArray();
 			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT); 
 			JSONObject jsonObj;
@@ -744,7 +744,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			return jsonObj;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
-			Log.d(TAG, "exception:" + e.getMessage());
+			if (TwimightBaseActivity.D) Log.d(TAG, "exception:" + e.getMessage());
 			return null;
 		}
 
@@ -776,7 +776,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		if(c.getColumnIndex(DirectMessages.COL_RECEIVER) < 0 || c.getColumnIndex(DirectMessages.COL_SENDER) < 0 
 				|| c.isNull(c.getColumnIndex(DirectMessages.COL_CRYPTEXT))) {
-			Log.i(TAG,"missing users data");
+			if (TwimightBaseActivity.D) Log.i(TAG,"missing users data");
 			return null;
 			
 		} else {
@@ -809,7 +809,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	protected JSONObject getJSON(Cursor c) throws JSONException {
 		JSONObject o = new JSONObject();
 		if(c.getColumnIndex(Tweets.COL_USER) < 0 || c.getColumnIndex(TwitterUsers.COL_SCREENNAME) < 0 ) {
-			Log.i(TAG,"missing user data");
+			if (TwimightBaseActivity.D) Log.i(TAG,"missing user data");
 			return null;
 		}
 		
@@ -841,7 +841,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
 
 			if( c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH) >=0 && c.getColumnIndex("userRowId") >= 0 ) {
-				Log.i(TAG,"adding picture");
+				if (TwimightBaseActivity.D) Log.i(TAG,"adding picture");
 				int userId = c.getInt(c.getColumnIndex("userRowId"));
 				Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
 				try {
@@ -850,7 +850,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 					o.put(TwitterUsers.COL_PROFILEIMAGE, Base64.encodeToString(image, Base64.DEFAULT) );
 
 				} catch (Exception e) {
-					Log.e(TAG,"error",e);
+					if (TwimightBaseActivity.D) Log.e(TAG,"error",e);
 					
 				};
 			}

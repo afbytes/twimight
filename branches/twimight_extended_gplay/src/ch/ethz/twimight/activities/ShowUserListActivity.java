@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -99,7 +98,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 		// if we just got logged in, we load the timeline
 		Intent i = getIntent();
 		if(i.hasExtra("filter")){
-			Log.i(TAG, "got filter from intent");
+			
 			currentFilter = i.getIntExtra("filter", SHOW_FRIENDS);
 			i.removeExtra("filter");	
 		}
@@ -142,7 +141,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	  savedInstanceState.putInt("positionIndex", positionIndex);
 	  savedInstanceState.putInt("positionTop", positionTop);
 	  
-	  Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+	 
 	  
 	  super.onSaveInstanceState(savedInstanceState);
 	}
@@ -156,9 +155,8 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	  
 	  currentFilter = savedInstanceState.getInt("currentFilter");
 	  positionIndex = savedInstanceState.getInt("positionIndex");
-	  positionTop = savedInstanceState.getInt("positionTop");
-	  
-	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	  positionTop = savedInstanceState.getInt("positionTop");  
+	 
 	}
 	
 	/**

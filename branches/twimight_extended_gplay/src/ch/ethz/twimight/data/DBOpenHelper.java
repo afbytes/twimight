@@ -15,7 +15,7 @@ package ch.ethz.twimight.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
+
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -204,9 +204,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase database, int oldVersion,
 			int newVersion) {
-		Log.w(DBOpenHelper.class.getName(),
-				"Upgrading database from version " + oldVersion + " to "
-						+ newVersion + ", which will destroy all old data");
+		
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_MACS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_LOCATIONS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_REVOCATIONS);

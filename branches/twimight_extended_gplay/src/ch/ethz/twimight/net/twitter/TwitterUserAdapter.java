@@ -21,7 +21,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -67,7 +67,7 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 				} else
 					picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG,"error opening input stream",e);
+				
 				picture.setImageResource(R.drawable.default_profile);
 			}	
 

@@ -145,7 +145,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 			recepient.requestFocus();
 		}
 		
-		Log.v(TAG, "onCreated");
+		if (D) Log.v(TAG, "onCreated");
 	}
 	
 
@@ -180,7 +180,7 @@ public class NewDMActivity extends TwimightBaseActivity{
 		protected Boolean doInBackground(Void... params) {
 			boolean result = false;
 			
-			Log.i(TAG, "send DM!");
+			if (D) Log.i(TAG, "send DM!");
 			// if no connectivity, notify user that the tweet will be send later
 
 			ContentValues cv = createContentValues();

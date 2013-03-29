@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -36,7 +35,6 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.InternalStorageHelper;
 
 /**
  * Display a user
@@ -114,14 +112,12 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		} else if(getIntent().hasExtra("screenname")){
 
-			Log.e(TAG, getIntent().getStringExtra("screenname"));
-			
+					
 			// get data from local DB
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			c = getContentResolver().query(uri, null, TwitterUsers.COL_SCREENNAME+" LIKE '"+getIntent().getStringExtra("screenname")+"'", null, null);
 
 			if(c.getCount() == 0) {
-				Log.w(TAG, "USER NOT FOUND " + getIntent().getStringExtra("screenname"));
 				finish();
 				return;
 			}
@@ -131,7 +127,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 
 		} else {
 			// if we don't know which user to show
-			Log.w(TAG, "WHICH USER??");
+		
 			finish();
 			return;
 		}
@@ -236,7 +232,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 				} else
 					profileImage.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG,"error opening input stream",e);
+				
 				profileImage.setImageResource(R.drawable.default_profile);
 			}	
 		}
@@ -359,7 +355,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	private void showRemoteUser(){
 		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
-		Log.i(TAG,"showRemoteUser");
+		
 		/*
 		 * The following cases are possible: 
 		 * - the user was marked for following

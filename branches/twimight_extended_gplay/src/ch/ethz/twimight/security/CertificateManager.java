@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.util.Constants;
 
@@ -71,7 +72,7 @@ public class CertificateManager {
 		try {
 			rootkey = (RSAPublicKey) pem.readObject();
 		} catch (IOException e) {
-			Log.e(TAG, "error reading root key");
+			if (TwimightBaseActivity.D) Log.e(TAG, "error reading root key");
 		}
 				
 	}
@@ -89,10 +90,10 @@ public class CertificateManager {
 		try {
 			cert = (X509CertificateObject) pem.readObject();
 		} catch (IOException e) {
-			Log.e(TAG, "error reading certificate");
+			if (TwimightBaseActivity.D) Log.e(TAG, "error reading certificate");
 		}
 		
-		//Log.i(TAG, "expires: " + cert.getNotAfter().toString());
+		//if (TwimightBaseActivity.D) Log.i(TAG, "expires: " + cert.getNotAfter().toString());
 		
 		return cert;
 	}
@@ -183,23 +184,23 @@ public class CertificateManager {
 		try {
 			cert.checkValidity();
 		} catch (CertificateExpiredException e) {
-			Log.e(TAG, "certificate already expired!");
+			if (TwimightBaseActivity.D) Log.e(TAG, "certificate already expired!");
 			return false;
 		} catch (CertificateNotYetValidException e) {
-			Log.e(TAG, "certificate not yet valid");
+			if (TwimightBaseActivity.D) Log.e(TAG, "certificate not yet valid");
 			return false;
 		}
 		
 		// is it ours?
 		Principal subjectDN = cert.getSubjectDN();
 		if(!subjectDN.getName().substring(2).equals(twitterId)){
-			Log.e(TAG, "wrong DN in certificate! " + subjectDN.getName());
+			if (TwimightBaseActivity.D) Log.e(TAG, "wrong DN in certificate! " + subjectDN.getName());
 			return false;
 		}
 			
 		// certificate signed by root certificate?
 		if(!checkCertificateSignature(cert)){
-			Log.i(TAG, "wrong certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "wrong certificate signature");
 			return false;
 		}
 		
@@ -207,7 +208,7 @@ public class CertificateManager {
 		RevocationDBHelper dbHelper = new RevocationDBHelper(context);
 		dbHelper.open();
 		if(dbHelper.isRevoked(cert.getSerialNumber().toString())){
-			Log.i(TAG, "key is revoked");
+			if (TwimightBaseActivity.D) Log.i(TAG, "key is revoked");
 			return false;
 		}
 		
@@ -219,19 +220,19 @@ public class CertificateManager {
 		try {
 			cert.verify(rootkey);
 		} catch (InvalidKeyException e) {
-			Log.i(TAG, "invalid key exception while verifying certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "invalid key exception while verifying certificate signature");
 			return false;
 		} catch (CertificateException e) {
-			Log.i(TAG, "certificate exception while verifying certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "certificate exception while verifying certificate signature");
 			return false;
 		} catch (NoSuchAlgorithmException e) {
-			Log.i(TAG, "no such algorithm exception while verifying certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "no such algorithm exception while verifying certificate signature");
 			return false;
 		} catch (NoSuchProviderException e) {
-			Log.i(TAG, "no such provider exception while verifying certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "no such provider exception while verifying certificate signature");
 			return false;
 		} catch (SignatureException e) {
-			Log.i(TAG, "signature exception while verifying certificate signature");
+			if (TwimightBaseActivity.D) Log.i(TAG, "signature exception while verifying certificate signature");
 			return false;
 		}
 		return true;

@@ -26,12 +26,8 @@ public class ConditionsActivity extends Activity {
 			
 		} else {
 			
-			setContentView(R.layout.show_conditions);
-
-		
-			Button buttonAgree = (Button)findViewById(R.id.buttonAgree);
-			
-			
+			setContentView(R.layout.show_conditions);		
+			Button buttonAgree = (Button)findViewById(R.id.buttonAgree);			
 			
 			buttonAgree.setOnClickListener(new OnClickListener() {
 				@Override
@@ -40,7 +36,9 @@ public class ConditionsActivity extends Activity {
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putBoolean(TERMS, true);
 					editor.commit();  
+					startLogin();
 					
+					/*
 					setContentView(R.layout.show_raffle);
 					Button buttonSkip = (Button)findViewById(R.id.buttonSkip);
 					buttonSkip.setOnClickListener(new OnClickListener() {
@@ -49,11 +47,18 @@ public class ConditionsActivity extends Activity {
 						public void onClick(View v) {
 							startLogin();
 							
-						}
-						
-						
+						}						
 					});
-					
+					*/					
+				}			
+			});
+			
+			Button buttonDecline = (Button)findViewById(R.id.buttonDecline);			
+			
+			buttonDecline.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+						finish();
 				}			
 			});
 			

@@ -31,16 +31,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
-import android.util.Log;
+
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -58,7 +55,6 @@ import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
-import ch.ethz.twimight.util.AppRater;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
@@ -124,7 +120,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		// which state are we in?
 		if(hasAccessToken(this) && hasAccessTokenSecret(this) && getTwitterId(this)!=null){
 			// if we have token, secret and ID: launch the timeline activity
-			Log.i(TAG, "we have the tokens and ID");
+			
 			// Do we have connectivity?
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
@@ -159,7 +155,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		} else {
 			// if we don't have request token and secret, we show the login button
-			Log.i(TAG, "we do not have the tokens, enabling login button");			
+				
 			setupLoginButton();
 		}	
 		
@@ -244,7 +240,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected String doInBackground(Void... params) {
-			Log.i(TAG, "getting request token");
+			
 
 			OAuthConsumer consumer = new CommonsHttpOAuthConsumer(Obfuscator.getKey(),Obfuscator.getSecret());		
 			OAuthProvider provider = new CommonsHttpOAuthProvider (TWITTER_REQUEST_TOKEN_URL,TWITTER_ACCESS_TOKEN_URL,TWITTER_AUTHORIZE_URL);
@@ -308,7 +304,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 
 		@Override
 		protected String doInBackground(Uri... params) {
-			Log.i(TAG, "getting access token");		
+			
 
 			Uri uri = params[0];
 			
@@ -465,7 +461,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 			// Stop all services and pending alarms
 			Context context = params[0];
 			stopServices(context);
-
 			
 			// Delete persistent Twitter update information
 			TwitterService.setFavoritesSinceId(null, context);
