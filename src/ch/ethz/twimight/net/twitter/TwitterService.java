@@ -53,6 +53,7 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -116,7 +117,7 @@ public class TwitterService extends Service {
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-			Log.w(TAG, "Error synching: no connectivity");
+			if (TwimightBaseActivity.D) Log.w(TAG, "Error synching: no connectivity");
 			return START_NOT_STICKY;
 			
 		} else {
@@ -130,7 +131,7 @@ public class TwitterService extends Service {
 					OAuthSignpostClient client = new OAuthSignpostClient(Obfuscator.getKey(), Obfuscator.getSecret(), token, secret);
 					twitter = new Twitter(null, client);
 				} else {
-					Log.e(TAG, "Error synching: no access token or secret");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Error synching: no access token or secret");
 					return START_NOT_STICKY;
 				}				
 				twitter.setIncludeTweetEntities(true);
@@ -192,7 +193,7 @@ public class TwitterService extends Service {
 					}
 					break;
 				case SYNCH_USER:
-					Log.i(TAG,"SYNCH_USER");
+					if (TwimightBaseActivity.D) Log.i(TAG,"SYNCH_USER");
 					if(intent.hasExtra("rowId")){
 						long rowId = intent.getLongExtra("rowId", -1);
 						new UserQueryTask().execute(rowId);
@@ -254,7 +255,7 @@ public class TwitterService extends Service {
 			c = getContentResolver().query(queryUri, null, null, null, null);
 
 			if(c.getCount() == 0)
-				Log.w(TAG, "Synch Tweet: Tweet not found " + params[0]);					
+				if (TwimightBaseActivity.D) Log.w(TAG, "Synch Tweet: Tweet not found " + params[0]);					
 
 			c.moveToFirst();
 			return c;
@@ -288,7 +289,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected void onPostExecute(Cursor c) {
-			Log.d(TAG, "synchTweet");
+			if (TwimightBaseActivity.D) Log.d(TAG, "synchTweet");
 			synchTweet(c,TRUE);
 			if(c!=null) c.close();	
 		}
@@ -315,7 +316,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Starts a thread to search Twitter users
 	 */
 	private void synchSearchUsers(String query) {
-			Log.i(TAG, "SYNCH_SEARCH USERS");
+			if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_SEARCH USERS");
 			(new SearchUsersTask()).execute(query);
 		
 	}
@@ -333,7 +334,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Creates the thread to update friends
 	 */
 	private void synchFriends(long notify) {
-		Log.d(TAG, "SYNCH_FRIENDS");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_FRIENDS");
 		if(System.currentTimeMillis() - getLastFriendsUpdate(getBaseContext()) > Constants.FRIENDS_MIN_SYNCH){
 			(new UpdateFriendsTask()).execute(notify);
 		} 
@@ -344,11 +345,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Creates the thread to update followers
 	 */
 	private void synchFollowers(long notify) {
-		Log.i(TAG, "SYNCH_FOLLOWERS");
+		if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_FOLLOWERS");
 		if(System.currentTimeMillis() - getLastFollowerUpdate(getBaseContext()) > Constants.FOLLOWERS_MIN_SYNCH){
 			(new UpdateFollowersTask()).execute(notify);
 		} else {
-			Log.i(TAG, "Last followers synch too recent.");
+			if (TwimightBaseActivity.D) Log.i(TAG, "Last followers synch too recent.");
 		}		
 	}
 
@@ -357,7 +358,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Stores the user ID in the shared preferences.
 	 */
 	private void synchLogin(){
-		Log.i(TAG, "SYNCH_LOGIN");
+		if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_LOGIN");
 		Integer [] params = {Constants.LOGIN_ATTEMPTS, 1}; // nr of attempts, notify login activity about result
 		(new VerifyCredentialsTask()).execute(params);
 	}
@@ -368,7 +369,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Stores the user ID in the shared preferences.
 	 */
 	private void synchVerify(){
-		Log.i(TAG, "SYNCH_VERIFY");
+		if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_VERIFY");
 		Integer [] params = {Constants.LOGIN_ATTEMPTS, 0}; // nr of attempts, do not notify login activity about result		
 		new VerifyCredentialsTask().execute(params);
 	}	
@@ -385,14 +386,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			Log.i(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
+			if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
 			// get the flagged tweets
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 			Cursor c = null;
 			
 				c = getContentResolver().query(queryUri, null, Tweets.COL_FLAGS+"!=0", null, null);
 				
-				Log.i(TAG, c.getCount()+" transactional tweets to synch");
+				if (TwimightBaseActivity.D) Log.i(TAG, c.getCount()+" transactional tweets to synch");
 				if(c.getCount() >= 0){
 					c.moveToFirst();
 					while(!c.isAfterLast()){
@@ -423,7 +424,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 				c = getContentResolver().query(queryUri, null, DirectMessages.COL_FLAGS+"!=0", null, null);
 				
-				Log.i(TAG, c.getCount()+" transactional messages to synch");
+				if (TwimightBaseActivity.D) Log.i(TAG, c.getCount()+" transactional messages to synch");
 				if(c.getCount() >= 0){
 					c.moveToFirst();
 					while(!c.isAfterLast()){
@@ -497,7 +498,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Checks the transactional flags of the tweet with the given _id and performs the corresponding actions
 	 */
 	private void synchTweet(Cursor c, long notify) {
-		Log.i(TAG, "SYNCH_TWEET");
+		if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_TWEET");
 		if (c != null) {
 			
 			int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
@@ -510,7 +511,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 			} else if((flags & Tweets.FLAG_TO_INSERT)>0) {
 				// post the tweet to twitter
-				Log.i(TAG,"uploading tweet");
+				if (TwimightBaseActivity.D) Log.i(TAG,"uploading tweet");
 				Long[] params = {rowId, 3L, notify}; // three attempts
 				(new UpdateStatusTask()).execute(params);
 			} 		
@@ -592,7 +593,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Starts a thread to load the favorites. But only if the last favorites request is old enough.
 	 */
 	private void synchFavorites(boolean force) {
-		Log.d(TAG, "SYNCH_FAVORITES");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_FAVORITES");
 		if(force || (System.currentTimeMillis() - getLastFavoritesUpdate(getBaseContext()) > Constants.FAVORITES_MIN_SYNCH)){
 			(new UpdateFavoritesTask()).execute();
 		} 
@@ -603,7 +604,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Starts a thread to load the mentions. But only if the last mentions request is old enough.
 	 */
 	private void synchMentions(boolean force) {
-		Log.d(TAG, "SYNCH_MENTIONS");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_MENTIONS");
 		if(force || (System.currentTimeMillis() - getLastMentionsUpdate(getBaseContext()) > Constants.MENTIONS_MIN_SYNCH)){
 			(new UpdateMentionsTask()).execute();
 		} 
@@ -614,17 +615,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Loads DMs from Twitter
 	 */
 	private void synchMessages() {
-		Log.d(TAG, "SYNCH_MESSAGES");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_MESSAGES");
 		if(System.currentTimeMillis() - getLastDMsInUpdate(getBaseContext()) > Constants.DMS_MIN_SYNCH){
 			(new UpdateDMsInTask()).execute(3); // maximum three attempts before we give up
 		} else {
-			Log.i(TAG, "Last DM IN synch too recent.");
+			if (TwimightBaseActivity.D) Log.i(TAG, "Last DM IN synch too recent.");
 		}
 
 		if(System.currentTimeMillis() - getLastDMsOutUpdate(getBaseContext()) > Constants.DMS_MIN_SYNCH){
 			(new UpdateDMsOutTask()).execute(3); // maximum three attempts before we give up
 		} else {
-			Log.i(TAG, "Last DM Out synch too recent.");
+			if (TwimightBaseActivity.D) Log.i(TAG, "Last DM Out synch too recent.");
 		}
 
 
@@ -634,7 +635,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 * Checks the transactional flags of the direct message with the given _id and performs the corresponding actions
 	 */
 	private void synchMessage(long rowId, long notify) {
-		Log.i(TAG, "SYNCH_DM");
+		if (TwimightBaseActivity.D) Log.i(TAG, "SYNCH_DM");
 		// get the flags
 		Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+rowId);
 		Cursor c = null;		
@@ -642,7 +643,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		try{
 			c = getContentResolver().query(queryUri, null, null, null, null);
 			if(c.getCount() == 0){
-				Log.w(TAG, "Synch Message: Message not found " + rowId);
+				if (TwimightBaseActivity.D) Log.w(TAG, "Synch Message: Message not found " + rowId);
 				return;
 			}
 			c.moveToFirst();
@@ -659,7 +660,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			} 
 			
 		} catch(Exception ex){
-			Log.e(TAG, "Exception: " + ex);
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception: " + ex);
 		} finally {
 			c.close();	
 		}
@@ -670,7 +671,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 */
 	private void synchUserTweets(String screenname) {
 
-		Log.d(TAG, "SYNCH_USERTWEETS");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_USERTWEETS");
 		(new UpdateUserTweetsTask()).execute(screenname);
 
 	}
@@ -680,7 +681,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 */
 	private void synchSearchTweets(String query) {
 
-		Log.d(TAG, "SYNCH_SEARCH");
+		if (TwimightBaseActivity.D) Log.d(TAG, "SYNCH_SEARCH");
 		(new SearchTweetsTask()).execute(query);
 
 	}
@@ -725,7 +726,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	 */
 	public static void setTimelineSinceId(BigInteger sinceId, Context context) {
 		
-		Log.i(TAG,"inside setTimelineSinceId");
+		if (TwimightBaseActivity.D) Log.i(TAG,"inside setTimelineSinceId");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putString("timelineSinceId",sinceId==null?null:sinceId.toString());
@@ -1011,7 +1012,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			Uri resultUri = getContentResolver().insert(insertUri, getMessageContentValues(dm, buffer));
 			return new Integer(resultUri.getLastPathSegment());
 		} catch (Exception ex) {
-			Log.e(TAG, "Exception while updating message");
+			if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating message");
 			return 0;
 		}
 	}
@@ -1161,7 +1162,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 					getContentResolver().insert(insertUri, cv);
 				} catch(Exception ex){
-					Log.e(TAG, "Exception while inserting mentioned user");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Exception while inserting mentioned user");
 				}
 			}
 		}
@@ -1212,7 +1213,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 			
 		} catch (StringIndexOutOfBoundsException ex) {
-			Log.e(TAG,"create spans error",ex);
+			if (TwimightBaseActivity.D) Log.e(TAG,"create spans error",ex);
 			return new SpanResult(tweet.getText(),urls);
 		}	
 		
@@ -1301,7 +1302,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected User doInBackground(Integer... params) {
-			Log.d(TAG, "AsynchTask: VerifyCredentialsTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: VerifyCredentialsTask");
 			attempts = params[0];
 			startTimeline = params[1];
 			
@@ -1324,7 +1325,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 			// error handling
 			if(ex != null){
-				Log.e(TAG, "exception while verifying: " + ex);
+				if (TwimightBaseActivity.D) Log.e(TAG, "exception while verifying: " + ex);
 				// user not authorized!
 				if(ex instanceof TwitterException.E401){
 				
@@ -1390,7 +1391,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(Void... params) {
-			Log.d(TAG, "AsynchTask: UpdateMentionsTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateMentionsTask");
 			ShowTweetListActivity.setLoading(true);
 
 			List<winterwell.jtwitter.Status> mentions = null;
@@ -1414,13 +1415,13 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading mentions: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading mentions: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
 					if (ShowTweetListActivity.running)	
 						Toast.makeText(getBaseContext(), "Timeout while loading mentions.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading mentions: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading mentions: " + ex);
 				} else {
-					Log.e(TAG, "exception while loading mentions: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading mentions: " + ex);
 				}
 				return;
 			} else
@@ -1500,7 +1501,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(Void... params) {
-			Log.d(TAG, "AsynchTask: UpdateFavoritesTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateFavoritesTask");
 			ShowTweetListActivity.setLoading(true);
 			List<winterwell.jtwitter.Status> favorites = null;
 
@@ -1524,15 +1525,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading favorites: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading favorites: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
 					if (ShowTweetListActivity.running)							
 						Toast.makeText(getBaseContext(), "Timeout while loading favorites.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading favorites: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading favorites: " + ex);
 				}else {
 					if (ShowTweetListActivity.running)	
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your favorites. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading favorites: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading favorites: " + ex);
 				}
 				return;
 			} else
@@ -1648,9 +1649,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				if (timeline.size()>0 && overscroll == OVERSCROLL_BOTTOM ) {
 					Constants.TIMELINE_BUFFER_SIZE += 50;
-					Log.i(TAG, "BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
+					if (TwimightBaseActivity.D) Log.i(TAG, "BUFFER_SIZE =  "+ Constants.TIMELINE_BUFFER_SIZE);
 				}				
-				Log.i(TAG,"timeline size:" + timeline.size());
+				if (TwimightBaseActivity.D) Log.i(TAG,"timeline size:" + timeline.size());
 			} catch (Exception ex) {
 				this.ex = ex;
 			}
@@ -1666,17 +1667,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading timeline: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading timeline: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
 					if (ShowTweetListActivity.running)	
 						Toast.makeText(getBaseContext(), "Timeout while loading timeline.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading timeline: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading timeline: " + ex);
 					if (attempts_left > 0)
 						new UpdateTimelineTask().execute(--attempts_left);
 				}else {
 					if (ShowTweetListActivity.running)	
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your timeline. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading timeline: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading timeline: " + ex);
 					if (attempts_left > 0)
 						new UpdateTimelineTask().execute(--attempts_left);
 				}				
@@ -1779,7 +1780,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			
 
-			Log.i(TAG,"Insert onPost Execute");
+			if (TwimightBaseActivity.D) Log.i(TAG,"Insert onPost Execute");
 		}
 
 	}
@@ -1837,11 +1838,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while updating user: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while updating user: " + ex);
 				} else {
 					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while loading the timeline. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while updating user: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while updating user: " + ex);
 				}
 				return;
 			} else
@@ -1917,7 +1918,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(String... params) {
-			Log.v(TAG, "AsynchTask: SearchTweetsTask");
+			if (TwimightBaseActivity.D) Log.v(TAG, "AsynchTask: SearchTweetsTask");
 
 			SearchableActivity.setLoading(true);
 			
@@ -1943,11 +1944,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while updating user: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while updating user: " + ex);
 				} else {
 					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while searching: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while searching: " + ex);
 				}
 				return;
 			} else
@@ -1967,7 +1968,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.User> doInBackground(String... params) {
-			Log.v(TAG, "AsynchTask: SearchTweetsTask");
+			if (TwimightBaseActivity.D) Log.v(TAG, "AsynchTask: SearchTweetsTask");
 
 			SearchableActivity.setLoading(true);
 			
@@ -1992,11 +1993,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){				
-					Log.e(TAG, "exception while updating user: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while updating user: " + ex);
 				} else {
 					if (ShowTweetListActivity.running)						
 						Toast.makeText(getBaseContext(), "Something went wrong while searching. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while searching: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while searching: " + ex);
 				}
 				return;
 			} else
@@ -2019,7 +2020,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 			SearchableActivity.setLoading(true);			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
-			Log.i(TAG,"search results: " + tweetList.size());
+			if (TwimightBaseActivity.D) Log.i(TAG,"search results: " + tweetList.size());
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
 				double i = 0;
@@ -2130,7 +2131,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<Number> doInBackground(Long... params) {
-			Log.d(TAG, "AsynchTask: UpdateFriendsTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateFriendsTask");
 			ShowUserListActivity.setLoading(true);
 			this.notify= params[0];
 			
@@ -2153,15 +2154,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading friends: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading friends: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
 					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Timeout while loading friends.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading friends: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading friends: " + ex);
 				}else {
 					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your friends. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading followers: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading followers: " + ex);
 				}
 				return;
 			}
@@ -2240,7 +2241,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	
 		@Override
 		protected Void doInBackground(List<User>... params) {
-			Log.i(TAG,"insert friends task");
+			if (TwimightBaseActivity.D) Log.i(TAG,"insert friends task");
 			ShowUserListActivity.setLoading(true);
 			
 			List<User> result = params[0];
@@ -2293,7 +2294,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		
 		@Override
 		protected List<Number> doInBackground(Long... params) {
-			Log.d(TAG, "AsynchTask: UpdateFollowersTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateFollowersTask");
 			ShowUserListActivity.setLoading(true);
 			this.notify= params[0];
 			
@@ -2316,15 +2317,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.RateLimit){				
-					Log.e(TAG, "exception while loading followers: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading followers: " + ex);
 				} else if(ex instanceof TwitterException.Timeout){
 					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Timeout while loading followers.", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading followers: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading followers: " + ex);
 				}else {
 					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong when loading your followers. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while loading followers: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading followers: " + ex);
 				}
 				return;
 			}
@@ -2512,7 +2513,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
 					if(hasMedia){
-						Log.d("upload", "upload media with reply");
+						if (TwimightBaseActivity.D) Log.d("upload", "upload media with reply");
 						BigInteger replyToId = BigInteger.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
 						tweet = twitter.updateStatusWithMedia(text, replyToId, new File(mediaUrl));
 					}
@@ -2521,7 +2522,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					}
 				} else {
 					if(hasMedia){
-						Log.d("upload", "upload media without reply");
+						if (TwimightBaseActivity.D) Log.d("upload", "upload media without reply");
 						tweet = twitter.updateStatusWithMedia(text, null, new File(mediaUrl));
 					}
 					else{
@@ -2547,15 +2548,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.w(TAG, "exception while posting tweet, Tweet already posted: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while posting tweet, Tweet already posted: " + ex);
 					// we stil clear the flag
 				} else if(ex instanceof TwitterException.Unexplained){
 					// we get unexplained exceptions if what twitter returns does not match what we have sent.
 					// this does not have to be an error, it happens if we post a url, for example.
-					Log.w(TAG, "unexplained exception while posting tweet (maybe it contained a url): " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "unexplained exception while posting tweet (maybe it contained a url): " + ex);
 					
 				} else if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while posting tweet: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while posting tweet: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2567,7 +2568,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while posting tweet: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while posting tweet: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2581,7 +2582,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				} else {
 					if (ShowTweetListActivity.running && notify == TRUE)						
 						Toast.makeText(getBaseContext(), "Something went wrong while posting your tweet. Please try again later!", Toast.LENGTH_SHORT).show();
-					Log.e(TAG, "exception while posting tweet: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
 				}
 			}			
@@ -2603,7 +2604,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			try{
 				getContentResolver().update(queryUri, cv, null, null);
 			} catch (Exception ex){
-				Log.e(TAG, "Exception while updating tweet in DB");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 			}
 			
 			if (ShowTweetListActivity.running)
@@ -2629,7 +2630,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected Integer doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: DestroyStatusTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: DestroyStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
@@ -2646,7 +2647,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure the tweet was found in the content provider
 				if(c.getCount() == 0){
-					Log.w(TAG, "DestroyStatusTask: Tweet not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "DestroyStatusTask: Tweet not found " + this.rowId);
 					ex = new Exception();
 					c.close();
 					return null;
@@ -2743,7 +2744,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected Integer doInBackground(Long... params) {
-			Log.d(TAG, "AsynchTask: DestroyStatusTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: DestroyStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = params[0];
 			this.attempts = params[1];
@@ -2760,7 +2761,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure the tweet was found in the content provider
 				if(c.getCount() == 0){
-					Log.w(TAG, "DestroyStatusTask: Msg not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "DestroyStatusTask: Msg not found " + this.rowId);
 					ex = new Exception();
 					c.close();
 					return null;
@@ -2768,13 +2769,13 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				c.moveToFirst();				
 			
 				twitter.destroyMessage(c.getLong(c.getColumnIndex(DirectMessages.COL_DMID)));
-				Log.i(TAG,"destroy executed");
+				if (TwimightBaseActivity.D) Log.i(TAG,"destroy executed");
 				result = 1;
 			} catch (TwitterException ex) {
 				this.ex = ex;
 			} finally {
 				if(c!=null) c.close();
-				Log.i(TAG,"cursor closed");
+				if (TwimightBaseActivity.D) Log.i(TAG,"cursor closed");
 			}
 
 			return result;
@@ -2788,17 +2789,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 			ShowTweetListActivity.setLoading(false);
 			Uri deleteUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS+"/"+ rowId);
-			Log.i(TAG,"on post ex");
+			if (TwimightBaseActivity.D) Log.i(TAG,"on post ex");
 			
 			// error handling
 			if(ex != null){
-				Log.i(TAG,"ex != null");
+				if (TwimightBaseActivity.D) Log.i(TAG,"ex != null");
 				if(ex instanceof TwitterException.Repetition){	
-					Log.i(TAG,"repetition");
+					if (TwimightBaseActivity.D) Log.i(TAG,"repetition");
 					getContentResolver().delete(deleteUri, null, null);
 					
 				} else if(ex instanceof TwitterException.E401){
-					Log.i(TAG,"TwitterException.E401");
+					if (TwimightBaseActivity.D) Log.i(TAG,"TwitterException.E401");
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2810,7 +2811,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.i(TAG,"Timeout");
+					if (TwimightBaseActivity.D) Log.i(TAG,"Timeout");
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2822,11 +2823,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				}else if (ex instanceof TwitterException.E404) {
-					Log.i(TAG,"E404");
+					if (TwimightBaseActivity.D) Log.i(TAG,"E404");
 					getContentResolver().delete(deleteUri, null, null);
 					
 				}else {
-					Log.i(TAG,"error");
+					if (TwimightBaseActivity.D) Log.i(TAG,"error");
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running && notify == TRUE)					
 						Toast.makeText(getBaseContext(), "Something went wrong while deleting. We will try again later!", Toast.LENGTH_LONG).show();
@@ -2836,7 +2837,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 		    // TODO: Move this to async task
 		    else {
-		    	Log.i(TAG,"else");			
+		    	if (TwimightBaseActivity.D) Log.i(TAG,"else");			
 				getContentResolver().delete(deleteUri, null, null);
 				if (ShowTweetListActivity.running && notify == TRUE)					
 						Toast.makeText(getBaseContext(), "Delete successful.", Toast.LENGTH_SHORT).show();
@@ -2862,7 +2863,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@SuppressWarnings("deprecation")
 		@Override
 		protected Integer doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: FavoriteStatusTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: FavoriteStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
@@ -2878,14 +2879,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure the Tweet was found in the content provider
 				if(c.getCount() == 0){
-					Log.w(TAG, "FavoriteStatusTask: Tweet not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "FavoriteStatusTask: Tweet not found " + this.rowId);
 					return null;
 				}
 				c.moveToFirst();
 
 				// making sure we have an official Tweet ID from Twitter
 				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
-					Log.w(TAG, "FavoriteStatusTask: Tweet has no ID! " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "FavoriteStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					return null;
 				}
@@ -2916,9 +2917,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.e(TAG, "exception while favoriting: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while favoriting: " + ex);
 				} else if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while favoriting tweet: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while favoriting tweet: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2930,7 +2931,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while favoriting tweet: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while favoriting tweet: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -2945,7 +2946,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while favoriting. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while favoriting: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while favoriting: " + ex);
 					return;
 				}
 			}
@@ -2965,7 +2966,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Favorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){
-				Log.e(TAG, "Exception while updating tweet in DB");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 			}
 		}
 
@@ -2987,7 +2988,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@SuppressWarnings("deprecation")
 		@Override
 		protected Integer doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: UnfavoriteStatusTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UnfavoriteStatusTask");
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
@@ -3003,7 +3004,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure the Tweet was found in the content provider
 				if(c.getCount() == 0){
-					Log.w(TAG, "UnfavoriteStatusTask: Tweet not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "UnfavoriteStatusTask: Tweet not found " + this.rowId);
 					c.close();
 					ex = new Exception();
 					return null;
@@ -3012,7 +3013,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure we have an official Tweet ID from Twitter
 				if(c.getColumnIndex(Tweets.COL_TID)<0 | c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
-					Log.w(TAG, "UnavoriteStatusTask: Tweet has no ID! " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "UnavoriteStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					ex = new Exception();
 					return null;
@@ -3042,9 +3043,9 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.w(TAG, "exception while favoriting: ", ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while favoriting: ", ex);
 				} else if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while unfavoriting: ", ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while unfavoriting: ", ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -3056,7 +3057,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while unfavoriting: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while unfavoriting: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -3071,7 +3072,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while unfavoriting. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while favoriting: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while favoriting: " + ex);
 					return;
 				}
 			}
@@ -3090,7 +3091,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Unfavorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){
-				Log.e(TAG, "Exception while updating tweet in DB");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 			}
 		}
 
@@ -3112,7 +3113,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@SuppressWarnings("deprecation")
 		@Override
 		protected Integer doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: RetweetStatusTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: RetweetStatusTask");
 
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
@@ -3128,7 +3129,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure the Tweet was found in the content provider
 				if(c.getCount() == 0){
-					Log.w(TAG, "RetweetStatusTask: Tweet not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "RetweetStatusTask: Tweet not found " + this.rowId);
 					c.close();
 					ex = new Exception();
 					return null;
@@ -3137,7 +3138,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				// making sure we have an official Tweet ID from Twitter
 				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
-					Log.w(TAG, "RetweetStatusTask: Tweet has no ID! " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "RetweetStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					ex = new Exception();
 					return null;
@@ -3166,10 +3167,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.w(TAG, "exception while retweeting: ", ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while retweeting: ", ex);
 					
 				} else if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while retweeting: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -3182,7 +3183,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					}
 					
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while retweeting: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while retweeting: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts,notify};
@@ -3197,7 +3198,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running && notify == TRUE)
 						Toast.makeText(getBaseContext(), "Something went wrong while retweeting. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while retweeting: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while retweeting: " + ex);
 					return;
 				}
 			} else {
@@ -3215,7 +3216,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Retweet successful.", Toast.LENGTH_LONG).show();
 				} catch(NullPointerException ex){
-					Log.e(TAG, "Exception while updating tweet in DB");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 				}
 			}
 			
@@ -3237,7 +3238,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected User doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: FollowUserTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: FollowUserTask");
 
 			ShowUserActivity.setLoading(true);
 			this.rowId = rowId[0];
@@ -3277,7 +3278,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while sending follow request: ", ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while sending follow request: ", ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3289,7 +3290,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while sending follow request: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while sending follow request: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3304,7 +3305,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					// an exception happended, we notify the user					
 					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending follow request. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while following: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while following: " + ex);
 					return;
 				}
 			} else {
@@ -3326,7 +3327,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					if (ShowTweetListActivity.running)
 							Toast.makeText(getBaseContext(), "Follow request sent.", Toast.LENGTH_LONG).show();
 				} catch(NullPointerException ex){
-					Log.e(TAG, "Exception while updating tweet in DB");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 				}
 				
 				getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
@@ -3350,7 +3351,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected User doInBackground(Long... rowId) {
 
-			Log.d(TAG, "AsynchTask: UnfollowUserTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UnfollowUserTask");
 
 			ShowUserListActivity.setLoading(true);
 			this.rowId = rowId[0];
@@ -3389,7 +3390,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while sending unfollow request: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while sending unfollow request: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3401,7 +3402,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while sending unfollow request: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while sending unfollow request: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3415,7 +3416,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				} else {
 					if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while sending the unfollow request. We will try again later!", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while unfollowing: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while unfollowing: " + ex);
 					return;
 				}
 			}
@@ -3437,7 +3438,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Unfollowed user.", Toast.LENGTH_LONG).show();
 			} catch(Exception ex){
-				Log.e(TAG, "Exception while updating tweet in DB");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while updating tweet in DB");
 			}
 			
 			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
@@ -3460,7 +3461,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected User doInBackground(Long... rowId) {
-			Log.i(TAG, "AsynchTask: UpdateUserTask");
+			if (TwimightBaseActivity.D) Log.i(TAG, "AsynchTask: UpdateUserTask");
 			ShowUserActivity.setLoading(true);
 			
 			this.rowId = rowId[0];
@@ -3474,7 +3475,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				c = getContentResolver().query(queryUri, null, null, null, null);
 
 				if(c.getCount() == 0){
-					Log.w(TAG, "UpdateUserTask: User not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "UpdateUserTask: User not found " + this.rowId);
 					c.close();
 					return null;
 				}
@@ -3491,7 +3492,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				}
 			} catch (TwitterException ex) {
 				this.ex=ex;
-				Log.e(TAG,"error",ex);
+				if (TwimightBaseActivity.D) Log.e(TAG,"error",ex);
 				
 			} finally {			
 				if(c!=null) c.close();
@@ -3510,7 +3511,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			if (ex!= null) {
 				
 				if(ex instanceof TwitterException.E401){
-					Log.w(TAG, "exception while updating user information: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while updating user information: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3520,7 +3521,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						return;
 					}
 				} else if(ex instanceof TwitterException.Timeout){
-					Log.w(TAG, "exception while updating user information: " + ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while updating user information: " + ex);
 					// try again?
 					if(attempts>0){
 						Long[] params = {rowId, --attempts};
@@ -3562,12 +3563,12 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			ShowUserActivity.setLoading(true);
 
 			ContentValues cv = params[0];
-			Log.i(TAG, "AsynchTask: InsertUserTask");
+			if (TwimightBaseActivity.D) Log.i(TAG, "AsynchTask: InsertUserTask");
 			try{
 				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsInteger("_id"));			
 				getContentResolver().update(queryUri, cv, null, null);
 			} catch(Exception ex){
-				Log.e(TAG, "Exception while inserting user update into DB");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while inserting user update into DB");
 			}
 
 			return null;
@@ -3598,7 +3599,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
-			Log.d(TAG, "AsynchTask: UpdateDMsInTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateDMsInTask");
 
 			ShowDMUsersListActivity.setLoading(true);
 			attempts = params[0];
@@ -3611,7 +3612,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 			try {
 				dms = twitter.getDirectMessages();
-				Log.i(TAG,"dms size: " + dms.size());
+				if (TwimightBaseActivity.D) Log.i(TAG,"dms size: " + dms.size());
 			} catch (Exception ex) {					
 				// save the expcetion for handling it in on post execute
 				this.ex = ex;
@@ -3629,17 +3630,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			if(ex != null){
 				// an exception happended, we try again or notify the user
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading incoming DMs: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading incoming DMs: " + ex);
 					return;
 				} else {
 					if(attempts>0) {
-						Log.w(TAG, "Exception, attempt " + attempts);
+						if (TwimightBaseActivity.D) Log.w(TAG, "Exception, attempt " + attempts);
 						(new UpdateDMsOutTask()).execute(--attempts);
 						return;
 					} else {
 						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
-						Log.e(TAG, "exception while loading incoming DMs: " + ex);
+						if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading incoming DMs: " + ex);
 						return;
 					}
 				}
@@ -3710,7 +3711,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
 
-			Log.d(TAG, "AsynchTask: UpdateDMsOutTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: UpdateDMsOutTask");
 			ShowDMUsersListActivity.setLoading(true);
 
 			attempts = params[0];
@@ -3739,17 +3740,17 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			if(ex != null){
 				// an exception happended, we try again or notify the user
 				if(ex instanceof TwitterException.RateLimit){					
-					Log.e(TAG, "exception while loading outgoing DMs: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading outgoing DMs: " + ex);
 					return;
 				} else {
 					if(attempts>0) {
-						Log.w(TAG, "Exception, attempt " + attempts);
+						if (TwimightBaseActivity.D) Log.w(TAG, "Exception, attempt " + attempts);
 						(new UpdateDMsOutTask()).execute(--attempts);
 						return;
 					} else {
 						if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Something went wrong while loading your direct messages. Please try again later!", Toast.LENGTH_LONG).show();
-						Log.e(TAG, "exception while loading outgoing DMs: " + ex);
+						if (TwimightBaseActivity.D) Log.e(TAG, "exception while loading outgoing DMs: " + ex);
 						return;
 					}
 				}
@@ -3822,7 +3823,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected winterwell.jtwitter.Message doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: SendMessageTask");
+			if (TwimightBaseActivity.D) Log.d(TAG, "AsynchTask: SendMessageTask");
 			this.rowId = rowId[0];
 			notify = rowId[1];
 			
@@ -3835,7 +3836,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				c = getContentResolver().query(queryUri, null, null, null, null);
 
 				if(c.getCount() == 0){
-					Log.w(TAG, "SendMessageTask: Message not found " + this.rowId);
+					if (TwimightBaseActivity.D) Log.w(TAG, "SendMessageTask: Message not found " + this.rowId);
 					return null;
 				}
 				c.moveToFirst();
@@ -3845,7 +3846,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				text = c.getString(c.getColumnIndex(DirectMessages.COL_TEXT));
 				rec = c.getString(c.getColumnIndex(DirectMessages.COL_RECEIVER_SCREENNAME));
-				Log.d(TAG, "sending: " + text + " to " + rec);
+				if (TwimightBaseActivity.D) Log.d(TAG, "sending: " + text + " to " + rec);
 				msg = twitter.sendMessage(rec, text);
 
 			} catch(Exception ex) { 
@@ -3867,14 +3868,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.Repetition){					
-					Log.w(TAG, "exception while sending DM: ", ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "exception while sending DM: ", ex);
 					getContentResolver().delete(queryUri, null, null);
-					Log.w(TAG, "Error: "+ex);
+					if (TwimightBaseActivity.D) Log.w(TAG, "Error: "+ex);
 					return;
 				}  else if (ex instanceof TwitterException.E403) {
 					if (ShowUserActivity.running || ShowDMUsersListActivity.running && notify==1)
 						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you ?", Toast.LENGTH_LONG).show();
-					Log.e(TAG, "exception while sending DM: " + ex);
+					if (TwimightBaseActivity.D) Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
 					i.putExtra("recipient", rec);
 					i.putExtra("text", text);

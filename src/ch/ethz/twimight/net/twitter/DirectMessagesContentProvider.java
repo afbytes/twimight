@@ -32,6 +32,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowDMListActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -135,13 +136,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		switch(dmUriMatcher.match(uri)){
 			
 			case DMS: 
-				Log.d(TAG, "Query DMS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query DMS");
 				c = database.query(DBOpenHelper.TABLE_DMS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				break;
 
 			case DM_ID: 
-				Log.d(TAG, "Query DM_ID");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query DM_ID");
 				sql = "SELECT  * "
 					+ "FROM "+DBOpenHelper.TABLE_DMS + " "
 					+ "WHERE " + DBOpenHelper.TABLE_DMS+ "._id=" + uri.getLastPathSegment() + ";";
@@ -150,7 +151,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 						
 			case USER:
-				Log.d(TAG, "Query USER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USER");
 				// get the twitter user id
 				sql = "SELECT "+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID + " "
 				+ "FROM "+ DBOpenHelper.TABLE_USERS+" "
@@ -188,7 +189,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				
 				break;
 			case USERS: 
-				Log.d(TAG, "Query USERS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS");
 				// selects the last DM of which the given user is either a sender or recepient
 				String subQuery1 = "SELECT " + DirectMessages.COL_TEXT + " " 
 					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
@@ -221,7 +222,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID + " "
 					+ "ORDER BY created DESC LIMIT 100;";
 				
-					Log.e(TAG, sql);
+					if (TwimightBaseActivity.D) Log.e(TAG, sql);
 				
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
@@ -238,7 +239,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 			case LIST_DISASTER:
 				
-				Log.i(TAG, "Query DMS Disaster");
+				if (TwimightBaseActivity.D) Log.i(TAG, "Query DMS Disaster");
 				c = database.query(DBOpenHelper.TABLE_DMS, projection,DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_MYDISASTER + "!=0"
 						+ " OR " + DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_DISASTER_OTHERS + "!=0", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
@@ -266,7 +267,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		
 		switch(dmUriMatcher.match(uri)){
 			case LIST_NORMAL:
-				Log.d(TAG, "Insert LIST_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Insert LIST_NORMAL");
 				/*
 				 *  First, we check if we already have a direct messages with the same disaster ID.
 				 *  If yes, two cases are possible
@@ -309,7 +310,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				break;
 				
 			case LIST_DISASTER:
-				Log.d(TAG, "Insert LIST_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Insert LIST_DISASTER");
 				// in disaster mode, we set the is disaster flag, encrypt and sign the message 
 				//and sign the tweet (if we have a certificate for our key pair)
 				values.put(DirectMessages.COL_ISDISASTER, 1);
@@ -350,7 +351,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 						values.put(DirectMessages.COL_CRYPTEXT,text );	
 						/*if (twitterId != null) {
 							String cipherText = km.encrypt(text,twitterId );
-							Log.i(TAG, "ciphertext: " + cipherText );
+							if (TwimightBaseActivity.D) Log.i(TAG, "ciphertext: " + cipherText );
 							if (cipherText != null) {								
 								values.put(DirectMessages.COL_CRYPTEXT,cipherText );															
 								
@@ -405,7 +406,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 
-		Log.d(TAG, "Update DM_ID");
+		if (TwimightBaseActivity.D) Log.d(TAG, "Update DM_ID");
 		
 		int nrRows = database.update(DBOpenHelper.TABLE_DMS, values, "_id="+uri.getLastPathSegment() , null);
 		if(nrRows >= 0){
@@ -433,7 +434,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
 		if(dmUriMatcher.match(uri) != DM_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
-		Log.d(TAG, "Delete DM_ID");
+		if (TwimightBaseActivity.D) Log.d(TAG, "Delete DM_ID");
 		
 		int nrRows = database.delete(DBOpenHelper.TABLE_DMS, "_id="+uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
@@ -496,22 +497,22 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		int bufferFlags = cv.getAsInteger(DirectMessages.COL_BUFFER);
 		
 		if((bufferFlags & DirectMessages.BUFFER_MESSAGES) != 0){
-			Log.d(TAG, "purging local direct messages buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "purging local direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_MESSAGES, Constants.MESSAGES_BUFFER_SIZE);
 		}
 			
 		if((bufferFlags & DirectMessages.BUFFER_DISASTER_OTHERS) != 0){
-			Log.d(TAG, "purging relay direct messages buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "purging relay direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_DISASTER_OTHERS, Constants.DISASTERDM_BUFFER_SIZE);
 		}
 		
 		if((bufferFlags & DirectMessages.BUFFER_DISASTER_ME) != 0){
-			Log.d(TAG, "purging relay direct messages buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "purging relay direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_DISASTER_ME, Constants.DISASTERDM_BUFFER_SIZE);
 		}
 
 		if((bufferFlags & DirectMessages.BUFFER_MYDISASTER) != 0){
-			Log.d(TAG, "purging local direct messages buffer");
+			if (TwimightBaseActivity.D) Log.d(TAG, "purging local direct messages buffer");
 			purgeBuffer(DirectMessages.BUFFER_MYDISASTER, Constants.MYDISASTERDM_BUFFER_SIZE);
 		}
 		
@@ -597,7 +598,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
 						// notify user
 						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
-						Log.i(TAG,"notifying");
+						if (TwimightBaseActivity.D) Log.i(TAG,"notifying");
 					}
 				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
@@ -628,7 +629,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Creates and triggers the status bar notifications
 	 */
 	private void notifyUser(int type, String tickerText){
-		Log.i(TAG,"notify dm");
+		if (TwimightBaseActivity.D) Log.i(TAG,"notify dm");
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();

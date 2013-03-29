@@ -25,6 +25,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 
 /**
@@ -84,7 +85,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException
     {
-    	Log.d(TAG," inside openFile");
+    	if (TwimightBaseActivity.D) Log.d(TAG," inside openFile");
     	// only support read only files
         if ("r".equals(mode.toLowerCase())) {
         	return openFileHelper(uri, mode);       
@@ -117,21 +118,21 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		Cursor c = null;
 		switch(twitterusersUriMatcher.match(uri)){
 			case USERS: 
-				Log.d(TAG, "Query USERS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 
 			
 			case USERS_ID: 
-				//Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
+				//if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id="+uri.getLastPathSegment(), whereArgs, null, null, sortOrder);
 				//c.setNotificationUri(getContext().getContentResolver(),uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 				break;
 			
 			case USERS_FOLLOWERS:
-				Log.d(TAG, "Query USERS_FOLLOWERS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS_FOLLOWERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
 				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
@@ -143,9 +144,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			
 				break;
 			case USERS_FRIENDS:
-				Log.i(TAG, "Query USERS_FRIENDS");
+				if (TwimightBaseActivity.D) Log.i(TAG, "Query USERS_FRIENDS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
-				Log.i(TAG,"cursor count: "+ c.getCount());
+				if (TwimightBaseActivity.D) Log.i(TAG,"cursor count: "+ c.getCount());
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				// start synch service with a synch friends request
@@ -155,13 +156,13 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				
 				break;
 			case USERS_DISASTER:
-				Log.d(TAG, "Query USERS_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS_DISASTER");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISDISASTER_PEER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
 				break;
 				
 			case USERS_SEARCH:
-				Log.d(TAG, "Query USERS_SEARCH");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query USERS_SEARCH");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" IS NOT NULL" 
 						+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' OR " + TwitterUsers.COL_NAME + " LIKE '%" + where + "%' " , whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
@@ -221,7 +222,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			if(values.containsKey(TwitterUsers.COL_FLAGS) && ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) >0)){
 				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
 					values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS) & (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
-					Log.d(TAG, "we already have profile picture, deleting flag");
+					if (TwimightBaseActivity.D) Log.d(TAG, "we already have profile picture, deleting flag");
 				} 
 			}
 			Uri updateUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"

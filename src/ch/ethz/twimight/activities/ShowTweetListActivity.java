@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -178,7 +178,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		public void run() {
 
 			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
-				Log.i(TAG,"writing log");
+				
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
@@ -215,7 +215,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		} else if(intent.hasExtra("login")){
 			
 			intent.removeExtra("login");
-			//AppRater.app_launched(this);
+	//		AppRater.app_launched(this);
 			setFilter(SHOW_TIMELINE);
 		
 
@@ -445,7 +445,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	  savedInstanceState.putInt("positionIndex", positionIndex);
 	  savedInstanceState.putInt("positionTop", positionTop);
 	  
-	  Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+	
 	  
 	  super.onSaveInstanceState(savedInstanceState);
 	}
@@ -461,7 +461,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	  positionIndex = savedInstanceState.getInt("positionIndex");
 	  positionTop = savedInstanceState.getInt("positionTop");
 	  
-	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	 
 	}
 	
 	

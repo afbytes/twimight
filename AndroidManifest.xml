@@ -6,15 +6,16 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="6" android:versionName="0.9.3 preview">
+	package="ch.ethz.twimight" android:versionCode="7" android:versionName="0.9.3 preview">
 	<uses-sdk android:minSdkVersion="10"/>
+	
 	<permission android:description="@string/permDescription"
 		android:label="Access to Twimight content providers" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
 		android:protectionLevel="dangerous" />
 	
 
 	<application android:icon="@drawable/ic_launcher_twimight"
-		android:label="@string/app_name" android:debuggable="true"
+		android:label="@string/app_name" android:debuggable="false"
 		android:theme="@style/Twimight" android:hardwareAccelerated="true">
 		
 	    <activity android:name=".activities.ConditionsActivity"
@@ -90,15 +91,16 @@
 			<meta-data android:name="android.app.default_searchable"
 				android:value=".activities.SearchableActivity" />
 		</activity>
+		
 		<activity android:name=".activities.NewTweetActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
-		<activity android:name=".activities.FeedbackActivity"
-			android:label="Twimight" android:theme="@style/Theme.Transparent"
-			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
+		
+		
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />
+		
 		<activity android:name=".activities.PrefsActivity"
 			android:label="Settings" android:theme="@android:style/Theme.Black" />
 		<activity android:name=".activities.AboutActivity"

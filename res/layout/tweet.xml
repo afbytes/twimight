@@ -5,11 +5,13 @@
         at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo
         Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann
         - Message specification -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:background="@color/tweet_background"
-        android:padding="5dp" android:id="@+id/showNewTweetRoot">
+    android:id="@+id/showNewTweetRoot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/twimightBackgroundLight"
+    android:orientation="vertical"
+    android:padding="5dp" >
 
         <EditText android:id="@+id/tweetText" android:layout_width="260dp"
                 android:layout_height="100dp" android:layout_gravity="top"
@@ -19,68 +21,105 @@
                 android:layout_width="260dp" android:layout_height="wrap_content"
                 android:layout_gravity="right">
 			                
-                <ImageButton android:id="@+id/tweet_location"
-				    android:src="@drawable/ic_menu_mylocation"
-					android:layout_marginTop="5dp" 
-					android:layout_width="50dp" android:layout_height="45dp"
-					android:contentDescription="Location"/>
+                <ImageButton
+                    android:id="@+id/tweet_location"
+                    android:layout_width="50dp"
+                    android:layout_height="45dp"
+                    android:layout_margin="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/button_custom"
+                    android:contentDescription="Location"
+                    android:src="@drawable/ic_menu_mylocation" />
                 
-                <ImageButton android:id="@+id/tweet_photo"
-				    android:src="@drawable/ic_menu_gallery"
-					android:layout_marginTop="5dp" 
-					android:layout_width="50dp" android:layout_height="45dp"
-					android:contentDescription="Photo"/>
+                <ImageButton
+                    android:id="@+id/tweet_photo"
+                    android:layout_width="50dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/button_custom"
+                    android:contentDescription="Photo"
+                    android:src="@drawable/ic_menu_gallery_on" />
                 
-                <TextView android:id="@+id/tweet_characters"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_gravity="right" android:text="140" android:textColor="@color/text"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:paddingLeft="80dp" />
+                <TextView
+                    android:id="@+id/tweet_characters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"
+                    android:paddingLeft="80dp"
+                    android:text="140"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/twimightTextDark" />
 
         </LinearLayout>
                 
-		<LinearLayout android:id="@+id/linearLayout_photo_view"
-                android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="center"
-                android:orientation="horizontal" android:layout_marginTop="5dp">
+		<LinearLayout
+		    android:id="@+id/linearLayout_photo_view"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="10dp"
+		    android:gravity="center"
+		    android:orientation="horizontal" >
    			
 		    <ImageButton
-			    android:id="@+id/upload_from_gallery"
-			    android:src="@drawable/ic_menu_slideshow"
-			    android:layout_marginLeft="15dp" 
-			    android:layout_width="50dp" android:layout_height="45dp" />
+		        android:id="@+id/upload_from_gallery"
+		        android:layout_width="50dp"
+		        android:layout_height="45dp"
+		        android:layout_marginLeft="15dp"
+		        android:background="@drawable/button_custom"
+		        android:src="@drawable/ic_menu_slideshow_off" />
+
 		    <ImageButton
-			    android:id="@+id/upload_from_camera"
-			    android:layout_marginLeft="15dp" 
-			    android:src="@drawable/ic_camera"
-			    android:layout_width="50dp" android:layout_height="45dp" />
+		        android:id="@+id/upload_from_camera"
+		        android:layout_width="50dp"
+		        android:layout_height="45dp"
+		        android:layout_marginLeft="15dp"
+		        android:background="@drawable/button_custom"
+		        android:src="@drawable/ic_camera_off" />
 		   
 		    <ImageButton
-			    android:id="@+id/preview_photo"
-			    android:layout_marginLeft="15dp" 
-			    android:src="@drawable/ic_menu_zoom"
-			    android:layout_width="50dp" android:layout_height="45dp" />
+		        android:id="@+id/preview_photo"
+		        android:layout_width="50dp"
+		        android:layout_height="45dp"
+		        android:layout_marginLeft="15dp"
+		        android:background="@drawable/button_custom"
+		        android:src="@drawable/ic_menu_zoom_off" />
 		    
 		    <ImageButton
-			    android:id="@+id/delete_photo"
-			    android:layout_marginLeft="15dp" 
-			    android:layout_marginRight="15dp" 
-			    android:src="@drawable/ic_menu_delete"
-			    android:layout_width="50dp" android:layout_height="45dp" />    
+		        android:id="@+id/delete_photo"
+		        android:layout_width="50dp"
+		        android:layout_height="45dp"
+		        android:layout_marginLeft="15dp"
+		        android:layout_marginRight="15dp"
+		        android:background="@drawable/button_custom"
+		        android:src="@drawable/ic_menu_delete_off" />
 		    
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:gravity="center" >
 
-        
-        <LinearLayout android:id="@+id/linearLayout2"
-                android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/tweet_send"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginRight="20dp"
+                    android:paddingLeft="5dp"
+                    android:text="Tweet" />
 
-                <Button android:id="@+id/tweet_send" android:layout_width="120dp"
-                        android:paddingLeft="5dp" android:layout_height="wrap_content"
-                        android:text="Tweet" android:layout_gravity="left" />
-
-                <Button android:id="@+id/tweet_cancel" android:layout_width="120dp"
-                        android:layout_height="wrap_content" android:text="Cancel"
-                        android:layout_gravity="right" />
+                <Button
+                    android:id="@+id/tweet_cancel"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="Cancel" />
 
         </LinearLayout>
 

@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -153,7 +152,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	  savedInstanceState.putInt("positionIndex", positionIndex);
 	  savedInstanceState.putInt("positionTop", positionTop);
 	  
-	  Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+	
 	  
 	  super.onSaveInstanceState(savedInstanceState);
 	}
@@ -168,6 +167,6 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	  positionIndex = savedInstanceState.getInt("positionIndex");
 	  positionTop = savedInstanceState.getInt("positionTop");
 	  
-	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	 
 	}
 }

@@ -31,7 +31,8 @@ import ch.ethz.twimight.R;
 public class TwimightBaseActivity extends Activity{
 	
 	static TwimightBaseActivity instance;
-	private static final String TAG = "TwimightBaseActivity";	
+	private static final String TAG = "TwimightBaseActivity";
+	public static final boolean D = false;
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;

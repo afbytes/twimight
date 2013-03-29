@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -66,8 +65,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
 		c = getContentResolver().query(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_USERS), null, null, null, null);
 		
-		Log.e(TAG, "Users: " +c.getCount());
-		
+				
 		adapter = new DMUserAdapter(this, c);		
 		dmUsersListView.setAdapter(adapter);
 		dmUsersListView.setEmptyView(findViewById(R.id.dmListEmpty));
@@ -151,9 +149,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	  positionTop = (v == null) ? 0 : v.getTop();
 	  savedInstanceState.putInt("positionIndex", positionIndex);
 	  savedInstanceState.putInt("positionTop", positionTop);
-	  
-	  Log.i(TAG, "saving" + positionIndex + " " + positionTop);
-	  
+	 
 	  super.onSaveInstanceState(savedInstanceState);
 	}
 	
@@ -167,7 +163,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	  positionIndex = savedInstanceState.getInt("positionIndex");
 	  positionTop = savedInstanceState.getInt("positionTop");
 	  
-	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+	 
 	}
 	
 }

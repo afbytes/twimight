@@ -22,7 +22,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.text.Html;
 import android.text.format.DateUtils;
-import android.util.Log;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -101,7 +101,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
                             } else
                                     picture.setImageResource(R.drawable.default_profile);
                     } catch (Exception e) {
-                            Log.e(TAG,"error opening input stream",e);
+                          
                             picture.setImageResource(R.drawable.default_profile);
                     }                              
 

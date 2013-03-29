@@ -14,7 +14,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
+
 
 
 public class SDCardHelper {
@@ -60,7 +60,7 @@ public class SDCardHelper {
 				SDcardPath = Environment.getExternalStoragePublicDirectory(path);
 				SDcardPath.mkdirs();
 			}
-			Log.d(TAG, "sdcard storage check success");
+			
 			return true;
 		}
 		else if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
@@ -71,7 +71,7 @@ public class SDCardHelper {
 			isSDAvail = false;
 			isSDWritable = false;
 		}
-		Log.d("check", "check fail");
+	
 		return false;
 	}
 
@@ -101,16 +101,16 @@ public class SDCardHelper {
 			fosto.close();
 			copyResult = true;
 		} catch (Exception e) {
-			Log.i(TAG, "file io error");
+			
 		}
-		Log.i(TAG, "file copy finished");
+		
 		return copyResult;
 	}
 	
 	public void deleteFile(String delFilePath){
 		File delFile = new File(delFilePath);
 		delFile.delete();
-		Log.i(TAG, "delete file finished");
+		
 	}
 	
 	/**

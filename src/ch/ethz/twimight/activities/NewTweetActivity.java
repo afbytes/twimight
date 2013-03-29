@@ -43,7 +43,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
@@ -70,7 +69,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private long isReplyTo;
 	
 	// the following are all to deal with location
-	private ImageButton locationButton;
+	
 	private Location loc;
 	private LocationManager lm;
 	private LocationListener locationListener;
@@ -93,6 +92,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private ImageButton deletePhoto;
 	private ImageButton previewPhoto;
 	private ImageButton photoButton;
+	private ImageButton locationButton;
 	private Bitmap photo = null;
 	private LinearLayout photoLayout;
 	
@@ -220,10 +220,12 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// User settings: do we use location or not?
+		
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
 		
 		locationButton = (ImageButton) findViewById(R.id.tweet_location);
 		locationChecked = false;
+		
 		if(useLocation){
 			locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
 			locationChecked = true;
@@ -299,11 +301,11 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			public void onClick(View v) {
 				if(photoLayout.getVisibility() == View.GONE){
 					photoLayout.setVisibility(View.VISIBLE);
-					photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
+					//photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
 				}
 				else{
 					photoLayout.setVisibility(View.GONE);
-					photoButton.setImageResource(R.drawable.ic_menu_gallery);
+					//photoButton.setImageResource(R.drawable.ic_menu_gallery);
 				}
 			}
 		});
@@ -316,7 +318,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		}
 		else setButtonStatus(false,false);
 
-		Log.v(TAG, "onCreated");
+		if (D) Log.v(TAG, "onCreated");
 	}
 
 	/**
@@ -326,23 +328,30 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	 * @param statusDelete
 	 */
 	private void setButtonStatus(boolean statusUpload, boolean statusDelete){
+		
 		uploadFromGallery.setEnabled(statusUpload);
 		uploadFromCamera.setEnabled(statusUpload);
 		deletePhoto.setEnabled(statusDelete);
 		previewPhoto.setEnabled(statusDelete);
+		/*
 		if(statusUpload){
-			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow);
+			//uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow);
 			uploadFromCamera.setImageResource(R.drawable.ic_camera);
 		}else{
-			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow_off);
+			//uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow_off);
 			uploadFromCamera.setImageResource(R.drawable.ic_camera_off);
 		}
+		*/
 		if(statusDelete){
-			deletePhoto.setImageResource(R.drawable.ic_menu_delete);
-			previewPhoto.setImageResource(R.drawable.ic_menu_zoom);
+			//deletePhoto.setImageResource(R.drawable.ic_menu_delete);
+			deletePhoto.setEnabled(true);
+			previewPhoto.setEnabled(true);
+			//previewPhoto.setImageResource(R.drawable.ic_menu_zoom);
 		}else{
-			deletePhoto.setImageResource(R.drawable.ic_menu_delete_off);
-			previewPhoto.setImageResource(R.drawable.ic_menu_zoom_off);
+			deletePhoto.setEnabled(false);
+			previewPhoto.setEnabled(false);
+			//deletePhoto.setImageResource(R.drawable.ic_menu_delete_off);
+			//previewPhoto.setImageResource(R.drawable.ic_menu_zoom_off);
 		}
 	}
 	
@@ -372,7 +381,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		Log.d(TAG, "onDestroy");
+		if (D) Log.d(TAG, "onDestroy");
 		if(hasMedia){
 			sdCardHelper.deleteFile(tmpPhotoUri.getPath());
 			hasMedia = false;
@@ -416,10 +425,10 @@ public class NewTweetActivity extends TwimightBaseActivity{
 
 			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
 
-				Log.i(TAG,"writing log");
+				if (D) Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
-				Log.i(TAG, String.valueOf(hasMedia));
+				if (D) Log.i(TAG, String.valueOf(hasMedia));
 			}
 			if(hasMedia){
 				try {
@@ -427,16 +436,16 @@ public class NewTweetActivity extends TwimightBaseActivity{
 					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));//photoFileParent, photoFilename));
 					String fromFile = tmpPhotoUri.getPath();
 					String toFile = photoUri.getPath();
-					Log.i(TAG, fromFile);
-					Log.i(TAG, toFile);
+					if (D) Log.i(TAG, fromFile);
+					if (D) Log.i(TAG, toFile);
 					if(sdCardHelper.copyFile(fromFile, toFile)){
 
-						Log.i(TAG, "file copy successful");
+						if (D) Log.i(TAG, "file copy successful");
 
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					Log.d("photo", "exception!!!!!");
+					if (D) Log.d("photo", "exception!!!!!");
 					e.printStackTrace();
 				}
 			}
@@ -516,7 +525,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		//if there is a photo, put the path of photo in the cv
 		if (hasMedia){
 			tweetContentValues.put(Tweets.COL_MEDIA, finalPhotoName);
-			Log.i(TAG, Tweets.COL_MEDIA + ":" + finalPhotoName);
+			if (D) Log.i(TAG, Tweets.COL_MEDIA + ":" + finalPhotoName);
 		}
 		
 		return tweetContentValues;
@@ -532,7 +541,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 200, locationListener);
 			}
 		} catch(Exception e) {
-			Log.i(TAG,"Can't request location Updates: " + e.toString());
+			if (D) Log.i(TAG,"Can't request location Updates: " + e.toString());
 			return;
 		}
 	}
@@ -544,10 +553,10 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		try{
 			if ((lm != null) && (locationListener != null)) {
 		        lm.removeUpdates(locationListener);
-		        Log.i(TAG, "unregistered updates");
+		        if (D) Log.i(TAG, "unregistered updates");
 		    }
 		} catch(Exception e) {
-			Log.i(TAG,"Can't unregister location listener: " + e.toString());
+			if (D) Log.i(TAG,"Can't unregister location listener: " + e.toString());
 			return;
 		}
 	}
@@ -592,7 +601,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			}
 		}
 		else{
-			Log.i(TAG, "path for storing photos cannot be created!");
+			if (D) Log.i(TAG, "path for storing photos cannot be created!");
 			setButtonStatus(false, false);
 		}
 		
@@ -609,7 +618,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
 		}
 		else{
-			Log.i(TAG, "path for storing photos cannot be created!");
+			if (D) Log.i(TAG, "path for storing photos cannot be created!");
 			setButtonStatus(false, false);
 		}
 		

@@ -3,8 +3,6 @@ package ch.ethz.twimight.net.twitter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -18,8 +16,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
+
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.util.InternalStorageHelper;
 
@@ -94,7 +91,7 @@ public class PicturesIntentService extends IntentService {
 				Uri queryUri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS+"/"+cv.getAsLong("_id"));			
 				getContentResolver().update(queryUri, cv, null, null);
 			} catch(IllegalArgumentException ex){
-				Log.e(TAG, "Exception while inserting profile image into DB",ex);
+				
 				
 			}
 		} else 				

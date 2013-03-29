@@ -24,6 +24,7 @@ import org.spongycastle.jce.provider.X509CertificateObject;
 
 import android.content.Context;
 import android.util.Log;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.RevocationListEntry;
 import ch.ethz.twimight.util.Constants;
@@ -136,7 +137,7 @@ public class TDSResponseMessage {
 		if(!hasAuthenticationObject()) return null;
 		
 		String twitterId = authenticationObject.getString("twitter_id");
-		Log.i(TAG,"showing twitter id inside response");
+		if (TwimightBaseActivity.D) Log.i(TAG,"showing twitter id inside response");
 		return twitterId;
 		
 	}
@@ -151,7 +152,7 @@ public class TDSResponseMessage {
 		// check status code
 		int statusCode = locationObject.getInt("status");
 		if(statusCode != 200){
-			Log.e(TAG, "TDS returned location status error code " + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned location status error code " + statusCode);
 		} 
 		return statusCode;
 	}
@@ -165,22 +166,22 @@ public class TDSResponseMessage {
 
 		int statusCode = bluetoothObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned bluetooth status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned bluetooth status error code" + statusCode);
 			return null;
 		}
 		
-		Log.d(TAG, "Bluetooth object status ok");
+		if (TwimightBaseActivity.D) Log.d(TAG, "Bluetooth object status ok");
 		List<String> macList = new ArrayList<String>();
 		JSONArray macs = bluetoothObject.getJSONArray("list");
 		
 		if(macs!= null){
 			for(int i = 0 ; i < macs.length(); i++){
-				Log.d(TAG, "macs length: " + macs.length() + " " + i);
-				Log.d(TAG, "MAC: " + macs.getString(i));
+				if (TwimightBaseActivity.D) Log.d(TAG, "macs length: " + macs.length() + " " + i);
+				if (TwimightBaseActivity.D) Log.d(TAG, "MAC: " + macs.getString(i));
 				macList.add(macs.getString(i));
 			}
 		}
-		Log.i(TAG, "macs done ");
+		if (TwimightBaseActivity.D) Log.i(TAG, "macs done ");
 
 		return macList;
 	}
@@ -196,7 +197,7 @@ public class TDSResponseMessage {
 		
 		int statusCode =certificateObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned certificate status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned certificate status error code" + statusCode);
 			return null;
 		}
 
@@ -234,7 +235,7 @@ public class TDSResponseMessage {
 
 		int statusCode = revocationObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned revocation status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned revocation status error code" + statusCode);
 			return null;
 		}
 		
@@ -263,7 +264,7 @@ public class TDSResponseMessage {
 
 		int statusCode = revocationObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned revocation status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned revocation status error code" + statusCode);
 			return 0;
 		}
 		return revocationObject.getInt("version");
@@ -277,10 +278,10 @@ public class TDSResponseMessage {
 	public List<TDSPublicKey> parseFollower() throws JSONException{
 		if(!hasFollowerObject()) return null;
 
-		Log.d(TAG,"reading followers");
+		if (TwimightBaseActivity.D) Log.d(TAG,"reading followers");
 		int statusCode = followerObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned follower status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned follower status error code" + statusCode);
 			return null;
 		}
 
@@ -290,7 +291,7 @@ public class TDSResponseMessage {
 			keyList = new ArrayList<TDSPublicKey>();
 			JSONArray entries = followerObject.getJSONArray("update");
 			
-			Log.i(TAG, "reading update");
+			if (TwimightBaseActivity.D) Log.i(TAG, "reading update");
 			
 			if(entries!= null){
 				for(int i = 0 ; i < entries.length(); i++){
@@ -318,7 +319,7 @@ public class TDSResponseMessage {
 
 		int statusCode = followerObject.getInt("status"); 
 		if(statusCode != 200) {
-			Log.e(TAG, "TDS returned follower status error code" + statusCode);
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned follower status error code" + statusCode);
 			return 0;
 		}
 		

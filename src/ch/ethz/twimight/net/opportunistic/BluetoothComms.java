@@ -41,7 +41,7 @@ import ch.ethz.twimight.util.Constants;
 public class BluetoothComms{
     // Debugging
     private static final String TAG = "BluetoothComms";
-    private static final boolean D = true;
+    private static final boolean D = false;
 
     // Name for the SDP record when creating server socket
     private static final String NAME_INSECURE = "BluetoothComms";

@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import ch.ethz.twimight.R;
@@ -79,7 +78,7 @@ public class PrefsActivity extends PreferenceActivity{
 					// toggle TDS communication
 					if(preferences.getBoolean("prefTDSCommunication",	Constants.TDS_DEFAULT_ON) == true){
 						//new TDSAlarm(getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
-						Log.i(TAG, "start TDS communication");
+						
 					} else {
 						//stopService(new Intent(getApplicationContext(), TDSService.class));
 						//TDSAlarm.stopTDSCommuniction(getApplicationContext());						
@@ -99,7 +98,6 @@ public class PrefsActivity extends PreferenceActivity{
 					}
 				} else if (key.equals("prefUpdateInterval")) {					
 					Constants.UPDATER_UPDATE_PERIOD = Long.parseLong(preferences.getString("prefUpdateInterval", "5") ) * 60 * 1000L;
-					Log.i(TAG, "new update interval: " + Constants.UPDATER_UPDATE_PERIOD );
 					
 					//start the twitter update alarm
 					if(PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
@@ -158,9 +156,7 @@ public class PrefsActivity extends PreferenceActivity{
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
-		case REQUEST_DISCOVERABLE:
-			Log.d(TAG,"resultcode = " + resultCode); 
-			
+		case REQUEST_DISCOVERABLE:			
 			new ScanningAlarm(getApplicationContext(),0,true);
 			finish();
 			

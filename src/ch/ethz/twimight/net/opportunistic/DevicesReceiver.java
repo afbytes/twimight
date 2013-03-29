@@ -12,7 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
+
 import ch.ethz.twimight.data.MacsDBHelper;
 
 public class DevicesReceiver extends BroadcastReceiver {
@@ -73,7 +73,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 			// Get the BluetoothDevice object from the Intent
 			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);    
 			
-			Log.i(TAG, "found a new device:" + device.getAddress().toString());
+		
 			newDeviceList.add(device.getAddress().toString());
 			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART &&
 					device.getBondState() != BluetoothDevice.BOND_BONDED) {
@@ -123,7 +123,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 				dp = (float)oldProb * (float)0.5* ( (float)newDevice/(float)(newDeviceList.size()) + (1 - (float)oldDevice/(float)(oldDeviceList.size())));
 			}
 			
-			Log.i(TAG, "delta p is:" + String.valueOf(dp));
+		
 			oldProb = Math.min(oldProb + dp, MAX_PROB);
 			
 		}
@@ -140,7 +140,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 	//set scan info(device list and probability) to current scan
 	public void setScanInfo(float probability, ArrayList<String> deviceList) {
 
-		Log.i(TAG,"set scan probability to:" + String.valueOf(probability));
+	
 		
 		SharedPreferences.Editor prefEditor = sharedPref.edit();
 		prefEditor.putFloat(SCAN_PROBABILITY, probability);
@@ -155,7 +155,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 		    }
 		    
 		}
-		Log.i(TAG, "set device list to:" + sb.toString());
+	
 		prefEditor.putString(DEVICE_LIST, sb.toString());
 		prefEditor.commit();
 	}
@@ -170,8 +170,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 		for(String device:tmpList){
 			deviceList.add(device);
 		}
-		Log.i(TAG, "current scan probability is:" + String.valueOf(probability));
-		Log.i(TAG, "devices scanned during last time are:" + deviceList.toString());
+	
 		Bundle mBundle = new Bundle();
 		mBundle.putFloat(SCAN_PROBABILITY, probability);
 		mBundle.putStringArrayList(DEVICE_LIST, deviceList);

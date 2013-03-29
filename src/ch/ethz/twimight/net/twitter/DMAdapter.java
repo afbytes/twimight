@@ -25,7 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.text.format.DateUtils;
-import android.util.Log;
+
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -35,7 +35,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.util.InternalStorageHelper;
 
 /** 
  * Cursor adapter for a cursor containing users.
@@ -121,7 +120,7 @@ public class DMAdapter extends SimpleCursorAdapter {
 				} else
 					picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG,"error opening input stream",e);
+				
 				picture.setImageResource(R.drawable.default_profile);
 			}	
 		} else {
@@ -185,11 +184,11 @@ public class DMAdapter extends SimpleCursorAdapter {
 	    	if((flags & Tweets.FLAG_TO_DELETE) == 0){	    		
 				
 				if (tid != null) {
-					Log.i(TAG,"msg was published online");
+					
 					showDeleteDialog(tid,rowId );
 				}
 				else {
-					Log.i(TAG,"msg was NOT published online");
+				
 					showDeleteDialog(0,rowId );		
 				}
 	    	}

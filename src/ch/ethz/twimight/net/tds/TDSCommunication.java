@@ -36,8 +36,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
 import android.util.Log;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.security.RevocationListEntry;
-import ch.ethz.twimight.util.Constants;
 
 /**
  * API for communication with the Twimight Disaster Server
@@ -152,7 +152,7 @@ public class TDSCommunication {
 		try {
 			requestObject = assembleRequest();
 		} catch (Exception e) {
-			Log.e(TAG, "JSON exception while assembling request!");
+			if (TwimightBaseActivity.D) Log.e(TAG, "JSON exception while assembling request!");
 			return false;
 		}
 		
@@ -171,7 +171,7 @@ public class TDSCommunication {
 		try {
 			ent = new UrlEncodedFormEntity(params);
 		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG,"Unsupported Encoding Exception!",e);
+			if (TwimightBaseActivity.D) Log.e(TAG,"Unsupported Encoding Exception!",e);
 			return false;
 		}
 
@@ -182,10 +182,10 @@ public class TDSCommunication {
 		try {
 			response = client.execute(post);
 		} catch (ClientProtocolException e) {
-			Log.d(TAG,"HTTP POST request failed! " + e.toString());
+			if (TwimightBaseActivity.D) Log.d(TAG,"HTTP POST request failed! " + e.toString());
 			return false;
 		} catch (IOException e) {
-			Log.d(TAG,"HTTP POST request failed!" + e.toString());
+			if (TwimightBaseActivity.D) Log.d(TAG,"HTTP POST request failed!" + e.toString());
 			return false;
 		}	
 
@@ -198,21 +198,21 @@ public class TDSCommunication {
 			try {
 				result = EntityUtils.toString(resEntity);
 			} catch (ParseException e) {
-				Log.e(TAG,"Parse Error while parsing response!" + e.toString());
+				if (TwimightBaseActivity.D) Log.e(TAG,"Parse Error while parsing response!" + e.toString());
 				return false;
 			} catch (IOException e) {
-				Log.e(TAG,"IO Error while parsing response!" + e.toString());
+				if (TwimightBaseActivity.D) Log.e(TAG,"IO Error while parsing response!" + e.toString());
 				return false;
 			}
-			Log.i(TAG,"result = " + result);
+			if (TwimightBaseActivity.D) Log.i(TAG,"result = " + result);
 
 			try {
 				if(disassembleResponse(result) != 0){
-					Log.e(TAG, "Error while parsing result");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Error while parsing result");
 				}
 				
 			} catch (Exception e) {
-				Log.e(TAG,"JSON Error while parsing result!" + e.toString());
+				if (TwimightBaseActivity.D) Log.e(TAG,"JSON Error while parsing result!" + e.toString());
 				return false;
 			}					
 		} else 
@@ -273,7 +273,7 @@ public class TDSCommunication {
 			requestObject.put(STATISTIC, tdsRequest.getStatisticObject());
 		}
 
-		Log.i(TAG, requestObject.toString(5));
+		if (TwimightBaseActivity.D) Log.i(TAG, requestObject.toString(5));
 		return requestObject;
 	}
 	
@@ -287,7 +287,7 @@ public class TDSCommunication {
 		// version
 		int responseVersion = messageObject.getInt("version"); 
 		if(responseVersion != tdsResponse.getVersion()){
-			Log.e(TAG, "TDS message version mismatch!");
+			if (TwimightBaseActivity.D) Log.e(TAG, "TDS message version mismatch!");
 			return -1;
 		}
 		
@@ -297,7 +297,7 @@ public class TDSCommunication {
 			if(authenticationObject != null){				
 				tdsResponse.setAuthenticationObject(authenticationObject);
 			} else {
-				Log.e(TAG, "Authentication failed");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Authentication failed");
 				return -1;
 			}
 			
@@ -310,7 +310,7 @@ public class TDSCommunication {
 			JSONObject bluetoothObject = messageObject.getJSONObject(BLUETOOTH);
 			tdsResponse.setBluetoothObject(bluetoothObject);
 		} catch(JSONException e) {
-			Log.i(TAG, "No Bluetooth object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No Bluetooth object");
 		}
 		
 		try{
@@ -318,7 +318,7 @@ public class TDSCommunication {
 			JSONObject locationObject = messageObject.getJSONObject(LOCATION);
 			tdsResponse.setLocationObject(locationObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No location object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No location object");
 		}
 
 		try{
@@ -326,7 +326,7 @@ public class TDSCommunication {
 			JSONObject certificateObject = messageObject.getJSONObject(CERTIFICATE);
 			tdsResponse.setCertificateObject(certificateObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No certificate object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No certificate object");
 		}
 
 		try{
@@ -334,7 +334,7 @@ public class TDSCommunication {
 			JSONObject revocationObject = messageObject.getJSONObject(REVOCATION);
 			tdsResponse.setRevocationObject(revocationObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No revocation object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No revocation object");
 		}
 
 		try{
@@ -342,7 +342,7 @@ public class TDSCommunication {
 			JSONObject followerObject = messageObject.getJSONObject(FOLLOWER);
 			tdsResponse.setFollowerObject(followerObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No follower object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No follower object");
 		}
 		
 		try{
@@ -350,7 +350,7 @@ public class TDSCommunication {
 			JSONObject notificationObject = messageObject.getJSONObject(NOTIFICATION);
 			tdsResponse.setNotificationObject(notificationObject);
 		} catch(JSONException e){
-			Log.i(TAG, "No notification object");
+			if (TwimightBaseActivity.D) Log.i(TAG, "No notification object");
 		}
 
 		return 0;
