@@ -63,8 +63,9 @@ public class PicturesIntentService extends IntentService {
 			cv[i]= new ContentValues();
 			cv[i].put("_id", rowIds[i]);
 			if (!cursorArray[i].isClosed()) {
-				cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & cursorArray[i].getInt(cursorArray[i].getColumnIndex(TwitterUsers.COL_FLAGS)));
-				cv[i].put(TwitterUsers.COL_PROFILEIMAGE, new File(getFilesDir(),screenNames.get(i)).getPath() );				
+				cv[i].put(TwitterUsers.COL_FLAGS, ~(TwitterUsers.FLAG_TO_UPDATEIMAGE) & 
+						cursorArray[i].getInt(cursorArray[i].getColumnIndex(TwitterUsers.COL_FLAGS)));
+				cv[i].put(TwitterUsers.COL_PROFILEIMAGE_PATH, new File(getFilesDir(),screenNames.get(i)).getPath() );	
 				cv[i].put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());	
 				cursorArray[i].close();
 			}				

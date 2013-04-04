@@ -44,7 +44,7 @@ public class InternalStorageHelper {
 		
 	}
 	
-	/*
+/*
 	public byte[] readImage(String filename) {
 		FileInputStream fis = null;
 		try {
@@ -80,6 +80,7 @@ public class InternalStorageHelper {
 	}
 	
 	*/
+	
 	
 	    		
 			

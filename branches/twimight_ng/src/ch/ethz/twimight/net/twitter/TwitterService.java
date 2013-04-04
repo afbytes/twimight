@@ -13,22 +13,13 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.Status;
@@ -45,9 +36,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -56,12 +48,15 @@ import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewDMActivity;
+import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
+import ch.ethz.twimight.net.Html.HtmlService;
+import ch.ethz.twimight.net.Html.InternetStatusReceiver;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -147,7 +142,7 @@ public class TwitterService extends Service {
 			
 			twitter.setSinceId(null);
 			twitter.setUntilId(null);
-			
+
 			if (intent != null) {
 				// check what we are asked to synch
 				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);	
@@ -211,7 +206,6 @@ public class TwitterService extends Service {
 					if(intent.hasExtra("rowId")){
 						// get the flags
 						long rowId = intent.getLongExtra("rowId", -1);
-						
 						if (rowId >= 0) {
 							new TweetQueryTask().execute(rowId);										
 						}				
@@ -283,10 +277,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected Cursor doInBackground(Long... params) {
+			
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+params[0]);
 			Cursor c = null;					
 			c = getContentResolver().query(queryUri, null, null, null, null);
-
+			
 			if(c.getCount() == 1){
 				c.moveToFirst();
 				return c;				
@@ -297,6 +292,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected void onPostExecute(Cursor c) {
+			Log.d(TAG, "synchTweet");
 			synchTweet(c,TRUE);
 			if(c!=null) c.close();	
 		}
@@ -393,7 +389,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected Void doInBackground(Void... params) {
 			
-			Log.d(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
+			Log.i(TAG, "SYNCH_TRANSACTIONAL_TWEETS");
 			// get the flagged tweets
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 			Cursor c = null;
@@ -722,7 +718,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		if (id != null) {			
 			return new BigInteger(Long.toString(id));
 		}
-		else 
+		else
 			return null;
 		
 	}
@@ -1077,7 +1073,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
 		
-		cv.put(Tweets.COL_TEXT, createSpans(tweet).getText());
+		String tweetSpanText = createSpans(tweet).getText();
+		cv.put(Tweets.COL_TEXT, tweetSpanText);
+		
+		//if there are urls to this tweet, change the status of html field to 1
+		if(tweetSpanText.indexOf("http://") > 0 || tweetSpanText.indexOf("https://") > 0 ){
+			cv.put(Tweets.COL_HTMLS, 1);
+		}
+		
+		
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
 		
@@ -1096,6 +1100,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		
 		cv.put(Tweets.COL_USER, tweet.getUser().getId());
 		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
+		
+		//insert the picture url to the database
+		//tweet.getEntities-> List<TweetEntity>
+		//
+		//cv.put(Tweets.COL_MEDIA tweet.getEntities(KEntityType.media))
 		//cv.put(Tweets.COL_FLAGS, 0);
 		cv.put(Tweets.COL_BUFFER, buffer);
 		
@@ -1162,10 +1171,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		}
 		entities = tweet.getTweetEntities(Twitter.KEntityType.urls);
 		if(entities != null){
-			for (TweetEntity entity: entities) {
+			
+			for (TweetEntity entity: entities) {				
 				allEntities.add(entity);
 			}
-		}
+		} 			
 		// do we have entities at all?
 		if(allEntities.isEmpty()) return new SpanResult(tweet.getText(),urls);
 
@@ -1193,8 +1203,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					replacedText.append("<hashtag target='"+curEntity.toString()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</hashtag>");
 				} else if(curEntity.type == KEntityType.urls){
 					replacedText.append("<url target='"+originalText.substring(curEntity.start, curEntity.end)+"'>"+ curEntity.displayVersion()+"</url>");
-					urls.add(curEntity.displayVersion());	
-					
+					urls.add(curEntity.displayVersion());				    
+				  
 					
 				} else if(curEntity.type == KEntityType.user_mentions){
 					replacedText.append("<mention target='"+originalText.substring(curEntity.start, curEntity.end)+"' name='"+curEntity.displayVersion()+"'>"+ originalText.substring(curEntity.start, curEntity.end)+"</mention>");
@@ -1770,7 +1780,12 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);	
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);			
+			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			
+			//send broadcast 
+			Intent i = new Intent(getBaseContext(), InternetStatusReceiver.class);
+			getBaseContext().sendBroadcast(i);
+
 			Log.i(TAG,"Insert onPost Execute");
 		}
 
@@ -2455,27 +2470,26 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		long rowId;
 		int flags;
 		int buffer;
-
+		String mediaName = null;
 		Exception ex;
 
 		@Override
 		protected winterwell.jtwitter.Status doInBackground(Long... rowId) {
-			Log.d(TAG, "AsynchTask: UpdateStatusTask");
+			
 			ShowTweetListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
 			this.notify= rowId[2];
-
+			
 			winterwell.jtwitter.Status tweet = null;
 			Cursor c = null;
-			
+
 			try {
-				
+
 				Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 				c = getContentResolver().query(queryUri, null, null, null, null);
 
 				if(c.getCount() == 0){
-					Log.w(TAG, "UpdateStatusTask: Tweet not found " + this.rowId);
 					return null;
 				}
 				c.moveToFirst();
@@ -2483,6 +2497,18 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+				mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+				String mediaUrl =  null;
+				
+				if (mediaName != null)
+					mediaUrl = Environment.getExternalStoragePublicDirectory(Tweets.PHOTO_PATH +
+												"/" + LoginActivity.getTwitterId(TwitterService.this) + "/" + mediaName).getAbsolutePath();
+				
+				boolean hasMedia;
+				if(mediaUrl != null)
+					hasMedia = true;
+				else	
+					hasMedia = false;				
 
 				if(!(c.getDouble(c.getColumnIndex(Tweets.COL_LAT))==0 & c.getDouble(c.getColumnIndex(Tweets.COL_LNG))==0)){
 					double[] location = {c.getDouble(c.getColumnIndex(Tweets.COL_LAT)),c.getDouble(c.getColumnIndex(Tweets.COL_LNG))}; 
@@ -2490,10 +2516,24 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				} else {
 					twitter.setMyLocation(null);
 				}
+				
 				if(c.getColumnIndex(Tweets.COL_REPLYTO)>=0){
-					tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+					if(hasMedia){
+						Log.d("upload", "upload media with reply");
+						BigInteger replyToId = BigInteger.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+						tweet = twitter.updateStatusWithMedia(text, replyToId, new File(mediaUrl));
+					}
+					else{
+						tweet = twitter.updateStatus(text, c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO)));
+					}
 				} else {
-					tweet = twitter.updateStatus(text);
+					if(hasMedia){
+						Log.d("upload", "upload media without reply");
+						tweet = twitter.updateStatusWithMedia(text, null, new File(mediaUrl));
+					}
+					else{
+						tweet = twitter.updateStatus(text);
+					}
 					
 				}
 
@@ -2552,8 +2592,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					Log.e(TAG, "exception while posting tweet: " + ex);
 					return;
 				}
-			}
-
+			}			
+			
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 
 			ContentValues cv = null;

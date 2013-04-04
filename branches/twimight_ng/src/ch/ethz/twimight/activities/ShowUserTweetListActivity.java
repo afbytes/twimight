@@ -12,6 +12,7 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
@@ -38,7 +39,6 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);
 		
 		if(!getIntent().hasExtra("userId")) finish();
-		
 		
 		setContentView(R.layout.main);		
 				

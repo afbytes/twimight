@@ -118,7 +118,10 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_LASTUPDATE = "last_update";
 	public static final String COL_LAST_PICTURE_UPDATE = "last_picture_update";
 	public static final String COL_FLAGS = "u_flags";
-	public static final String COL_PROFILEIMAGE = "_data";
+
+	public static final String COL_PROFILEIMAGE_PATH = "_data";
+	public static final String COL_PROFILEIMAGE = "image";  /** this is used only in disaster mode to sent the profile image */
+
 	
 	public static final String DEFAULT_SORT_ORDER = COL_SCREENNAME;
 	

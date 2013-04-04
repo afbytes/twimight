@@ -23,6 +23,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -32,7 +33,7 @@ import ch.ethz.twimight.util.Constants;
 public class ScanningAlarm extends BroadcastReceiver {
 	// Class constants
 	static final String TAG = "ScanningAlarm"; /** for logging */	
-	
+
 	private static WakeLock wakeLock; 
 	private static final String WAKE_LOCK = "ScanningAlarmWakeLock";
 
@@ -44,86 +45,86 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 * This constructor is called the alarm manager.
 	 */
 	public ScanningAlarm(){}
-	
+
 	/**
 	 * Starts the alarm.
 	 */
 
 	public ScanningAlarm(Context context, long delay, boolean forceScan) {		
-		
+
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());
 		} 			
-				
+
 	}	
-	
-		
-		public static void setBluetoothInitialState(Context context, boolean b) {
-			
-			SharedPreferences.Editor prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-			prefEditor.putBoolean("wasBlueEnabled", b);
-			prefEditor.commit();		 
-		
+
+
+	public static void setBluetoothInitialState(Context context, boolean b) {
+
+		SharedPreferences.Editor prefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+		prefEditor.putBoolean("wasBlueEnabled", b);
+		prefEditor.commit();		 
+
 	}
-				
 
-		/**
-		 * Acquire the Wake Lock
-		 * @param context
-		 */
-		public static void getWakeLock(Context context){
-			
-			releaseWakeLock();
-			
-			PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-			wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK , WAKE_LOCK); 
-			wakeLock.acquire();
-		}
-		
-		/**
-		 * We have to make sure to release the wake lock after the TDSThread is done!
-		 * @param context
-		 */
-		public static void releaseWakeLock(){
-			if(wakeLock != null)
-				if(wakeLock.isHeld())
-					wakeLock.release();
-		}
 
-	
+	/**
+	 * Acquire the Wake Lock
+	 * @param context
+	 */
+	public static void getWakeLock(Context context){
 
-		/**
-		 * Stop the scheduled alarm
-		 * @param context
-		 */
-		public static void stopScanning(Context context) {
-			AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		releaseWakeLock();
 
-			Intent intent = new Intent(context, ScanningAlarm.class);
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			instance = null;
-			alarmMgr.cancel(pendingIntent);			
-			releaseWakeLock();				
-		}
+		PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK , WAKE_LOCK); 
+		wakeLock.acquire();
+	}
 
-		private static boolean getBluetoothInitialState(Context context) {
+	/**
+	 * We have to make sure to release the wake lock after the TDSThread is done!
+	 * @param context
+	 */
+	public static void releaseWakeLock(){
+		if(wakeLock != null)
+			if(wakeLock.isHeld())
+				wakeLock.release();
+	}
 
-			SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
-			return pref.getBoolean("wasBlueEnabled", true);
 
-		}
 
-		/**
-		 * Schedules a Scanning communication
-		 * @param time after how many milliseconds (0 for immediately)?
-		 */
+	/**
+	 * Stop the scheduled alarm
+	 * @param context
+	 */
+	public static void stopScanning(Context context) {
+		AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+
+		Intent intent = new Intent(context, ScanningAlarm.class);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		instance = null;
+		alarmMgr.cancel(pendingIntent);			
+		releaseWakeLock();				
+	}
+
+	private static boolean getBluetoothInitialState(Context context) {
+
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);		
+		return pref.getBoolean("wasBlueEnabled", true);
+
+	}
+
+	/**
+	 * Schedules a Scanning communication
+	 * @param time after how many milliseconds (0 for immediately)?
+	 */
 	public void scheduleScanning(Context context, long time) {		
-		
-				
+
+
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
-			
+
 			AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-			
+
 			Intent intent = new Intent(context, ScanningAlarm.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			alarmMgr.cancel(pendingIntent);
@@ -138,14 +139,14 @@ public class ScanningAlarm extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {		
 		//getWakeLock(context);
-		
+
 		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
-			Intent i = new Intent(context,ScanningService.class);		
+			Intent i = new Intent(context,ScanningService.class);
 			context.startService(i);
 		}
-		
+
 	}
-	
-	
-		
+
+
+
 }

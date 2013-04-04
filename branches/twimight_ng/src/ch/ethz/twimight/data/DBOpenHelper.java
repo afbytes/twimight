@@ -16,6 +16,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
@@ -37,9 +38,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_TWEETS = "tweets"; 	
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
-//	static final String TABLE_HTML = "html";
+	public static final String TABLE_HTML = "htmls";
 
-	private static final int DATABASE_VERSION = 43;
+	private static final int DATABASE_VERSION = 48;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -95,6 +96,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "			
+			+ Tweets.COL_MEDIA + " string, "
+			+ Tweets.COL_HTMLS + " integer default 0, "
 			+ Tweets.COL_ISDISASTER + " integer default 0, "
 			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
@@ -127,9 +130,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_ISDISASTER_PEER + " integer default 0, "
 			+ TwitterUsers.COL_IS_SEARCH_RESULT + " integer default 0, "			
 			+ TwitterUsers.COL_FOLLOWREQUEST + " integer, "
-			+ TwitterUsers.COL_PROFILEIMAGE + " string,"
-			+ TwitterUsers.COL_LASTUPDATE + " integer,"
-			+ TwitterUsers.COL_LAST_PICTURE_UPDATE + " integer,"
+			+ TwitterUsers.COL_PROFILEIMAGE_PATH + " string, "
+			+ TwitterUsers.COL_LASTUPDATE + " integer, "
+			+ TwitterUsers.COL_LAST_PICTURE_UPDATE + " integer, "
 			+ TwitterUsers.COL_FLAGS + " integer default 0);";
 
 	// Direct Messages (including disaster messages)
@@ -151,17 +154,22 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ DirectMessages.COL_CRYPTEXT + " string, "
 			+ DirectMessages.COL_CERTIFICATE + " string);";
 	
-	/*// html pages 
-		private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
-				+ "_id integer primary key autoincrement not null, "
-				+ HtmlPage.COL_URL + " string unique not null, "
-				+ HtmlPage.COL_HTML + " string);";
-	*/	
+	// html pages 
+	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
+			+ "_id integer primary key autoincrement not null, "
+			+ HtmlPage.COL_URL + " string not null, "
+			+ HtmlPage.COL_TID + " string not null, "
+			+ HtmlPage.COL_USER + " string not null, "
+			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
+			+ HtmlPage.COL_FORCED + " integer default 0, "
+			+ HtmlPage.COL_TRIES + " integer default 0, "
+			+ HtmlPage.COL_FILENAME + " string);";
+	
 	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
 
 	/**
-	 * Constructor
+	 * Constructorcontent://
 	 * @param context
 	 */
 	private DBOpenHelper(Context context) {
@@ -188,6 +196,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_TWEETS_CREATE);
 		database.execSQL(TABLE_USERS_CREATE);
 		database.execSQL(TABLE_DMS_CREATE);
+		database.execSQL(TABLE_HTML_CREATE);
 	
 	}
 	
@@ -215,7 +224,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DMS);
-		//database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML);
+		database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML);
 		createTables(database);
 	}
 	
@@ -232,6 +241,6 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);
 		database.execSQL("DELETE FROM "+TABLE_USERS);
 		database.execSQL("DELETE FROM "+TABLE_DMS);
-		//database.execSQL("DELETE FROM "+TABLE_HTML);
+		database.execSQL("DELETE FROM "+TABLE_HTML);
 	}
 }

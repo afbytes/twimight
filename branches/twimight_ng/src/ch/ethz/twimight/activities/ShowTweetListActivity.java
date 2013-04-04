@@ -26,16 +26,16 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
-import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.adapters.PageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.util.Constants;
+
+
 
 /**
  * The main Twimight view showing the Timeline, favorites and mentions
@@ -52,8 +52,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	// handler
 	static Handler handler;
 
+
 	private int positionIndex;
 	private int positionTop;
+	private static Context CONTEXT;
 	
 	//LOGS
 	LocationHelper locHelper ;
@@ -85,6 +87,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		super.onCreate(savedInstanceState);				
 		setContentView(R.layout.main);
 		
+
 		//statistics
 		locDBHelper = new StatisticsDBHelper(this);
 		locDBHelper.open();
@@ -147,10 +150,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 		@Override
 		public void run() {
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
+
+			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
+
 			} else {}
 			
 		}
@@ -162,7 +167,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	protected void onNewIntent(Intent intent) {		
 		setIntent(intent);
 		
-	}	
+
+	
+	}
+
 
 
 	/**
@@ -243,15 +251,17 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		super.onDestroy();
 		running = false;	
 	
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && cm != null) {
-			if (locHelper.count > 0) {			
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
+				cm.getActiveNetworkInfo() != null) {
+			
+			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
 				locHelper.unRegisterLocationListener();
 				handler.removeCallbacks(checkLocation);				
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
-		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm != null) {			
+		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
 			locHelper.unRegisterLocationListener();			
 			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
@@ -265,6 +275,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	}
 
 	
+
+
 
 	
 

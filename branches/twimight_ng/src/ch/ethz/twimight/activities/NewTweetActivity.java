@@ -13,10 +13,14 @@
 
 package ch.ethz.twimight.activities;
 
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,6 +30,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -34,15 +39,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.SDCardHelper;
 
 /**
  * The activity to write a new tweet.
@@ -52,7 +60,7 @@ import ch.ethz.twimight.util.Constants;
 public class NewTweetActivity extends Activity{
 
 	private static final String TAG = "TweetActivity";
-	
+	private static Context CONTEXT; 
 	private boolean useLocation;
 	private EditText text;
 	private TextView characters;
@@ -62,12 +70,34 @@ public class NewTweetActivity extends Activity{
 	private long isReplyTo;
 	
 	// the following are all to deal with location
-	private ToggleButton locationButton;
+	private ImageButton locationButton;
 	private Location loc;
 	private LocationManager lm;
 	private LocationListener locationListener;
-	
+	private boolean locationChecked;
 	private TextWatcher textWatcher;
+	
+	//uploading photos
+	private static final int PICK_FROM_CAMERA = 1;
+	private static final int PICK_FROM_FILE = 2;
+	private String tmpPhotoPath; //path storing photos on SDcard
+	private String finalPhotoPath; //path storing photos on SDcard
+	private String finalPhotoName; //file name of uploaded photo
+	private Uri tmpPhotoUri; //uri storing temp photos
+	private Uri photoUri; //uri storing photos
+	private ImageView mImageView; //to display the photo to be uploaded
+
+	private boolean hasMedia = false;
+	private ImageButton uploadFromGallery;
+	private ImageButton uploadFromCamera;
+	private ImageButton deletePhoto;
+	private ImageButton previewPhoto;
+	private ImageButton photoButton;
+	private Bitmap photo = null;
+	private LinearLayout photoLayout;
+	
+	//SDcard helper
+	private SDCardHelper sdCardHelper;
 	
 	//LOGS
 		LocationHelper locHelper ;
@@ -82,7 +112,7 @@ public class NewTweetActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tweet);
-		
+		CONTEXT = this;
 		
 		
 		//Statistics
@@ -90,14 +120,17 @@ public class NewTweetActivity extends Activity{
 		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
 		locHelper = new LocationHelper(this);
-
-		//
+		
+		//SDCard helper
+		sdCardHelper = new SDCardHelper(CONTEXT);
+		
 		cancelButton = (Button) findViewById(R.id.tweet_cancel);		
 		cancelButton.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View v) {
-				finish();
+				
+				finish();		
 			}
 			
 		});
@@ -116,6 +149,7 @@ public class NewTweetActivity extends Activity{
 		characters.setText(Integer.toString(Constants.TWEET_LENGTH));
 		
 		text = (EditText) findViewById(R.id.tweetText);
+		
 		
 		// Did we get some extras in the intent?
 		Intent i = getIntent();
@@ -189,23 +223,129 @@ public class NewTweetActivity extends Activity{
 		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// User settings: do we use location or not?
 		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
-		locationButton = (ToggleButton) findViewById(R.id.tweet_location);
-		locationButton.setChecked(useLocation);		
-		locationButton.setOnClickListener(new OnClickListener() {
-			
+		
+		locationButton = (ImageButton) findViewById(R.id.tweet_location);
+		locationChecked = false;
+		if(useLocation){
+			locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+			locationChecked = true;
+		}
+		locationButton.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				useLocation = locationButton.isChecked();
-				if(useLocation){
+				if(!locationChecked){
 					registerLocationListener();
+					Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
+					locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+					locationChecked = true;
 				} else {
 					unRegisterLocationListener();
+					Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
+					locationButton.setImageResource(R.drawable.ic_menu_mylocation);
+					locationChecked = false;
 				}
 			}
 		});
 		
 		
+		
+		//uploading photos
+		tmpPhotoPath = Tweets.PHOTO_PATH + "/" + "tmp";
+		finalPhotoPath = Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
+		mImageView = new ImageView(this);
+		
+		photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
+		photoLayout.setVisibility(View.GONE);
+		
+		uploadFromGallery = (ImageButton) findViewById(R.id.upload_from_gallery);
+		uploadFromGallery.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				uploadFromGallery();
+			}
+		});
+		
+		uploadFromCamera = (ImageButton) findViewById(R.id.upload_from_camera);
+		uploadFromCamera.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				uploadFromCamera();
+			}
+		});
+		
+		previewPhoto = (ImageButton) findViewById(R.id.preview_photo);
+		previewPhoto.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				
+				mImageView = new ImageView(CONTEXT);
+				mImageView.setImageBitmap(photo);
+				AlertDialog.Builder photoPreviewDialog = new AlertDialog.Builder(CONTEXT);
+				photoPreviewDialog.setView(mImageView);
+				photoPreviewDialog.setNegativeButton("close",null);
+				photoPreviewDialog.show();
+				
+			}
+		});
+		
+		deletePhoto = (ImageButton) findViewById(R.id.delete_photo);
+		deletePhoto.setOnClickListener(new OnClickListener(){
+			public void onClick(View v){
+				
+				sdCardHelper.deleteFile(tmpPhotoUri.getPath());
+				hasMedia = false;
+				setButtonStatus(true,false);
+			}		
+		});
+		
+		photoButton = (ImageButton) findViewById(R.id.tweet_photo);		
+		photoButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				if(photoLayout.getVisibility() == View.GONE){
+					photoLayout.setVisibility(View.VISIBLE);
+					photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
+				}
+				else{
+					photoLayout.setVisibility(View.GONE);
+					photoButton.setImageResource(R.drawable.ic_menu_gallery);
+				}
+			}
+		});
+		
+		String[] filePaths = {tmpPhotoPath, finalPhotoPath};
+		if(sdCardHelper.checkSDStuff(filePaths)){
+			
+			sdCardHelper.clearTempDirectory(tmpPhotoPath);
+			setButtonStatus(true,false);
+		}
+		else setButtonStatus(false,false);
+
 		Log.v(TAG, "onCreated");
+	}
+
+	/**
+	 * set button status with different operations
+	 * 
+	 * @param statusUpload
+	 * @param statusDelete
+	 */
+	private void setButtonStatus(boolean statusUpload, boolean statusDelete){
+		uploadFromGallery.setEnabled(statusUpload);
+		uploadFromCamera.setEnabled(statusUpload);
+		deletePhoto.setEnabled(statusDelete);
+		previewPhoto.setEnabled(statusDelete);
+		if(statusUpload){
+			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow);
+			uploadFromCamera.setImageResource(R.drawable.ic_camera);
+		}else{
+			uploadFromGallery.setImageResource(R.drawable.ic_menu_slideshow_off);
+			uploadFromCamera.setImageResource(R.drawable.ic_camera_off);
+		}
+		if(statusDelete){
+			deletePhoto.setImageResource(R.drawable.ic_menu_delete);
+			previewPhoto.setImageResource(R.drawable.ic_menu_zoom);
+		}else{
+			deletePhoto.setImageResource(R.drawable.ic_menu_delete_off);
+			previewPhoto.setImageResource(R.drawable.ic_menu_zoom_off);
+		}
 	}
 	
 	/**
@@ -217,7 +357,6 @@ public class NewTweetActivity extends Activity{
 		if(useLocation){
 			registerLocationListener();
 		}
-
 	}
 	
 	/**
@@ -235,7 +374,11 @@ public class NewTweetActivity extends Activity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		
+		Log.d(TAG, "onDestroy");
+		if(hasMedia){
+			sdCardHelper.deleteFile(tmpPhotoUri.getPath());
+			hasMedia = false;
+		}
 		if (locHelper!= null) 
 			locHelper.unRegisterLocationListener();	
 		
@@ -272,10 +415,32 @@ public class NewTweetActivity extends Activity{
 			boolean result=false;
 			
 			timestamp = System.currentTimeMillis();
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null) {	
+
+			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
+
 				Log.i(TAG,"writing log");
 				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
+				Log.i(TAG, String.valueOf(hasMedia));
+			}
+			if(hasMedia){
+				try {
+					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
+					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));//photoFileParent, photoFilename));
+					String fromFile = tmpPhotoUri.getPath();
+					String toFile = photoUri.getPath();
+					Log.i(TAG, fromFile);
+					Log.i(TAG, toFile);
+					if(sdCardHelper.copyFile(fromFile, toFile)){
+
+						Log.i(TAG, "file copy successful");
+
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					Log.d("photo", "exception!!!!!");
+					e.printStackTrace();
+				}
 			}
 			// if no connectivity, notify user that the tweet will be send later		
 				
@@ -304,7 +469,6 @@ public class NewTweetActivity extends Activity{
 					}
 				}
 
-					
 				return result;
 			
 		}
@@ -351,6 +515,12 @@ public class NewTweetActivity extends Activity{
 				tweetContentValues.put(Tweets.COL_LNG, loc.getLongitude());
 			}
 		}
+		//if there is a photo, put the path of photo in the cv
+		if (hasMedia){
+			tweetContentValues.put(Tweets.COL_MEDIA, finalPhotoName);
+			Log.i(TAG, Tweets.COL_MEDIA + ":" + finalPhotoName);
+		}
+		
 		return tweetContentValues;
 	}
 	
@@ -397,6 +567,89 @@ public class NewTweetActivity extends Activity{
 			}
 		}
 		return null;
+	}
+	
+	
+	
+	
+	
+	//methods photo uploading
+	
+	/**
+	 * upload photo from camera
+	 */
+	private void uploadFromCamera() {
+		
+		if((tmpPhotoUri = sdCardHelper.createTmpPhotoStoragePath(tmpPhotoPath)) != null){
+			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, tmpPhotoUri);
+			
+			try {
+				intent.putExtra("return-data", true);
+				startActivityForResult(intent, PICK_FROM_CAMERA);
+			} 
+			catch (ActivityNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		else{
+			Log.i(TAG, "path for storing photos cannot be created!");
+			setButtonStatus(false, false);
+		}
+		
+	}
+	
+	/**
+	 * upload photo by taking a picture
+	 */
+	private void uploadFromGallery(){
+		if((tmpPhotoUri = sdCardHelper.createTmpPhotoStoragePath(tmpPhotoPath)) != null){
+			Intent intent = new Intent();
+			intent.setType("image/*");
+			intent.setAction(Intent.ACTION_GET_CONTENT);
+			startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
+		}
+		else{
+			Log.i(TAG, "path for storing photos cannot be created!");
+			setButtonStatus(false, false);
+		}
+		
+	}
+	
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    if (resultCode != RESULT_OK) return;
+	    setButtonStatus(false,true);
+	    hasMedia = true;
+	    switch (requestCode) {
+		    case PICK_FROM_CAMERA:
+		    	
+		    	//display the picture		    	
+		    	photo = sdCardHelper.decodeBitmapFile(tmpPhotoUri.getPath());
+		    	mImageView.setImageBitmap(photo);
+
+		    	break;
+
+		    case PICK_FROM_FILE: 
+		    	
+		    	//display the photo
+		    	Uri mImageGalleryUri = data.getData();
+		    	
+		    	//get the real path for chosen photo
+		    	mImageGalleryUri = Uri.parse(sdCardHelper.getRealPathFromUri( (Activity) NewTweetActivity.this, mImageGalleryUri));
+		    	
+		    	//copy the photo from gallery to tmp directory
+
+		    	String fromFile = mImageGalleryUri.getPath();
+		    	String toFile = tmpPhotoUri.getPath();
+				if(sdCardHelper.copyFile(fromFile, toFile)){
+			    	photo = sdCardHelper.decodeBitmapFile(toFile);
+			    	mImageView.setImageBitmap(photo);
+				}
+		    	break;    	
+	    }
 	}
 	
 }
