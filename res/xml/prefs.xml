@@ -24,6 +24,9 @@
 		
 	</PreferenceCategory>
     
+    <PreferenceCategory android:title="Offline Mode" android:key="prefCategoryOfflineMode">
+		<CheckBoxPreference android:title="Automatic Web Download" android:key="prefOfflineMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets."></CheckBoxPreference>	
+	</PreferenceCategory>
    	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
 		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
 		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>

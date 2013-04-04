@@ -34,6 +34,7 @@ public abstract class ListFragment extends Fragment {
 
 		super.onCreate(savedInstanceState);
 		
+
 		resolver = getActivity().getContentResolver();
 		if (type != SearchableActivity.SHOW_SEARCH_TWEETS && type != SearchableActivity.SHOW_SEARCH_USERS) 
 			adapter = getData(type);
