@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -93,7 +93,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	long timestamp;
 	Intent intent;
 	ConnectivityManager cm;
-	StatisticsDBHelper locDBHelper;	
+	StatisticsDBHelper statsDBHelper;	
 	CheckLocation checkLocation;
 	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
 	
@@ -113,10 +113,11 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		setContentView(R.layout.main);	
 		CONTEXT = this;
 		//statistics
-		locDBHelper = new StatisticsDBHelper(this);
-		locDBHelper.open();
+		statsDBHelper = new StatisticsDBHelper(this);
+		statsDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
+		Log.i(TAG,"timestamp: " + timestamp);
 		locHelper = new LocationHelper(this);
 		handler = new Handler();
 		checkLocation = new CheckLocation();
@@ -177,9 +178,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		@Override
 		public void run() {
 
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
+			if (locHelper != null && locHelper.count > 0 && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -308,19 +309,19 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		timelineListView.setAdapter(null);	
 		
 	
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && statsDBHelper != null && 
 				cm.getActiveNetworkInfo() != null) {
 			
 			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
 				locHelper.unRegisterLocationListener();
 				handler.removeCallbacks(checkLocation);				
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
+				statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
-		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
+		if ((locHelper != null && locHelper.count > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {			
 			locHelper.unRegisterLocationListener();			
-			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
+			statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
 		if(c!=null) c.close();

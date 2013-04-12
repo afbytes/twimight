@@ -99,7 +99,7 @@ public class StatisticsDBHelper {
 	
 		
 		try{
-			database.insert(DBOpenHelper.TABLE_LOCATIONS, null, update);
+			database.insert(DBOpenHelper.TABLE_STATISTICS, null, update);
 			return true;
 			
 		} catch (SQLiteException e) {
@@ -110,12 +110,12 @@ public class StatisticsDBHelper {
 	
 	public int deleteOldData() {
 		
-		return database.delete(DBOpenHelper.TABLE_LOCATIONS, null, null);
+		return database.delete(DBOpenHelper.TABLE_STATISTICS, null, null);
 	}
 	
 	public Cursor getData() {
 		
-		Cursor cursor = database.query(DBOpenHelper.TABLE_LOCATIONS, null, null, null, null,null,null);
+		Cursor cursor = database.query(DBOpenHelper.TABLE_STATISTICS, null, null, null, null,null,null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();			
 		}
@@ -146,7 +146,7 @@ public class StatisticsDBHelper {
 	public List<Location> getLocationsSince(Date d){
 		ArrayList<Location> locationList = new ArrayList<Location>();
 		
-		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_LOCATIONS, new String[] {
+		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_STATISTICS, new String[] {
 				KEY_LOCATION_LNG, KEY_LOCATION_LAT, KEY_LOCATION_ACCURACY, KEY_LOCATION_PROVIDER, KEY_LOCATION_DATE},
 				KEY_LOCATION_DATE + ">=" + Long.toString(d.getTime()), null, null, null, null, null);
 		

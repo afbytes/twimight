@@ -350,21 +350,7 @@ public class TDSService extends Service {
 				// TODO: This is a hack, we should wait for a connectivity change intent, or a timeout, to proceed.
 				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
 
-				/*// push locations to the server
-				LocationDBHelper locationAdapter = new LocationDBHelper(getBaseContext());
-				locationAdapter.open();
-
-				Date sinceWhen = new Date(getLastUpdate(getBaseContext()));
-				ArrayList<Location> locationList = (ArrayList<Location>) locationAdapter.getLocationsSince(sinceWhen);
-				if(!locationList.isEmpty()){
-					tds.createLocationObject(locationList);
-				}
-				 */
-				// request potential bluetooth peers
-				String mac = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null);
-				if(mac!=null){
-					tds.createBluetoothObject(mac);
-				}
+			
 
 				// revocation list
 				RevocationDBHelper rm = new RevocationDBHelper(getBaseContext());

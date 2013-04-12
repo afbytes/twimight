@@ -80,13 +80,13 @@ public class TDSCommunication {
 	 * Creates a new Bluetooth object in the reqeust
 	 * @return
 	 * @throws JSONException
-	 */
+	
 	public int createBluetoothObject(String mac) throws JSONException{
 		tdsRequest.createBluetoothObject(mac);
 		return 0;
 	}
 	
-
+ */
 	
 	/**
 	 * Creates a new certiricate object in the request
