@@ -32,14 +32,14 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	// Database table names;
 	static final String TABLE_REVOCATIONS = "revocations"; /** the table holding the local version of the revocation list */
 	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */
-	static final String TABLE_LOCATIONS = "locations";
+	static final String TABLE_STATISTICS = "statistics";
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
 	public static final String TABLE_TWEETS = "tweets"; 	
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 
 
-	private static final int DATABASE_VERSION = 48;
+	private static final int DATABASE_VERSION = 49;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -50,9 +50,9 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ MacsDBHelper.KEY_ACTIVE + " integer, "
 			+ MacsDBHelper.KEY_LAST +" integer);";
 	
-	private static final String TABLE_LOCATIONS_CREATE = "create table "+TABLE_LOCATIONS+" ("
+	private static final String TABLE_STATISTICS_CREATE = "create table "+TABLE_STATISTICS+" ("
 			+ "_id integer primary key autoincrement not null, "			
-			+ "timestamp integer not null, "
+			+ "timestamp bigint not null, "
 			+ "lat real, "
 			+ "lng real, "
 			+ "accuracy integer, "
@@ -90,8 +90,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_MENTIONS + " int, "
 			+ Tweets.COL_LAT + " real, "
 			+ Tweets.COL_LNG + " real, "
-			+ Tweets.COL_CREATED + " integer, "
-			+ Tweets.COL_RECEIVED + " integer, "
+			+ Tweets.COL_CREATED + " bigint, "
+			+ Tweets.COL_RECEIVED + " bigint, "
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "
@@ -121,7 +121,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_UTCOFFSET + " string, "
 			+ TwitterUsers.COL_TIMEZONE + " string, "
 			+ TwitterUsers.COL_URL + " string, "
-			+ TwitterUsers.COL_CREATED + " integer, "
+			+ TwitterUsers.COL_CREATED + " bigint, "
 			+ TwitterUsers.COL_PROTECTED + " integer, "
 			+ TwitterUsers.COL_VERIFIED + " integer, "
 			+ TwitterUsers.COL_ISFOLLOWER + " integer, "
@@ -142,8 +142,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ DirectMessages.COL_RECEIVER + " bigint, "
 			+ DirectMessages.COL_RECEIVER_SCREENNAME + " string, "
 			+ DirectMessages.COL_DMID + " bigint unique, "
-			+ DirectMessages.COL_CREATED + " integer, "
-			+ DirectMessages.COL_RECEIVED + " integer, "
+			+ DirectMessages.COL_CREATED + " bigint, "
+			+ DirectMessages.COL_RECEIVED + " bigint, "
 			+ DirectMessages.COL_FLAGS + " integer default 0, "
 			+ DirectMessages.COL_BUFFER + " integer default 0, "
 			+ DirectMessages.COL_ISDISASTER + " integer default 0, "
@@ -159,7 +159,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
 
 	/**
-	 * Constructorcontent://
+	 * Constructor content://
 	 * @param context
 	 */
 	private DBOpenHelper(Context context) {
@@ -180,7 +180,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	private void createTables(SQLiteDatabase database) {
 		database.execSQL(TABLE_MACS_CREATE);
-		database.execSQL(TABLE_LOCATIONS_CREATE);
+		database.execSQL(TABLE_STATISTICS_CREATE);
 		database.execSQL(TABLE_REVOCATION_CREATE);
 		database.execSQL(TABLE_FRIENDS_KEYS_CREATE);
 		database.execSQL(TABLE_TWEETS_CREATE);
@@ -206,7 +206,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			int newVersion) {
 		
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_MACS);
-		database.execSQL("DROP TABLE IF EXISTS "+TABLE_LOCATIONS);
+		database.execSQL("DROP TABLE IF EXISTS "+TABLE_STATISTICS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_REVOCATIONS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
@@ -223,7 +223,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.execSQL("DELETE FROM "+TABLE_MACS);
-		database.execSQL("DELETE FROM "+TABLE_LOCATIONS);
+		database.execSQL("DELETE FROM "+TABLE_STATISTICS);
 		database.execSQL("DELETE FROM "+TABLE_REVOCATIONS);
 		database.execSQL("DELETE FROM "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);

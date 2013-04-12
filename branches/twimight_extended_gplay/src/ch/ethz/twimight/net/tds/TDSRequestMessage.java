@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
+import android.util.Log;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 
@@ -104,7 +105,8 @@ public class TDSRequestMessage {
 				row.put("longitude", Double.toString(stats.getDouble(stats.getColumnIndex("lng"))));
 				row.put("accuracy", Integer.toString(stats.getInt(stats.getColumnIndex("accuracy"))) );
 				row.put("provider", stats.getString(stats.getColumnIndex("provider")));
-				row.put("timestamp", Integer.toString(stats.getInt(stats.getColumnIndex("timestamp"))));
+				Log.i("TDSRequestMessage","timestamp from db: " + Long.toString(stats.getLong(stats.getColumnIndex("timestamp"))));
+				row.put("timestamp", Long.toString(stats.getLong(stats.getColumnIndex("timestamp"))));
 				row.put("network", stats.getString(stats.getColumnIndex("network")));
 				row.put("event", stats.getString(stats.getColumnIndex("event")));
 				row.put("link", stats.getString(stats.getColumnIndex("link")));
@@ -113,6 +115,7 @@ public class TDSRequestMessage {
 				statisticArray.put(row);
 				stats.moveToNext();
 			}
+			stats.close();
 			
 			statisticObject.put("content", statisticArray);
 			

@@ -12,8 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.net.tds;
 
-import java.util.Date;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
