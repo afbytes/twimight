@@ -206,7 +206,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID + " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -243,7 +243,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " + DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID + " "
 					+ "WHERE  " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -282,7 +282,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "					
 					+ "ORDER BY " + Tweets.REVERSE_SORT_ORDER
 					+ " LIMIT 5;";
@@ -321,7 +321,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -358,7 +358,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
@@ -407,7 +407,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+"="+uri.getLastPathSegment()+") " 
 					+ "OR (" + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + "='" + screenName + "') "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -451,7 +451,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -489,7 +489,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -527,7 +527,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -564,7 +564,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -602,7 +602,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -640,7 +640,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);

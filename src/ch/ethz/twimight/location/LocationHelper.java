@@ -16,22 +16,47 @@ public class LocationHelper {
 	
 	LocationListener locationListener;
 	LocationManager lm;
-	public static Location loc = null;
+	private Location loc = null;
 	public long timestamp ;
-	public int count;
-	Context context;
+	private int count;
+	
+	private static LocationHelper instance;
 	
 	private static final int TEN_MINUTES = 1000 * 60 * 10;
 	
 	
-	public LocationHelper(Context context) {
-		this.context = context;
-		lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);		
-		createLocationListener();
+	private LocationHelper(Context context) {
 		
-	    registerLocationListener();
-	    Log.i(TAG,"new location helper");
+		lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);		
+		createLocationListener();		
+	    
 	}
+	
+	public static LocationHelper getInstance(Context context) {
+		if (instance == null)
+			instance = new LocationHelper(context);
+		return instance;
+	}
+	
+	public int getCount(){
+		return count;
+	}
+	
+	/**
+	 * Tries to get a location from the listener if that was successful or the last known location otherwise.
+	 * @return
+	 */
+	public Location getLocation(){
+		if(loc!=null)
+			return loc;
+		else {
+			if ((lm != null)) {
+				return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			}
+		}
+		return null;
+	}
+	
 
 	/** Determines whether one Location reading is better than the current Location fix
 	  * @param location  The new Location that you want to evaluate
@@ -94,26 +119,19 @@ public class LocationHelper {
 				if (isBetterLocation(location,loc)) {
 					loc = location;
 					count++;
-				}
-				
-				
+				}					
 			}
-
 			public void onProviderDisabled(String provider) {}
 			public void onProviderEnabled(String provider) {}
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
 		};
 		
 	}
-	
-	
-
-
 
 	/**
 	 * Starts listening to location updates
 	 */
-	private void registerLocationListener(){
+	public void registerLocationListener(){
 		try{
 			if ((lm != null) && (locationListener != null)) {
 				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10, locationListener);
@@ -135,7 +153,7 @@ public class LocationHelper {
 		        lm.removeUpdates(locationListener);
 		        Log.i(TAG, "unregistered updates");
 		    }
-		} catch(Exception e) {
+		} catch(IllegalArgumentException e) {
 			Log.i(TAG,"Can't unregister location listener: " + e.toString());
 			return;
 		}

@@ -115,10 +115,13 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		//statistics
 		statsDBHelper = new StatisticsDBHelper(this);
 		statsDBHelper.open();
+		
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
-		Log.i(TAG,"timestamp: " + timestamp);
-		locHelper = new LocationHelper(this);
+		
+		locHelper = LocationHelper.getInstance(this);
+		locHelper.registerLocationListener();
+		
 		handler = new Handler();
 		checkLocation = new CheckLocation();
 		handler.postDelayed(checkLocation, 1*60*1000L);
@@ -178,9 +181,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		@Override
 		public void run() {
 
-			if (locHelper != null && locHelper.count > 0 && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {	
+			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				
-				statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -283,8 +286,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	@Override
 	protected void onStop() {
-		running=false;
-		
+		running=false;	
+		if (locHelper!= null)
+			locHelper.unRegisterLocationListener();		
 		super.onStop();
 	
 		
@@ -312,20 +316,17 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && statsDBHelper != null && 
 				cm.getActiveNetworkInfo() != null) {
 			
-			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
-				locHelper.unRegisterLocationListener();
+			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {					
 				handler.removeCallbacks(checkLocation);				
-				statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
-		if ((locHelper != null && locHelper.count > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {			
-			locHelper.unRegisterLocationListener();			
-			statsDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
+		if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {							
+			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
-		if(c!=null) c.close();
-				
+		if(c!=null) c.close();				
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
