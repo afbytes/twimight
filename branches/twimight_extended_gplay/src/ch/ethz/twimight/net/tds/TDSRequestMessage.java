@@ -104,8 +104,7 @@ public class TDSRequestMessage {
 				row.put("latitude", Double.toString(stats.getDouble(stats.getColumnIndex("lat"))));
 				row.put("longitude", Double.toString(stats.getDouble(stats.getColumnIndex("lng"))));
 				row.put("accuracy", Integer.toString(stats.getInt(stats.getColumnIndex("accuracy"))) );
-				row.put("provider", stats.getString(stats.getColumnIndex("provider")));
-				Log.i("TDSRequestMessage","timestamp from db: " + Long.toString(stats.getLong(stats.getColumnIndex("timestamp"))));
+				row.put("provider", stats.getString(stats.getColumnIndex("provider")));			
 				row.put("timestamp", Long.toString(stats.getLong(stats.getColumnIndex("timestamp"))));
 				row.put("network", stats.getString(stats.getColumnIndex("network")));
 				row.put("event", stats.getString(stats.getColumnIndex("event")));

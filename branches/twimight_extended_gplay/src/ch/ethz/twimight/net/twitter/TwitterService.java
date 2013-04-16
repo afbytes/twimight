@@ -1231,7 +1231,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		ContentValues cv = new ContentValues();
 		cv.put(DirectMessages.COL_TEXT, dm.getText());
 		cv.put(DirectMessages.COL_CREATED, dm.getCreatedAt().getTime());
-		cv.put(DirectMessages.COL_DMID, dm.getId());
+		cv.put(DirectMessages.COL_DMID, dm.getId().longValue());
 
 		cv.put(DirectMessages.COL_SENDER, dm.getSender().getId());
 		cv.put(DirectMessages.COL_RECEIVER, dm.getRecipient().getId());
@@ -3673,7 +3673,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				for (winterwell.jtwitter.Message dm: result) {
 					if(lastId == null){
-						lastId = dm.getId();
+						lastId = dm.getId().longValue();
 						// save the id of the last DM (comes first from twitter) for future synchs
 						setDMsInSinceId(new BigInteger(lastId.toString()), getBaseContext());
 					}
@@ -3781,7 +3781,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				for (winterwell.jtwitter.Message dm: result) {
 					if(lastId == null){
-						lastId = dm.getId();
+						lastId = dm.getId().longValue();
 						// save the id of the last DM (comes first from twitter) for future synchs
 						setDMsOutSinceId(new BigInteger(lastId.toString()), getBaseContext());
 					}
