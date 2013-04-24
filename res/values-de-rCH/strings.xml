@@ -116,7 +116,7 @@
     <string name="revoke">Widerruefe</string>
     <string name="revoke_key">Bisch sicher dass dr Schlüssu wosch widerruefe? Nume komprimittierti Schlüssu sötte widerruefe wärde (z.B. falls ds Telefon isch gmugget worde).</string>
     <string name="revoking">Schlüssu wird jetz widerruefe</string>
-    <string name="update">TDS Update</string>
+    <string name="update">Twimight Server Update</string>
     <string name="update_button">Update</string>
     
     <!-- Terms & Conditions -->
@@ -154,10 +154,10 @@
     <string name="updates_interval">Update-Intervau</string>
     <string name="updates_interval_explain">Ds gwünschte Update-Intervau uswähle.</string>
     <string name="disaster_mode">Katastrophe-Modus</string>
-    <string name="disaster_mode_explain">Markiere um dr Katastrophe-Modus inzschaute. Achtung: Das schautet Bluetooth i.</string>
-    <string name="tds_communication">TDS Kommunikation</string>
-    <string name="tds_communication_explain">Markiere um outomatisch Updates vom Katastrophe-Server z lade.</string>
+    <string name="disaster_mode_explain">Markiere um dr Katastrophe-Modus izschaute. Ufpasst: Das schautet Bluetooth i.</string>
+    <string name="tds_communication">Twimight Server Kommunikation</string>
+    <string name="tds_communication_explain">Markiere um outomatisch Updates vom Twimight Server z lade.</string>
     <string name="location_updates">Standort-Updates</string>
-    <string name="location_updates_explain">Söue periodisch Standort-Updates a Katastrophe-Server gschickt wärde?</string>
+    <string name="location_updates_explain">Söue periodisch Standort-Updates a Twimight Server gschickt wärde?</string>
     
 </resources>

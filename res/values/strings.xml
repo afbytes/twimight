@@ -117,7 +117,7 @@
     <string name="revoke">Revoke</string>
     <string name="revoke_key">Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).</string>
     <string name="revoking">Revoking key.</string>
-    <string name="update">TDS Update</string>
+    <string name="update">Twimight Server Update</string>
     <string name="update_button">Update</string>
     
     <!-- Terms & Conditions -->
@@ -161,9 +161,9 @@
     <string name="updates_interval_explain">select the desired update interval</string>
     <string name="disaster_mode">Disaster Mode</string>
     <string name="disaster_mode_explain">Tap to enable disaster mode. Note that this enables Bluetooth.</string>
-    <string name="tds_communication">TDS Communication</string>
-    <string name="tds_communication_explain">Tap to enable updates from disaster server</string>
+    <string name="tds_communication">Twimight Server Communication</string>
+    <string name="tds_communication_explain">Tap to enable updates from Twimight Server</string>
     <string name="location_updates">Location Updates</string>
-    <string name="location_updates_explain">Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!</string>
+    <string name="location_updates_explain">Send periodic location updates to Twimight Server? Note that this will be of great use for the Disaster Mode when needed!</string>
     
 </resources>
