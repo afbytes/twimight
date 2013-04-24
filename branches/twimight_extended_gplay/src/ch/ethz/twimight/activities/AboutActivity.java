@@ -76,7 +76,7 @@ public class AboutActivity extends TwimightBaseActivity{
 		} else {
 			Date date = new Date(lastTimestamp);
 			
-			lastUpdate.setText(DateFormat.format("MM/dd/yy h:mmaa", date));
+			lastUpdate.setText(DateFormat.format("MM/dd/yy ", date));
 		}
 		updateButton.setOnClickListener(new OnClickListener(){
 
