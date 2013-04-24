@@ -35,8 +35,6 @@ import ch.ethz.twimight.net.twitter.DirectMessages;
  */
 public class ShowDMListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowDMListActivity";
-	
 	// Views
 	private ListView dmUserListView;
 	private ImageButton messageButton;

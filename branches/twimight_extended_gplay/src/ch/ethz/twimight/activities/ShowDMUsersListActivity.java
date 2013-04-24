@@ -37,8 +37,6 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
  */
 public class ShowDMUsersListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowDMUsersListActivity";
-	
 	// Views
 	private ListView dmUsersListView;
 	private ImageButton messageButton;

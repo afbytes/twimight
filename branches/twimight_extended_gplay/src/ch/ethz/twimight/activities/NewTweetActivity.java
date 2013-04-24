@@ -22,8 +22,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -298,14 +296,14 @@ public class NewTweetActivity extends TwimightBaseActivity{
 				if(!locationChecked){
 					
 					locHelper.registerLocationListener();
-					Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
+					Toast.makeText(NewTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
 					locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
 					locationChecked = true;
 					
 				} else {
 					
 					locHelper.unRegisterLocationListener();
-					Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
+					Toast.makeText(NewTweetActivity.this, getString(R.string.location_off), Toast.LENGTH_SHORT).show();
 					locationButton.setImageResource(R.drawable.ic_menu_mylocation);
 					locationChecked = false;
 				}
@@ -474,7 +472,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		@Override
 		protected void onPostExecute(Boolean result){
 			if (result)
-				Toast.makeText(NewTweetActivity.this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(NewTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT).show();
 			
 			if(insertUri != null){
 				// schedule the tweet for uploading to twitter
@@ -563,7 +561,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			Intent intent = new Intent();
 			intent.setType("image/*");
 			intent.setAction(Intent.ACTION_GET_CONTENT);
-			startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
+			startActivityForResult(Intent.createChooser(intent, getString(R.string.picker)), PICK_FROM_FILE);
 		}
 		else{
 			if (D) Log.i(TAG, "path for storing photos cannot be created!");

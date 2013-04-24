@@ -29,13 +29,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="Bug" android:textColor="@color/black"/>
+                    android:text="@string/bug_report" android:textColor="@color/black"/>
 
                 <RadioButton
                     android:id="@+id/radioFeature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Feature request" android:textColor="@color/black"/>
+                    android:text="@string/feature_request" android:textColor="@color/black"/>
             </RadioGroup>
 
         </LinearLayout>
@@ -45,10 +45,10 @@
 
                 <Button android:id="@+id/feedback_send" android:layout_width="120dp"
                         android:paddingLeft="5dp" android:layout_height="wrap_content"
-                        android:text="Send" android:layout_gravity="left" />
+                        android:text="@string/send" android:layout_gravity="left" />
 
                 <Button android:id="@+id/feedback_cancel" android:layout_width="120dp"
-                        android:layout_height="wrap_content" android:text="Cancel"
+                        android:layout_height="wrap_content" android:text="@string/cancel"
                         android:layout_gravity="right" android:layout_marginLeft="5dp"/>
 
         </LinearLayout>

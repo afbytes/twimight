@@ -187,7 +187,7 @@ public class DeviceListActivity extends TwimightBaseActivity {
            String address = info.substring(info.length() - 17);
             
            dbHelper.createMac(address, 1);
-           Toast.makeText(DeviceListActivity.this, "Devices added to active devices, connection will be attempted soon", Toast.LENGTH_SHORT).show();
+           Toast.makeText(DeviceListActivity.this, getString(R.string.device_added), Toast.LENGTH_SHORT).show();
                       
         }
     };

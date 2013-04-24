@@ -70,8 +70,6 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
  */
 public class LoginActivity extends Activity implements OnClickListener{
 
-	private static final String TAG = "LoginActivity"; /** For logging */
-	
 	// shared preferences
 	public static final String TWITTER_ID = "twitter_id"; /** Name of Twitter ID in shared preferences */
 	private static final String TWITTER_SCREENNAME = "twitter_screenname"; /** Name of Twitter screenname in shared preferences */
@@ -124,7 +122,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			// Do we have connectivity?
 			ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 			if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-				Toast.makeText(this,"Not connected to the Internet, showing old Tweets!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this,getString(R.string.no_connection), Toast.LENGTH_LONG).show();
 			}
 			startTimeline(this);
 			
@@ -161,12 +159,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 	}
 	
-	
-	
-	
-	
-
-
 	private void removeLoginInterface(){
 		buttonLogin = (Button) findViewById(R.id.buttonLogin);
 		showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
@@ -207,7 +199,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 									
 				new GetRequestTokenTask().execute();
 			} else {
-				Toast.makeText(this,"Not connected to the Internet, please try again later!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this,getString(R.string.no_connection2), Toast.LENGTH_LONG).show();
 			}
 			break;						
 		}
@@ -262,19 +254,19 @@ public class LoginActivity extends Activity implements OnClickListener{
 				// now we have the request token.
 			} catch (OAuthMessageSignerException e) {
 				e.printStackTrace();						
-				return "signing the request failed ";
+				return getString(R.string.error_signing);
 				
 			} catch (OAuthNotAuthorizedException e) {
 				e.printStackTrace();		
-				return "Twitter is not reachable at the moment, please try again later";
+				return getString(R.string.error_twitter);
 						
 			} catch (OAuthExpectationFailedException e) {
 				e.printStackTrace();							
-				return "required parameters were not correctly set" ;
+				return getString(R.string.error_parameters) ;
 						
 			} catch (OAuthCommunicationException e) {
 				e.printStackTrace();						
-				return "server communication failed, check internet connectivity";
+				return getString(R.string.error_server);
 			}
 			
 			return null;
@@ -299,7 +291,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		protected void onPreExecute() {
 			
 			super.onPreExecute();
-			progressDialog=ProgressDialog.show(LoginActivity.this, "In progress", "Veryfing credentials");
+			progressDialog=ProgressDialog.show(LoginActivity.this, getString(R.string.in_progress), getString(R.string.verifying));
 		}
 
 		@Override
@@ -343,25 +335,25 @@ public class LoginActivity extends Activity implements OnClickListener{
 				e.printStackTrace();				
 				success = false;
 				finish();
-				return "Error authenticating";
+				return getString(R.string.error_authentication);
 				
 			} catch (OAuthNotAuthorizedException e) {
 				e.printStackTrace();				
 				success = false;
 				finish();
-				return "Error authenticating";
+				return getString(R.string.error_authentication);
 				
 			} catch (OAuthExpectationFailedException e) {
 				e.printStackTrace();				
 				success = false;
 				finish();
-				return "Error authenticating";
+				return getString(R.string.error_authentication);
 				
 			} catch (OAuthCommunicationException e) {
 				e.printStackTrace();			
 				success = false;
 				finish();
-				return "Error authenticating";
+				return getString(R.string.error_authentication);
 				
 			} finally {
 			
@@ -771,7 +763,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	    	        		if(intent.getIntExtra(LoginActivity.LOGIN_RESULT, LoginActivity.LOGIN_FAILURE)==LoginActivity.LOGIN_SUCCESS){	        			
 	    	        			startTimeline(context);
 	    	        		} else {
-	    	        			Toast.makeText(getBaseContext(), "There was a problem with the login. Please try again later.", Toast.LENGTH_SHORT).show();
+	    	        			Toast.makeText(getBaseContext(), getString(R.string.error_login), Toast.LENGTH_SHORT).show();
 	    	        			
 	    	        			
 	    	        		}

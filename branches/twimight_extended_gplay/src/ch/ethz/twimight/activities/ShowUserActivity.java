@@ -24,7 +24,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -43,8 +42,6 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
  */
 public class ShowUserActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowUserActivity";
-
 	Uri uri;
 	Cursor c;
 	int flags;
@@ -56,7 +53,10 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	private TextView realName;
 	private TextView location;
 	private TextView description;
-	private TextView stats;
+	private TextView statsTweets;
+	private TextView statsFavorits;
+	private TextView statsFriends;
+	private TextView statsFollowers;
 	private Button followButton;
 	private ImageButton mentionButton;
 	private ImageButton messageButton;
@@ -86,7 +86,10 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		realName = (TextView) findViewById(R.id.showUserRealName);
 		location = (TextView) findViewById(R.id.showUserLocation);
 		description = (TextView) findViewById(R.id.showUserDescription);
-		stats = (TextView) findViewById(R.id.showUserStats);
+		statsTweets = (TextView) findViewById(R.id.statsTweets);
+		statsFavorits = (TextView) findViewById(R.id.statsFavorits);
+		statsFriends = (TextView) findViewById(R.id.statsFriends);
+		statsFollowers = (TextView) findViewById(R.id.statsFollowers);
 		followButton = (Button) findViewById(R.id.showUserFollow);
 		mentionButton = (ImageButton) findViewById(R.id.showUserMention);
 		messageButton = (ImageButton) findViewById(R.id.showUserMessage);
@@ -264,8 +267,10 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		int follows = c.getInt(c.getColumnIndex(TwitterUsers.COL_FRIENDS));
 		int followed = c.getInt(c.getColumnIndex(TwitterUsers.COL_FOLLOWERS));
 
-		stats.setText(Html.fromHtml("<b>@"+userScreenName+"</b> has <b>tweeted " +tweets+ "</b> times, and <b>favorited "
-						+ favorites+"</b> tweets. They <b>follow "+follows+"</b> users and are <b>followed by "+followed+"</b>."));
+		statsTweets.setText(String.valueOf(tweets));
+		statsFavorits.setText(String.valueOf(favorites));
+		statsFriends.setText(String.valueOf(follows));
+		statsFollowers.setText(String.valueOf(followed));
 
 		// if the user we show is the local user, disable the follow button
 		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
@@ -366,9 +371,9 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		 */
 		following = c.getInt(c.getColumnIndex(TwitterUsers.COL_ISFRIEND))>0;
 		if(following){
-			followButton.setText("Unfollow");
+			followButton.setText(getString(R.string.unfollow));
 		} else {
-			followButton.setText("Follow");
+			followButton.setText(getString(R.string.follow));
 		}
 		// listen to clicks		
 		followButton.setOnClickListener(new OnClickListener(){

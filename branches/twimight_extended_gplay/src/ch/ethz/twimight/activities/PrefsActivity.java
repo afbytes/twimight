@@ -188,7 +188,7 @@ public class PrefsActivity extends PreferenceActivity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
+		menu.add(1, OPTIONS_MENU_HOME, 1, getString(R.string.home));
 		return true;
 	}
 

@@ -24,7 +24,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,8 +49,6 @@ import ch.ethz.twimight.util.Constants;
  */
 public class ShowTweetListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowTweetListActivity";	
-	
 	// Views
 	private TweetListView timelineListView;
 	private ImageButton timelineButton;
@@ -127,7 +124,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		handler.postDelayed(checkLocation, 1*60*1000L);
 
 	    
-		setTitle("Twimight - @" + LoginActivity.getTwitterScreenname(this));
+		setTitle(getString(R.string.app_name) + " - @" + LoginActivity.getTwitterScreenname(this));
 		
 		running = true;
 		timelineListView = (TweetListView) findViewById(R.id.tweetList);
@@ -330,7 +327,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		unbindDrawables(findViewById(R.id.showTweetListRoot));
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
-			Toast.makeText(this, "Warning: The disaster mode is still running in the background ", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, getString(R.string.disastermode_running), Toast.LENGTH_LONG).show();
 
 
 	}
@@ -342,12 +339,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_PROFILE, 1, "My Profile").setIcon(R.drawable.ic_menu_friendslist);
-		menu.add(2, OPTIONS_MENU_MESSAGES, 2, "Messages").setIcon(R.drawable.ic_menu_start_conversation);
-		menu.add(3, OPTIONS_MENU_SETTINGS, 4, "Settings").setIcon(R.drawable.ic_menu_preferences);				
-		menu.add(5, OPTIONS_MENU_LOGOUT, 9, "Logout").setIcon(R.drawable.ic_menu_close_clear_cancel);
-		menu.add(6, OPTIONS_MENU_ABOUT, 8, "About").setIcon(R.drawable.ic_menu_info_details);
-		menu.add(7, OPTIONS_MENU_FEEDBACK, 7, "Feedback").setIcon(R.drawable.ic_menu_edit);
+		menu.add(1, OPTIONS_MENU_PROFILE, 1, getString(R.string.profile)).setIcon(R.drawable.ic_menu_friendslist);
+		menu.add(2, OPTIONS_MENU_MESSAGES, 2, getString(R.string.messages)).setIcon(R.drawable.ic_menu_start_conversation);
+		menu.add(3, OPTIONS_MENU_SETTINGS, 4, getString(R.string.settings)).setIcon(R.drawable.ic_menu_preferences);				
+		menu.add(5, OPTIONS_MENU_LOGOUT, 9, getString(R.string.logout)).setIcon(R.drawable.ic_menu_close_clear_cancel);
+		menu.add(6, OPTIONS_MENU_ABOUT, 8, getString(R.string.about)).setIcon(R.drawable.ic_menu_info_details);
+		menu.add(7, OPTIONS_MENU_FEEDBACK, 7, getString(R.string.feedback)).setIcon(R.drawable.ic_menu_edit);
 
 		return true;
 	}
@@ -397,7 +394,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==false){
 				showLogoutDialog();
 			} else {
-				Toast.makeText(this, "Disable Disaster Mode first. NOTE: Once you log out Twimight will not work until you are connected to the internet again!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, getString(R.string.disable_disastermode), Toast.LENGTH_LONG).show();
 			}
 			break;
 		case OPTIONS_MENU_ABOUT:
@@ -566,15 +563,15 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	 */
 	private void showLogoutDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to log out?")
+		builder.setMessage(getString(R.string.logout_question))
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   LoginActivity.logout(getBaseContext());
 		        	   finish();
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		                dialog.cancel();
 		           }
