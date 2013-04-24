@@ -11,23 +11,93 @@
       Theus Hossmann - Implementation
       Dominik Schatzmann - Message specification
 -->
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory android:key="prefCategoryNotifications" android:title="Notifications"><PreferenceScreen android:title="Notifications" android:summary="click to enter in the notifications menu" android:key="prefNotifications">
-   		
-   		
-   	<CheckBoxPreference android:key="prefNotifyTweets" android:title="Notify Tweets" android:summary="tap to receive tweet notifications" android:enabled="true" android:selectable="true" android:defaultValue="false" />
-   	<CheckBoxPreference android:key="prefNotifyMentions" android:summary="tab to be notified about mentions" android:title="Notify Mentions" android:enabled="true" android:selectable="true" android:defaultValue="true" />
-   	<CheckBoxPreference android:key="prefNotifyDirectMessages" android:summary="tap to be notified about new direct messages" android:enabled="true" android:selectable="true" android:title="Notify Direct Messages" android:defaultValue="true" />
-</PreferenceScreen></PreferenceCategory><PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
-		<CheckBoxPreference android:title="Use Location" android:key="prefUseLocation" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to geo-tag your Tweets by default."></CheckBoxPreference>
-		<CheckBoxPreference android:title="Updates in Background" android:key="prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/><ListPreference android:title="Updates Interval" android:summary="select the desired update interval" android:key="prefUpdateInterval" android:enabled="true" android:entries="@array/listArray" android:entryValues="@array/listValues" android:defaultValue="5"/>
-		
-	</PreferenceCategory>
-   	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
-		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
-		<CheckBoxPreference android:title="TDS Communication" android:key="prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
-		<CheckBoxPreference android:title="Location Updates" android:key="prefLocationUpdates" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Send periodic location updates to TDS? Note that this will be of great use for the Disaster Mode when needed!"></CheckBoxPreference>
-	</PreferenceCategory>
-   	
-   	
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="prefCategoryNotifications"
+        android:title="@string/notifications" >
+        <PreferenceScreen
+            android:key="prefNotifications"
+            android:summary="@string/notifications_explain"
+            android:title="@string/notifications" >
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:enabled="true"
+                android:key="prefNotifyTweets"
+                android:selectable="true"
+                android:summary="@string/notify_tweets_explain"
+                android:title="@string/notify_tweets" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:enabled="true"
+                android:key="prefNotifyMentions"
+                android:selectable="true"
+                android:summary="@string/notify_mentions_explain"
+                android:title="@string/notify_mentions" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:enabled="true"
+                android:key="prefNotifyDirectMessages"
+                android:selectable="true"
+                android:summary="@string/notify_dms_explain"
+                android:title="@string/notify_dms" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="prefCategoryTwitter"
+        android:title="@string/twitter" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="prefUseLocation"
+            android:selectable="true"
+            android:summary="@string/use_location_explain"
+            android:title="@string/use_location" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="prefRunAtBoot"
+            android:selectable="true"
+            android:summary="@string/updates_background_explain"
+            android:title="@string/updates_background" />
+
+        <ListPreference
+            android:defaultValue="5"
+            android:enabled="true"
+            android:entries="@array/listArray"
+            android:entryValues="@array/listValues"
+            android:key="prefUpdateInterval"
+            android:summary="@string/updates_interval_explain"
+            android:title="@string/updates_interval" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="prefCategoryDisasterMode"
+        android:title="Disaster Mode" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="prefDisasterMode"
+            android:selectable="true"
+            android:summary="@string/disaster_mode_explain"
+            android:title="@string/disaster_mode" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="prefTDSCommunication"
+            android:selectable="true"
+            android:summary="@string/tds_communication_explain"
+            android:title="@string/tds_communication" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="prefLocationUpdates"
+            android:selectable="true"
+            android:summary="@string/location_updates_explain"
+            android:title="@string/location_updates" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+
 </PreferenceScreen>

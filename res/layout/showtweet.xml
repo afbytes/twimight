@@ -28,11 +28,11 @@
 				android:orientation="vertical" android:paddingLeft="20dp">
 				<TextView android:id="@+id/showTweetRealName"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="TextView" android:textColor="@color/twimightTextDark"
+					android:text="@string/placeholder" android:textColor="@color/twimightTextDark"
 					android:textSize="18sp" android:textStyle="bold" />
 				<TextView android:id="@+id/showTweetScreenName"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="TextView" android:textColor="@color/twimightTextDark"
+					android:text="@string/placeholder" android:textColor="@color/twimightTextDark"
 					android:textSize="18sp" />
 			</LinearLayout>
 			<LinearLayout android:layout_width="fill_parent"
@@ -120,7 +120,7 @@
 			    style="@style/twimightDefaultTextAppearance"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:text="This tweet will be posted soon (when Internet connection available)." />
+			    android:text="@string/tweet_will_be_posted" />
 
 		</LinearLayout>
 
@@ -138,8 +138,7 @@
 			    style="@style/twimightDefaultTextAppearance"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:text="This tweet will be deleted soon (when Internet connection available). 
-				Press to abort operation" />
+			    android:text="@string/tweet_will_be_deleted" />
 
 		</LinearLayout>
 
@@ -157,7 +156,7 @@
 			    style="@style/twimightDefaultTextAppearance"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:text="This tweet will be marked as favorite soon (when Internet connection available)." />
+			    android:text="@string/tweet_will_be_favorited" />
 
 		</LinearLayout>
 
@@ -175,7 +174,7 @@
 			    style="@style/twimightDefaultTextAppearance"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:text="This tweet will be un-favorited soon (when Internet connection available)." />
+			    android:text="@string/tweet_will_be_unfavorited" />
 
 		</LinearLayout>
 
@@ -193,7 +192,7 @@
 			    style="@style/twimightDefaultTextAppearance"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
-			    android:text="This retweet will be posted soon (when Internet connection available)." />
+			    android:text="@string/will_be_retweeted" />
 
 		</LinearLayout>
 

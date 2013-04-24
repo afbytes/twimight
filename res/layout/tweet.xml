@@ -112,14 +112,14 @@
                     android:layout_gravity="left"
                     android:layout_marginRight="20dp"
                     android:paddingLeft="5dp"
-                    android:text="Tweet" />
+                    android:text="@string/tweet" />
 
                 <Button
                     android:id="@+id/tweet_cancel"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
-                    android:text="Cancel" />
+                    android:text="@string/cancel" />
 
         </LinearLayout>
 

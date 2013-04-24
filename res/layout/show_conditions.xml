@@ -21,7 +21,7 @@
     	<TextView android:id="@+id/textConditionTitle"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal" android:textSize="24dp"
-			android:text="Terms of Conditions" android:textColor="@color/black" />	
+			android:text="@string/terms_and_conditions" android:textColor="@color/black" />	
     
 		<TextView android:id="@+id/textConditions" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_gravity="center"
@@ -40,13 +40,13 @@
 		    android:layout_height="wrap_content"
 		    android:layout_marginRight="20dp"
 		    android:padding="10dp"
-		    android:text="I Agree" />
+		    android:text="@string/agree" />
 		
 		<Button
 		    android:id="@+id/buttonDecline"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="Decline" android:padding="10dp"/>
+		    android:text="@string/decline" android:padding="10dp"/>
     
     
 	</LinearLayout>

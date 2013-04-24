@@ -74,7 +74,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
                     String retweeted_by = cursor.getString(col);
                     TextView textRetweeted_by = (TextView) row.findViewById(R.id.textRetweeted_by);
                     if (retweeted_by != null) {
-                            textRetweeted_by.setText("retweeted by " + retweeted_by);              
+                            textRetweeted_by.setText(context.getString(R.string.retweeted_by) + " " + retweeted_by);              
                             textRetweeted_by.setVisibility(View.VISIBLE);                                  
                     }
                     else {

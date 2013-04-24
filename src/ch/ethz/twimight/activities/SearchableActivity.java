@@ -92,7 +92,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 		if (intent.hasExtra(SearchManager.QUERY)) {
 			//if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
 			query = intent.getStringExtra(SearchManager.QUERY);	
-			setTitle("Search Results for: " + query);
+			setTitle(getString(R.string.results_for)+ ": " + query);
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);

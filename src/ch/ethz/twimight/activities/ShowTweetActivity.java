@@ -104,8 +104,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	//SDcard helper
 	private SDCardHelper sdCardHelper;
 	private String userID = null;
-	private String tweetId;	
-	
 
 	
 	/** 
@@ -455,11 +453,6 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		});
 		
 	}
-
-
-	
-	
-	
 
 	private class InternalURLSpan extends ClickableSpan {      
 		String url;

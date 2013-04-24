@@ -9,18 +9,18 @@
 		android:layout_height="50dp">
 		<Button android:id="@+id/headerBarFriendsButton"
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:text="Friends" android:layout_marginRight="15dp"
+			android:text="@string/friends" android:layout_marginRight="15dp"
 			android:paddingLeft="10dp" android:paddingRight="10dp"
 			android:background="@drawable/header_button" />
 		<Button android:id="@+id/headerBarFollowersButton"
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:text="Followers" android:layout_marginRight="15dp"
+			android:text="@string/followers" android:layout_marginRight="15dp"
 			android:paddingLeft="10dp" android:paddingRight="10dp"
 			android:background="@drawable/header_button" />
 
 		<Button android:id="@+id/headerBarDisasterPeersButton"
 			android:layout_width="wrap_content" android:layout_height="fill_parent"
-			android:text="Peers"
+			android:text="@string/peers"
 			android:paddingLeft="10dp" android:paddingRight="10dp"
 			android:background="@drawable/header_button" />
 
@@ -37,7 +37,7 @@
 
 	<TextView android:id="@+id/userListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="No users (loading..)" android:textSize="16sp"
+		android:text="@string/no_users" android:textSize="16sp"
 		android:layout_gravity="center" android:paddingTop="20dp" />
 
 </LinearLayout>
