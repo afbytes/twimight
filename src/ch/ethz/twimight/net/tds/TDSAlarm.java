@@ -177,18 +177,22 @@ public class TDSAlarm extends BroadcastReceiver {
 			@Override
 			public void run() {				
 					int attempts = 0;
-					while(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null && attempts <= 3){
-						BluetoothAdapter.getDefaultAdapter().enable();
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
-							
+					
+					BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+					if (adapter != null) {
+						while(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) == null && attempts <= 3){
+							adapter.enable();
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e) {
+								
+							}
+							// can we now get an address?
+							getMacFromAdapter(context);
+							attempts++;
 						}
-						// can we now get an address?
-						getMacFromAdapter(context);
-						attempts++;
-					}
-					BluetoothAdapter.getDefaultAdapter().disable();
+						BluetoothAdapter.getDefaultAdapter().disable();
+					}					
 
 					if(PreferenceManager.getDefaultSharedPreferences(context).getString("mac", null) != null && 
 							PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON) == true ){
