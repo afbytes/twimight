@@ -418,18 +418,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 
 
-	@Override
-		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-			switch(requestCode) {
-			case PrefsActivity.REQUEST_DISCOVERABLE:
-				
-				if (resultCode != Activity.RESULT_CANCELED) {
-					Intent intent = new Intent(this, DeviceListActivity.class);
-					startActivity(intent);
-				}
-						
-			}
-		}  
+
 	
 	/**
 	 * Saves the current selection

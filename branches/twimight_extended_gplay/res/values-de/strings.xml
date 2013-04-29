@@ -89,16 +89,7 @@
     <string name="disable_disastermode">Bitte zuerst Katastrophen-Modus abschalten. Achtung: Sobald du dich abmeldest funktioniert Twimight nicht mehr bis wieder Internetverbindung besteht.</string>
     <string name="logout_question">Bist du sicher dass du dich abmelden willst?</string>
     
-    <!-- Peering -->
-    <string name="scanning">Suche nach Geräten..</string>
-    <string name="select_device">Gerät zum Hinzufügen auswählen</string>
-    <string name="none_paired">Keine Geräte verbunden</string>
-    <string name="none_found">Keine Geräte gefunden</string>
-    <string name="title_paired_devices">Verbundene Geräte</string>
-    <string name="title_other_devices">Verfügbare Geräte</string>
-    <string name="device_added">Gerät zu den aktiven Geräten hinzugefügt. Verbindung wird bald erstellt.</string>
-    <string name="button_scan">Geräte suchen</string>
-    
+
     <!-- Feedback -->
     <string name="feature_request">Feature anfordern</string>
     <string name="bug_report">Fehlermeldung</string>
