@@ -23,7 +23,6 @@ import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;

@@ -35,6 +35,7 @@ import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
@@ -110,8 +111,7 @@ public class TweetsContentProvider extends ContentProvider {
 	}
 	
 	// for the status bar notification
-	private static final int TWEET_NOTIFICATION_ID = 1;
-	
+	private static final int TWEET_NOTIFICATION_ID = 1;	
 	private static final int NOTIFY_MENTION = 2;
 	private static final int NOTIFY_DISASTER = 3;
 	private static final int NOTIFY_TWEET = 4;
@@ -121,11 +121,13 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	@Override
 	public boolean onCreate() {
-		dbHelper = DBOpenHelper.getInstance(getContext());
+		dbHelper = DBOpenHelper.getInstance(getContext().getApplicationContext());
 		database = dbHelper.getWritableDatabase();
 		localScreenName = LoginActivity.getTwitterScreenname(getContext());
 		return true;
 	}
+	
+	
 
 	/**
 	 * Returns the MIME types (defined in Tweets) of a URI
@@ -171,13 +173,13 @@ public class TweetsContentProvider extends ContentProvider {
 		Intent i;
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS: 
-				Log.d(TAG, "Query TWEETS");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS");
 				c = database.query(DBOpenHelper.TABLE_TWEETS, projection, where, whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
 				break;
 			
 			case TWEETS_ID: 
-				Log.d(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
@@ -206,7 +208,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME + " "
 					+ "WHERE " + DBOpenHelper.TABLE_TWEETS+ "._id=" + uri.getLastPathSegment() + ";";
 				c = database.rawQuery(sql, null);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -214,7 +216,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 						
 			case TWEETS_SEARCH: // the search query must be given in the where argument
-				Log.d(TAG, "Query SEARCH");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query SEARCH");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
@@ -243,7 +245,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " + DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME + " "
 					+ "WHERE  " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -257,7 +259,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_TIMELINE_NORMAL:
-				Log.d(TAG, "Query TIMELINE_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_NORMAL");
 
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
@@ -282,7 +284,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "					
 					+ "ORDER BY " + Tweets.REVERSE_SORT_ORDER
 					+ " LIMIT 5;";
@@ -296,7 +298,7 @@ public class TweetsContentProvider extends ContentProvider {
 				getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_DISASTER: 
-				Log.d(TAG, "Query TIMELINE_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -321,7 +323,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -335,7 +337,7 @@ public class TweetsContentProvider extends ContentProvider {
 				//getContext().startService(i);
 				break;
 			case TWEETS_TIMELINE_ALL:
-				Log.d(TAG, "Query TIMELINE_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query TIMELINE_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -358,7 +360,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MYDISASTER+")!=0 "
 					+ "OR ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_TIMELINE+")!=0 "
@@ -374,7 +376,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_USER_ID:
-				Log.i(TAG, "Query TWEETS_USER_ID");
+				if (TwimightBaseActivity.D) Log.i(TAG, "Query TWEETS_USER_ID");
 				
 				// get the screenname for updating user tweets
 				Uri userUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
@@ -429,7 +431,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 			
 			case TWEETS_FAVORITES_NORMAL: 
-				Log.d(TAG, "Query FAVORITES_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -451,7 +453,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -467,7 +469,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_FAVORITES_DISASTER: 
-				Log.d(TAG, "Query FAVORITES_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
@@ -489,7 +491,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -505,7 +507,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_FAVORITES_ALL: 
-				Log.d(TAG, "Query FAVORITES_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query FAVORITES_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -527,7 +529,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_FAVORITES+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -542,7 +544,7 @@ public class TweetsContentProvider extends ContentProvider {
 				break;
 				
 			case TWEETS_MENTIONS_NORMAL: 
-				Log.d(TAG, "Query MENTIONS_NORMAL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_NORMAL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -564,7 +566,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+"=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -580,7 +582,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_DISASTER: 
-				Log.d(TAG, "Query MENTIONS_DISASTER");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_DISASTER");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -602,7 +604,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "AND "+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_ISDISASTER+">0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
@@ -618,7 +620,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				break;
 			case TWEETS_MENTIONS_ALL: 
-				Log.d(TAG, "Query MENTIONS_ALL");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query MENTIONS_ALL");
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
@@ -640,7 +642,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 					+ "FROM "+DBOpenHelper.TABLE_TWEETS + " "
 					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " 
-					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_SCREENNAME+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_SCREENNAME+ " "
+					+ "ON " +DBOpenHelper.TABLE_TWEETS+"." +Tweets.COL_USER+ "=" +DBOpenHelper.TABLE_USERS+"." +TwitterUsers.COL_ID+ " "
 					+ "WHERE ("+DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_BUFFER+"&"+Tweets.BUFFER_MENTIONS+")!=0 "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
@@ -717,7 +719,7 @@ public class TweetsContentProvider extends ContentProvider {
 				}
 				
 				CertificateManager cm = new CertificateManager(getContext());
-				KeyManager km = new KeyManager(getContext());
+				KeyManager km = new KeyManager(getContext().getApplicationContext());
 				
 				//verify whether I was the author or not
 				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
@@ -1130,15 +1132,15 @@ public class TweetsContentProvider extends ContentProvider {
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = "You have new mention(s)";
-			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.MENTIONS_KEY);			
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = "You have new disaster tweet(s)";
-			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.FAVORITES_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
 			break;
 		case(NOTIFY_TWEET):
 			contentText = "New tweet(s) in your timeline";
-			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, ShowTweetListActivity.TIMELINE_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
 			break;
 		default:
 			break;

@@ -17,7 +17,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
 
 /**
@@ -27,9 +26,7 @@ import ch.ethz.twimight.fragments.TweetListFragment;
  */
 public class ShowUserTweetListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowUserTweetListActivity";
-	public static final int USER_TWEETS_KEY = 14;	
-	
+	private static final String TAG = "ShowUserTweetListActivity";	
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -45,10 +42,12 @@ public class ShowUserTweetListActivity extends TwimightBaseActivity{
 		long userId = getIntent().getLongExtra("userId", 0);
 		FragmentManager fragmentManager = getFragmentManager();
 	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        TweetListFragment tlf = new TweetListFragment(USER_TWEETS_KEY);
+        TweetListFragment tlf = new TweetListFragment(TweetListFragment.USER_TWEETS);
+        
         Bundle bundle =  new Bundle();
-        bundle.putLong(ListFragment.EXTRA_DATA, userId);
+        bundle.putLong(TweetListFragment.USER_ID, userId);
         tlf.setArguments(bundle);
+        
         fragmentTransaction.add(R.id.rootRelativeLayout,tlf);
         fragmentTransaction.commit();
 		

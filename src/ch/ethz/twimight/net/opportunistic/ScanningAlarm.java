@@ -22,8 +22,7 @@ import android.content.SharedPreferences;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import ch.ethz.twimight.data.MacsDBHelper;
+
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -55,6 +54,8 @@ public class ScanningAlarm extends BroadcastReceiver {
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());
 		} 			
+			
+
 
 	}	
 
@@ -123,6 +124,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
 
+		
 			AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 
 			Intent intent = new Intent(context, ScanningAlarm.class);
@@ -131,7 +133,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 			
 			long delay = Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL) - Math.round(Math.random()*Constants.RANDOMIZATION_INTERVAL);
 			alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, time, Constants.SCANNING_INTERVAL+ delay, pendingIntent);
-			
+		
 		} 
 	}
 

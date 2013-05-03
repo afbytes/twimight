@@ -60,7 +60,7 @@ import ch.ethz.twimight.util.SDCardHelper;
 public class NewTweetActivity extends Activity{
 
 	private static final String TAG = "TweetActivity";
-	private static Context CONTEXT; 
+	
 	private boolean useLocation;
 	private EditText text;
 	private TextView characters;
@@ -71,9 +71,7 @@ public class NewTweetActivity extends Activity{
 	
 	// the following are all to deal with location
 	private ImageButton locationButton;
-	private Location loc;
-	private LocationManager lm;
-	private LocationListener locationListener;
+	
 	private boolean locationChecked;
 	private TextWatcher textWatcher;
 	
@@ -103,223 +101,217 @@ public class NewTweetActivity extends Activity{
 		LocationHelper locHelper ;
 		long timestamp;		
 		ConnectivityManager cm;
-		StatisticsDBHelper locDBHelper;	
-	
-	/** 
-	 * Called when the activity is first created. 
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.tweet);
-		CONTEXT = this;
-		
-		
-		//Statistics
-		locDBHelper = new StatisticsDBHelper(this);
-		locDBHelper.open();
-		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
-		locHelper = new LocationHelper(this);
-		
-		//SDCard helper
-		sdCardHelper = new SDCardHelper(CONTEXT);
-		
-		cancelButton = (Button) findViewById(R.id.tweet_cancel);		
-		cancelButton.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
+		StatisticsDBHelper statsDBHelper;	
+		/** 
+		 * Called when the activity is first created. 
+		 */
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.tweet);
 				
-				finish();		
+			//Statistics
+			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
+			statsDBHelper.open();
+			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
+			
+			locHelper = LocationHelper.getInstance(this);		
+			
+			//SDCard helper
+			sdCardHelper = new SDCardHelper(this);		
+			setupBasicButtons();
+			
+			characters = (TextView) findViewById(R.id.tweet_characters);
+			characters.setText(Integer.toString(Constants.TWEET_LENGTH));
+			
+			text = (EditText) findViewById(R.id.tweetText);		
+			
+			// Did we get some extras in the intent?
+			Intent i = getIntent();
+			if(i.hasExtra("text")){
+				text.setText(Html.fromHtml("<i>"+i.getStringExtra("text")+"</i>"));
+			}
+			if(text.getText().length()==0){
+				sendButton.setEnabled(false);
 			}
 			
-		});
-		
-		sendButton = (Button) findViewById(R.id.tweet_send);
-		sendButton.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
-				new SendTweetTask().execute();				
+			if(text.getText().length()>Constants.TWEET_LENGTH){
+				text.setText(text.getText().subSequence(0, Constants.TWEET_LENGTH));
+				text.setSelection(text.getText().length());
+	    		characters.setTextColor(Color.RED);
 			}
 			
-		});
-		
-		characters = (TextView) findViewById(R.id.tweet_characters);
-		characters.setText(Integer.toString(Constants.TWEET_LENGTH));
-		
-		text = (EditText) findViewById(R.id.tweetText);
-		
-		
-		// Did we get some extras in the intent?
-		Intent i = getIntent();
-		if(i.hasExtra("text")){
-			text.setText(Html.fromHtml("<i>"+i.getStringExtra("text")+"</i>"));
-		}
-		if(text.getText().length()==0){
-			sendButton.setEnabled(false);
-		}
-		
-		if(text.getText().length()>Constants.TWEET_LENGTH){
-			text.setText(text.getText().subSequence(0, Constants.TWEET_LENGTH));
-			text.setSelection(text.getText().length());
-    		characters.setTextColor(Color.RED);
-		}
-		
-		characters.setText(Integer.toString(Constants.TWEET_LENGTH-text.getText().length()));
+			characters.setText(Integer.toString(Constants.TWEET_LENGTH-text.getText().length()));
 
-		if(i.hasExtra("isReplyTo")){
-			isReplyTo = i.getLongExtra("isReplyTo", 0);
+			if(i.hasExtra("isReplyTo")){
+				isReplyTo = i.getLongExtra("isReplyTo", 0);
+			}
+			
+			// This makes sure we do not enter more than 140 characters	
+			textWatcher = new TextWatcher(){
+			    public void afterTextChanged(Editable s){
+			    	int nrCharacters = Constants.TWEET_LENGTH-text.getText().length();
+			    	
+			    	if(nrCharacters < 0){
+			    		text.setText(text.getText().subSequence(0, Constants.TWEET_LENGTH));
+			    		text.setSelection(text.getText().length());
+			    		nrCharacters = Constants.TWEET_LENGTH-text.getText().length();
+			    	}
+			    	
+			    	if(nrCharacters <= 0){
+			    		characters.setTextColor(Color.RED);
+			    	} else {
+			    		characters.setTextColor(Color.BLACK);
+			    	}
+			    	
+			    	if(nrCharacters == Constants.TWEET_LENGTH){
+			    		sendButton.setEnabled(false);
+			    	} else {
+			    		sendButton.setEnabled(true);
+			    	}
+			    	
+			    	characters.setText(Integer.toString(nrCharacters));
+			    	
+			    }
+			    public void  beforeTextChanged(CharSequence s, int start, int count, int after){}
+			    public void  onTextChanged (CharSequence s, int start, int before,int count) {} 
+			};
+			text.addTextChangedListener(textWatcher);
+			text.setSelection(text.getText().length());	
+			
+			setupImageRelatedButtons();	
+
+			
 		}
 		
-		// This makes sure we do not enter more than 140 characters	
-		textWatcher = new TextWatcher(){
-		    public void afterTextChanged(Editable s){
-		    	int nrCharacters = Constants.TWEET_LENGTH-text.getText().length();
-		    	
-		    	if(nrCharacters < 0){
-		    		text.setText(text.getText().subSequence(0, Constants.TWEET_LENGTH));
-		    		text.setSelection(text.getText().length());
-		    		nrCharacters = Constants.TWEET_LENGTH-text.getText().length();
-		    	}
-		    	
-		    	if(nrCharacters <= 0){
-		    		characters.setTextColor(Color.RED);
-		    	} else {
-		    		characters.setTextColor(Color.BLACK);
-		    	}
-		    	
-		    	if(nrCharacters == Constants.TWEET_LENGTH){
-		    		sendButton.setEnabled(false);
-		    	} else {
-		    		sendButton.setEnabled(true);
-		    	}
-		    	
-		    	characters.setText(Integer.toString(nrCharacters));
-		    	
-		    }
-		    public void  beforeTextChanged(CharSequence s, int start, int count, int after){}
-		    public void  onTextChanged (CharSequence s, int start, int before,int count) {} 
-		};
-		text.addTextChangedListener(textWatcher);
-		text.setSelection(text.getText().length());
-		
-
-		locationListener = new LocationListener() {
-			public void onLocationChanged(Location location) {
-				
-				if(loc == null || !loc.hasAccuracy()){
-					loc = location;
-				} else if(location.hasAccuracy() && location.getAccuracy() < loc.getAccuracy()){
-					loc = location;
-				}
-			}
-
-			public void onProviderDisabled(String provider) {}
-			public void onProviderEnabled(String provider) {}
-			public void onStatusChanged(String provider, int status, Bundle extras) {}
-		};
-		
-		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		// User settings: do we use location or not?
-		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
-		
-		locationButton = (ImageButton) findViewById(R.id.tweet_location);
-		locationChecked = false;
-		if(useLocation){
-			locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
-			locationChecked = true;
-		}
-		locationButton.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				if(!locationChecked){
-					registerLocationListener();
-					Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
-					locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
-					locationChecked = true;
-				} else {
-					unRegisterLocationListener();
-					Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
-					locationButton.setImageResource(R.drawable.ic_menu_mylocation);
-					locationChecked = false;
-				}
-			}
-		});
-		
-		
-		
-		//uploading photos
-		tmpPhotoPath = Tweets.PHOTO_PATH + "/" + "tmp";
-		finalPhotoPath = Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
-		mImageView = new ImageView(this);
-		
-		photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
-		photoLayout.setVisibility(View.GONE);
-		
-		uploadFromGallery = (ImageButton) findViewById(R.id.upload_from_gallery);
-		uploadFromGallery.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				uploadFromGallery();
-			}
-		});
-		
-		uploadFromCamera = (ImageButton) findViewById(R.id.upload_from_camera);
-		uploadFromCamera.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				uploadFromCamera();
-			}
-		});
-		
-		previewPhoto = (ImageButton) findViewById(R.id.preview_photo);
-		previewPhoto.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				
-				mImageView = new ImageView(CONTEXT);
-				mImageView.setImageBitmap(photo);
-				AlertDialog.Builder photoPreviewDialog = new AlertDialog.Builder(CONTEXT);
-				photoPreviewDialog.setView(mImageView);
-				photoPreviewDialog.setNegativeButton("close",null);
-				photoPreviewDialog.show();
-				
-			}
-		});
-		
-		deletePhoto = (ImageButton) findViewById(R.id.delete_photo);
-		deletePhoto.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				
-				sdCardHelper.deleteFile(tmpPhotoUri.getPath());
-				hasMedia = false;
-				setButtonStatus(true,false);
-			}		
-		});
-		
-		photoButton = (ImageButton) findViewById(R.id.tweet_photo);		
-		photoButton.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				if(photoLayout.getVisibility() == View.GONE){
-					photoLayout.setVisibility(View.VISIBLE);
-					photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
-				}
-				else{
+		private void setupImageRelatedButtons(){
+			
+			//uploading photos
+					tmpPhotoPath = Tweets.PHOTO_PATH + "/" + "tmp";
+					finalPhotoPath = Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
+					mImageView = new ImageView(this);
+					
+					photoLayout = (LinearLayout) findViewById(R.id.linearLayout_photo_view);
 					photoLayout.setVisibility(View.GONE);
-					photoButton.setImageResource(R.drawable.ic_menu_gallery);
-				}
-			}
-		});
-		
-		String[] filePaths = {tmpPhotoPath, finalPhotoPath};
-		if(sdCardHelper.checkSDStuff(filePaths)){
-			
-			sdCardHelper.clearTempDirectory(tmpPhotoPath);
-			setButtonStatus(true,false);
+					
+					uploadFromGallery = (ImageButton) findViewById(R.id.upload_from_gallery);
+					uploadFromGallery.setOnClickListener(new OnClickListener(){
+						public void onClick(View v){
+							uploadFromGallery();
+						}
+					});
+					
+					uploadFromCamera = (ImageButton) findViewById(R.id.upload_from_camera);
+					uploadFromCamera.setOnClickListener(new OnClickListener(){
+						public void onClick(View v){
+							uploadFromCamera();
+						}
+					});
+					
+					previewPhoto = (ImageButton) findViewById(R.id.preview_photo);
+					previewPhoto.setOnClickListener(new OnClickListener(){
+						public void onClick(View v){
+							
+							mImageView = new ImageView(NewTweetActivity.this);
+							mImageView.setImageBitmap(photo);
+							AlertDialog.Builder photoPreviewDialog = new AlertDialog.Builder(NewTweetActivity.this);
+							photoPreviewDialog.setView(mImageView);
+							photoPreviewDialog.setNegativeButton("close",null);
+							photoPreviewDialog.show();
+							
+						}
+					});
+					
+					deletePhoto = (ImageButton) findViewById(R.id.delete_photo);
+					deletePhoto.setOnClickListener(new OnClickListener(){
+						public void onClick(View v){
+							
+							sdCardHelper.deleteFile(tmpPhotoUri.getPath());
+							hasMedia = false;
+							setButtonStatus(true,false);
+						}		
+					});
+					
+					String[] filePaths = {tmpPhotoPath, finalPhotoPath};
+					if(sdCardHelper.checkSDStuff(filePaths)){
+						
+						sdCardHelper.clearTempDirectory(tmpPhotoPath);
+						setButtonStatus(true,false);
+					}
+					else setButtonStatus(false,false);
 		}
-		else setButtonStatus(false,false);
+		
+		
+		private void setupBasicButtons() {
 
-		Log.v(TAG, "onCreated");
-	}
+			cancelButton = (Button) findViewById(R.id.tweet_cancel);
+			cancelButton.setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View v) {				
+					finish();		
+				}
+
+			});
+
+			sendButton = (Button) findViewById(R.id.tweet_send);
+			sendButton.setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View v) {
+					new SendTweetTask().execute();				
+				}
+
+			});
+			
+			photoButton = (ImageButton) findViewById(R.id.tweet_photo);		
+			photoButton.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					if(photoLayout.getVisibility() == View.GONE){
+						photoLayout.setVisibility(View.VISIBLE);
+						//photoButton.setImageResource(R.drawable.ic_menu_gallery_on);
+					}
+					else{
+						photoLayout.setVisibility(View.GONE);
+						//photoButton.setImageResource(R.drawable.ic_menu_gallery);
+					}
+				}
+			});
+
+			// User settings: do we use location or not?
+
+			useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
+
+			locationButton = (ImageButton) findViewById(R.id.tweet_location);
+			locationChecked = false;
+
+			if(useLocation){
+				locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+				locationChecked = true;
+			}
+
+			locationButton.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					if(!locationChecked){
+						
+						locHelper.registerLocationListener();
+						Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
+						locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
+						locationChecked = true;
+						
+					} else {
+						
+						locHelper.unRegisterLocationListener();
+						Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
+						locationButton.setImageResource(R.drawable.ic_menu_mylocation);
+						locationChecked = false;
+					}
+				}
+			});
+
+		}
 
 	/**
 	 * set button status with different operations
@@ -355,7 +347,7 @@ public class NewTweetActivity extends Activity{
 	public void onResume(){
 		super.onResume();
 		if(useLocation){
-			registerLocationListener();
+			locHelper.registerLocationListener();
 		}
 	}
 	
@@ -365,7 +357,7 @@ public class NewTweetActivity extends Activity{
 	@Override
 	public void onPause(){
 		super.onPause();
-		unRegisterLocationListener();
+		locHelper.unRegisterLocationListener();
 	}
 	
 	/**
@@ -384,8 +376,6 @@ public class NewTweetActivity extends Activity{
 		
 		locationButton.setOnClickListener(null);
 		locationButton = null;
-		locationListener = null;
-		lm = null;
 		
 		cancelButton.setOnClickListener(null);
 		cancelButton = null;
@@ -416,10 +406,10 @@ public class NewTweetActivity extends Activity{
 			
 			timestamp = System.currentTimeMillis();
 
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
+			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
 
 				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
 				Log.i(TAG, String.valueOf(hasMedia));
 			}
@@ -509,7 +499,7 @@ public class NewTweetActivity extends Activity{
 		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
 		
 		if(useLocation){
-			Location loc = getLocation();
+			Location loc = locHelper.getLocation();
 			if(loc!=null){
 				tweetContentValues.put(Tweets.COL_LAT, loc.getLatitude());
 				tweetContentValues.put(Tweets.COL_LNG, loc.getLongitude());
@@ -524,53 +514,8 @@ public class NewTweetActivity extends Activity{
 		return tweetContentValues;
 	}
 	
-	/**
-	 * Starts listening to location updates
-	 */
-	private void registerLocationListener(){
-		try{
-			if ((lm != null) && (locationListener != null)) {
-				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 40, locationListener);
-				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 200, locationListener);
-			}
-		} catch(Exception e) {
-			Log.i(TAG,"Can't request location Updates: " + e.toString());
-			return;
-		}
-	}
 	
-	/**
-	 * Stops listening to location updates
-	 */
-	private void unRegisterLocationListener(){
-		try{
-			if ((lm != null) && (locationListener != null)) {
-		        lm.removeUpdates(locationListener);
-		        Log.i(TAG, "unregistered updates");
-		    }
-		} catch(Exception e) {
-			Log.i(TAG,"Can't unregister location listener: " + e.toString());
-			return;
-		}
-	}
-	
-	/**
-	 * Tries to get a location from the listener if that was successful or the last known location otherwise.
-	 * @return
-	 */
-	private Location getLocation(){
-		if(loc!=null){
-			return loc;
-		}else{
-			if ((lm != null)) {
-				return lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			}
-		}
-		return null;
-	}
-	
-	
-	
+
 	
 	
 	//methods photo uploading

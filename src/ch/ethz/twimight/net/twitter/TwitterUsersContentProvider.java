@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -69,7 +70,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	 */
 	@Override
 	public boolean onCreate() {
-		dbHelper = DBOpenHelper.getInstance(getContext());
+		dbHelper = DBOpenHelper.getInstance(getContext().getApplicationContext());
 		database = dbHelper.getWritableDatabase();
 
 		return true;

@@ -1254,15 +1254,13 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		ContentValues userContentValues = new ContentValues();
 
 		if(user!=null){
-			if(user.screenName!=null ) {
-				if(user.id!=null) {
-					userContentValues.put(TwitterUsers.COL_ID, user.id);
-												
-				} 
-				userContentValues.put(TwitterUsers.COL_SCREENNAME, user.screenName);				
-				userContentValues.put(TwitterUsers.COL_NAME, user.name);
-				if(user.description!=null) userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.description);
-				if(user.location!=null) userContentValues.put(TwitterUsers.COL_LOCATION, user.location);
+			if(user.screenName!=null ) {				
+				userContentValues.put(TwitterUsers.COL_ID, user.getId());	
+				
+				userContentValues.put(TwitterUsers.COL_SCREENNAME, user.getScreenName());				
+				userContentValues.put(TwitterUsers.COL_NAME, user.getName());
+				if(user.description!=null) userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.getDescription());
+				if(user.location!=null) userContentValues.put(TwitterUsers.COL_LOCATION, user.getLocation());
 				userContentValues.put(TwitterUsers.COL_FAVORITES, user.favoritesCount);
 				userContentValues.put(TwitterUsers.COL_FRIENDS, user.friendsCount);
 				userContentValues.put(TwitterUsers.COL_FOLLOWERS, user.followersCount);
@@ -1924,7 +1922,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(String... params) {
-			Log.v(TAG, "AsynchTask: SearchTweetsTask");
+			Log.i(TAG, "AsynchTask: SearchTweetsTask");
 
 			SearchableActivity.setLoading(true);
 			
@@ -1934,7 +1932,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			twitter.setMaxResults(Constants.NR_SEARCH_TWEETS);
 			
 			try {
-				searchTweets = twitter.search(query);				
+				searchTweets = twitter.search(query);	
+				Log.i(TAG,"search tweets size = " + searchTweets.size());
 			} catch (Exception ex) {
 				this.ex = ex;
 			}

@@ -16,7 +16,6 @@ import java.util.HashMap;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,7 +29,7 @@ import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.fragments.adapters.PageAdapter;
+import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.util.Constants;
@@ -53,9 +52,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	static Handler handler;
 
 
-	private int positionIndex;
-	private int positionTop;
-	private static Context CONTEXT;
 	
 	//LOGS
 	LocationHelper locHelper ;
@@ -73,10 +69,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	ActionBar actionBar;
 	public static final String FILTER_REQUEST = "filter_request";
-	
-	public static final int TIMELINE_KEY = 10;	
-	public static final int FAVORITES_KEY = 11;
-	public static final int MENTIONS_KEY = 12;
+
 	ViewPager viewPager;
 	
 	/** 
@@ -89,17 +82,22 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 
 		//statistics
-		locDBHelper = new StatisticsDBHelper(this);
+		locDBHelper = new StatisticsDBHelper(getApplicationContext());
 		locDBHelper.open();
+		
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
-		locHelper = new LocationHelper(this);
+		
+		locHelper = LocationHelper.getInstance(this);
+		locHelper.registerLocationListener();
+		
 		handler = new Handler();
 		checkLocation = new CheckLocation();
-		handler.postDelayed(checkLocation, 1*60*1000L);	  
+		handler.postDelayed(checkLocation, 1*60*1000L);	
 		
-		HashMap<Integer,TweetListFragment> fragmentMap = createFragments();		
-		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap,null);		
+		Bundle bundle = new Bundle();
+		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
+		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
         viewPager = (ViewPager)  findViewById(R.id.viewpager);			
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
@@ -136,24 +134,16 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	}
 	
-	private HashMap<Integer,TweetListFragment> createFragments() {
-		
-		HashMap<Integer,TweetListFragment> map = new HashMap<Integer,TweetListFragment>();
-		map.put(PageAdapter.POS_ZERO, new TweetListFragment(TIMELINE_KEY));
-		map.put(PageAdapter.POS_ONE, new TweetListFragment(FAVORITES_KEY));
-		map.put(PageAdapter.POS_TWO, new TweetListFragment(MENTIONS_KEY));
-		
-		return map;
-	}
+
 
 	private class CheckLocation implements Runnable {
 
 		@Override
 		public void run() {
 
-			if (locHelper != null && locHelper.count > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
+			if (locHelper != null && locHelper.getCount() > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -165,10 +155,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	@Override
 	protected void onNewIntent(Intent intent) {		
-		setIntent(intent);
-		
-
-	
+		setIntent(intent);	
 	}
 
 
@@ -185,7 +172,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		Intent intent = getIntent();
 
 		if(intent.hasExtra(FILTER_REQUEST)) {
-			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST, TIMELINE_KEY));
+			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST, TweetListFragment.TIMELINE_KEY));
 			intent.removeExtra(FILTER_REQUEST);
 
 		}
@@ -236,7 +223,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	protected void onStop() {
 		running=false;
-		
+		locHelper.unRegisterLocationListener();
 		super.onStop();
 	
 		
@@ -254,16 +241,14 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
 				cm.getActiveNetworkInfo() != null) {
 			
-			if (locHelper.count > 0 && cm.getActiveNetworkInfo() != null ) {			
-				locHelper.unRegisterLocationListener();
+			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {				
 				handler.removeCallbacks(checkLocation);				
-				locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
+				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
-		if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
-			locHelper.unRegisterLocationListener();			
-			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
+		if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {				
+			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
 			
@@ -275,24 +260,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	}
 
 	
-
-
-
-	
-
-
-	@Override
-		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-			switch(requestCode) {
-			case PrefsActivity.REQUEST_DISCOVERABLE:
-				
-				if (resultCode != Activity.RESULT_CANCELED) {
-					Intent intent = new Intent(this, DeviceListActivity.class);
-					startActivity(intent);
-				}
-						
-			}
-		}  
 	
 	/**
 	 * Saves the current selection

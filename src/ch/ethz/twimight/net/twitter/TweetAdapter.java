@@ -13,7 +13,6 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import android.content.ContentValues;
@@ -61,8 +60,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
 		super.bindView(row, context, cursor);
-		htmlDbHelper = new HtmlPagesDbHelper(context);
+		
+		htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
 		htmlDbHelper.open();
+		
 		// if we don't have a real name, we use the screen name
 		if(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME))==null){
 			TextView usernameTextView = (TextView) row.findViewById(R.id.textUser);
@@ -223,7 +224,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				} else
 					picture.setImageResource(R.drawable.default_profile);
 			} catch (Exception e) {
-				Log.e(TAG,"error opening input stream",e);
+				//Log.e(TAG,"error opening input stream",e);
 				picture.setImageResource(R.drawable.default_profile);
 			}				
 

@@ -17,7 +17,8 @@
     <string name="my_profile">My Profile</string>
     <string name="messages">Messages</string>
     <string name="settings">Settings</string>
-    <string name="add_peer">Add Peer</string>
+    <string name="cache_html">Save Links</string>
+    <string name="clear_cache_html">Clear cache</string>
     <string name="logout">Logout</string>
     <string name="about">About</string>
     <string name="feedback">Feedback</string>
@@ -38,21 +39,26 @@
     <string name="title_paired_devices">Paired Devices</string>
     <string name="title_other_devices">Available Devices</string>
     <string name="button_scan">Scan for devices</string>
-    <string name="conditions">By clicking &quot;I Agree&quot; below, I agree to join the Twimight Beta data
-collection. The Twimight Beta application will collect data that samples
-Twimight application usage statistics and my location during application
-usage.
+    <string name="conditions">
+        By clicking &quot;I Agree&quot; below, I agree to join the Twimight Beta data
+		collection. The Twimight Beta application will collect data that samples
+		Twimight application usage statistics and my location during application
+		usage.
 
-I understand that access to any data collected will only be allowed
-to the members of the Twimight research team and only for the purpose of
-research performed in the context of the Twimight project. Any published
-results of this study will only refer to anonymised and obfuscated data,
-and aggregated statistics that do not reveal the identities of the
-participants. As a participant I have the right to opt out of this study at
-any time during this experiment by uninstalling the application. Moreover,
-I have the right to access any information in the data set related to me,
-and request for all collected data to be removed. As a user of Twimight
-Beta I may participate in the Twimight Beta online competition.</string>
+		I understand that access to any data collected will only be allowed
+		to the members of the Twimight research team and only for the purpose of
+		research performed in the context of the Twimight project. Any published
+		results of this study will only refer to anonymised and obfuscated data,
+		and aggregated statistics that do not reveal the identities of the
+		participants. As a participant I have the right to opt out of this study at
+		any time during this experiment by uninstalling the application. Moreover,
+		I have the right to access any information in the data set related to me,
+		and request for all collected data to be removed. As a user of Twimight
+		Beta I may participate in the Twimight Beta online competition.
+  </string>
+    <string name="app_rater">If you enjoy using Twimight, please take a moment to rate it. 
+        					 Thanks for your support!
+    </string>   		
     <string name="dis_mode_description">If you loose Internet connectivity, activate the disaster mode 
     in the twimight preferences. Disaster tweets will epidemically
 	spread among all phones in disaster mode, without the need for

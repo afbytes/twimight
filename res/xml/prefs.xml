@@ -23,9 +23,9 @@
 		<CheckBoxPreference android:title="Updates in Background" android:key="prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/><ListPreference android:title="Updates Interval" android:summary="select the desired update interval" android:key="prefUpdateInterval" android:enabled="true" android:entries="@array/listArray" android:entryValues="@array/listValues" android:defaultValue="5"/>
 		
 	</PreferenceCategory>
-    
     <PreferenceCategory android:title="Offline Mode" android:key="prefCategoryOfflineMode">
-		<CheckBoxPreference android:title="Automatic Web Download" android:key="prefOfflineMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets."></CheckBoxPreference>	
+		<CheckBoxPreference android:title="Automatic Web Download" android:key="prefOfflineMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets."></CheckBoxPreference>
+		<CheckBoxPreference android:title="Web Page Share" android:key="prefWebShare" android:dependency="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable webpage share function in disaster mode, this could drain battery faster"></CheckBoxPreference>		
 	</PreferenceCategory>
    	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
 		<CheckBoxPreference android:title="Disaster Mode" android:key="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>

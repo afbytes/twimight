@@ -1,6 +1,5 @@
 package ch.ethz.twimight.net.opportunistic;
 
-import ch.ethz.twimight.net.opportunistic.DevicesReceiver.ScanningFinished;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -8,33 +8,43 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.adapters.TweetPageAdapter;
+import ch.ethz.twimight.fragments.TweetListFragment;
+import ch.ethz.twimight.fragments.adapters.ShowTweetPageAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 
 public class ShowTweetActivity extends TwimightBaseActivity {
 	
 	ViewPager viewPager;
 	ContentResolver resolver;
+	//String query;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.main);		
 		
 		resolver = getContentResolver();
 		Intent intent = getIntent();
+		
 		long rowId = intent.getIntExtra("rowId", 0);
-		int type = intent.getIntExtra("type", ShowTweetListActivity.TIMELINE_KEY);
+		Log.i("ShowTweetActivity","rowId: " + rowId);
+		int type = intent.getIntExtra("type", TweetListFragment.TIMELINE_KEY);
+		//if (type == TweetListFragment.SEARCH_TWEETS)
+			//query = intent.getStringExtra(ListFragment.SEARCH_QUERY);
 		
-		ArrayList<Long> rowIdList = getRowIds(type);
-		
-		TweetPageAdapter pageAdapter = new TweetPageAdapter(getFragmentManager(), rowIdList );		
-		viewPager = (ViewPager)  findViewById(R.id.viewpager);			
-		viewPager.setAdapter(pageAdapter);
-		viewPager.setOffscreenPageLimit(2);
-		viewPager.setCurrentItem(rowIdList.indexOf(rowId));
+		ArrayList<Long> rowIdList = getRowIds(type);		
+		if (rowIdList != null) {			
+			ShowTweetPageAdapter pageAdapter = new ShowTweetPageAdapter(getFragmentManager(), rowIdList );		
+			viewPager = (ViewPager) findViewById(R.id.viewpager);			
+			viewPager.setAdapter(pageAdapter);
+			viewPager.setOffscreenPageLimit(2);
+			Log.i("ShowTweetActivity","index: " + rowIdList.indexOf(rowId));
+			viewPager.setCurrentItem(rowIdList.indexOf(rowId));
+		}
+			
 	}
 
 	private ArrayList<Long> getRowIds(int type) {
@@ -66,27 +76,27 @@ public class ShowTweetActivity extends TwimightBaseActivity {
 
 	private Cursor performQuery(int type) {
 		Cursor c= null;
-		
+
 		switch(type) {
-		case ShowTweetListActivity.TIMELINE_KEY:
+		case TweetListFragment.TIMELINE_KEY:
 
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 
 			break;
-		case ShowTweetListActivity.FAVORITES_KEY:			
+		case TweetListFragment.FAVORITES_KEY:			
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
 					+ Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			break;
-		case ShowTweetListActivity.MENTIONS_KEY: 			
+		case TweetListFragment.MENTIONS_KEY: 			
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 					+ Tweets.TWEETS_TABLE_MENTIONS + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
 			break;
-		case SearchableActivity.SHOW_SEARCH_TWEETS:
+		case TweetListFragment.SEARCH_TWEETS:
 			c = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
-					+ Tweets.SEARCH), null, SearchableActivity.query, null, null);
+					+ Tweets.SEARCH), null, SearchableActivity.query , null, null);
 			break;
-			
+
 		}
 		return c;
 		

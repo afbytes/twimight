@@ -14,7 +14,6 @@ package ch.ethz.twimight.activities;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -33,6 +32,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.Html.HtmlPage;
+import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 
@@ -44,7 +45,8 @@ import ch.ethz.twimight.util.Constants;
 public class TwimightBaseActivity extends FragmentActivity{
 	
 	static TwimightBaseActivity instance;
-	private static final String TAG = "TwimightBaseActivity";	
+	private static final String TAG = "TwimightBaseActivity";
+	public static final boolean D = false;
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
@@ -198,21 +200,45 @@ public class TwimightBaseActivity extends FragmentActivity{
 			i = new Intent(this, AboutActivity.class);
 			startActivity(i);    
 			break;
-		case R.id.menu_add_peer:
-			   // Get the local Bluetooth adapter
-	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-			if (mBtAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
-				Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-				discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);			
-				startActivityForResult(discoverableIntent, PrefsActivity.REQUEST_DISCOVERABLE);           
+		case R.id.menu_cache: 
 
-			} else  {
-				Intent intent = new Intent(this, DeviceListActivity.class);
-				startActivity(intent);
-			}
-				
-				
+            i = new Intent(this, HtmlService.class);
+            i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_ALL);
+            i.putExtra(HtmlPage.OFFLINE_MANUAL, true);
+            startService(i); 			
 			break;
+			
+		 case R.id.menu_cache_clear:             
+             
+             AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
+             confirmDialog.setMessage("Are you sure you want to clear all files and data of webpage?");
+             confirmDialog.setTitle("Clear Cache");
+             confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+
+                     @Override
+                     public void onClick(DialogInterface dialog, int which) {
+                             // TODO Auto-generated method stub
+                             dialog.dismiss();
+                             Intent i = new Intent(getBaseContext(), HtmlService.class);
+                             Long timeSpan = (long) (0*24*3600*1000);
+                             i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.CLEAR_ALL);
+                             i.putExtra("timespan", timeSpan);
+                             startService(i);
+                     }
+                    
+             });
+             confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    
+                     @Override
+                     public void onClick(DialogInterface dialog, int which) {
+                             // TODO Auto-generated method stub
+                             dialog.dismiss();
+                     }
+             });
+             confirmDialog.show();
+            
+             break;
+			
 		case R.id.menu_feedback:
 			// Launch FeedbacktActivity
 			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
@@ -233,7 +259,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 		       .setCancelable(false)
 		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
-		        	   LoginActivity.logout(getBaseContext());
+		        	   LoginActivity.logout(TwimightBaseActivity.this.getApplicationContext());
 		        	   finish();
 		           }
 		       })
