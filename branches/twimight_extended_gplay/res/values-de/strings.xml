@@ -99,6 +99,7 @@
     <!-- About -->
     <string name="author">Autoren: Paolo Carta und Theus Hossmann</string>
     <string name="version">Version:</string>
+    <string name="keys">Keys</string>    
     <string name="no_certificate">Kein gültiges Zertifikat.</string>
     <string name="no_update">Keine Aktualisierung</string>
     <string name="starting_update">TDS Update wird gestartet.</string>

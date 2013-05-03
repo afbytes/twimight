@@ -109,6 +109,7 @@
     <!-- About -->
     <string name="author">Authors: Paolo Carta and Theus Hossmann</string>
     <string name="version">Version:</string>
+    <string name="keys">Keys</string>    
     <string name="no_certificate">No valid certificate.</string>
     <string name="no_update">No update</string>
     <string name="starting_update">Starting TDS update.</string>

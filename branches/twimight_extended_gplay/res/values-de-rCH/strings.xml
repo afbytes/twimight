@@ -108,6 +108,7 @@
     <!-- About -->
     <string name="author">Outore: Paolo Carta u Theus Hossmann</string>
     <string name="version">Version:</string>
+    <string name="keys">Keys</string>    
     <string name="no_certificate">Kes güutigs Zertifikat.</string>
     <string name="no_update">Ke Aktualisierig</string>
     <string name="starting_update">TDS Update wird gstartet.</string>

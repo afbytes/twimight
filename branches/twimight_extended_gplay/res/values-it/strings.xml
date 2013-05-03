@@ -32,7 +32,7 @@
     <string name="profile">Profilo</string>
     <string name="messages">Messaggi</string>
     <string name="settings">Impostazioni</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Esci</string>
     <string name="about">Info</string>
     <string name="feedback">Feedback</string>
     
@@ -42,7 +42,7 @@
     <string name="tweet_will_be_favorited">Il tweet verrà aggiunto ai preferiti al più presto(non appena sarà disponibile una connessione ad internet).</string>
     <string name="tweet_will_be_unfavorited">Il tweet verrà rimosso dai preferiti al più presto (non appena sarà disponibile una connessione ad internet).</string>
     <string name="will_be_retweeted">Il retweet verrà pubblicato al più presto (non appena sarà disponibile una connessione ad internet).</string>
-	<string name="no_tweets">nessun Tweet disponibile</string>
+	<string name="no_tweets">Nessun Tweet disponibile</string>
 	<string name="no_connection">Nessuna connessione disponibile, verranno mostrati i vecchi tweet </string>
 	<string name="location_on">GPS attivato</string>
 	<string name="location_off">GPS disattivato</string>
@@ -95,11 +95,13 @@
     <string name="feature_request">Feature request</string>
     <string name="bug_report">Bug report</string>
     <string name="send">Send</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">Cancella</string>
     
     <!-- About -->
     <string name="author">Autori: Paolo Carta and Theus Hossmann</string>
     <string name="version">Versione:</string>
+    <string name="keys">Chiavi</string>
+    
     <string name="no_certificate">Nessun Certificato valido.</string>
     <string name="no_update">Nessun aggiornamento</string>
     <string name="starting_update">Aggiornamento con il TDS iniziato.</string>
@@ -109,17 +111,17 @@
     <string name="revoke_key">Sei sicuro vuoi revocare la tua chiave? Questo va effettuato in caso di telefono smarrito o rubato.</string>
     <string name="revoking">Revoca la chiave.</string>
     <string name="update">Aggiornamento TDS</string>
-    <string name="update_button">Aggiornamento</string>
+    <string name="update_button">Aggiorna</string>
     
     <!-- Terms & Conditions -->
     <string name="terms_and_conditions">Condizioni d\'uso</string>
     <string name="agree">Accetto</string>
     <string name="decline">Rifiuto</string>
     <string name="conditions">Cliccando &quot;Accetto&quot; qua sotto, accetto di prender parte alla raccolta
-        dati di Twimight Beta.L\'applicazione raccoglie dei dati e statistiche delle azioni
-        effettuate e della posizione.
+        dati di Twimight Beta.L\'applicazione raccoglie dati e statistiche e registra alcune azioni
+        effettuate e la posizione geografica.
 
-		L\'accesso ad ogni tipo di dato sarà permessa ai soli membri del team di sviluppo per scopi 
+		L\'accesso ad ogni tipo di dato sarà permessa solo ed esclusivamente ai soli membri del team di sviluppo per scopi 
 		di ricerca scientifica. I risultati pubblicati verranno rilasciati
 		dopo anonimizzazione e offuscamento dei dati sensibili. Verranno pubblicate solamente statistiche 
 		di tipo aggregato che non riveleranno in nessun modo l\'identità dei partecipanti. 
@@ -140,16 +142,16 @@
     <string name="notify_dms">Notifica messaggi diretti</string>
     <string name="notify_dms_explain">Seleziona per ricevere notifiche sui messaggi diretti</string>
     <string name="use_location">Utilizza GPS</string>
-    <string name="use_location_explain">Seleziona per aggiungere il geo-tag ai tweet automaticamente.</string>
+    <string name="use_location_explain">Seleziona per aggiungere automaticamente il geo-tag ai tweet.</string>
     <string name="updates_background">Aggiornamenti in background</string>
     <string name="updates_background_explain">Seleziona per aggiornamenti automatici in background</string>
     <string name="updates_interval">Intervallo aggiornamenti</string>
-    <string name="updates_interval_explain">Seleziona l\'intervallo di tempo desiderato</string>
+    <string name="updates_interval_explain">Seleziona l\'intervallo di tempo desiderato per gli aggiornamenti</string>
     <string name="disaster_mode">Modalità disastro</string>
     <string name="disaster_mode_explain">Clicca per abilitare la modalità disastro. Nota che utilizza il Bluetooth.</string>
     <string name="tds_communication">Comunicazione con il TDS</string>
-    <string name="tds_communication_explain">Seleziona per abilitare aggiornamenti con il server</string>
+    <string name="tds_communication_explain">Seleziona per abilitare aggiornamenti automatici con il server</string>
     <string name="location_updates">Aggiornamenti GPS</string>
-    <string name="location_updates_explain">Inviare aggiornamenti periodici sulla posizione al TDS?</string>
+    <string name="location_updates_explain">Inviare aggiornamenti periodici al TDS sulla propria posizione?</string>
     
 </resources>
