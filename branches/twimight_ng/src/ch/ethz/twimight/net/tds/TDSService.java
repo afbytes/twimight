@@ -37,6 +37,7 @@ import android.text.Html;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
@@ -46,6 +47,8 @@ import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.EasySSLSocketFactory;
+
+
 
 /**
  * The service to send all kinds of API calls to the disaster server. 
@@ -91,7 +94,7 @@ public class TDSService extends Service {
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		Log.d(TAG, "started..");
+		if (TwimightBaseActivity.D) Log.d(TAG, "started..");
 		
 		//  release the lock
 		//TDSAlarm.releaseWakeLock();
@@ -99,7 +102,7 @@ public class TDSService extends Service {
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-			Log.d(TAG, "Error synching: no connectivity");
+			if (TwimightBaseActivity.D) Log.d(TAG, "Error synching: no connectivity");
 			schedulePeriodic(false);			
 			
 			return START_NOT_STICKY;
@@ -112,12 +115,12 @@ public class TDSService extends Service {
 				try {
 					tds = new TDSCommunication(getBaseContext(), Constants.CONSUMER_ID, token, secret);
 				} catch (JSONException e) {
-					Log.e(TAG, "error while setting up TDS Communication");
+					if (TwimightBaseActivity.D) Log.e(TAG, "error while setting up TDS Communication");
 					schedulePeriodic(false);
 					return START_NOT_STICKY;
 				}
 			} else {
-				Log.i(TAG, "Error synching: no access token or secret");
+				if (TwimightBaseActivity.D) Log.i(TAG, "Error synching: no access token or secret");
 				schedulePeriodic(false);
 				
 				return START_NOT_STICKY;
@@ -161,11 +164,11 @@ public class TDSService extends Service {
 	private void synchAll() {
 		
 		if(needUpdate()){
-			Log.d(TAG, "starting synch task");
+			if (TwimightBaseActivity.D) Log.d(TAG, "starting synch task");
 			new SynchAllTask().execute();
 		} else {
 			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - getLastUpdate(getBaseContext())));
-			Log.d(TAG, "no synch needed");
+			if (TwimightBaseActivity.D) Log.d(TAG, "no synch needed");
 		}
 	}
 	
@@ -173,7 +176,7 @@ public class TDSService extends Service {
 	 * Regular TDS update, forced (outside the update schedule)
 	 */
 	private void synchAllForce() {
-		Log.i(TAG, "starting synch task");
+		if (TwimightBaseActivity.D) Log.i(TAG, "starting synch task");
 		new SynchAllTask().execute();
 
 	}
@@ -206,7 +209,7 @@ public class TDSService extends Service {
 			// reschedule
 			TDSAlarm.scheduleCommunication(getBaseContext(), Constants.TDS_UPDATE_INTERVAL);
 
-			Log.i(TAG,"update successful");
+			if (TwimightBaseActivity.D) Log.i(TAG,"update successful");
 		} else {
 			// get the last successful update
 			Long lastUpdate = getLastUpdate(getBaseContext());
@@ -233,7 +236,7 @@ public class TDSService extends Service {
 
 			// write back to shared preferences
 			setUpdateInterval(currentUpdateInterval);
-			Log.i(TAG, "update not successful");
+			if (TwimightBaseActivity.D) Log.i(TAG, "update not successful");
 		}
 
 		
@@ -366,7 +369,7 @@ public class TDSService extends Service {
 				}
 
 				// revocation list
-				RevocationDBHelper rm = new RevocationDBHelper(getBaseContext());
+				RevocationDBHelper rm = new RevocationDBHelper(getApplicationContext());
 				rm.open();
 				tds.createRevocationObject(rm.getCurrentVersion());
 
@@ -375,21 +378,21 @@ public class TDSService extends Service {
 				if(cm.needNewCertificate()){
 					KeyManager km = new KeyManager(getBaseContext());
 					tds.createCertificateObject(km.getKey(), null);
-					Log.i(TAG, "we need a new certificate");
+					if (TwimightBaseActivity.D) Log.i(TAG, "we need a new certificate");
 				} 
 				
 				// follower key list
-				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());
+				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getApplicationContext());
 				tds.createFollowerObject(fm.getLastUpdate());
 				
 				//send statistics
-				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
+				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getApplicationContext());
 				statisticAdapter.open();
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
 				
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while assembling request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
 				return false;
 			}
 
@@ -398,13 +401,13 @@ public class TDSService extends Service {
 			try {
 				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
 			if(!success) 				
 				return false;			
 
-			Log.i(TAG, "success");
+			if (TwimightBaseActivity.D) Log.i(TAG, "success");
 			try {
 				
 				//delete old logs
@@ -415,39 +418,42 @@ public class TDSService extends Service {
 				// authentication
 				String twitterId = tds.parseAuthentication();				
 				if(!LoginActivity.getTwitterId(getBaseContext()).equals( twitterId  )){
-					Log.e(TAG, "Twitter ID mismatch!");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
 				
 
 				// bluetooth
 				List<String> macsList = tds.parseBluetooth();
-				//TODO: 
-				///////////////////////////////////////////////////////////////////////
-				macsList.clear();
-				///////////////////////////////////////////////////////////////////////
-				if(!macsList.isEmpty()){
-					MacsDBHelper dbHelper = new MacsDBHelper(getBaseContext());
-					dbHelper.open();
+				
+				if (macsList != null) {					
+					//TODO: 
+					///////////////////////////////////////////////////////////////////////
+					macsList.clear();
+					///////////////////////////////////////////////////////////////////////
+					if(!macsList.isEmpty()){
+						MacsDBHelper dbHelper = new MacsDBHelper(getApplicationContext());
+						dbHelper.open();
 
-					// temporarily de-activate all local MACs
-					dbHelper.updateMacsDeActive();
+						// temporarily de-activate all local MACs
+						dbHelper.updateMacsDeActive();
 
-					// insert new macs in the DB
-					Iterator<String> iterator = macsList.iterator();
-					while(iterator.hasNext()) {
+						// insert new macs in the DB
+						Iterator<String> iterator = macsList.iterator();
+						while(iterator.hasNext()) {
 
-						String mac = iterator.next();
-						if(dbHelper.createMac(mac, 1) == -1){
-							dbHelper.updateMacActive(mac, 1);
-							Log.d(TAG, "Already have MAC: " + mac);
-						} else {
-							Log.d(TAG,"New MAC: " + mac);
+							String mac = iterator.next();
+							if(dbHelper.createMac(mac, 1) == -1){
+								dbHelper.updateMacActive(mac, 1);
+								if (TwimightBaseActivity.D) Log.d(TAG, "Already have MAC: " + mac);
+							} else {
+								if (TwimightBaseActivity.D) Log.d(TAG,"New MAC: " + mac);
+							}
 						}
+					} else {
+						if (TwimightBaseActivity.D) Log.d(TAG, "bluetooth mac list empty");
 					}
-				} else {
-					Log.d(TAG, "bluetooth mac list empty");
-				}
+				}			
 				
 				// location, nothing to do here
 
@@ -457,10 +463,10 @@ public class TDSService extends Service {
 					CertificateManager cm = new CertificateManager(getBaseContext());
 					cm.setCertificate(certPem);
 				}
-				Log.d(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D) Log.d(TAG, "certificate parsed");
 
 				// revocation
-				RevocationDBHelper rm = new RevocationDBHelper(getBaseContext());
+				RevocationDBHelper rm = new RevocationDBHelper(getApplicationContext());
 				rm.open();
 				rm.deleteExpired();
 				// first, we check the version
@@ -475,18 +481,18 @@ public class TDSService extends Service {
 					// check if our certificate is on the new revocation list
 					CertificateManager cm = new CertificateManager(getBaseContext());
 					if(rm.isRevoked(cm.getSerial())){
-						Log.i(TAG, "Our certificate got revoked! Deleting key and certificate");
+						if (TwimightBaseActivity.D) Log.i(TAG, "Our certificate got revoked! Deleting key and certificate");
 						cm.deleteCertificate();
 						KeyManager km = new KeyManager(getBaseContext());
 						km.deleteKey();
 					}
 				} else {
-					Log.d(TAG, "no new revocations");
+					if (TwimightBaseActivity.D) Log.d(TAG, "no new revocations");
 				}
-				Log.d(TAG, "revocation parsed");
+				if (TwimightBaseActivity.D) Log.d(TAG, "revocation parsed");
 
 				// Followers
-				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getBaseContext());				
+				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getApplicationContext());				
 				fm.open();
 				List<TDSPublicKey> keyList = tds.parseFollower();			
 				if(keyList != null){
@@ -496,7 +502,7 @@ public class TDSService extends Service {
 						fm.setLastUpdate(lastUpdate);
 					}
 				}
-				Log.i(TAG, "followers parsed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "followers parsed");
 				
 				//NOTIFICATION				
 				try {
@@ -515,7 +521,7 @@ public class TDSService extends Service {
 				
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while parsing response",e);
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response",e);
 			}
 
 			return true;
@@ -580,7 +586,7 @@ public class TDSService extends Service {
 				KeyManager km = new KeyManager(getBaseContext());			
 				tds.createCertificateObject(null, km.getKey());
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while assembling request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
 				return false;
 			}
 
@@ -589,25 +595,25 @@ public class TDSService extends Service {
 			try {
 				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
 			if(!success) {
-				Log.e(TAG, "Error while sending");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Error while sending");
 				return false;
 			}
 
-			Log.i(TAG, "success");
+			if (TwimightBaseActivity.D) Log.i(TAG, "success");
 
 			try {
 
 				// authentication
 				String twitterId = tds.parseAuthentication();
 				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
-					Log.e(TAG, "Twitter ID mismatch!");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				Log.i(TAG, "authentication parsed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "authentication parsed");
 
 
 				// certificate
@@ -622,10 +628,10 @@ public class TDSService extends Service {
 					KeyManager km = new KeyManager(getBaseContext());
 					km.deleteKey();
 				}
-				Log.i(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "certificate parsed");
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while parsing response");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response");
 				return false;
 			}
 
@@ -665,7 +671,7 @@ public class TDSService extends Service {
 				KeyManager km = new KeyManager(getBaseContext());			
 				tds.createCertificateObject(km.getKey(), null);
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while assembling request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
 				return false;
 			}
 
@@ -674,25 +680,25 @@ public class TDSService extends Service {
 			try {
 				success = tds.sendRequest(getClient(),REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
 			if(!success) {
-				Log.e(TAG, "Error while sending");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Error while sending");
 				return false;
 			}
 
-			Log.i(TAG, "success");
+			if (TwimightBaseActivity.D) Log.i(TAG, "success");
 
 			try {
 
 				// authentication
 				String twitterId = tds.parseAuthentication();
 				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
-					Log.e(TAG, "Twitter ID mismatch!");
+					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				Log.i(TAG, "authentication parsed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "authentication parsed");
 
 
 				// certificate
@@ -705,10 +711,10 @@ public class TDSService extends Service {
 					String certificatePem = tds.parseCertificate();
 					cm.setCertificate(certificatePem);
 				}
-				Log.i(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D) Log.i(TAG, "certificate parsed");
 
 			} catch(Exception e) {
-				Log.e(TAG, "Exception while parsing response");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response");
 				return false;
 			}
 

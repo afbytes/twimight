@@ -12,19 +12,14 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.util.HashMap;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.UserListFragment;
-import ch.ethz.twimight.fragments.adapters.PageAdapter;
+import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 
 /**
@@ -39,10 +34,6 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	private int positionIndex;
 	private int positionTop;
 	ViewPager viewPager;
-	
-	public static final int FRIENDS_KEY = 0;	
-	public static final int FOLLOWERS_KEY = 1;
-	public static final int PEERS_KEY = 2;
 	
 	public static final String USER_FILTER_REQUEST = "user_filter_request";
 
@@ -59,10 +50,9 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 		actionBar = getActionBar();	
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		HashMap<Integer,UserListFragment> fragmentMap = createUserFragments();
-		PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),fragmentMap,null);
-		
-		LayoutInflater inflater =  (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		Bundle bundle = new Bundle();
+		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE,ListViewPageAdapter.BUNDLE_TYPE_USERS );
+		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(),bundle);	
 		viewPager = (ViewPager)  findViewById(R.id.viewpager);	
 		
 		viewPager.setAdapter(pagAdapter);
@@ -93,20 +83,12 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 		actionBar.addTab(tab);
 		
 	    //actionBar.setSelectedNavigationItem(intent.getIntExtra(USER_FILTER_REQUEST, FRIENDS_KEY));
-		viewPager.setCurrentItem(intent.getIntExtra(USER_FILTER_REQUEST, FRIENDS_KEY));
+		viewPager.setCurrentItem(intent.getIntExtra(USER_FILTER_REQUEST, 0));
 
 
 	}
 	
-private HashMap<Integer,UserListFragment> createUserFragments() {
-		
-		HashMap<Integer,UserListFragment> map = new HashMap<Integer,UserListFragment>();
-		map.put(PageAdapter.POS_ZERO, new UserListFragment(FRIENDS_KEY));
-		map.put(PageAdapter.POS_ONE, new UserListFragment(FOLLOWERS_KEY));
-		map.put(PageAdapter.POS_TWO, new UserListFragment(PEERS_KEY));
-		
-		return map;
-	}
+
 
 	
 	/**

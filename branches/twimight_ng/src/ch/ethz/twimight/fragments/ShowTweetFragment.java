@@ -83,25 +83,25 @@ import ch.ethz.twimight.util.TweetTagHandler;
 @SuppressLint("ValidFragment")
 public class ShowTweetFragment extends Fragment{	
 	Cursor c;
-	
+
 	// Views
 	private TextView screenNameView;
 	private TextView realNameView;
 	private TextView tweetTextView;
 	private TextView createdTextView;
 	private TextView createdWithView;
-	
+
 	private LinearLayout userInfoView;
 	ImageButton retweetButton;
 	ImageButton deleteButton;
 	ImageButton replyButton;
 	ImageButton favoriteButton;
 	ImageButton offlineButton;
-	
+
 	Uri uri;
 	ContentObserver observer;
 	Handler handler;
-	
+
 	private boolean favorited;
 	int flags;
 	int buffer;
@@ -110,24 +110,24 @@ public class ShowTweetFragment extends Fragment{
 	String text;
 	String screenName;
 
-	protected String TAG = "ShowTweetActivity";
-	
+	protected String TAG = "ShowTweetFragment";
+
 	//LOGS
-		LocationHelper locHelper ;	
-		Intent intent;
-		ConnectivityManager cm;
-		StatisticsDBHelper locDBHelper;	
-	
-    Activity activity;
+	LocationHelper locHelper ;	
+	Intent intent;
+	ConnectivityManager cm;
+	StatisticsDBHelper statsDBHelper;	
+
+	Activity activity;
 	ContentResolver resolver;
 	View view;
 
 	//photo
 	private String photoPath;
-	
+
 	//SDcard helper
 	private SDCardHelper sdCardHelper;
-	
+
 	private String userID = null;
 	private String tweetId;
 
@@ -141,11 +141,10 @@ public class ShowTweetFragment extends Fragment{
 	private boolean downloadNotSuccess = false; // whether it's a not successfully downloaded tweet
 	private int forcedDownload = 0;
 
-    public ShowTweetFragment() {};
-    
-    public ShowTweetFragment(long rowId) {
-    	super();
-        this.rowId = rowId;
+	public ShowTweetFragment() {};
+
+	public ShowTweetFragment(long rowId) {
+		this.rowId = rowId;		
     };
     
     
@@ -166,16 +165,15 @@ public class ShowTweetFragment extends Fragment{
     	createdWithView = (TextView) view.findViewById(R.id.showTweetCreatedWith);
 
     	// If we don't know which tweet to show, we stop the activity
-    	if(rowId != 0) {		
-
+    	if(rowId != 0) {
+    		
     		queryContentProvider();
 
     		if(c.getCount() == 0) 
     			activity.getFragmentManager().beginTransaction().remove(this).commit();
 
     		else {				
-    			// register content observer to refresh when user was updated				
-
+    			// register content observer to refresh when user was updated	    			
     			handler = new Handler();											
     			
     			userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
@@ -216,6 +214,7 @@ public class ShowTweetFragment extends Fragment{
     	}
     	else 
     		activity.getFragmentManager().beginTransaction().remove(this).commit();
+    		
 
     	return view;
     }
@@ -230,8 +229,8 @@ public class ShowTweetFragment extends Fragment{
 		activity = getActivity();			
 		resolver = activity.getContentResolver();
 
-		locDBHelper = new StatisticsDBHelper(activity);
-		locDBHelper.open();
+		statsDBHelper = new StatisticsDBHelper(activity.getApplicationContext());
+		statsDBHelper.open();
 
 		sdCardHelper = new SDCardHelper(activity);
 
@@ -241,8 +240,7 @@ public class ShowTweetFragment extends Fragment{
 		htmlUrls = new ArrayList<String>();
 
 		cm = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);		
-		locHelper = new LocationHelper(activity);		
-
+		locHelper = LocationHelper.getInstance(activity);		
 
 	}
 
@@ -374,6 +372,8 @@ public class ShowTweetFragment extends Fragment{
 		c = resolver.query(uri, null, null, null, null);
 		if(c.getCount() > 0) 
 			c.moveToFirst();
+		
+			
 		
 	}
 
@@ -661,9 +661,9 @@ public class ShowTweetFragment extends Fragment{
            
         	
 
-        	if ((locHelper != null && locHelper.count > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
+        	if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
-    			locDBHelper.insertRow(locHelper.loc, cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
+    			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
     		} else {}
         	
 	        if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){	
@@ -819,7 +819,7 @@ private void setTweetInfo() {
 @Override
 public void onResume(){
 	super.onResume();
-
+	locHelper.registerLocationListener();
 	observer = new TweetContentObserver(handler);
 	c.registerContentObserver(observer);
 
@@ -835,6 +835,8 @@ public void onResume(){
 	public void onPause(){
 		Log.i(TAG, "on pause");
 		super.onPause();
+		if (locHelper != null) 			
+			locHelper.unRegisterLocationListener();    			
 		if(c!=null){
 			if(observer != null) 
 				try {
@@ -851,10 +853,7 @@ public void onResume(){
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		
-		if (locHelper != null) 			
-			locHelper.unRegisterLocationListener();    			
+		super.onDestroy();	
 		
 		if (userInfoView != null)
 			userInfoView.setOnClickListener(null);
@@ -881,10 +880,13 @@ public void onResume(){
 		       .setCancelable(false)
 		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
+		        	   
+		        	   
 		        	   uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);	        	   
 		        	   queryContentProvider();
 		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		        	   String delPhotoName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		        	   
 		        	   if(delPhotoName != null){
 		        		   photoPath = Tweets.PHOTO_PATH + "/" + userID;
 		        		   String[] filePath = {photoPath};
@@ -915,9 +917,10 @@ public void onResume(){
 		  
 		        	   if (tid != null && tid != 0)
 		        		   resolver.update(uri, setDeleteFlag(flags), null, null);
-		        	   else
+		        	   else {
 		        		   resolver.delete(uri,null,null );
-		        	   activity.getFragmentManager().beginTransaction().remove(ShowTweetFragment.this).commit();
+		        	       activity.getFragmentManager().beginTransaction().remove(ShowTweetFragment.this).commit();
+		        	   }
 		           }
 		       })
 		       .setNegativeButton("No", new DialogInterface.OnClickListener() {

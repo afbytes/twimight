@@ -98,9 +98,7 @@
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
 		
-		<activity android:name=".activities.FeedbackActivity"
-			android:label="Twimight" android:theme="@style/Theme.Transparent"
-			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
+	
 		<activity android:name=".activities.NewDMActivity"
 			android:label="Twimight" android:theme="@style/Theme.Transparent"
 			android:windowSoftInputMode="stateAlwaysVisible" />
@@ -112,12 +110,8 @@
 
 		
 		<activity android:name=".activities.WebViewActivity"
-			android:label="WebView" android:theme="@android:style/Theme.NoTitleBar" />
-		
-		 <activity android:name=".activities.DeviceListActivity"
-                  android:label="Select Device"
-                  android:theme="@android:style/Theme.Dialog"
-                  android:configChanges="orientation|keyboardHidden" />
+			android:label="WebView" android:theme="@android:style/Theme.NoTitleBar" />		
+	
 
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />

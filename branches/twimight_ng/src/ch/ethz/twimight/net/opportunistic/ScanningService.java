@@ -50,9 +50,11 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.PrefsActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
@@ -88,8 +90,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	// manage bluetooth communication
 	public BluetoothComms bluetoothHelper = null;
 
-	//private Date lastScan;			
-	private MacsDBHelper dbHelper;	
+	//private Date lastScan;
+			
+	private MacsDBHelper dbHelper;
+	
 	private static Context context = null;
 	StateChangedReceiver stateReceiver;
 	private Cursor cursor;
@@ -165,7 +169,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		Bundle scanInfo = receiver.getScanInfo();
 		float scanRef = scanInfo.getFloat(receiver.SCAN_PROBABILITY);
-//		String[] deviceList = scanInfo.getStringArray(receiver.DEVICE_LIST);
+		
 		//sdCard helper
 		sdCardHelper = new SDCardHelper(context);
 		//htmldb helper
@@ -179,7 +183,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
 		
 		if (mBtAdapter != null) {
-			if(scanProb < scanRef){
+			if(scanProb < scanRef){//scanRef
 				Log.i(TAG, "begin scanning");
 				receiver.initDeivceList();
 				// If we're already discovering, stop it
@@ -330,7 +334,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	/**
 	 * Proceed to the next MAC address
 	 */
-	private void nextScanning() {		
+	private void nextScanning() {	
 		if(cursor == null || bluetoothHelper.getState()==BluetoothComms.STATE_CONNECTED)
 			stopScanning();
 		else {
@@ -479,7 +483,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 			case Constants.MESSAGE_CONNECTION_TO_CLOSE:
 				Log.i(TAG, "sending closing request");
-            	bluetoothHelper.write("####CLOSING_REQUEST####");  
+				if(bluetoothHelper!=null)bluetoothHelper.write("####CLOSING_REQUEST####");  
                 break;
 
 				
@@ -664,7 +668,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			c.moveToFirst();
 			
 			while (!c.isAfterLast()){
-				if (c.getLong(c.getColumnIndex(DirectMessages.COL_RECEIVED)) > (last - 5*60000) ) {
+				if (c.getLong(c.getColumnIndex(DirectMessages.COL_RECEIVED)) > (last - 1*30*1000L) ) {
 						JSONObject dmToSend;
 						
 						try {
@@ -690,36 +694,68 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		// get disaster tweets
 			
 		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
-		Cursor c = getContentResolver().query(queryUri, null, null, null, null);				
+		Cursor c = getContentResolver().query(queryUri, null, null, null, null);			
 		Log.d(TAG, "count:" + String.valueOf(c.getCount()));
+		boolean prefWebShare = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefWebShare", false);
+		Log.d(TAG, "web share:" + String.valueOf(prefWebShare));
 		if(c.getCount()>0){		
 			c.moveToFirst();
 			while(!c.isAfterLast()){
 				
-				
-				Log.d(TAG, String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))) + ":" + String.valueOf(last));
-				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5*60000)){
-					JSONObject toSend;
-					try {								
-						toSend = getJSON(c);
-						if (toSend != null) {
-							Log.i(TAG,"sending tweet");
-							Log.d(TAG, toSend.toString(5));
-							bluetoothHelper.write(toSend.toString());
-							//if there is a photo related to this tweet, send it
-							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) 
-								sendDisasterPhoto(c);
+					try{
+						if(prefWebShare){
 							if(c.getInt(c.getColumnIndex(Tweets.COL_HTMLS)) == 1){
-								String tweetId = getTweetId(c);
-								sendDisasterHtmls(tweetId);
+
+								if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 10*60*1000L)){
+									JSONObject toSend;
+
+									toSend = getJSON(c);
+									if (toSend != null) {
+										Log.i(TAG,"sending tweet");
+										Log.d(TAG, toSend.toString(5));
+										bluetoothHelper.write(toSend.toString());
+										//if there is a photo related to this tweet, send it
+										if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) 
+											sendDisasterPhoto(c);
+									}
+									sendDisasterHtmls(c);
+								}
 							}
-								
+
 						}
-						
-					} catch (JSONException e) {								
+						else{
+							if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) {
+								if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 5*60*1000L)){
+									JSONObject toSend;
+
+									toSend = getJSON(c);
+									if (toSend != null) {
+										Log.i(TAG,"sending tweet");
+										Log.d(TAG, toSend.toString(5));
+										bluetoothHelper.write(toSend.toString());
+										//if there is a photo related to this tweet, send it
+										if(c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) 
+											sendDisasterPhoto(c);
+									}
+								}
+							}
+							else if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 1*30*1000L)){
+								JSONObject toSend;
+
+								toSend = getJSON(c);
+								if (toSend != null) {
+									Log.i(TAG,"sending tweet");
+									Log.d(TAG, toSend.toString(5));
+									bluetoothHelper.write(toSend.toString());
+								}
+							}
+						}
+							
+					}catch (JSONException e) {								
 						Log.e(TAG,"exception ", e);
-					}					
-				}
+					}	
+					
+
 				c.moveToNext();				
 			}			
 		}
@@ -756,52 +792,56 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		return false;
 	}
-	
-	private boolean sendDisasterHtmls(String tweetId) throws JSONException{
+		
+	private void sendDisasterHtmls(Cursor c) throws JSONException{
 		
 		JSONObject toSendXml;
 		
-		Cursor c = htmlDbHelper.getUrlsByTweetId(tweetId);
-		for(c.moveToFirst();!c.isAfterLast();c.moveToNext()){
-			
-			if(c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)) == 1){
-				
-				String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
-				String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
-				String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
-				
-				String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-				
-				if(sdCardHelper.checkSDStuff(filePath)){
-					
-					File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
-					if(xmlFile.exists()){
-						toSendXml = getJSONFromXml(xmlFile);
-						toSendXml.put(HtmlPage.COL_USER, userId);
-						toSendXml.put(HtmlPage.COL_URL, htmlUrl);
-						toSendXml.put(HtmlPage.COL_FILENAME, filename);
-						toSendXml.put(HtmlPage.COL_TID, tweetId);
-						Log.d(TAG, "sending htmls");
-						Log.d(TAG, toSendXml.toString(5));
-						bluetoothHelper.write(toSendXml.toString());
-						return true;
-					}
-
-				}
-				
-			}
-			
-		}
+		String userId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_USER)));
 		
-		return false;
+		String substr = Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_TEXT))).toString();
+
+		String[] strarr = substr.split(" ");
+		
+		//check the urls of the tweet
+		for(String subStrarr : strarr){
+
+			if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
+				String subUrl = null;
+				if(subStrarr.indexOf("http://") >= 0){
+					subUrl = subStrarr.substring(subStrarr.indexOf("http://"));
+				}else if(subStrarr.indexOf("https://") >= 0){
+					subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
+				}
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(subUrl, "0", userId);
+
+				if(htmlCV!=null){
+					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
+						String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
+						String tweetId = htmlCV.getAsString(HtmlPage.COL_TID);
+						if(sdCardHelper.checkSDStuff(filePath)){
+							
+							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+							if(xmlFile.exists()){
+								toSendXml = getJSONFromXml(xmlFile);
+								toSendXml.put(HtmlPage.COL_USER, userId);
+								toSendXml.put(HtmlPage.COL_URL, subUrl);
+								toSendXml.put(HtmlPage.COL_FILENAME, filename);
+								toSendXml.put(HtmlPage.COL_TID, tweetId);
+								Log.d(TAG, "sending htmls");
+								Log.d(TAG, toSendXml.toString(5));
+								bluetoothHelper.write(toSendXml.toString());
+								
+							}
+
+						}
+					}
+				}
+			}
+		}
 	}
 	
-	private String getTweetId(Cursor c){
-		String tweetId = null;
-		int id = c.getInt(c.getColumnIndex("_id"));
-		tweetId = htmlDbHelper.getTweetId(id);
-		return tweetId;
-	}
 	
 	private JSONObject getJSONFromXml(File xml){
 		try {

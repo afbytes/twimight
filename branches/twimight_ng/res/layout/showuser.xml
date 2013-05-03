@@ -95,7 +95,9 @@
 				android:layout_width="match_parent" android:orientation="horizontal">
 				<Button android:id="@+id/showUserFollow"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="Follow" android:layout_marginRight="20dp" android:paddingLeft="15dp" android:paddingRight="15dp"/>
+					android:text="Follow" android:layout_marginRight="20dp" android:paddingLeft="15dp" 
+					android:paddingRight="15dp" android:textAppearance="?android:attr/textAppearanceSmallInverse" 
+					android:textSize="16dp"  style="@drawable/button_custom"/>
 				<ImageButton android:id="@+id/showUserMention"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:src="@drawable/btn_twimight_reply" android:layout_marginRight="20dp" />
@@ -125,10 +127,15 @@
 			android:orientation="horizontal" android:layout_width="match_parent"
 			android:layout_height="wrap_content" android:padding="10dp" android:background="@drawable/content_box">
 
-			<Button android:id="@+id/showUserTweetsButton"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="Tweets" android:paddingLeft="15dp" android:paddingRight="15dp"
-				android:visibility="visible"/>
+			<Button
+			    android:id="@+id/showUserTweetsButton"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:paddingLeft="15dp"
+			    android:paddingRight="15dp"
+			    android:text="Tweets"
+			    android:visibility="visible" />
+
 		</LinearLayout>
 
 

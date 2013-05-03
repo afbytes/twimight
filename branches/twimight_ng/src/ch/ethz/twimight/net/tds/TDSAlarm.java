@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -69,11 +68,11 @@ public class TDSAlarm extends BroadcastReceiver {
 		if(System.currentTimeMillis() - lastUpdate >= Constants.TDS_UPDATE_INTERVAL){	
 			// schedule one immediately
 			alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (90 * 1000L), pendingIntent);
-			Log.i(TAG, "alarm set");
+		
 		} else {
 			// schedule update interval after last update
 			alarmMgr.set(AlarmManager.RTC_WAKEUP, lastUpdate + Constants.TDS_UPDATE_INTERVAL, pendingIntent);
-			Log.i(TAG, "alarm set");
+			
 		}
 	}
 
@@ -103,7 +102,7 @@ public class TDSAlarm extends BroadcastReceiver {
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			
 			alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+delay, pendingIntent);
-			Log.i(TAG, "alarm set");
+			
 		}
 	}
 
@@ -116,8 +115,7 @@ public class TDSAlarm extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 
-		Log.i(TAG, "woken up!"+ (new Date()).toString());
-
+		
 		// Acquire wake lock so we don't fall asleep after onReceive returns
 		//getWakeLock(context);
 
@@ -140,7 +138,7 @@ public class TDSAlarm extends BroadcastReceiver {
 			}
 			// do we have a MAC address now? if not, we have to ask the user to switch on bluetooth, since we cannot obtain the address from the BluetoothAdapter when Bluetooth is off
 			else {				
-				Log.d(TAG, "No MAC address, enabling Bluetooth");
+				
 				enableBluetooth(context); // this will also schedule a TDSThread, once bluetooth is done.
 				
 			} 
@@ -186,7 +184,7 @@ public class TDSAlarm extends BroadcastReceiver {
 						try {
 							Thread.sleep(5000);
 						} catch (InterruptedException e) {
-							Log.e(TAG, "error while waiting for Bluetooth");
+							
 						}
 						// can we now get an address?
 						getMacFromAdapter(context);
@@ -201,7 +199,7 @@ public class TDSAlarm extends BroadcastReceiver {
 						synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL);
 						context.startService(synchIntent);
 					} else {
-						Log.e(TAG, "Sometimes everything goes wrong. Can't obtain a MAC address, rescheduling now.");
+					
 						scheduleCommunication(context, Constants.TDS_UPDATE_INTERVAL);
 					}
 				

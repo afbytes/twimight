@@ -64,7 +64,7 @@ public class HtmlService extends Service {
 		if(intent != null){
 				
 			sdCardHelper = new SDCardHelper(this);
-			htmlDbHelper = new HtmlPagesDbHelper(this);
+			htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();
 			Bundle extras = intent.getExtras();
 			

@@ -19,10 +19,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ListFragment;
-import ch.ethz.twimight.fragments.adapters.PageAdapter;
+import ch.ethz.twimight.fragments.TweetListFragment.OnInitCompletedListener;
+import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
@@ -31,18 +31,17 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
  * @author thossmann
  * @author pcarta
  */
-public class SearchableActivity extends TwimightBaseActivity{
+public class SearchableActivity extends TwimightBaseActivity implements OnInitCompletedListener{
 
 	private static final String TAG = "SearchableActivity";
 
 	
 		
-	ViewPager viewPager;
-	
+	ViewPager viewPager;	
 	public static String query;
-	
-	public static final int SHOW_SEARCH_TWEETS = 13;
-	public static final int SHOW_SEARCH_USERS = 14;
+	ListViewPageAdapter pagAdapter;
+	Intent intent;
+	ListFragment listFrag;
 	
 	/** 
 	 * Called when the activity is first created. 	
@@ -51,23 +50,27 @@ public class SearchableActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);		
+		setContentView(R.layout.main);	
+
+		viewPager = (ViewPager)  findViewById(R.id.viewpager); 
+
+		Bundle bundle = new Bundle();		
+		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_SEARCH_RESULTS);
 		
-		viewPager = (ViewPager)  findViewById(R.id.viewpager);        
-		// Get the intent and get the query
-		Intent intent = getIntent();		
-		processIntent(intent);
+		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);      
+		viewPager.setAdapter(pagAdapter);	
+		viewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
 		
 		//action bar
 		actionBar = getActionBar();	
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);	  	
-        
+
 		viewPager.setOnPageChangeListener(
-	            new ViewPager.SimpleOnPageChangeListener() {
-	                @Override
-	                public void onPageSelected(int position) {
-	                    // When swiping between pages, select the
-	                    // corresponding tab.	                	
+				new ViewPager.SimpleOnPageChangeListener() {
+					@Override
+					public void onPageSelected(int position) {
+						// When swiping between pages, select the
+						// corresponding tab.	                	
 	                    getActionBar().setSelectedNavigationItem(position);
 	                }
 	            });
@@ -83,6 +86,10 @@ public class SearchableActivity extends TwimightBaseActivity{
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
+		// Get the intent and get the query
+		intent = getIntent();
+		//processIntent(intent);
+
 
 	}
 
@@ -95,13 +102,7 @@ public class SearchableActivity extends TwimightBaseActivity{
 			
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
 	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-	        suggestions.saveRecentQuery(query, null); 
-	        Bundle bundle = new Bundle();
-	        bundle.putString(ListFragment.EXTRA_DATA, query);
-	        PageAdapter pagAdapter = new PageAdapter(getFragmentManager(),null, bundle);      
-	        viewPager.setAdapter(pagAdapter);	
-	        viewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
-		
+	        suggestions.saveRecentQuery(query, null); 	     
 		
 		} 
 	}
@@ -109,16 +110,49 @@ public class SearchableActivity extends TwimightBaseActivity{
 
 
 	@Override
-	protected void onNewIntent(Intent intent) {
-		Log.i(TAG,"on new intent");
+	protected void onNewIntent(Intent intent) {		
 		setIntent(intent);
-		processIntent(intent);		
+		processIntent(intent);
+		getFragmentByPosition(0).newQueryText();
+		getFragmentByPosition(1).newQueryText();
+				
+	}
+
+	public ListFragment getFragmentByPosition(int pos) {
+        String tag = "android:switcher:" + viewPager.getId() + ":" + pos;
+        return (ListFragment) getFragmentManager().findFragmentByTag(tag);
+    }
+
+
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		processIntent(intent);
 	}
 
 
+	@Override
+	public void onInitCompleted() {
+		 processIntent(intent);
+		// listFrag = getFragmentByPosition(actionBar.getSelectedNavigationIndex());
+	    // listFrag.setQueryText(query);		
+		
+	}
 
 
-
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		pagAdapter = null;
+		viewPager = null;
+		
+	}
+	
+	
+	
+	
 	/**
 	 * Saves the current selection
 	

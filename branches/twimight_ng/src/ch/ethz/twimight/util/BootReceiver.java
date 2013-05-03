@@ -41,11 +41,11 @@ public class BootReceiver extends BroadcastReceiver {
 		
 		// we only start the services if we are logged in (i.e., we have the tokens from twitter)
 		if(LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
-			Log.i(TAG,"starting twimight services at boot time");
+			
 			
 			// Start the service for communication with the TDS
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-				//new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 			}
 			
 			

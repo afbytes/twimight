@@ -24,7 +24,6 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.database.Cursor;
 import android.location.Location;
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 

@@ -93,7 +93,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 */
 	@Override
 	public boolean onCreate() {
-		dbHelper = DBOpenHelper.getInstance(getContext());
+		dbHelper = DBOpenHelper.getInstance(getContext().getApplicationContext());
 		database = dbHelper.getWritableDatabase();
 		return true;
 	}
@@ -326,7 +326,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				}
 				
 				CertificateManager cm = new CertificateManager(getContext());
-				KeyManager km = new KeyManager(getContext());
+				KeyManager km = new KeyManager(getContext().getApplicationContext());
 				
 				//verify whether I was the author or not
 				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(DirectMessages.COL_SENDER).toString())){

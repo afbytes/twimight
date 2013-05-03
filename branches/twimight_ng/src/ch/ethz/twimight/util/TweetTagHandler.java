@@ -22,7 +22,6 @@ import android.text.Editable;
 import android.text.Html.TagHandler;
 import android.text.Spannable;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import ch.ethz.twimight.activities.SearchableActivity;
@@ -145,7 +144,7 @@ public class TweetTagHandler implements TagHandler {
 			 }else{
 				 Intent i = new Intent(context, SearchableActivity.class);
 				 i.putExtra(SearchManager.QUERY, hashtag);
-				 Log.i(TAG,"opening searchable Activity ");
+				
 				 context.startActivity(i);
 			 }
 
