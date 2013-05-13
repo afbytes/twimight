@@ -162,7 +162,7 @@ public class BluetoothComms{
      * @param socket  The BluetoothSocket on which the connection was made
      * @param device  The BluetoothDevice that has been connected
      */
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice
+    private synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device) {
         if (D) Log.d(TAG, "connected" );
 
@@ -293,7 +293,7 @@ public class BluetoothComms{
                         // successful connection or an exception
                         socket = mmServerSocket.accept();
                     } catch (IOException e) {
-                       // Log.e(TAG, "accept() failed", e);
+                         Log.e(TAG, "accept() failed");
                         break;
                     }
 
@@ -422,7 +422,7 @@ public class BluetoothComms{
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
-                Log.e(TAG, "temp sockets not created", e);
+                Log.e(TAG, "temp sockets not created");
             }
 
             mmInStream = tmpIn;
@@ -445,7 +445,7 @@ public class BluetoothComms{
                     .sendToTarget();
                     
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    Log.e(TAG, "disconnected");
                     connectionLost();
                     break;
                 } catch (ClassNotFoundException e) {
@@ -468,7 +468,7 @@ public class BluetoothComms{
                 out.flush(); 
                 
             } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
+                Log.e(TAG, "Exception during write");
             }
         }
 
@@ -476,7 +476,7 @@ public class BluetoothComms{
             try {
                 mmSocket.close();
             } catch (IOException e) {
-                Log.e(TAG, "close() of connect socket failed", e);
+                Log.e(TAG, "close() of connect socket failed");
             }
         }
     }

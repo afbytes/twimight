@@ -129,6 +129,11 @@
   
     <!-- Rate -->
     <string name="app_rater">Falls dir Twimight gefällt, nimm dir bitte kurz Zeit für eine Bewertung. Vielen Dank für deine Unterstützung!</string>   		
+    <!-- TO BE TRASNALTED -->
+    <string name="rate_app">Rate App</string>   	
+    <string name="remind_me">Remind me later</string>   
+    <string name="no_thanks">No Thanks</string>   
+    
     
     <!-- Preferences -->
     <string name="notifications">Benachrichtigungen</string>

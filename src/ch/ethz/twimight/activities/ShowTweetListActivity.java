@@ -82,8 +82,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 	private int currentFilter = SHOW_TIMELINE;
 	private int positionIndex;
-	private int positionTop;
-	private static Context CONTEXT;
+	private int positionTop;	
 	
 	//LOGS
 	LocationHelper locHelper ;
@@ -107,8 +106,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.main);	
-		CONTEXT = this;
+		setContentView(R.layout.main);			
 		//statistics
 		statsDBHelper = new StatisticsDBHelper(this);
 		statsDBHelper.open();

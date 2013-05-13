@@ -138,6 +138,11 @@
   
     <!-- Rate -->
     <string name="app_rater">Faus dr Twimight gfaut, nimm dir bitte churz Zit für ä Bewärtig. Merci viumau für dini Ungerstützig!</string>   		
+    <!-- TO BE TRASNALTED -->
+    <string name="rate_app">Rate App</string>   	
+    <string name="remind_me">Remind me later</string>   
+    <string name="no_thanks">No Thanks</string> 
+    
     
     <!-- Preferences -->
     <string name="notifications">Benachrichtige</string>

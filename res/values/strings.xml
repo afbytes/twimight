@@ -143,8 +143,13 @@
   </string>
   
     <!-- Rate -->
-    <string name="app_rater">If you enjoy using Twimight, please take a moment to rate it. Thanks for your support!</string>   		
-    
+    <string name="app_rater">If you enjoy using Twimight, please take a moment to rate it. Thanks for your support!</string>  
+    <string name="rate_app">Rate App</string>   	
+    <string name="remind_me">Remind me later</string>   
+    <string name="no_thanks">No Thanks</string>   
+   	
+    	
+  
     <!-- Preferences -->
     <string name="notifications">Notifications</string>
     <string name="notifications_explain">click to enter in the notifications menu</string>
