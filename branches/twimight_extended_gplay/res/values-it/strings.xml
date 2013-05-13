@@ -130,7 +130,11 @@
 		richiederne la cancellazione. </string>
   
     <!-- Rate -->
-    <string name="app_rater">Se ti piace Twimight, dedica un minuto per votarlo. Grazie per il sostegno!</string>   		
+    <string name="app_rater">Se ti piace Twimight, dedica un minuto per votarlo. Grazie per il sostegno!</string>    
+    <string name="rate_app">Vota App</string>   	
+    <string name="remind_me">Ricorda più tardi</string>   
+    <string name="no_thanks">No Grazie</string> 
+    
     
     <!-- Preferences -->
     <string name="notifications">Notifiche</string>
