@@ -637,13 +637,13 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		
 		Context context = getContext().getApplicationContext();
 		
-		CharSequence contentTitle = "New Direct Messages!";
+		CharSequence contentTitle = getContext().getString(R.string.dm_content_title);
 		CharSequence contentText = "New DirectMessages!";
 		Intent notificationIntent = new Intent(getContext(), ShowDMUsersListActivity.class);
 		PendingIntent contentIntent;
 		switch(type){
 		case(NOTIFY_DM):
-			contentText = "You have new direct message(s)";
+			contentText = getContext().getString(R.string.dm_content_text);
 			break;
 		default:
 			break;

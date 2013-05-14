@@ -205,35 +205,6 @@ public class PrefsActivity extends PreferenceActivity{
 		prefs.unregisterOnSharedPreferenceChangeListener(prefListener);
 	}
 	
-	/**
-	 * Populate the Options menu
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		super.onCreateOptionsMenu(menu);
-		menu.add(1, OPTIONS_MENU_HOME, 1, "Home");
-		return true;
-	}
-
-	/**
-	 * Handle options menu selection
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-
-		Intent i;
-		switch(item.getItemId()){
-		
-		case OPTIONS_MENU_HOME:
-			// show the timeline
-			i = new Intent(this, ShowTweetListActivity.class);
-			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
-			break;
-		default:
-			return false;
-		}
-		return true;
-	}
+	
 
 }

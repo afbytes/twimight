@@ -17,13 +17,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.DMAdapter;
@@ -51,7 +47,6 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 
 	// handler
 	static Handler handler;
-
 
 	private int positionIndex;
 	private int positionTop;

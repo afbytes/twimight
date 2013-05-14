@@ -2,12 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent" android:layout_width="fill_parent"
 	android:orientation="vertical" android:id="@+id/showDMUserListRoot">
+
+	<LinearLayout android:id="@+id/headerBarDMUser"
+		android:layout_height="50dp" android:layout_width="match_parent"
+		android:orientation="horizontal" android:background="@drawable/top_bar_background"
+		android:gravity="right">
+		<ImageButton android:id="@+id/headerBarMessageButtonDMUser"
+			android:layout_width="wrap_content" android:layout_height="fill_parent"
+			android:src="@drawable/ic_twimight_compose"
+			android:layout_marginRight="10dp" android:background="@drawable/header_button"
+			android:paddingLeft="10dp" android:paddingRight="10dp" />
+	</LinearLayout>
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/dmUserList"
 		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
 
 	<TextView android:id="@+id/dmListEmpty" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="No direct messages (loading..)" 
+		android:layout_height="wrap_content" android:text="@string/no_dms" 
 		android:textSize="16sp" android:layout_gravity="center"
 		android:paddingTop="20dp"/>
 

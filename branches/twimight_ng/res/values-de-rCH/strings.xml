@@ -35,6 +35,15 @@
     <string name="logout">Abmäude</string>
     <string name="about">Über Twimight</string>
     <string name="feedback">Rückmäudige</string>  
+    
+       <!--web page caching TO BE TRANSLATED--> 
+	<string name="clear_cache_question">"Are you sure you want to clear all files and data of webpage?"</string>
+	<string name="clear_cache_title">Clear Cache</string>
+	<string name="loading">Loading</string>	
+	<string name="file_not_exists">File does not exist</string>	
+	<string name="loading_finished">Loading finished.</string>
+	<string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading</string>
      
   <!-- TO BE TRANSLATED -->
     <string name="cache_html">Save Links</string>
@@ -63,6 +72,9 @@
 	<string name="no_connection4">Ke Internetverbindig. Dä Tweet wird veröffentlicht sobau Internetverbindig besteit.</string>
 	<string name="picker">Usfüere mit</string>
 	<string name="retweeted_by">Retweet vo</string>
+		<!-- TO BE TRANSLATED -->
+    <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
+	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
 	
     <!-- User, Friends -->
     <string name="followers">Fouge Mir</string>
@@ -83,7 +95,16 @@
     <!-- Direct Messages -->
     <string name="no_dms">Kener Nachrichte verfüegbar</string>
     <string name="to">A: </string>
-    <string name="no_connection3">Dini Nachricht wird gli verschickt (sobau Internetverbindung besteit).</string>
+    <string name="no_connection3">Dini Nachricht wird gli verschickt (sobau Internetverbindung besteit).</string>   
+    <!-- TO BE TRANSLATED -->
+    <string name="dm_content_title">New Direct Messages!</string>
+    <string name="dm_content_text">You have new direct message(s)</string>
+    
+    <!-- Tweet Notification -->
+    <string name="tweet_content_title">New Tweet(s)!</string>
+    <string name="tweet_content_text">New tweet(s) in your timeline</string>
+    <string name="mention_content_text">You have new mention(s)</string>
+    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
     
     <!-- Install -->
     <string name="permission">Zuegriff uf Twimight Content Providers</string>
@@ -153,6 +174,11 @@
   
     <!-- Rate -->
     <string name="app_rater">Faus dr Twimight gfaut, nimm dir bitte churz Zit für ä Bewärtig. Merci viumau für dini Ungerstützig!</string>   		
+    <!-- TO BE TRANSLATED -->
+    <string name="rate_app">Rate App</string>   	
+    <string name="remind_me">Remind me later</string>   
+    <string name="no_thanks">No Thanks</string>  
+    
     
     <!-- Preferences -->
     <string name="notifications">Benachrichtige</string>

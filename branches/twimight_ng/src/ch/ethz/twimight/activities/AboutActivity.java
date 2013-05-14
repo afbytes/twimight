@@ -57,7 +57,7 @@ public class AboutActivity extends Activity{
 		revokeButton = (Button) findViewById(R.id.showAboutRevoke);
 		CertificateManager cm = new CertificateManager(this);
 		if(cm.hasCertificate()){
-			keyOk.setText("OK!");
+			keyOk.setText(R.string.ok);
 			revokeButton.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View v) {
@@ -66,14 +66,14 @@ public class AboutActivity extends Activity{
 			});
 		} else {
 			revokeButton.setVisibility(Button.GONE);
-			keyOk.setText("No valid certificate!");
+			keyOk.setText(R.string.no_certificate);
 		}
 		
 		updateButton = (Button) findViewById(R.id.showAboutUpdate);
 		lastUpdate = (TextView) findViewById(R.id.showAboutLastUpdate);
 		long lastTimestamp = TDSService.getLastUpdate(this);
 		if(lastTimestamp == 0){
-			lastUpdate.setText("no update");
+			lastUpdate.setText(R.string.no_update);
 		} else {
 			Date date = new Date(lastTimestamp);
 			
@@ -86,7 +86,7 @@ public class AboutActivity extends Activity{
 				Intent updateIntent = new Intent(getBaseContext(), TDSService.class);
 				updateIntent.putExtra("synch_request", TDSService.SYNCH_ALL_FORCE);
 				startService(updateIntent);
-				Toast.makeText(getBaseContext(), "Starting TDS update.", Toast.LENGTH_LONG).show();
+				Toast.makeText(getBaseContext(), getString(R.string.starting_update), Toast.LENGTH_LONG).show();
 				finish();
 			}
 			
@@ -134,18 +134,18 @@ public class AboutActivity extends Activity{
 	 */
 	private void showRevokeDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).")
+		builder.setMessage(getString(R.string.revoke_key))
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 						Intent updateIntent = new Intent(getBaseContext(), TDSService.class);
 						updateIntent.putExtra("synch_request", TDSService.SYNCH_REVOKE);
 						startService(updateIntent);
-						Toast.makeText(getBaseContext(), "Revoking key.", Toast.LENGTH_LONG).show();
+						Toast.makeText(getBaseContext(), getString(R.string.revoking), Toast.LENGTH_LONG).show();
 						finish();
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		                dialog.cancel();
 		           }

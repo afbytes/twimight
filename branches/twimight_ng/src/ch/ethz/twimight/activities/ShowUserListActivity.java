@@ -68,17 +68,17 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 		
 		
 		Tab tab = actionBar.newTab()
-				.setText("Friends")
+				.setText(R.string.friends)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 		
 		tab = actionBar.newTab()
-				.setText("Followers")
+				.setText(R.string.followers)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 		
 		tab = actionBar.newTab()
-				.setText("Peers")
+				.setText(R.string.peers)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 		

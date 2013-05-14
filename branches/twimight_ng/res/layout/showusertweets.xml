@@ -9,7 +9,7 @@
 		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
 	<TextView android:id="@+id/userTweetListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="No tweets (loading..)" android:textSize="16sp" android:layout_gravity="center"
+		android:text="@string/no_tweets" android:textSize="16sp" android:layout_gravity="center"
 		android:paddingTop="20dp" />
 
 </LinearLayout>

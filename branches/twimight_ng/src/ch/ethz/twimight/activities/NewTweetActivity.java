@@ -297,14 +297,14 @@ public class NewTweetActivity extends Activity{
 					if(!locationChecked){
 						
 						locHelper.registerLocationListener();
-						Toast.makeText(NewTweetActivity.this, "Location is turned on", Toast.LENGTH_SHORT).show();
+						Toast.makeText(NewTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
 						locationButton.setImageResource(R.drawable.ic_menu_mylocation_on);
 						locationChecked = true;
 						
 					} else {
 						
 						locHelper.unRegisterLocationListener();
-						Toast.makeText(NewTweetActivity.this, "Location is turned off", Toast.LENGTH_SHORT).show();
+						Toast.makeText(NewTweetActivity.this, getString(R.string.location_off), Toast.LENGTH_SHORT).show();
 						locationButton.setImageResource(R.drawable.ic_menu_mylocation);
 						locationChecked = false;
 					}
@@ -466,8 +466,7 @@ public class NewTweetActivity extends Activity{
 		@Override
 		protected void onPostExecute(Boolean result){
 			if (result)
-				Toast.makeText(NewTweetActivity.this, "No connectivity, your Tweet will be uploaded to Twitter once we have a connection!", Toast.LENGTH_SHORT).show();
-			
+				Toast.makeText(NewTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT).show();			
 			if(insertUri != null){
 				// schedule the tweet for uploading to twitter
 				Intent i = new Intent(NewTweetActivity.this, TwitterService.class);
@@ -553,7 +552,7 @@ public class NewTweetActivity extends Activity{
 			Intent intent = new Intent();
 			intent.setType("image/*");
 			intent.setAction(Intent.ACTION_GET_CONTENT);
-			startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_FROM_FILE);
+			startActivityForResult(Intent.createChooser(intent, getString(R.string.picker)), PICK_FROM_FILE);
 		}
 		else{
 			Log.i(TAG, "path for storing photos cannot be created!");

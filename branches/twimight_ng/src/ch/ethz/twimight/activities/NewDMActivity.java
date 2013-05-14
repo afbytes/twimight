@@ -212,7 +212,7 @@ public class NewDMActivity extends Activity{
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result)
-				Toast.makeText(NewDMActivity.this, "No connectivity, your Message will be sent once we have a connection!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(NewDMActivity.this, getString(R.string.no_connection3), Toast.LENGTH_SHORT).show();
 
 			super.onPostExecute(result);
 		}

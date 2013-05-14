@@ -14,12 +14,12 @@
 
 			<Button android:id="@+id/headerBarTweetsButton"
 				android:layout_width="wrap_content" android:layout_height="fill_parent"
-				android:background="@drawable/header_button" android:text="Tweets"
+				android:background="@drawable/header_button" android:text="@string/tweets"
 				android:layout_marginRight="15dp" android:paddingLeft="15dp"
 				android:paddingRight="15dp" />
 			<Button android:id="@+id/headerBarUsersButton"
 				android:layout_width="wrap_content" android:layout_height="fill_parent"
-				android:background="@drawable/header_button" android:text="Users"
+				android:background="@drawable/header_button" android:text="@string/users"
 				android:layout_marginRight="15dp" android:paddingLeft="15dp"
 				android:paddingRight="15dp" />
 		</LinearLayout>
@@ -39,7 +39,7 @@
 		android:fastScrollEnabled="true" android:scrollingCache="true" android:divider="@color/twimightBackgroundLight"/>
 	<TextView android:id="@+id/searchListEmpty"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:text="No results" android:textSize="16sp"
+		android:text="@string/no_results" android:textSize="16sp"
 		android:layout_gravity="center" android:paddingTop="20dp" />
 
 </LinearLayout>

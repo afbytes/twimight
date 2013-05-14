@@ -49,6 +49,24 @@
 	<string name="no_connection4">No connectivity, your Tweet will be uploaded to Twitter once we have a connection!</string>
 	<string name="picker">Complete action using</string>
 	<string name="retweeted_by">retweeted by</string>
+	<string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
+	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
+	
+	<!--web page caching and pictures--> 
+	<string name="clear_cache_question">"Are you sure you want to clear all files and data of webpage?"</string>
+	<string name="clear_cache_title">Clear Cache</string>
+	<string name="loading">Loading</string>	
+	<string name="file_not_exists">File does not exist</string>	
+	<string name="loading_finished">Loading finished.</string>
+	<string name="no_valid_pdf">No valid application for viewing pdf files</string>
+    <string name="no_valid_pictures">No valid application for viewing pictures</string>
+    <string name="no_valid_audio">No valid application for playing audio files</string>
+    <string name="no_valid_video">No valid application for playing video files</string>
+    <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading</string>
+    
+    
 	
     <!-- User, Friends -->
     <string name="followers">Followers</string>
@@ -70,6 +88,15 @@
     <string name="no_dms">No direct messages available</string>
     <string name="to">To: </string>
     <string name="no_connection3">No connectivity, your Message will be sent once we have a connection!</string>
+    <string name="dm_content_title">New Direct Messages!</string>
+    <string name="dm_content_text">You have new direct message(s)</string>
+    
+    <!-- Tweet Notification -->
+    <string name="tweet_content_title">New Tweet(s)!</string>
+    <string name="tweet_content_text">New tweet(s) in your timeline</string>
+    <string name="mention_content_text">You have new mention(s)</string>
+    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
+        
     
     <!-- Install -->
     <string name="permission">Access to Twimight content providers</string>
@@ -99,12 +126,6 @@
     <string name="title_other_devices">Available Devices</string>
     <string name="device_added">Devices added to active devices, connection will be attempted soon</string>
     <string name="button_scan">Scan for devices</string>
-    
-    <!-- Feedback -->
-    <string name="feature_request">Feature request</string>
-    <string name="bug_report">Bug report</string>
-    <string name="send">Send</string>
-    <string name="cancel">Cancel</string>
     
     <!-- About -->
     <string name="author">Authors: Paolo Carta and Theus Hossmann</string>
@@ -143,7 +164,10 @@
   </string>
   
     <!-- Rate -->
-    <string name="app_rater">If you enjoy using Twimight, please take a moment to rate it. Thanks for your support!</string>   		
+    <string name="app_rater">If you enjoy using Twimight, please take a moment to rate it. Thanks for your support!</string> 
+    <string name="rate_app">Rate App</string>   	
+    <string name="remind_me">Remind me later</string>   
+    <string name="no_thanks">No Thanks</string>    		
     
     <!-- Preferences -->
     <string name="notifications">Notifications</string>

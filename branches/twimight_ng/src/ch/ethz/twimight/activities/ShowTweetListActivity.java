@@ -12,8 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.util.HashMap;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.content.Context;
@@ -254,7 +252,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
-			Toast.makeText(this, "Warning: The disaster mode is still running in the background ", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, getString(R.string.disastermode_running), Toast.LENGTH_LONG).show();
 
 
 	}
