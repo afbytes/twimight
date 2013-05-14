@@ -48,7 +48,9 @@
 	<string name="location_off">GPS disattivato</string>
 	<string name="no_connection4">Nessuna connessione ad internet. Il tweet verrà pubblicato al più presto !</string>
 	<string name="picker">Completa l\'azione con</string>
-	<string name="retweeted_by">Retweet da</string>
+	<string name="retweeted_by">Retweet da</string>	
+    <string name="delete_tweet">Il tweet verrà cancellato, continuare?</string>
+	<string name="modify_tweet">Vuole modificare il tweet prima di effettuare il retweet?</string>
 	
     <!-- User, Friends -->
     <string name="followers">Followers</string>
@@ -69,7 +71,15 @@
     <!-- Direct Messages -->
     <string name="no_dms">Nessun messaggio diretto disponibile</string>
     <string name="to">A: </string>
-    <string name="no_connection3">Nessuna connessione ad internet disponibile, il messaggio verrà inviato non appena possibile</string>
+    <string name="no_connection3">Nessuna connessione ad internet disponibile, il messaggio verrà inviato non appena possibile</string>   
+    <string name="dm_content_title">Nuovi Messaggi Diretti!</string>
+    <string name="dm_content_text">Hai nuovi messaggi diretti</string>
+    
+    <!-- Tweet Notification -->
+    <string name="tweet_content_title">Nuovi tweets</string>
+    <string name="tweet_content_text">Nuovi tweets nella tua timeline</string>
+    <string name="mention_content_text">Nuovi tweet in cui sei menzionato</string>
+    <string name="dis_tweet_content_text">Nuovi tweet in modalità disastro</string>    
     
     <!-- Install -->
     <string name="permission">Accesso al Content provider di Twimight</string>

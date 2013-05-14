@@ -591,9 +591,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void showDeleteDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to delete your Tweet?")
+		builder.setMessage(R.string.delete_tweet)
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);	        	   
 		        	   queryContentProvider();
@@ -617,7 +617,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		        	   finish();
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		                dialog.cancel();
 		           }
@@ -631,9 +631,9 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 	 */
 	private void showRetweetDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Would you like to modify the tweet before retweeting?")
+		builder.setMessage(R.string.modify_tweet)
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   Intent i = new Intent(getBaseContext(), NewTweetActivity.class);
 		        	   i.putExtra("text", "RT @"+screenName+" " +text);
@@ -641,7 +641,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		        	   startActivity(i);
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   getContentResolver().update(uri, setRetweetFlag(flags), null, null);
 		        	   c.requery();

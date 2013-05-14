@@ -48,6 +48,9 @@
 	<string name="no_connection4">Keine Internetverbindung. Der Tweet wird veröffentlicht sobald Internetverbindung besteht.</string>
 	<string name="picker">Aktion ausführen mit</string>
 	<string name="retweeted_by">Retweet von</string>
+	<!-- TO BE TRANSLATED -->
+    <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
+	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
 	
     <!-- User, Friends -->
     <string name="followers">Folgen Mir</string>
@@ -69,6 +72,16 @@
     <string name="no_dms">Keine Nachrichten verfügbar</string>
     <string name="to">An: </string>
     <string name="no_connection3">Deine Nachricht wird bald verschickt (sobald Internetverbindung besteht).</string>
+    <!-- TO BE TRANSLATED -->
+    <string name="dm_content_title">New Direct Messages!</string>
+    <string name="dm_content_text">You have new direct message(s)</string>
+    
+    <!-- Tweet Notification -->
+    <string name="tweet_content_title">New Tweet(s)!</string>
+    <string name="tweet_content_text">New tweet(s) in your timeline</string>
+    <string name="mention_content_text">You have new mention(s)</string>
+    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
+    
     
     <!-- Install -->
     <string name="permission">Zugriff auf Twimight Content Providers</string>
