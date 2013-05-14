@@ -48,8 +48,6 @@ public class TwimightBaseActivity extends FragmentActivity{
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = false;
 	
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
 	
 	ActionBar actionBar;
 	static Drawable dd,dn;
@@ -192,7 +190,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 			if(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==false){
 				showLogoutDialog();
 			} else {
-				Toast.makeText(this, "Disable Disaster Mode first. NOTE: Once you log out Twimight will not work until you are connected to the internet again!", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.disable_disastermode, Toast.LENGTH_LONG).show();
 			}
 			break;
 		case R.id.menu_about:
@@ -211,9 +209,9 @@ public class TwimightBaseActivity extends FragmentActivity{
 		 case R.id.menu_cache_clear:             
              
              AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
-             confirmDialog.setMessage("Are you sure you want to clear all files and data of webpage?");
-             confirmDialog.setTitle("Clear Cache");
-             confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+             confirmDialog.setMessage(R.string.clear_cache_question);
+             confirmDialog.setTitle(R.string.clear_cache_title);
+             confirmDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener(){
 
                      @Override
                      public void onClick(DialogInterface dialog, int which) {
@@ -227,7 +225,7 @@ public class TwimightBaseActivity extends FragmentActivity{
                      }
                     
              });
-             confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+             confirmDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     
                      @Override
                      public void onClick(DialogInterface dialog, int which) {
@@ -255,15 +253,15 @@ public class TwimightBaseActivity extends FragmentActivity{
 	 */
 	private void showLogoutDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Are you sure you want to log out?")
+		builder.setMessage(R.string.logout_question)
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   LoginActivity.logout(TwimightBaseActivity.this.getApplicationContext());
 		        	   finish();
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		                dialog.cancel();
 		           }

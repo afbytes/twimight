@@ -694,7 +694,7 @@ public class ShowTweetFragment extends Fragment{
         					    startActivity(intentToPDF);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(activity, "no valid application for viewing pdf files", Toast.LENGTH_LONG).show();
+        						Toast.makeText(activity, R.string.no_valid_pdf, Toast.LENGTH_LONG).show();
         					}
         					break;
         				case SDCardHelper.TYPE_PNG:
@@ -710,7 +710,7 @@ public class ShowTweetFragment extends Fragment{
         					    startActivity(intentToPic);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(activity, "no valid application for viewing pictures", Toast.LENGTH_LONG).show();
+        						Toast.makeText(activity, R.string.no_valid_pictures, Toast.LENGTH_LONG).show();
         					}
         					
         					break;
@@ -725,7 +725,7 @@ public class ShowTweetFragment extends Fragment{
         					    startActivity(intentToMp3);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(activity, "no valid application for playing audio files", Toast.LENGTH_LONG).show();
+        						Toast.makeText(activity, R.string.no_valid_audio, Toast.LENGTH_LONG).show();
         					}
         					break;
         				case SDCardHelper.TYPE_MP4:
@@ -741,14 +741,14 @@ public class ShowTweetFragment extends Fragment{
         					    startActivity(intentToVideo);
         					} else {
         					    // Do something else here. Maybe pop up a Dialog or Toast
-        						Toast.makeText(activity, "no valid application for playing video files", Toast.LENGTH_LONG).show();
+        						Toast.makeText(activity,R.string.no_valid_video, Toast.LENGTH_LONG).show();
         					}
         					break;
         				
         			}
         		}
         		else{
-        			Toast.makeText(activity, "unable to view in offline mode because pages have not been downloaded", Toast.LENGTH_LONG).show();
+        			Toast.makeText(activity, R.string.pages_not_downloaded, Toast.LENGTH_LONG).show();
         		}
         	}
 
@@ -876,9 +876,9 @@ public void onResume(){
 	 */
 	private void showDeleteDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage("Are you sure you want to delete your Tweet?")
+		builder.setMessage(R.string.delete_tweet)
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   
 		        	   
@@ -923,7 +923,7 @@ public void onResume(){
 		        	   }
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		                dialog.cancel();
 		           }
@@ -937,9 +937,9 @@ public void onResume(){
 	 */
 	private void showRetweetDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage("Would you like to modify the tweet before retweeting?")
+		builder.setMessage(R.string.modify_tweet)
 		       .setCancelable(false)
-		       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   Intent i = new Intent(activity, NewTweetActivity.class);
 		        	   i.putExtra("text", "RT @"+screenName+" " +text);
@@ -947,7 +947,7 @@ public void onResume(){
 		        	   startActivity(i);
 		           }
 		       })
-		       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		        	   resolver.update(uri, setRetweetFlag(flags), null, null);
 		        	   c.requery();

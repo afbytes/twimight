@@ -33,7 +33,7 @@
                     android:layout_marginRight="5dp"
                     android:background="@drawable/button_custom"
                     android:paddingLeft="5dp"
-                    android:text="Rate App"
+                    android:text="@string/rate_app"
                     android:textColor="#FFFFFFFF"
                     android:textStyle="bold" />
 
@@ -43,14 +43,14 @@
                     android:layout_height="55dp"
                     android:layout_gravity="right"
                     android:layout_marginRight="5dp"
-                    android:text="Remind me later" />
+                    android:text="@string/remind_me" />
                 
                 <Button
                     android:id="@+id/rater_nothanks"
                     android:layout_width="100dp"
                     android:layout_height="55dp"
                     android:layout_gravity="right"
-                    android:text="No Thanks" />
+                    android:text="@string/no_thanks" />
 
         </LinearLayout>
 

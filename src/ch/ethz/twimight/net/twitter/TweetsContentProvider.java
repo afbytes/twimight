@@ -1124,22 +1124,22 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		Context context = getContext().getApplicationContext();
 		
-		CharSequence contentTitle = "New Tweets!";
+		CharSequence contentTitle = getContext().getString(R.string.tweet_content_title);
 		CharSequence contentText = "New Tweets!";
 		Intent notificationIntent = new Intent(getContext(), ShowTweetListActivity.class);
 		PendingIntent contentIntent;
 		
 		switch(type){
 		case(NOTIFY_MENTION):
-			contentText = "You have new mention(s)";
+			contentText = getContext().getString(R.string.mention_content_text);
 			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
 			break;
 		case(NOTIFY_DISASTER):
-			contentText = "You have new disaster tweet(s)";
+			contentText = getContext().getString(R.string.dis_tweet_content_text);
 			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
 			break;
 		case(NOTIFY_TWEET):
-			contentText = "New tweet(s) in your timeline";
+			contentText = getContext().getString(R.string.tweet_content_text);
 			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
 			break;
 		default:

@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.text.Html;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -36,24 +35,20 @@ import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 
 
-
-
-
 /** 
  * Cursor adapter for a cursor containing tweets.
  */
 public class TweetAdapter extends SimpleCursorAdapter {
 	
 	static final String[] from = {TwitterUsers.COL_NAME};
-	static final int[] to = {R.id.textUser};
-	Context context;
+	static final int[] to = {R.id.textUser};	
 	private static final String TAG = "tweet adapter";
 	private HtmlPagesDbHelper htmlDbHelper;
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {		
 		super(context, R.layout.row, c, from, to);  
-		this.context= context;
+		
 	}
 
 	/** This is where data is mapped to its view */
@@ -86,7 +81,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			String retweeted_by = cursor.getString(col);
 			TextView textRetweeted_by = (TextView) row.findViewById(R.id.textRetweeted_by);
 			if (retweeted_by != null) {
-				textRetweeted_by.setText("retweeted by " + retweeted_by);		
+				textRetweeted_by.setText(context.getString(R.string.retweeted_by) + retweeted_by);		
 				textRetweeted_by.setVisibility(View.VISIBLE);	
 				retweeted = true;
 			}
@@ -149,51 +144,31 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			if(hasHtml == 1){
 				
 				//if webpages have been downloaded
-				String text = null;
+				int text =0;
 				if(retweeted){
 					if(downloaded){
 						splitBar.setText("|");
 						splitBar.setVisibility(View.VISIBLE);
-						text = "downloaded";
+						text = R.string.downloaded;
 						textHtml.setTextColor(Color.parseColor("#1d8a04"));
 						
 					}
 					else if(downloading){
 						splitBar.setText("|");
 						splitBar.setVisibility(View.VISIBLE);
-						text = "downloading";
+						text = R.string.downloading;
 						textHtml.setTextColor(Color.parseColor("#9ea403"));
-					}
-					else if(downloadfailed){
-						splitBar.setText("|");
-						splitBar.setVisibility(View.VISIBLE);
-						text = "download failed";
-						textHtml.setTextColor(Color.parseColor("#9E3B33"));
-					}
-					else{
-						splitBar.setText("|");
-						splitBar.setVisibility(View.VISIBLE);
-						text = "not downloaded";
-						textHtml.setTextColor(Color.parseColor("#9E3B33"));
 					}
 					
 				}
 				else{
 					if(downloaded){
-						text = "downloaded";
+						text = R.string.downloaded;
 						textHtml.setTextColor(Color.parseColor("#1d8a04"));
 					}
 					else if(downloading){
-						text = "downloading";
+						text = R.string.downloading;
 						textHtml.setTextColor(Color.parseColor("#9ea403"));
-					}
-					else if(downloadfailed){
-						text = "download failed";
-						textHtml.setTextColor(Color.parseColor("#9E3B33"));
-					}
-					else{
-						text = "not downloaded";
-						textHtml.setTextColor(Color.parseColor("#9E3B33"));
 					}
 					
 				}

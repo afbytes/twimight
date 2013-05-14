@@ -15,10 +15,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
 import android.util.Base64;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;

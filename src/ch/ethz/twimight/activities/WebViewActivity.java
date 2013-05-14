@@ -55,7 +55,7 @@ public class WebViewActivity extends Activity {
 			String filename = htmlDbHelper.getPageInfo(url, tweetId, userId).getAsString(HtmlPage.COL_FILENAME);
 			Log.d(TAG, filename);
 			if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() && sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 500){
-				progressBar = ProgressDialog.show(this, "LOADING...", url);
+				progressBar = ProgressDialog.show(this, getString(R.string.loading), url);
 				Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 				Log.d(TAG, webUri.getPath());
 				try {
@@ -78,7 +78,7 @@ public class WebViewActivity extends Activity {
 			}
 			else{
 				Log.d(TAG, "file not exist:" + filename);
-				Toast.makeText(this, "file not exist", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, getString(R.string.file_not_exists), Toast.LENGTH_LONG).show();
 			}
 
 			
@@ -97,7 +97,7 @@ public class WebViewActivity extends Activity {
         // Any other code we need to execute after loading a page from a WebArchive...
         if(progressBar.isShowing()){
 			progressBar.dismiss();
-			Toast.makeText(getBaseContext(), "Loading finished.", Toast.LENGTH_LONG).show();
+			Toast.makeText(getBaseContext(), getString(R.string.loading_finished), Toast.LENGTH_LONG).show();
 		}
     }
 	
