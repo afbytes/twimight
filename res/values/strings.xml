@@ -48,7 +48,10 @@
 	<string name="location_off">Location is turned off</string>
 	<string name="no_connection4">No connectivity, your Tweet will be uploaded to Twitter once we have a connection!</string>
 	<string name="picker">Complete action using</string>
-	<string name="retweeted_by">retweeted by</string>
+	<string name="retweeted_by">retweeted by</string>	
+    <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
+	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
+    
 	
     <!-- User, Friends -->
     <string name="followers">Followers</string>
@@ -66,10 +69,19 @@
     <string name="search_hint">Search Tweets and users</string>
     <string name="results_for">Search Results for</string>
     
-    <!-- Direct Messages -->
+   <!-- Direct Messages -->
     <string name="no_dms">No direct messages available</string>
     <string name="to">To: </string>
     <string name="no_connection3">No connectivity, your Message will be sent once we have a connection!</string>
+    <string name="dm_content_title">New Direct Messages!</string>
+    <string name="dm_content_text">You have new direct message(s)</string>
+    
+    <!-- Tweet Notification -->
+    <string name="tweet_content_title">New Tweet(s)!</string>
+    <string name="tweet_content_text">New tweet(s) in your timeline</string>
+    <string name="mention_content_text">You have new mention(s)</string>
+    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
+        
     
     <!-- Install -->
     <string name="permission">Access to Twimight content providers</string>
@@ -100,12 +112,7 @@
     <string name="device_added">Devices added to active devices, connection will be attempted soon</string>
     <string name="button_scan">Scan for devices</string>
     
-    <!-- Feedback -->
-    <string name="feature_request">Feature request</string>
-    <string name="bug_report">Bug report</string>
-    <string name="send">Send</string>
-    <string name="cancel">Cancel</string>
-    
+      
     <!-- About -->
     <string name="author">Authors: Paolo Carta and Theus Hossmann</string>
     <string name="version">Version:</string>
