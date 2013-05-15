@@ -53,7 +53,7 @@
 	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
 	
 	<!--web page caching and pictures--> 
-	<string name="clear_cache_question">"Are you sure you want to clear all files and data of webpage?"</string>
+	<string name="clear_cache_question">Are you sure you want to clear all files and data of saved webpages?</string>
 	<string name="clear_cache_title">Clear Cache</string>
 	<string name="loading">Loading</string>	
 	<string name="file_not_exists">File does not exist</string>	
@@ -192,11 +192,12 @@
     <string name="location_updates_explain">Send periodic location updates to Twimight Server? Note that this will be of great use for the Disaster Mode when needed!</string>
     
     <!--Disaster mode  -->    
-    <string name="dis_mode_description">If you loose Internet connectivity, activate the disaster mode
-    in the twimight preferences. Disaster tweets will epidemically
-        spread among all phones in disaster mode, without the need for
-        Internet infrastructure (3G, WLAN).Once connectivity is detected
-        your own tweets will be published on the regular twitter servers.
+    <string name="dis_mode_description">
+        If you loose Internet connectivity, activate the disaster mode
+    	in the Settings. Disaster tweets will spread epidemically
+        among all phones in disaster mode, even without 3G or WiFi.
+        Once connectivity is re-established, your Tweets will be published
+        to Twitter.
         </string>
     
 </resources>

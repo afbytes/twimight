@@ -35,28 +35,29 @@
     <string name="logout">Abmelden</string>
     <string name="about">Über Twimight</string>
     <string name="feedback">Rückmeldungen</string>    
-     <!-- TO BE TRANSLATED -->
-    <string name="cache_html">Save Links</string>
-    <string name="clear_cache_html">Clear cache</string>  
+    <string name="cache_html">Links speichern</string>
+    <string name="clear_cache_html">Cache löschen</string>  
     <string name="write_tweet">Tweet</string>
-    <string name="search">Search</string>
+    <string name="search">Suchen</string>
     
     
-    <!--web page caching TO BE TRANSLATED--> 
-	<string name="clear_cache_question">"Are you sure you want to clear all files and data of webpage?"</string>
-	<string name="clear_cache_title">Clear Cache</string>
-	<string name="loading">Loading</string>	
-	<string name="file_not_exists">File does not exist</string>	
-	<string name="loading_finished">Loading finished.</string>
-	<string name="downloaded">Downloaded</string>
-    <string name="downloading">Downloading</string>
+    <!-- web page caching --> 
+	<string name="clear_cache_question">Bist du sicher, dass du alle heruntergeladenen Links löschen willst?</string>
+	<string name="clear_cache_title">Cache</string>
+	<string name="loading">Wird geladen</string>	
+	<string name="file_not_exists">Datei existiert nicht</string>	
+	<string name="loading_finished">Fertig geladen</string>
+	<string name="downloaded">Gespeichert</string>
+    <string name="downloading">Wird geladen</string>
     
-     <!--Disaster mode  -->    
-    <string name="dis_mode_description">If you loose Internet connectivity, activate the disaster mode
-    in the twimight preferences. Disaster tweets will epidemically
-        spread among all phones in disaster mode, without the need for
-        Internet infrastructure (3G, WLAN).Once connectivity is detected
-        your own tweets will be published on the regular twitter servers.
+     <!-- Disaster mode -->    
+    <string name="dis_mode_description">
+        Falls die Internetverbindung zusammenbricht, aktiviere den
+        Katastrophen-Modus in den Einstellungen. Katastrophen-Tweets
+        werden epidemisch zwischen allen Telefonen im Katastrophen-Modus
+        verbreitet, auch ohne 3G oder WLAN.
+        Sobald die Verbindung wieder hergestellt wird, werden deine
+        Tweets dann auf Twitter hochgeladen.
         </string>
     
     <!-- Tweeting, Timeline, Favorites -->
@@ -72,9 +73,8 @@
 	<string name="no_connection4">Keine Internetverbindung. Der Tweet wird veröffentlicht sobald Internetverbindung besteht.</string>
 	<string name="picker">Aktion ausführen mit</string>
 	<string name="retweeted_by">Retweet von</string>
-		<!-- TO BE TRANSLATED -->
-    <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
-	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
+	<string name="delete_tweet">Bist du sicher, dass du deinen Tweet löschen willst?</string>
+	<string name="modify_tweet">Möchtest du den Tweet verändert Retweeten?</string>
 	
     <!-- User, Friends -->
     <string name="followers">Folgen Mir</string>
@@ -96,15 +96,14 @@
     <string name="no_dms">Keine Nachrichten verfügbar</string>
     <string name="to">An: </string>
     <string name="no_connection3">Deine Nachricht wird bald verschickt (sobald Internetverbindung besteht).</string>
-    <!-- TO BE TRANSLATED -->
-    <string name="dm_content_title">New Direct Messages!</string>
-    <string name="dm_content_text">You have new direct message(s)</string>
+    <string name="dm_content_title">Neue Nachricht(en)!</string>
+    <string name="dm_content_text">Du hast neue Nachricht(en)</string>
     
     <!-- Tweet Notification -->
-    <string name="tweet_content_title">New Tweet(s)!</string>
-    <string name="tweet_content_text">New tweet(s) in your timeline</string>
-    <string name="mention_content_text">You have new mention(s)</string>
-    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
+    <string name="tweet_content_title">Neue(r) Tweet(s)!</string>
+    <string name="tweet_content_text">Neue(r) Tweet(s) in deiner timeline</string>
+    <string name="mention_content_text">Du hast neue mention(s)</string>
+    <string name="dis_tweet_content_text">Du hast neue Katastrophen-Tweet(s)</string>    
         
     
     <!-- Install -->
@@ -166,10 +165,9 @@
   
     <!-- Rate -->
     <string name="app_rater">Falls dir Twimight gefällt, nimm dir bitte kurz Zeit für eine Bewertung. Vielen Dank für deine Unterstützung!</string>   		
-    <!-- TO BE TRANSLATED -->
-    <string name="rate_app">Rate App</string>   	
-    <string name="remind_me">Remind me later</string>   
-    <string name="no_thanks">No Thanks</string>  
+    <string name="rate_app">App bewerten</string>   	
+    <string name="remind_me">Später</string>   
+    <string name="no_thanks">Nein danke</string>   
     
     <!-- Preferences -->
     <string name="notifications">Benachrichtigungen</string>
