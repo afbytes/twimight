@@ -20,7 +20,7 @@ import android.provider.MediaStore;
 public class SDCardHelper {
 	private final static String TAG = "SDCardHelper";
 	private File SDcardPath;
-	private String state;
+	
 	private boolean isSDAvail;
 	private boolean isSDWritable;
 	private Uri tmpPhotoUri;
@@ -43,16 +43,15 @@ public class SDCardHelper {
 	
 	
 	
-	public SDCardHelper(Context context) {
-		SDcardPath = null;
-		state = null;
+	public SDCardHelper() {
+		SDcardPath = null;		
 		isSDAvail = false;
 		isSDWritable = false;
 		tmpPhotoUri = null;
-//		this.context=context;
 	}
-	public boolean checkSDStuff(String[] filePath){
-		state = Environment.getExternalStorageState();
+	
+	public boolean checkSDState(String[] filePath){
+		String state = Environment.getExternalStorageState();		
 		if(Environment.MEDIA_MOUNTED.equals(state)){
 			isSDAvail = true;
 			isSDWritable = true;

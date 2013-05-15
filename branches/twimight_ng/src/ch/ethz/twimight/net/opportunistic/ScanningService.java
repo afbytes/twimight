@@ -171,7 +171,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		float scanRef = scanInfo.getFloat(receiver.SCAN_PROBABILITY);
 		
 		//sdCard helper
-		sdCardHelper = new SDCardHelper(context);
+		sdCardHelper = new SDCardHelper();
 		//htmldb helper
 		htmlDbHelper = new HtmlPagesDbHelper(context);
 		htmlDbHelper.open();
@@ -604,7 +604,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			//locate the directory where the photos are stored
 			photoPath = PHOTO_PATH + "/" + userID;
 			String[] filePath = {photoPath};
-			if (sdCardHelper.checkSDStuff(filePath)) {
+			if (sdCardHelper.checkSDState(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);//photoFileParent, photoFilename));
 				saveFile(targetFile, jsonString);
 			}
@@ -626,7 +626,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			int downloaded = 0;
 			
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-			if (sdCardHelper.checkSDStuff(filePath)) {
+			if (sdCardHelper.checkSDState(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);//photoFileParent, photoFilename));
 				if(saveFile(targetFile, xmlContent)){
 					downloaded = 1;
@@ -773,7 +773,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		photoPath = PHOTO_PATH + "/" + userID;
 		String[] filePath = {photoPath};
 		
-		if (sdCardHelper.checkSDStuff(filePath)) {
+		if (sdCardHelper.checkSDState(filePath)) {
 			Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));//photoFileParent, photoFilename));
 			Log.d(TAG, "photo path:"+ photoUri.getPath());
 			Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri.getPath());
@@ -820,7 +820,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 						String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
 						String tweetId = htmlCV.getAsString(HtmlPage.COL_TID);
-						if(sdCardHelper.checkSDStuff(filePath)){
+						if(sdCardHelper.checkSDState(filePath)){
 							
 							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 							if(xmlFile.exists()){

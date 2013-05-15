@@ -63,7 +63,7 @@ public class HtmlService extends Service {
 		
 		if(intent != null){
 				
-			sdCardHelper = new SDCardHelper(this);
+			sdCardHelper = new SDCardHelper();
 			htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();
 			Bundle extras = intent.getExtras();
@@ -165,7 +165,7 @@ public class HtmlService extends Service {
 		
 			
 		Log.d(TAG, htmlUrls.toString());
-		if(sdCardHelper.checkSDStuff(filePath)){
+		if(sdCardHelper.checkSDState(filePath)){
 			
 			for(int i=0;i<htmlUrls.size();i++){
 				//web view declaration
@@ -323,7 +323,7 @@ public class HtmlService extends Service {
 			int forced = fileCV.getAsInteger(HtmlPage.COL_FORCED);
 			int tries = fileCV.getAsInteger(HtmlPage.COL_TRIES);
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-			if(sdCardHelper.checkSDStuff(filePath)){
+			if(sdCardHelper.checkSDState(filePath)){
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 				try {
 			        URL fileUrl = new URL(url);
@@ -388,7 +388,7 @@ public class HtmlService extends Service {
 			
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 				
-			if(sdCardHelper.checkSDStuff(filePath)){
+			if(sdCardHelper.checkSDState(filePath)){
 				
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, tweetId, userId);
 				
@@ -477,7 +477,7 @@ public class HtmlService extends Service {
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 			switch(sdCardHelper.checkFileType(htmlUrl)){
 				case SDCardHelper.TYPE_XML:
-					if(sdCardHelper.checkSDStuff(filePath)){
+					if(sdCardHelper.checkSDState(filePath)){
 	
 						File htmlPage = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 	
@@ -580,7 +580,7 @@ public class HtmlService extends Service {
 				if((System.currentTimeMillis() - createdTime) > timeSpan){
 					String userId = c.getString(c.getColumnIndex(HtmlPage.COL_USER));
 					String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
-					if(sdCardHelper.checkSDStuff(filePath)){
+					if(sdCardHelper.checkSDState(filePath)){
 						File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 						if(deleteFile.exists()){
 							if(deleteFile.delete()){

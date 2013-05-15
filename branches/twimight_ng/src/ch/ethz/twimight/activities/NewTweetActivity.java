@@ -23,8 +23,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -100,25 +98,20 @@ public class NewTweetActivity extends Activity{
 	//LOGS
 		LocationHelper locHelper ;
 		long timestamp;		
-		ConnectivityManager cm;
-		StatisticsDBHelper statsDBHelper;	
+		ConnectivityManager cm;		
 		/** 
 		 * Called when the activity is first created. 
 		 */
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			setContentView(R.layout.tweet);
-				
-			//Statistics
-			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
-			statsDBHelper.open();
-			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
+			setContentView(R.layout.tweet);				
 			
+			cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);			
 			locHelper = LocationHelper.getInstance(this);		
 			
 			//SDCard helper
-			sdCardHelper = new SDCardHelper(this);		
+			sdCardHelper = new SDCardHelper();		
 			setupBasicButtons();
 			
 			characters = (TextView) findViewById(R.id.tweet_characters);
@@ -233,7 +226,7 @@ public class NewTweetActivity extends Activity{
 					});
 					
 					String[] filePaths = {tmpPhotoPath, finalPhotoPath};
-					if(sdCardHelper.checkSDStuff(filePaths)){
+					if(sdCardHelper.checkSDState(filePaths)){
 						
 						sdCardHelper.clearTempDirectory(tmpPhotoPath);
 						setButtonStatus(true,false);
@@ -399,37 +392,31 @@ public class NewTweetActivity extends Activity{
 	private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		
 		Uri insertUri = null;
+		StatisticsDBHelper statsDBHelper;	
 		
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			boolean result=false;
-			
+			//Statistics
+			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
+			statsDBHelper.open();
 			timestamp = System.currentTimeMillis();
 
-			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
-
-				Log.i(TAG,"writing log");
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
-				locHelper.unRegisterLocationListener();
-				Log.i(TAG, String.valueOf(hasMedia));
+			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
+				
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
+				locHelper.unRegisterLocationListener();				
 			}
 			if(hasMedia){
 				try {
 					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
 					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));//photoFileParent, photoFilename));
 					String fromFile = tmpPhotoUri.getPath();
-					String toFile = photoUri.getPath();
-					Log.i(TAG, fromFile);
-					Log.i(TAG, toFile);
-					if(sdCardHelper.copyFile(fromFile, toFile)){
-
-						Log.i(TAG, "file copy successful");
-
-					}
+					String toFile = photoUri.getPath();					
+					sdCardHelper.copyFile(fromFile, toFile);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					Log.d("photo", "exception!!!!!");
-					e.printStackTrace();
+					Log.e("photo", "exception!!!!!");					
 				}
 			}
 			// if no connectivity, notify user that the tweet will be send later		
@@ -451,8 +438,7 @@ public class NewTweetActivity extends Activity{
 
 					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
 																Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-					//getContentResolver().notifyChange(insertUri, null);
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);					
 					ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 						result=true;
@@ -495,7 +481,10 @@ public class NewTweetActivity extends Activity{
 		}
 		
 		// we mark the tweet for posting to twitter
-		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
+		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);		
+		// set the current timestamp
+		tweetContentValues.put(Tweets.COL_CREATED, System.currentTimeMillis());
+		
 		
 		if(useLocation){
 			Location loc = locHelper.getLocation();

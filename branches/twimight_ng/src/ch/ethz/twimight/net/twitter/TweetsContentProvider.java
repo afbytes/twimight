@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -57,7 +58,7 @@ public class TweetsContentProvider extends ContentProvider {
 	
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
-	private static String localScreenName;
+	private String localScreenName;
 	
 	private static UriMatcher tweetUriMatcher;
 		
@@ -1025,13 +1026,7 @@ public class TweetsContentProvider extends ContentProvider {
 	/**
 	 * Inserts a tweet into the DB
 	 */
-	private Uri insertTweet(ContentValues values){
-	//	if(checkValues(values)){
-			
-			if(!values.containsKey(Tweets.COL_CREATED)){
-				// set the current timestamp
-				values.put(Tweets.COL_CREATED, System.currentTimeMillis());
-			}
+	private Uri insertTweet(ContentValues values){			
 			
 			values.put(Tweets.COL_RECEIVED, System.currentTimeMillis());			
 			// the disaster ID must be set for all tweets (normal and disaster)
@@ -1079,14 +1074,12 @@ public class TweetsContentProvider extends ContentProvider {
 					 return null; 
 				}
 				
-			} catch (Exception ex) {
+			} catch (SQLException ex) {
 				Log.e(TAG,"could not insert tweet in the table",ex);
 				return null;
 			}
 			
-		//} else {
-		//	throw new IllegalArgumentException("Illegal tweet: " + values);
-	//	}
+		
 	}
 
 	 
