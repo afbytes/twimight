@@ -57,13 +57,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	ConnectivityManager cm;
 	StatisticsDBHelper locDBHelper;	
 	CheckLocation checkLocation;
-	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
-	
-	//EVENTS
-	public static final String APP_STARTED = "app_started";
-	public static final String APP_CLOSED = "app_closed";
-	public static final String LINK_CLICKED = "link_clicked";
-	public static final String TWEET_WRITTEN = "tweet_written";
+	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";	
 	
 	ActionBar actionBar;
 	public static final String FILTER_REQUEST = "filter_request";
@@ -141,7 +135,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 			if (locHelper != null && locHelper.getCount() > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_STARTED, null, timestamp);
+				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -241,12 +235,12 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			
 			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {				
 				handler.removeCallbacks(checkLocation);				
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),APP_STARTED , null, timestamp);
+				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
 		if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {				
-			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), APP_CLOSED , null, System.currentTimeMillis());
+			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
 			

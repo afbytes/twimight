@@ -42,14 +42,14 @@ public class WebViewActivity extends Activity {
 		String userId = intent.getStringExtra("user_id");
 		String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
 		htmlDbHelper = new HtmlPagesDbHelper(this);
-		sdCardHelper = new SDCardHelper(this);
+		sdCardHelper = new SDCardHelper();
 		WebView web = (WebView) findViewById(R.id.webview);
 		web.getSettings().setJavaScriptEnabled(true);
 		web.getSettings().setDomStorageEnabled(true); //twitter api and youtube api hack
 		 
         web.getSettings().setBuiltInZoomControls(true); //Enable Multitouch if supported
         
-		if(sdCardHelper.checkSDStuff(filePath)){
+		if(sdCardHelper.checkSDState(filePath)){
 
 			htmlDbHelper.open();
 			String filename = htmlDbHelper.getPageInfo(url, tweetId, userId).getAsString(HtmlPage.COL_FILENAME);

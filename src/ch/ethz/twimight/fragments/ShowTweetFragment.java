@@ -232,7 +232,7 @@ public class ShowTweetFragment extends Fragment{
 		statsDBHelper = new StatisticsDBHelper(activity.getApplicationContext());
 		statsDBHelper.open();
 
-		sdCardHelper = new SDCardHelper(activity);
+		sdCardHelper = new SDCardHelper();
 
 		//html database
 		htmlDbHelper = new HtmlPagesDbHelper(activity);
@@ -252,7 +252,7 @@ public class ShowTweetFragment extends Fragment{
 	private void setPhotoAttached() {
 		// Profile image
 		String[] filePath = {photoPath};
-		if(sdCardHelper.checkSDStuff(filePath)){
+		if(sdCardHelper.checkSDState(filePath)){
 			if(!c.isNull(c.getColumnIndex(Tweets.COL_MEDIA))){
 				ImageView photoView = (ImageView) view.findViewById(R.id.showPhotoAttached);
 				
@@ -281,7 +281,7 @@ public class ShowTweetFragment extends Fragment{
 					//check if file status normal, exists and size
 					String[] filePath = {HtmlPage.HTML_PATH + "/" + htmlCV.getAsString(HtmlPage.COL_USER)}; 
 					
-					if(sdCardHelper.checkSDStuff(filePath)){
+					if(sdCardHelper.checkSDState(filePath)){
 						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
 						if(!sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() || sdCardHelper.getFileFromSDCard(filePath[0], filename).length() < 500){
 							fileStatusNormal = false;
@@ -322,7 +322,7 @@ public class ShowTweetFragment extends Fragment{
 		//insert database
 		boolean result = true;
 		String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
-		if(sdCardHelper.checkSDStuff(filePath)){
+		if(sdCardHelper.checkSDState(filePath)){
 			String tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 			for(int i=0; i<htmlsToDownload.size();i++){
 
@@ -663,7 +663,7 @@ public class ShowTweetFragment extends Fragment{
 
         	if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
-    			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.LINK_CLICKED , url, System.currentTimeMillis());
+    			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.LINK_CLICKED , url, System.currentTimeMillis());
     		} else {}
         	
 	        if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){	
@@ -890,7 +890,7 @@ public void onResume(){
 		        	   if(delPhotoName != null){
 		        		   photoPath = Tweets.PHOTO_PATH + "/" + userID;
 		        		   String[] filePath = {photoPath};
-		       			   if(sdCardHelper.checkSDStuff(filePath)){
+		       			   if(sdCardHelper.checkSDState(filePath)){
 		       				   File photoFile = sdCardHelper.getFileFromSDCard(photoPath, delPhotoName);//photoFileParent, photoFilename));
 				        	   photoFile.delete();
 		       			   }
@@ -903,7 +903,7 @@ public void onResume(){
 		        			   ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl, String.valueOf(tid), userID);
 		        			   if(htmlCV != null){
 		        				   String[] filePath = {HtmlPage.HTML_PATH + "/" + userID};
-				       			   if(sdCardHelper.checkSDStuff(filePath)){
+				       			   if(sdCardHelper.checkSDState(filePath)){
 				       				   File htmlFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME));//photoFileParent, photoFilename));
 				       				   htmlFile.delete();
 				       				   htmlDbHelper.deletePage(htmlUrl, String.valueOf(tid));
