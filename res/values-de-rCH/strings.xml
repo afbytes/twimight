@@ -23,8 +23,8 @@
     <string name="user">Benutzer</string>
     <string name="message">Nachrichte</string>
     <string name="ok">OK</string>
-    <string name="yes">Ja</string>
-    <string name="no">Nei</string>
+    <string name="yes">Äuä scho</string>
+    <string name="no">Äuä nid</string>
     
     <!-- Menu -->
     <string name="home">Hei</string>
@@ -46,11 +46,10 @@
 	<string name="location_on">Lokalisierig isch igschaute</string>
 	<string name="location_off">Lokalisierig isch usgschaute</string>
 	<string name="no_connection4">Ke Internetverbindig. Dä Tweet wird veröffentlicht sobau Internetverbindig besteit.</string>
-	<string name="picker">Usfüere mit</string>
+	<string name="picker">Usfüehre mit</string>
 	<string name="retweeted_by">Retweet vo</string>
-	<!-- TO BE TRANSLATED -->
-    <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
-	<string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
+    <string name="delete_tweet">Bisch sicher dass di Tweet wosch lösche?</string>
+	<string name="modify_tweet">Wosch dä Tweet vor em retweete verändere?</string>
 	
     <!-- User, Friends -->
     <string name="followers">Fouge Mir</string>
@@ -59,7 +58,7 @@
     <string name="peers">Peers</string>
     <string name="will_stop_following">Du wirsch däm Benutzer gli nümme fouge (sobau Internetverbindig besteit).</string>
     <string name="will_start_following">Du wirsch däm Benutzer gli fougen (sobau Internetverbindig besteit).</string>
-    <string name="follow">Fougen</string>
+    <string name="follow">Fouge</string>
     <string name="unfollow">Nümme fouge</string>
     <string name="no_users">Ke Benutzer verfüegbar.</string>
 
@@ -70,17 +69,16 @@
     
     <!-- Direct Messages -->
     <string name="no_dms">Kener Nachrichte verfüegbar</string>
-    <string name="to">A: </string>
+    <string name="to">Empfänger: </string>
     <string name="no_connection3">Dini Nachricht wird gli verschickt (sobau Internetverbindung besteit).</string>
-    <!-- TO BE TRANSLATED -->
-    <string name="dm_content_title">New Direct Messages!</string>
-    <string name="dm_content_text">You have new direct message(s)</string>
+    <string name="dm_content_title">Nöi Nachricht(e)!</string>
+    <string name="dm_content_text">Du hesch nöi Nachricht(e)</string>
     
     <!-- Tweet Notification -->
-    <string name="tweet_content_title">New Tweet(s)!</string>
-    <string name="tweet_content_text">New tweet(s) in your timeline</string>
-    <string name="mention_content_text">You have new mention(s)</string>
-    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>    
+    <string name="tweet_content_title">Nöi Tweet(s)!</string>
+    <string name="tweet_content_text">Du hesch nöi Tweet(s) ir Timeline</string>
+    <string name="mention_content_text">Du hesch nöi Mention(s)</string>
+    <string name="dis_tweet_content_text">Du hesch nöi Katastrophe-Tweet(s)</string>    
     
     <!-- Install -->
     <string name="permission">Zuegriff uf Twimight Content Providers</string>
@@ -88,13 +86,13 @@
     
     <!-- Login, Logout -->
     <string name="login">Amäude</string>
-    <string name="no_connection2">Ke Internetverbindig. Bitte später nomau probiere.</string>
-    <string name="error_signing">Fähler bim Signiere.</string>
-    <string name="error_twitter">Twitter isch grad nid erreichbar. Bitte später nochmau probiere.</string>
-    <string name="error_parameters">Benötigti Parameter si nid korräkt gsetzt.</string>
-    <string name="error_server">Kommunikation mit äm Server isch gschiteret. Bitte Internetverbindig prüefe.</string>
-    <string name="error_authentication">Fähler bei dr Authentisierig.</string>
-    <string name="error_login">Fähler bim Amäude. Bitte später nochmau probiere.</string>
+    <string name="no_connection2">Hoppla! Ke Internetverbindig. Bitte später nomau probiere.</string>
+    <string name="error_signing">Hoppla! Fähler bim Signiere.</string>
+    <string name="error_twitter">Hoppla! Twitter isch grad nid erreichbar. Bitte später nochmau probiere.</string>
+    <string name="error_parameters">Hoppla! Benötigti Parameter si nid korräkt gsetzt.</string>
+    <string name="error_server">Hoppla! Kommunikation mit äm Server isch gschiteret. Bitte Internetverbindig prüefe.</string>
+    <string name="error_authentication">Hoppla! Fähler bei dr Authentisierig.</string>
+    <string name="error_login">Hoppla! Fähler bim Amäude. Bitte später nochmau probiere.</string>
     <string name="in_progress">Wird usgfüehrt</string>
     <string name="verifying">Berächtigung wird prüft.</string>
     <string name="disastermode_running">Warnig: Katastrophe-Modus louft no im Hingergrund.</string>
@@ -150,10 +148,9 @@
   
     <!-- Rate -->
     <string name="app_rater">Faus dr Twimight gfaut, nimm dir bitte churz Zit für ä Bewärtig. Merci viumau für dini Ungerstützig!</string>   		
-    <!-- TO BE TRASNALTED -->
-    <string name="rate_app">Rate App</string>   	
-    <string name="remind_me">Remind me later</string>   
-    <string name="no_thanks">No Thanks</string> 
+    <string name="rate_app">App bewärte</string>   	
+    <string name="remind_me">Später</string>   
+    <string name="no_thanks">Nei merci</string> 
     
     
     <!-- Preferences -->
