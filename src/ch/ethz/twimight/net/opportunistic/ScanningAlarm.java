@@ -49,7 +49,7 @@ public class ScanningAlarm extends BroadcastReceiver {
 	 * Starts the alarm.
 	 */
 
-	public ScanningAlarm(Context context, long delay, boolean forceScan) {		
+	public ScanningAlarm(Context context, boolean forceScan) {		
 
 		if(BluetoothAdapter.getDefaultAdapter().isEnabled()){				
 			scheduleScanning(context,System.currentTimeMillis());

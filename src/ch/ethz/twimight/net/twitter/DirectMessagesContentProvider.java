@@ -239,7 +239,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 			case LIST_DISASTER:
 				
-				if (TwimightBaseActivity.D) Log.i(TAG, "Query DMS Disaster");
+				if (TwimightBaseActivity.D) Log.d(TAG, "Query DMS Disaster");
 				c = database.query(DBOpenHelper.TABLE_DMS, projection,DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_MYDISASTER + "!=0"
 						+ " OR " + DirectMessages.COL_BUFFER + "&" + DirectMessages.BUFFER_DISASTER_OTHERS + "!=0", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);

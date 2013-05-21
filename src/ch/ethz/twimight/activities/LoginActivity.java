@@ -219,7 +219,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		if(buttonLogin != null){
 			buttonLogin.setOnClickListener(null);
 		}
-		
+		instance =null;
 		unbindDrawables(findViewById(R.id.showLoginRoot));
 	}
 	
@@ -416,7 +416,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}		
 		
 		if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-			new ScanningAlarm(context,0,false);
+			new ScanningAlarm(context,false);
 		}		
 		
 		//start the twitter update alarm

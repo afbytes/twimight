@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -37,7 +38,7 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
+import ch.ethz.twimight.net.opportunistic.DevicesReceiver;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -162,7 +163,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * TODO: Create the queries more elegantly..
 	 */
 	@Override
-	public synchronized Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
+	public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs, String sortOrder) {
 		
 		if(TextUtils.isEmpty(sortOrder)) sortOrder = Tweets.DEFAULT_SORT_ORDER;
 		
@@ -672,7 +673,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			for (ContentValues value : values){
 				
-				if (insertTweetsTimelineNormal(value) != null) ;	
+				if (insertNormalTweet(value) != null) ;	
 				numInserted++;
 			}
 			database.setTransactionSuccessful();
@@ -687,96 +688,20 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Insert a tweet into the DB
 	 */
 	@Override
-	public synchronized Uri insert(Uri uri, ContentValues values) {
-		int disasterId;
-		Cursor c;
+	public Uri insert(Uri uri, ContentValues values) {
+		
+		
 		Uri insertUri = null; // the return value;
 		
 		switch(tweetUriMatcher.match(uri)){
 			case TWEETS_TIMELINE_NORMAL:				
 				
-				insertUri = insertTweetsTimelineNormal(values);				
-
+				insertUri = insertNormalTweet(values);
 				break;
 				
 			case TWEETS_TIMELINE_DISASTER:
-				if (TwimightBaseActivity.D) Log.d(TAG, "Insert TWEETS_TIMELINE_DISASTER");
-				// in disaster mode, we set the is disaster flag 
-				//and sign the tweet (if we have a certificate for our key pair)
-				values.put(Tweets.COL_ISDISASTER, 1);
 				
-				// if we already have a disaster tweet with the same disaster ID, 
-				// we discard the new one
-				disasterId = getDisasterID(values);
-				c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId+" AND "+Tweets.COL_ISDISASTER+">0", null, null, null, null);
-				if(c.getCount()>0){
-					c.moveToFirst();
-					Uri oldUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));
-					c.close();
-					return oldUri; 
-				}
-				
-				CertificateManager cm = new CertificateManager(getContext());
-				KeyManager km = new KeyManager(getContext());
-				
-				//verify whether I was the author or not
-				if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
-					if(cm.hasCertificate()){
-						// we put the signature
-						String text = values.getAsString(Tweets.COL_TEXT);
-						String userId = LoginActivity.getTwitterId(getContext()).toString();
-						
-						String signature = km.getSignature(new String(text+userId));
-						values.put(Tweets.COL_SIGNATURE, signature);
-						
-						// and the certificate
-						values.put(Tweets.COL_CERTIFICATE, cm.getCertificate());
-						
-						// and set the is_verified flag to show that the tweet is signed
-						values.put(Tweets.COL_ISVERIFIED, 1);
-					} else {
-						values.put(Tweets.COL_ISVERIFIED, 0);
-					}
-					// if we are in disaster mode, we give the content provider a 
-					// second to insert the tweet and then schedule a scanning operation
-					if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){
-						if (ScanningService.getState() == ScanningService.STATE_IDLE){
-			    				new ScanningAlarm(getContext(),0,true);
-			    			
-			    			} 
-						
-					}
-				} else {
-					
-					String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
-					// check validity
-					if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){
-						
-						// check signature
-						String signature = values.getAsString(Tweets.COL_SIGNATURE);
-						String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
-						if(km.checkSignature(cm.parsePem(certificate), signature, text)){							
-							values.put(Tweets.COL_ISVERIFIED, 1);
-						} else {
-							values.put(Tweets.COL_ISVERIFIED, 0);
-						}
-					
-					} else {
-						values.put(Tweets.COL_ISVERIFIED, 0);
-					}
-					
-					if (ShowTweetListActivity.running==false && 
-							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true) {
-						// notify user 
-						notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
-					}
-					
-				}
-				c.close();
-				insertUri = insertTweet(values);
-				//getContext().getContentResolver().notifyChange(uri, null);
-				// delete everything that now falls out of the buffer
-				purgeTweets(values);
+				insertUri =  insertDisasterTweet(values);				
 				break;
 				
 			default: throw new IllegalArgumentException("Unsupported URI: " + uri);	
@@ -785,7 +710,118 @@ public class TweetsContentProvider extends ContentProvider {
 		return insertUri;
 	}
 
-	private Uri insertTweetsTimelineNormal(ContentValues values) {
+  private Uri insertDisasterTweet(ContentValues values) {
+		
+		int disasterId;
+		Cursor c;
+		Uri insertUri = null; // the return value;		
+		
+		// in disaster mode, we set the is disaster flag 
+		//and sign the tweet (if we have a certificate for our key pair)
+				
+		// if we already have a disaster tweet with the same disaster ID, 
+		// we discard the new one
+		disasterId = getDisasterID(values);
+		
+		c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId+" AND "+Tweets.COL_ISDISASTER+">0", null, null, null, null);
+		if(c.getCount()>0){
+			Log.i(TAG,"tweet with same dis ID");
+			c.moveToFirst();
+			Uri oldUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));			
+			return oldUri; 
+		}
+		c.close();
+		
+		CertificateManager cm = new CertificateManager(getContext().getApplicationContext());
+		KeyManager km = new KeyManager(getContext().getApplicationContext());		
+		
+		//verify whether I was the author or not
+		if(LoginActivity.getTwitterId(getContext()).equals(values.getAsInteger(Tweets.COL_USER).toString())){
+			
+			signTweet(cm,km,values);
+			
+			// if we are in disaster mode, we give the content provider a 
+			// second to insert the tweet and then schedule a scanning operation
+			if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){				
+				    Log.i(TAG,"calling the service " + Thread.currentThread().toString() + " " + Thread.currentThread().getId());   
+				    DevicesReceiver.setDiscoveryFinishedTimestamp(PreferenceManager.getDefaultSharedPreferences(getContext()),0L);
+					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
+					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);
+					getContext().getApplicationContext().startService(i);	
+	    							
+				
+			}
+			
+		} else {
+			
+			verifySignature(cm,km,values);		
+			
+			if (ShowTweetListActivity.running==false && 
+					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true) {
+				// notify user 
+				notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
+			}			
+		}
+		
+		insertUri = insertTweet(values);
+		//getContext().getContentResolver().notifyChange(uri, null);
+		// delete everything that now falls out of the buffer
+		purgeTweets(values);
+		
+		return insertUri;
+	}
+
+
+
+
+
+
+
+	private void verifySignature(CertificateManager cm, KeyManager km, ContentValues values) {
+		String certificate = values.getAsString(Tweets.COL_CERTIFICATE);
+		// check validity
+		if(cm.checkCertificate(cm.parsePem(certificate), values.getAsLong(Tweets.COL_USER).toString())){
+			
+			// check signature
+			String signature = values.getAsString(Tweets.COL_SIGNATURE);
+			String text = values.getAsString(Tweets.COL_TEXT) + values.getAsString(Tweets.COL_USER);
+			if(km.checkSignature(cm.parsePem(certificate), signature, text)){							
+				values.put(Tweets.COL_ISVERIFIED, 1);
+			} else {
+				values.put(Tweets.COL_ISVERIFIED, 0);
+			}
+		
+		} else {
+			values.put(Tweets.COL_ISVERIFIED, 0);
+		}
+		
+	}
+
+
+
+	private void signTweet(CertificateManager cm, KeyManager km, ContentValues values) {
+		if(cm.hasCertificate()){
+			// we put the signature
+			String text = values.getAsString(Tweets.COL_TEXT);
+			String userId = LoginActivity.getTwitterId(getContext()).toString();
+			
+			String signature = km.getSignature(new String(text+userId));
+			values.put(Tweets.COL_SIGNATURE, signature);
+			
+			// and the certificate
+			values.put(Tweets.COL_CERTIFICATE, cm.getCertificate());
+			
+			// and set the is_verified flag to show that the tweet is signed
+			values.put(Tweets.COL_ISVERIFIED, 1);
+		} else {
+			values.put(Tweets.COL_ISVERIFIED, 0);
+		}
+		
+	}
+
+
+
+	private Uri insertNormalTweet(ContentValues values) {
 		
 		int disasterId;
 		/*
@@ -863,7 +899,7 @@ public class TweetsContentProvider extends ContentProvider {
 			return insertUri;
 			
 		} catch (Exception ex) {
-			if (TwimightBaseActivity.D) Log.e(TAG,"exception while inserting", ex);
+			Log.e(TAG,"exception while inserting", ex);
 			return null;
 		}
 		
@@ -874,7 +910,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Update a tweet
 	 */
 	@Override
-	public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);			
 		
@@ -901,7 +937,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 * Delete a local tweet from the DB
 	 */
 	@Override
-	public synchronized int delete(Uri uri, String arg1, String[] arg2) {
+	public int delete(Uri uri, String arg1, String[] arg2) {
 		if(tweetUriMatcher.match(uri) != TWEETS_ID) throw new IllegalArgumentException("Unsupported URI: " + uri);
 		
 		if (TwimightBaseActivity.D) Log.d(TAG, "Delete TWEETS_ID");
@@ -995,8 +1031,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private int getDisasterID(ContentValues cv){
 			
 		if ( cv != null ) {
-			String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();
-			
+			String text = Html.fromHtml(cv.getAsString(Tweets.COL_TEXT), null, null).toString();			
 			String userId;
 			if(!cv.containsKey(Tweets.COL_USER) || (cv.getAsString(Tweets.COL_USER)==null)){
 				userId = LoginActivity.getTwitterId(getContext()).toString();
@@ -1010,15 +1045,7 @@ public class TweetsContentProvider extends ContentProvider {
 		
 	}
 	
-	/**
-	 * Input verification for new tweets
-	 * @param values
-	 * @return
-	 */
-	private boolean checkValues(ContentValues values){
-		// TODO: Input validation
-		return true;
-	}
+
 	
 	/**
 	 * Inserts a tweet into the DB
@@ -1077,7 +1104,7 @@ public class TweetsContentProvider extends ContentProvider {
 					 return null; 
 				}
 				
-			} catch (Exception ex) {
+			} catch (SQLException ex) {
 				if (TwimightBaseActivity.D) Log.e(TAG,"could not insert tweet in the table",ex);
 				return null;
 			}

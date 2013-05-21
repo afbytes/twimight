@@ -33,6 +33,8 @@ public class PicturesIntentService extends IntentService {
 		super("PicturesIntentService");
 		
 	}
+	
+	
 
 	@Override
 	protected void onHandleIntent(Intent intent) {		

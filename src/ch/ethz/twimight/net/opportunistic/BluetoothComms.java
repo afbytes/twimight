@@ -41,7 +41,7 @@ import ch.ethz.twimight.util.Constants;
 public class BluetoothComms{
     // Debugging
     private static final String TAG = "BluetoothComms";
-    private static final boolean D = false;
+    private static final boolean D = true;
 
     // Name for the SDP record when creating server socket
     private static final String NAME_INSECURE = "BluetoothComms";
@@ -164,7 +164,7 @@ public class BluetoothComms{
      */
     private synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device) {
-        if (D) Log.d(TAG, "connected" );
+        if (D) Log.i(TAG, "connected" );
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -245,7 +245,7 @@ public class BluetoothComms{
         mHandler.sendMessage(msg);
 
         // Start the service over to restart listening mode
-        BluetoothComms.this.start();
+        start();
     }
 
     /**
@@ -257,7 +257,7 @@ public class BluetoothComms{
         mHandler.sendMessage(msg);
 
         // Start the service over to restart listening mode
-        BluetoothComms.this.start();
+        start();
     }
 
     /**
@@ -292,8 +292,9 @@ public class BluetoothComms{
                         // This is a blocking call and will only return on a
                         // successful connection or an exception
                         socket = mmServerSocket.accept();
+                        Log.i(TAG,"connection received, socket created");
                     } catch (IOException e) {
-                         Log.e(TAG, "accept() failed");
+                        // Log.e(TAG, "accept() failed");
                         break;
                     }
 
@@ -304,6 +305,7 @@ public class BluetoothComms{
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
                                 // Situation normal. Start the connected thread.
+                            	mAdapter.cancelDiscovery();
                                 connected(socket, socket.getRemoteDevice());
                                 break;
                             case STATE_NONE:
@@ -326,7 +328,7 @@ public class BluetoothComms{
         }
 
         public void cancel() {
-            if (D) Log.d(TAG,  "cancel " + this);
+            
             try {
                 mmServerSocket.close();
             } catch (IOException e) {

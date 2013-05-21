@@ -48,11 +48,17 @@ public class StatisticsDBHelper {
 	public static final String KEY_LINK = "link";
 	
 	private Context context;
-	
+
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
-	
-	
+
+	//EVENTS
+	public static final String APP_STARTED = "app_started";
+	public static final String APP_CLOSED = "app_closed";
+	public static final String LINK_CLICKED = "link_clicked";
+	public static final String TWEET_WRITTEN = "tweet_written";
+
+
 	/**
 	 * Constructor.
 	 * @param context
