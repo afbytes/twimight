@@ -157,6 +157,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
+	private static SQLiteDatabase myWritableDb;
 
 	/**
 	 * Constructor content://
@@ -176,7 +177,36 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			dbHelper = new DBOpenHelper(context);		
 		return dbHelper;
 		
+	}   
+    
+    /**
+     * Returns a writable database instance in order not to open and close many
+     * SQLiteDatabase objects simultaneously
+     *
+     * @return a writable instance to SQLiteDatabase
+     */
+    @Override
+	public SQLiteDatabase getWritableDatabase() {
+    	// TODO Auto-generated method stub
+    	synchronized(DBOpenHelper.class) {
+    		if ((myWritableDb == null) || (!myWritableDb.isOpen())) {
+    			return super.getWritableDatabase();
+    		}
+    	}
+    	return myWritableDb;
 	}
+
+	@Override
+    public void close() {
+        super.close();
+        synchronized(DBOpenHelper.class) {
+        	if (myWritableDb != null) {
+                myWritableDb.close();
+                myWritableDb = null;
+            }
+        }
+        
+    }
 	
 	private void createTables(SQLiteDatabase database) {
 		database.execSQL(TABLE_MACS_CREATE);

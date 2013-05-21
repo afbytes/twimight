@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import ch.ethz.twimight.data.MacsDBHelper;
 
@@ -31,8 +32,8 @@ public class DevicesReceiver extends BroadcastReceiver {
 	private static final String DISCOVERY_FINISHED_TIMESTAMP = "discovery_finished_timestamp" ;
 	private ArrayList<String> newDeviceList = null;
 	
-	public final String SCAN_PROBABILITY = "scan_probability";
-	public final String DEVICE_LIST = "device_list";
+	public static final String SCAN_PROBABILITY = "scan_probability";
+	public static final String DEVICE_LIST = "device_list";
 	
 	private static final float INIT_PROB = (float) 0.5;
 	private static final float MAX_PROB = (float) 1.0;
@@ -71,13 +72,14 @@ public class DevicesReceiver extends BroadcastReceiver {
 		if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 			
 			// Get the BluetoothDevice object from the Intent
-			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);    
+			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);   
 			
-		
-			newDeviceList.add(device.getAddress().toString());
+			
+			//newDeviceList.add(device.getAddress().toString());
+			
 			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART &&
 					device.getBondState() != BluetoothDevice.BOND_BONDED) {
-				
+				Log.i(TAG, "found a new special device, MAC :" + device.getAddress().toString());
 				if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
 					dbHelper.createMac(device.getAddress().toString(), 1);					
 				}
@@ -85,19 +87,26 @@ public class DevicesReceiver extends BroadcastReceiver {
 			} 
 
 			// When discovery is finished...
-		} else  if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {        
-			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
-			    	SharedPreferences.Editor edit = sharedPref.edit();
-			    	edit.putLong(DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
-			    	edit.commit();
+		} else  if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {   
+			Log.i(TAG, "received discovery finished");
+
+			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 5000) {
+			    	setDiscoveryFinishedTimestamp(sharedPref,System.currentTimeMillis());
 			    	addPairedDevices();
 			    	sf.onScanningFinished();
-			    	compareDevice();
+			    	//compareDevice();
 			    }
 				
         } 
 
 	}
+	
+	 public static void setDiscoveryFinishedTimestamp(SharedPreferences sharedPref, Long time) {
+		   Log.i(TAG,"setting time");
+		   SharedPreferences.Editor edit = sharedPref.edit();
+	   	   edit.putLong(DevicesReceiver.DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
+	   	   edit.commit();
+	   }
 	
 	private void compareDevice(){
 		Bundle scanInfo = getScanInfo();
@@ -123,7 +132,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 				dp = (float)oldProb * (float)0.5* ( (float)newDevice/(float)(newDeviceList.size()) + (1 - (float)oldDevice/(float)(oldDeviceList.size())));
 			}
 			
-		
+			Log.i(TAG, "delta p is:" + String.valueOf(dp));
 			oldProb = Math.min(oldProb + dp, MAX_PROB);
 			
 		}
@@ -138,9 +147,9 @@ public class DevicesReceiver extends BroadcastReceiver {
 	}
 	
 	//set scan info(device list and probability) to current scan
-	public void setScanInfo(float probability, ArrayList<String> deviceList) {
+	private void setScanInfo(float probability, ArrayList<String> deviceList) {
 
-	
+		Log.i(TAG,"set scan probability to:" + String.valueOf(probability));
 		
 		SharedPreferences.Editor prefEditor = sharedPref.edit();
 		prefEditor.putFloat(SCAN_PROBABILITY, probability);
@@ -155,7 +164,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 		    }
 		    
 		}
-	
+		Log.i(TAG, "set device list to:" + sb.toString());
 		prefEditor.putString(DEVICE_LIST, sb.toString());
 		prefEditor.commit();
 	}
@@ -170,7 +179,8 @@ public class DevicesReceiver extends BroadcastReceiver {
 		for(String device:tmpList){
 			deviceList.add(device);
 		}
-	
+		Log.i(TAG, "current scan probability is:" + String.valueOf(probability));
+		Log.i(TAG, "devices scanned during last time are:" + deviceList.toString());
 		Bundle mBundle = new Bundle();
 		mBundle.putFloat(SCAN_PROBABILITY, probability);
 		mBundle.putStringArrayList(DEVICE_LIST, deviceList);

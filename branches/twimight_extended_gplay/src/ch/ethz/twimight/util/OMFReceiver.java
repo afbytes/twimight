@@ -83,7 +83,7 @@ public class OMFReceiver extends BroadcastReceiver {
 			
 			mBluetoothAdapter.enable();
 			setPreferences(context,true);
-			new ScanningAlarm(context,0,true);
+			new ScanningAlarm(context,true);
 			Toast.makeText(context, "Disaster Mode enabled by OMF", Toast.LENGTH_SHORT).show();
 			createActivity(context);
 			

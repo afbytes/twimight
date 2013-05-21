@@ -43,13 +43,13 @@ public class SDCardHelper {
 	
 	
 	
-	public SDCardHelper(Context context) {
+	public SDCardHelper() {
 		SDcardPath = null;
 		state = null;
 		isSDAvail = false;
 		isSDWritable = false;
 		tmpPhotoUri = null;
-//		this.context=context;
+
 	}
 	public boolean checkSDStuff(String[] filePath){
 		state = Environment.getExternalStorageState();

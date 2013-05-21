@@ -98,7 +98,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		LocationHelper locHelper ;
 		long timestamp;		
 		ConnectivityManager cm;
-		StatisticsDBHelper statsDBHelper;	
+		
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -106,18 +106,15 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.tweet);
-			
-		//Statistics
-		statsDBHelper = new StatisticsDBHelper(this);
-		statsDBHelper.open();
+		setContentView(R.layout.tweet);			
+		
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);		
 		
 		locHelper = LocationHelper.getInstance(this);
 		locHelper.registerLocationListener();	
 		
 		//SDCard helper
-		sdCardHelper = new SDCardHelper(this);		
+		sdCardHelper = new SDCardHelper();		
 		setupBasicButtons();
 		
 		characters = (TextView) findViewById(R.id.tweet_characters);
@@ -405,17 +402,21 @@ public class NewTweetActivity extends TwimightBaseActivity{
 	private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		
 		Uri insertUri = null;
+		StatisticsDBHelper statsDBHelper;	
 		
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			boolean result=false;
 			
+			//Statistics
+			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
+			statsDBHelper.open();
 			timestamp = System.currentTimeMillis();
 
-			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo()!= null) {	
+			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
 
 				if (D) Log.i(TAG,"writing log");
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), ShowTweetListActivity.TWEET_WRITTEN, null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
 				if (D) Log.i(TAG, String.valueOf(hasMedia));
 			}
@@ -500,10 +501,12 @@ public class NewTweetActivity extends TwimightBaseActivity{
 		if (isReplyTo > 0) {
 			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
 		}
-		
+
 		// we mark the tweet for posting to twitter
 		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
-		
+		// set the current timestamp
+		tweetContentValues.put(Tweets.COL_CREATED, System.currentTimeMillis());
+
 		if(useLocation){
 			Location loc = locHelper.getLocation();
 			if(loc!=null){

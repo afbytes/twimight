@@ -139,7 +139,7 @@ public class PrefsActivity extends PreferenceActivity{
 			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);           
 			
 		} else {
-			new ScanningAlarm(getApplicationContext(),0,true);
+			new ScanningAlarm(getApplicationContext(),true);
 			finish();
 		}
 				 
@@ -157,7 +157,7 @@ public class PrefsActivity extends PreferenceActivity{
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
 		case REQUEST_DISCOVERABLE:			
-			new ScanningAlarm(getApplicationContext(),0,true);
+			new ScanningAlarm(getApplicationContext(),true);
 			finish();
 			
 		}

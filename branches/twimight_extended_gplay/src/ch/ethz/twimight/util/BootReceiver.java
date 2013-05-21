@@ -43,17 +43,17 @@ public class BootReceiver extends BroadcastReceiver {
 			
 			// Start the service for communication with the TDS
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
-				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+				new TDSAlarm(context.getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
 			}
 			
 			
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-				new ScanningAlarm(context,0,false);
+				new ScanningAlarm(context.getApplicationContext(),false);
 			}
 			
 						
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
-				new TwitterAlarm(context,false);
+				new TwitterAlarm(context.getApplicationContext(),false);
 			}
 		}
 
