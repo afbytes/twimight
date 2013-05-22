@@ -469,7 +469,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 			case Constants.BLUETOOTH_RESTART:         	 
 				if (TwimightBaseActivity.D) Log.i(TAG, "blue restart"); 
-				
+				unregisterStateReceiver();
 				stateReceiver = new StateChangedReceiver();
 				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 				stateReceiver.setListener(ScanningService.this);

@@ -724,8 +724,7 @@ public class TweetsContentProvider extends ContentProvider {
 		disasterId = getDisasterID(values);
 		
 		c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID+"="+disasterId+" AND "+Tweets.COL_ISDISASTER+">0", null, null, null, null);
-		if(c.getCount()>0){
-			Log.i(TAG,"tweet with same dis ID");
+		if(c.getCount()>0){			
 			c.moveToFirst();
 			Uri oldUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+Long.toString(c.getLong(c.getColumnIndex("_id"))));			
 			return oldUri; 
@@ -743,7 +742,7 @@ public class TweetsContentProvider extends ContentProvider {
 			// if we are in disaster mode, we give the content provider a 
 			// second to insert the tweet and then schedule a scanning operation
 			if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){				
-				    Log.i(TAG,"calling the service " + Thread.currentThread().toString() + " " + Thread.currentThread().getId());   
+				     
 				    DevicesReceiver.setDiscoveryFinishedTimestamp(PreferenceManager.getDefaultSharedPreferences(getContext()),0L);
 					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
 					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);

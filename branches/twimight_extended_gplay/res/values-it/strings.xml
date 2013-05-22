@@ -26,6 +26,8 @@
     <string name="ok">OK</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
+    <string name="cancel">Cancella</string>
+    
     
     <!-- Menu -->
     <string name="home">Home</string>
@@ -74,6 +76,8 @@
     <string name="no_connection3">Nessuna connessione ad internet disponibile, il messaggio verrà inviato non appena possibile</string>   
     <string name="dm_content_title">Nuovi Messaggi Diretti!</string>
     <string name="dm_content_text">Hai nuovi messaggi diretti</string>
+    <string name="send">Invia</string>
+    
     
     <!-- Tweet Notification -->
     <string name="tweet_content_title">Nuovi tweets</string>
@@ -98,15 +102,9 @@
     <string name="verifying">Verifica credenziali</string>
     <string name="disastermode_running">Attenzione: La modalità disastro è ancora attiva in background</string>
     <string name="disable_disastermode">Disabilita la modalità disastro prima. NOTA: Una volta uscito, Twimight non funzionerà fino a quando una connessione internet non sarà nuovamente disponibile.</string>
-    <string name="logout_question">Sei sicuro di voler uscire?</string>
+    <string name="logout_question">Sei sicuro di voler uscire?</string> 
     
-    
-    <!-- Feedback -->
-    <string name="feature_request">Feature request</string>
-    <string name="bug_report">Bug report</string>
-    <string name="send">Send</string>
-    <string name="cancel">Cancella</string>
-    
+   
     <!-- About -->
     <string name="author">Autori: Paolo Carta and Theus Hossmann</string>
     <string name="version">Versione:</string>
