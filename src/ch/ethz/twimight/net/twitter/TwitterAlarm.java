@@ -36,14 +36,14 @@ public class TwitterAlarm extends BroadcastReceiver {
 	private static final String TAG = "TwitterAlarm";
 	private static WakeLock wakeLock;
 	Intent intent;
-	private static boolean isLogin = false;
+	private boolean isLogin = false;
 	
 	public TwitterAlarm(){}
 	
-	public TwitterAlarm(Context context, boolean isLogin) {	
+	public TwitterAlarm(Context context, boolean isLog) {	
 		
 	    AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-		this.isLogin=isLogin;
+		isLogin=isLog;
 		intent = new Intent(context, TwitterAlarm.class);		
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);	
 		

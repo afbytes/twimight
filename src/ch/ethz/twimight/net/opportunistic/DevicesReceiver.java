@@ -102,7 +102,6 @@ public class DevicesReceiver extends BroadcastReceiver {
 	}
 	
 	 public static void setDiscoveryFinishedTimestamp(SharedPreferences sharedPref, Long time) {
-		   Log.i(TAG,"setting time");
 		   SharedPreferences.Editor edit = sharedPref.edit();
 	   	   edit.putLong(DevicesReceiver.DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
 	   	   edit.commit();

@@ -2609,8 +2609,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 			
 			if (ShowTweetListActivity.running)
-						if (ShowTweetListActivity.running)
-						Toast.makeText(getBaseContext(), "Tweet posted", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getBaseContext(), "Tweet posted", Toast.LENGTH_SHORT).show();
 
 		}
 
