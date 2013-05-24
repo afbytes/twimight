@@ -124,8 +124,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		running = false;
+		super.onDestroy();		
 		messageButton.setOnClickListener(null);
 
 		dmUsersListView.setOnItemClickListener(null);

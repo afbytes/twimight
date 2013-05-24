@@ -24,9 +24,13 @@
 			android:layout_height="wrap_content" android:text="@string/to"
 			android:textColor="@color/text" android:textAppearance="?android:attr/textAppearanceMedium" />
 
-		<EditText android:id="@+id/dmRecepient" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:layout_gravity="left"
-			android:gravity="left" />
+		<EditText
+		    android:id="@+id/dmRecepient"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="left"
+		    android:gravity="left"
+		    android:inputType="text|number" />
 
 	</LinearLayout>
 
@@ -55,7 +59,7 @@
 	</LinearLayout>
 
 	<LinearLayout
-	    android:id="@+id/linearLayout2"
+	    android:id="@+id/linearLayout3"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_marginTop="10dp"

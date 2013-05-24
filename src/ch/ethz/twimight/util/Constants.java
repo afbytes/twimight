@@ -118,6 +118,6 @@ public final class Constants {
 	
 	//Other
 	public static final long FRIENDS_FOLLOWERS_DELAY = 60*1000L; /** delay after which friends and followers are downloaded */
-
+	public static final String DIS_MODE_USED = "dis_mode_used";
 	
 }

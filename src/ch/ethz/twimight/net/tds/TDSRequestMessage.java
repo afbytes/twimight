@@ -22,9 +22,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
-import android.util.Log;
+import android.preference.PreferenceManager;
+import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 
@@ -101,15 +103,18 @@ public class TDSRequestMessage {
 			while(!stats.isAfterLast()) {
 				
 				JSONObject row = new JSONObject();
-				row.put("latitude", Double.toString(stats.getDouble(stats.getColumnIndex("lat"))));
-				row.put("longitude", Double.toString(stats.getDouble(stats.getColumnIndex("lng"))));
-				row.put("accuracy", Integer.toString(stats.getInt(stats.getColumnIndex("accuracy"))) );
-				row.put("provider", stats.getString(stats.getColumnIndex("provider")));			
-				row.put("timestamp", Long.toString(stats.getLong(stats.getColumnIndex("timestamp"))));
-				row.put("network", stats.getString(stats.getColumnIndex("network")));
-				row.put("event", stats.getString(stats.getColumnIndex("event")));
-				row.put("link", stats.getString(stats.getColumnIndex("link")));
+				row.put("latitude", Double.toString(stats.getDouble(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LAT))));
+				row.put("longitude", Double.toString(stats.getDouble(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LNG))));
+				row.put("accuracy", Integer.toString(stats.getInt(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_ACCURACY))) );
+				row.put("provider", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_PROVIDER)));			
+				row.put("timestamp", Long.toString(stats.getLong(stats.getColumnIndex(StatisticsDBHelper.KEY_TIMESTAMP))));
+				row.put("network", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_NETWORK)));
+				row.put("event", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_EVENT)));
+				row.put("link", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_LINK)));
+				row.put("isDisaster", Integer.toString(stats.getInt(stats.getColumnIndex(StatisticsDBHelper.KEY_ISDISASTER))) );
 				row.put("followers_count", follCount);
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+				row.put("dis_mode_used", prefs.getBoolean(Constants.DIS_MODE_USED, false) );
 				
 				statisticArray.put(row);
 				stats.moveToNext();

@@ -6,17 +6,36 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="10" android:versionName="0.9.4">
-	<uses-sdk android:minSdkVersion="10"/>
+	package="ch.ethz.twimight" android:versionCode="11" android:versionName="0.9.5">
+	<uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10"/>
 	
 	<permission android:description="@string/permDescription"
 		android:label="@string/permission" android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
 		android:protectionLevel="dangerous" />
 	
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.READ_LOGS" />
+	<uses-permission android:name="android.permission.RESTART_PACKAGES" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
+	<uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>  
+
+
+	<uses-feature android:name="android.hardware.bluetooth"
+		android:required="false" />
+	<uses-feature android:name="android.hardware.touchscreen" />
+	
 	<application android:icon="@drawable/ic_launcher_twimight"
-		android:label="@string/app_name" android:debuggable="true"
-		android:theme="@style/Twimight" android:hardwareAccelerated="true">
+		android:label="@string/app_name" android:debuggable="false"
+		android:theme="@style/Twimight" android:hardwareAccelerated="true" android:allowBackup="false">
 		
 	    <activity android:name=".activities.ConditionsActivity"
 			android:label="@string/app_name" android:launchMode="singleTop"
@@ -93,28 +112,23 @@
 		</activity>
 		
 		<activity android:name=".activities.NewTweetActivity"
-			android:label="@string/app_name" android:theme="@style/Theme.Transparent"
+			android:label="@string/app_name" android:theme="@style/MessageDialog"
 			android:windowSoftInputMode="stateAlwaysVisible" android:launchMode="singleTop" />
 		
 		
 		<activity android:name=".activities.NewDMActivity"
-			android:label="@string/app_name" android:theme="@style/Theme.Transparent"
+			android:label="@string/app_name" android:theme="@style/MessageDialog"
 			android:windowSoftInputMode="stateAlwaysVisible" />
 		
 		<activity android:name=".activities.PrefsActivity"
 			android:label="@string/settings" android:theme="@android:style/Theme.Black" />
 		<activity android:name=".activities.AboutActivity"
-			android:label="@string/about" />
-
-		
-		<activity android:name=".activities.WebViewActivity"
-			android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar" />
-		
+			android:label="@string/about" />		
 	
 		<service android:enabled="true" android:name=".net.tds.TDSService" />
 		<service android:enabled="true" android:name=".net.opportunistic.ScanningService" />
 		<service android:enabled="true" android:name=".net.twitter.PicturesIntentService" />
-		<service android:enabled="true" android:name=".net.Html.HtmlService" />
+		
 		<service android:enabled="true" android:name=".net.twitter.TwitterService">
 			<intent-filter>
 				<action android:name="twimight_synch" />
@@ -138,7 +152,7 @@
 			</intent-filter>
 		</receiver>
 		
-		<receiver android:name=".util.OMFReceiver" android:enabled="true">
+		<receiver android:name=".util.OMFReceiver" android:enabled="false">
 			<intent-filter>
 				<action android:name="autom_enable_disaster_mode" />				
 			</intent-filter>
@@ -147,8 +161,7 @@
 		<receiver android:name=".net.opportunistic.ScanningAlarm"
 			android:enabled="true" />
 		<receiver android:name=".net.tds.TDSAlarm" android:enabled="true" />
-		<receiver android:name=".location.LocationAlarm"
-			android:enabled="true" />
+	
 		<receiver android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
 			android:enabled="true" />
 
@@ -170,23 +183,5 @@
 
 	</application>
 
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-	<uses-permission android:name="android.permission.BLUETOOTH" />
-	<uses-permission android:name="android.permission.WAKE_LOCK" />
-	<uses-permission android:name="android.permission.READ_LOGS" />
-	<uses-permission android:name="android.permission.RESTART_PACKAGES" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-	<uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
-	<uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>  
-
-
-	<uses-feature android:name="android.hardware.bluetooth"
-		android:required="false" />
-	<uses-feature android:name="android.hardware.touchscreen" />
+	
 </manifest>

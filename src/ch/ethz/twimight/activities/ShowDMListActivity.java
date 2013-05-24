@@ -58,8 +58,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		running = true;		
+		super.onCreate(savedInstanceState);			
 		setContentView(R.layout.show_dm_user);
 		
 		rowId = getIntent().getIntExtra("rowId", 0);
@@ -111,13 +110,13 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 		}
 	}
 	
-	/**
-	 * On pause
-	 */
+	
+
 	@Override
-	public void onPause(){
-		super.onPause();
-				
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		running=false;
 	}
 
 	/**
@@ -125,8 +124,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		running=false;
+		super.onDestroy();		
 		messageButton.setOnClickListener(null);
 
 		dmUserListView.setAdapter(null);

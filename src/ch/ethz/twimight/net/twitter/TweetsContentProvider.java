@@ -673,8 +673,8 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			for (ContentValues value : values){
 				
-				if (insertNormalTweet(value) != null) ;	
-				numInserted++;
+				if (insertNormalTweet(value) != null) 
+					numInserted++;
 			}
 			database.setTransactionSuccessful();
 			
