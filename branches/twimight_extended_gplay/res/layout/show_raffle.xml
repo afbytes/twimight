@@ -11,11 +11,15 @@
     android:background="@drawable/about_background"
     android:orientation="vertical" android:layout_margin="10dp" android:layout_gravity="center_horizontal" android:layout_height="wrap_content">
 	
-    	<TextView android:id="@+id/textConditionTitle"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal" android:textSize="16dp"
-			android:text="Participate in the Twimight Beta online competition and win one of three
-Samsung Galaxy SIII!" android:textColor="@color/black" />     	
+    	<TextView
+    	    android:id="@+id/textConditionTitle"
+    	    android:layout_width="wrap_content"
+    	    android:layout_height="wrap_content"
+    	    android:layout_gravity="center_horizontal"
+    	    android:text="Participate in the Twimight Beta online competition and win one of three
+Samsung Galaxy SIII!"
+    	    android:textColor="@color/black"
+    	    android:textSize="16sp" />
     	
     	<ImageView android:id="@+id/showGalaxys3"
 			android:layout_height="140dp" android:layout_width="120dp"

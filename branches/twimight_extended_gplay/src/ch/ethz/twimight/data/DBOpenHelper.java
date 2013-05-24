@@ -52,15 +52,16 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	private static final String TABLE_STATISTICS_CREATE = "create table "+TABLE_STATISTICS+" ("
 			+ "_id integer primary key autoincrement not null, "			
-			+ "timestamp bigint not null, "
-			+ "lat real, "
-			+ "lng real, "
-			+ "accuracy integer, "
-			+ "loc_date integer, "
-			+ "provider string, "
-			+ "network string, "
-			+ "event string, "
-			+ "link string);";
+			+ StatisticsDBHelper.KEY_TIMESTAMP + " bigint not null, "
+			+ StatisticsDBHelper.KEY_LOCATION_LAT + " real, "
+			+ StatisticsDBHelper.KEY_LOCATION_LNG + " real, "
+			+ StatisticsDBHelper.KEY_LOCATION_ACCURACY + " integer, "
+			+ StatisticsDBHelper.KEY_LOCATION_DATE + " integer, "
+			+ StatisticsDBHelper.KEY_LOCATION_PROVIDER +" string, "
+			+ StatisticsDBHelper.KEY_NETWORK + " string, "
+			+ StatisticsDBHelper.KEY_EVENT + " string, "
+			+ StatisticsDBHelper.KEY_ISDISASTER+ " integer default 0, "
+			+ StatisticsDBHelper.KEY_LINK + " string);";
 	
 
 	private static final String TABLE_REVOCATION_CREATE = "create table "+TABLE_REVOCATIONS+" ("

@@ -145,7 +145,7 @@ public class DMAdapter extends SimpleCursorAdapter {
 		deleteButton.setOnClickListener(new OnButtonClickListener(cursor.getPosition(),cursor )  );	
 
 		// DM background and disaster info
-		LinearLayout rowLayout = (LinearLayout) dmrow.findViewById(R.id.dmUserRowLayout);		
+		LinearLayout rowLayout = (LinearLayout) dmrow.findViewById(R.id.showDM);		
 		if(Long.toString(cursor.getLong(cursor.getColumnIndex(DirectMessages.COL_SENDER))).equals(LoginActivity.getTwitterId(context))) {
 
 			if(cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_ISDISASTER))>0)

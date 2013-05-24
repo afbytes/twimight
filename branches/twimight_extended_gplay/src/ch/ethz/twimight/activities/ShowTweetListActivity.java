@@ -102,8 +102,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		setContentView(R.layout.main);			
 		//statistics
-		statsDBHelper = new StatisticsDBHelper(this);
-		statsDBHelper.open();
+		statsDBHelper = new StatisticsDBHelper();
+		statsDBHelper.open(this);
 		
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
@@ -116,9 +116,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		handler.postDelayed(checkLocation, 1*60*1000L);
 
 	    
-		setTitle(getString(R.string.app_name) + " - @" + LoginActivity.getTwitterScreenname(this));
+		setTitle(getString(R.string.app_name) + " - @" + LoginActivity.getTwitterScreenname(this));		
 		
-		running = true;
 		timelineListView = (TweetListView) findViewById(R.id.tweetList);
 		timelineListView.setEmptyView(findViewById(R.id.tweetListEmpty));
 		
@@ -172,7 +171,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_STARTED, null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
+						StatisticsDBHelper.APP_STARTED, null, timestamp,false);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -289,8 +289,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		running = false;
+		super.onDestroy();	
 		
 		timelineButton.setOnClickListener(null);
 		favoritesButton.setOnClickListener(null);
@@ -307,12 +306,14 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			
 			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {					
 				handler.removeCallbacks(checkLocation);				
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),StatisticsDBHelper.APP_STARTED , null, timestamp);
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+						StatisticsDBHelper.APP_STARTED , null, timestamp,false);
 			} else {}
 		}
 		
 		if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {							
-			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis());
+			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
+					StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis(),false);
 		} else {}
 
 		if(c!=null) c.close();				

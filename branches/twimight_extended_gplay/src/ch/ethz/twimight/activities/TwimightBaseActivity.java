@@ -32,7 +32,7 @@ public class TwimightBaseActivity extends Activity{
 	
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
-	public static final boolean D = true;
+	public static final boolean D = false;
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
@@ -96,42 +96,40 @@ public class TwimightBaseActivity extends Activity{
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Turns the loading icon on and off
 	 * @param isLoading
 	 */
 	public static void setLoading(final boolean isLoading) {
-		
-		if(instance!=null){
-			try {
-				
-				instance.runOnUiThread(new Runnable() {
-				     public void run() {
-				    	 instance.setProgressBarIndeterminateVisibility(isLoading);
-				     }
-				});
-				
-			} catch (Exception ex) {
-				Log.e(TAG,"error: ",ex);
-			}
-			
+
+		if(instance!=null){	
+
+			instance.runOnUiThread(new Runnable() {
+				public void run() {
+					instance.setProgressBarIndeterminateVisibility(isLoading);
+				}
+			});			
 		} else {
 			Log.v(TAG, "Cannot show loading icon");
 		}
 
 	}
 	
+	
+
+
+
 	/**
 	 * Clean up the views
 	 * @param view
 	 */
 	protected void unbindDrawables(View view) {
-	
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
+
+		if (view.getBackground() != null) {
+			view.getBackground().setCallback(null);
+		}
+		if (view instanceof ViewGroup) {
 	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
 	            unbindDrawables(((ViewGroup) view).getChildAt(i));
 	        }

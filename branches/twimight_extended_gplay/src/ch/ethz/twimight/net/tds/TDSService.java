@@ -348,9 +348,7 @@ public class TDSService extends Service {
 			try{
 				// wait a bit until we have connectivity
 				// TODO: This is a hack, we should wait for a connectivity change intent, or a timeout, to proceed.
-				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
-
-			
+				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);		
 
 				// revocation list
 				RevocationDBHelper rm = new RevocationDBHelper(getBaseContext());
@@ -370,8 +368,8 @@ public class TDSService extends Service {
 				tds.createFollowerObject(fm.getLastUpdate());
 				
 				//send statistics
-				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
-				statisticAdapter.open();
+				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper();
+				statisticAdapter.open(getBaseContext());
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
 				
 
@@ -395,8 +393,8 @@ public class TDSService extends Service {
 			try {
 				
 				//delete old logs
-				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
-				statHelper.open();
+				StatisticsDBHelper statHelper = new StatisticsDBHelper();
+				statHelper.open(getBaseContext());
 				statHelper.deleteOldData();
 				
 				// authentication

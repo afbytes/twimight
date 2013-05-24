@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 ETH Zurich.
+c * Copyright (c) 2011 ETH Zurich.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v2.0
  * which accompanies this distribution, and is available at
@@ -46,8 +46,8 @@ public class StatisticsDBHelper {
 	public static final String KEY_NETWORK = "network";
 	public static final String KEY_EVENT = "event";
 	public static final String KEY_LINK = "link";
-	
-	private Context context;
+	public static final String KEY_ISDISASTER = "is_disaster";
+
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
@@ -59,20 +59,13 @@ public class StatisticsDBHelper {
 	public static final String TWEET_WRITTEN = "tweet_written";
 
 
-	/**
-	 * Constructor.
-	 * @param context
-	 */
-	public StatisticsDBHelper(Context context) {
-		this.context = context;
-	}
 
 	/**
 	 * Opens the DB.
 	 * @return
 	 * @throws SQLException
 	 */
-	public StatisticsDBHelper open() throws SQLException {
+	public StatisticsDBHelper open(Context context) throws SQLException {
 		dbHelper = DBOpenHelper.getInstance(context);
 		database = dbHelper.getWritableDatabase();
 		return this;
@@ -90,17 +83,17 @@ public class StatisticsDBHelper {
 	 * @param loc
 	 * @return
 	 */
-	public boolean insertRow(Location loc, String network, String event, String link, Long timestamp) {
+	public boolean insertRow(Location loc, String network, String event, String link, Long timestamp, boolean isDisaster ) {
 		
 		ContentValues update;
 		
 		if(loc != null){
 			
 			 update = createContentValues(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime(),
-					loc.getProvider(), network, event, link, timestamp);		
+					loc.getProvider(), network, event, link, timestamp, isDisaster);		
 		} else 
 			 update = createContentValues(null, null, null, timestamp,
-					null, network, event, link, timestamp);
+					null, network, event, link, timestamp, isDisaster);
 		
 	
 		
@@ -184,7 +177,7 @@ public class StatisticsDBHelper {
 	 * @return
 	 */
 	private ContentValues createContentValues(Double lat, Double lng, Float accuracy, long locDate, String provider,
-			 String network, String event, String link, long timestamp) {
+			 String network, String event, String link, long timestamp, boolean isDisaster) {
 		
 		ContentValues values = new ContentValues();
 		
@@ -194,6 +187,9 @@ public class StatisticsDBHelper {
 			values.put(KEY_LOCATION_ACCURACY, (int) Math.round(accuracy));
 			values.put(KEY_LOCATION_PROVIDER, provider);
 		}
+		
+		if (isDisaster) 
+			values.put(KEY_ISDISASTER, 1);
 		
 		values.put(KEY_LOCATION_DATE, locDate);		
 		values.put(KEY_TIMESTAMP, timestamp);

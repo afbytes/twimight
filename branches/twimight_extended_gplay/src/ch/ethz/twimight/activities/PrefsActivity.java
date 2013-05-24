@@ -132,7 +132,8 @@ public class PrefsActivity extends PreferenceActivity{
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);
 		else
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), false);
-
+		
+		setDisasterModeUsed();
 		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
@@ -144,6 +145,12 @@ public class PrefsActivity extends PreferenceActivity{
 		}
 				 
 		
+	}
+	
+	private void setDisasterModeUsed() {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Constants.DIS_MODE_USED, true);
+		edit.commit();
 	}
 	
 	private static boolean getBluetoothInitialState(Context context) {

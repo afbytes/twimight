@@ -417,7 +417,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 				Intent i = new Intent(TwitterService.SYNCH_ACTION);
 				i.putExtra("synch_request", TwitterService.SYNCH_DM);
-				i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+				i.putExtra("rowId", Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}
 			

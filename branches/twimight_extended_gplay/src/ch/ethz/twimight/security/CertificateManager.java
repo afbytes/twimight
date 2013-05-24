@@ -55,7 +55,7 @@ public class CertificateManager {
 	
 	private Context context;
 	
-	private static PublicKey rootkey;
+	private PublicKey rootkey;
 	
 	static {
 	    Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());

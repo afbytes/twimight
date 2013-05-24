@@ -409,17 +409,11 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			boolean result=false;
 			
 			//Statistics
-			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
-			statsDBHelper.open();
+			statsDBHelper = new StatisticsDBHelper();
+			statsDBHelper.open(getApplicationContext());
 			timestamp = System.currentTimeMillis();
 
-			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
-
-				if (D) Log.i(TAG,"writing log");
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
-				locHelper.unRegisterLocationListener();
-				if (D) Log.i(TAG, String.valueOf(hasMedia));
-			}
+			
 			if(hasMedia){
 				try {
 					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
@@ -442,9 +436,10 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			// if no connectivity, notify user that the tweet will be send later		
 				
 				ContentValues cv = createContentValues(); 
-				
+				boolean isDisaster = false;
 				if(PreferenceManager.getDefaultSharedPreferences(NewTweetActivity.this).getBoolean("prefDisasterMode", false) == true){				
-
+					
+					isDisaster = true;
 					// our own tweets go into the my disaster tweets buffer
 					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
@@ -464,6 +459,14 @@ public class NewTweetActivity extends TwimightBaseActivity{
 					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 						result=true;
 					}
+				}
+				if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
+
+					if (D) Log.i(TAG,"writing log");
+					statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
+							StatisticsDBHelper.TWEET_WRITTEN, null, timestamp,isDisaster);
+					locHelper.unRegisterLocationListener();
+					if (D) Log.i(TAG, String.valueOf(hasMedia));
 				}
 
 				return result;
