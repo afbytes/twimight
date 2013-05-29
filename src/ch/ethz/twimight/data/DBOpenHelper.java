@@ -39,8 +39,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 	public static final String TABLE_HTML = "htmls";
+	static final String TABLE_STATISTICS = "statistics";
 
-	private static final int DATABASE_VERSION = 48;
+
+	private static final int DATABASE_VERSION = 50;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -51,17 +53,18 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ MacsDBHelper.KEY_ACTIVE + " integer, "
 			+ MacsDBHelper.KEY_LAST +" integer);";
 	
-	private static final String TABLE_LOCATIONS_CREATE = "create table "+TABLE_LOCATIONS+" ("
+	private static final String TABLE_STATISTICS_CREATE = "create table "+TABLE_STATISTICS+" ("
 			+ "_id integer primary key autoincrement not null, "			
-			+ "timestamp integer not null, "
-			+ "lat real, "
-			+ "lng real, "
-			+ "accuracy integer, "
-			+ "loc_date integer, "
-			+ "provider string, "
-			+ "network string, "
-			+ "event string, "
-			+ "link string);";
+			+ StatisticsDBHelper.KEY_TIMESTAMP + " bigint not null, "
+			+ StatisticsDBHelper.KEY_LOCATION_LAT + " real, "
+			+ StatisticsDBHelper.KEY_LOCATION_LNG + " real, "
+			+ StatisticsDBHelper.KEY_LOCATION_ACCURACY + " integer, "
+			+ StatisticsDBHelper.KEY_LOCATION_DATE + " integer, "
+			+ StatisticsDBHelper.KEY_LOCATION_PROVIDER +" string, "
+			+ StatisticsDBHelper.KEY_NETWORK + " string, "
+			+ StatisticsDBHelper.KEY_EVENT + " string, "
+			+ StatisticsDBHelper.KEY_ISDISASTER+ " integer default 0, "
+			+ StatisticsDBHelper.KEY_LINK + " string);";
 	
 
 	private static final String TABLE_REVOCATION_CREATE = "create table "+TABLE_REVOCATIONS+" ("
@@ -167,7 +170,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
-
+	private static SQLiteDatabase myWritableDb;
+	
 	/**
 	 * Constructorcontent://
 	 * @param context
@@ -188,9 +192,38 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		
 	}
 	
+    /**
+     * Returns a writable database instance in order not to open and close many
+     * SQLiteDatabase objects simultaneously
+     *
+     * @return a writable instance to SQLiteDatabase
+     */
+    @Override
+	public SQLiteDatabase getWritableDatabase() {
+    	// TODO Auto-generated method stub
+    	synchronized(DBOpenHelper.class) {
+    		if ((myWritableDb == null) || (!myWritableDb.isOpen())) {
+    			return super.getWritableDatabase();
+    		}
+    	}
+    	return myWritableDb;
+	}
+
+	@Override
+    public void close() {
+        super.close();
+        synchronized(DBOpenHelper.class) {
+        	if (myWritableDb != null) {
+                myWritableDb.close();
+                myWritableDb = null;
+            }
+        }
+        
+    }
+	
 	private void createTables(SQLiteDatabase database) {
 		database.execSQL(TABLE_MACS_CREATE);
-		database.execSQL(TABLE_LOCATIONS_CREATE);
+		database.execSQL(TABLE_STATISTICS_CREATE);
 		database.execSQL(TABLE_REVOCATION_CREATE);
 		database.execSQL(TABLE_FRIENDS_KEYS_CREATE);
 		database.execSQL(TABLE_TWEETS_CREATE);
@@ -218,7 +251,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 				"Upgrading database from version " + oldVersion + " to "
 						+ newVersion + ", which will destroy all old data");
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_MACS);
-		database.execSQL("DROP TABLE IF EXISTS "+TABLE_LOCATIONS);
+		database.execSQL("DROP TABLE IF EXISTS "+TABLE_STATISTICS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_REVOCATIONS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_TWEETS);
@@ -235,7 +268,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.execSQL("DELETE FROM "+TABLE_MACS);
-		database.execSQL("DELETE FROM "+TABLE_LOCATIONS);
+		database.execSQL("DELETE FROM "+TABLE_STATISTICS);
 		database.execSQL("DELETE FROM "+TABLE_REVOCATIONS);
 		database.execSQL("DELETE FROM "+TABLE_FRIENDS_KEYS);
 		database.execSQL("DELETE FROM "+TABLE_TWEETS);

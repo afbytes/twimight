@@ -663,7 +663,8 @@ public class ShowTweetFragment extends Fragment{
 
         	if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
-    			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.LINK_CLICKED , url, System.currentTimeMillis());
+    			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
+    					StatisticsDBHelper.LINK_CLICKED , url, System.currentTimeMillis());
     		} else {}
         	
 	        if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){	

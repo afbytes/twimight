@@ -24,6 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
 import android.util.Log;
+import ch.ethz.twimight.activities.PrefsActivity;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -46,11 +47,12 @@ public class StatisticsDBHelper {
 	public static final String KEY_NETWORK = "network";
 	public static final String KEY_EVENT = "event";
 	public static final String KEY_LINK = "link";
-	
-	private Context context;
+	public static final String KEY_ISDISASTER = "is_disaster";
+
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
+	private Context context;
 
 	//EVENTS
 	public static final String APP_STARTED = "app_started";
@@ -58,70 +60,67 @@ public class StatisticsDBHelper {
 	public static final String LINK_CLICKED = "link_clicked";
 	public static final String TWEET_WRITTEN = "tweet_written";
 
-	/**
-	 * Constructor.
-	 * @param context
-	 */
-	public StatisticsDBHelper(Context context) {
-		this.context = context;
-	}
 
-	/**
-	 * Opens the DB.
-	 * @return
-	 * @throws SQLException
-	 */
-	public StatisticsDBHelper open() throws SQLException {
-		dbHelper = DBOpenHelper.getInstance(context);
-		database = dbHelper.getWritableDatabase();
-		return this;
-	}
 
-	/**
-	 * We don't close the DB since there is only one instance!
-	 */
-	public void close() {
-		
-	}
-	
-	/**
-	 * Inserts a location update into the DB
-	 * @param loc
-	 * @return
-	 */
-	public boolean insertRow(Location loc, String network, String event, String link, Long timestamp) {
-		
-		ContentValues update;
-		
-		if(loc != null){
+	 public StatisticsDBHelper(Context context) {
+		   this.context =  context;
+	   }
+		/**
+		 * Opens the DB.
+		 * @return
+		 * @throws SQLException
+		 */
+		public StatisticsDBHelper open() throws SQLException {
+			dbHelper = DBOpenHelper.getInstance(context);
+			database = dbHelper.getWritableDatabase();
+			return this;
+		}
+
+		/**
+		 * We don't close the DB since there is only one instance!
+		 */
+		public void close() {
 			
-			 update = createContentValues(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime(),
-					loc.getProvider(), network, event, link, timestamp);		
-		} else 
-			 update = createContentValues(null, null, null, timestamp,
-					null, network, event, link, timestamp);
-		
-		Log.i("LocationDBHelper","latitude: " + loc.getLatitude() + " Longitude: " + loc.getLongitude() + " accuracy: " + loc.getAccuracy() + 
-				" provider: " + loc.getProvider() + " network: " + network + " timestamp: " + timestamp );
-		
-		try{
-			database.insert(DBOpenHelper.TABLE_LOCATIONS, null, update);
-			return true;
-			
-		} catch (SQLiteException e) {
-			return false;
 		}
 		
-	}
+		/**
+		 * Inserts a location update into the DB
+		 * @param loc
+		 * @return
+		 */
+		public boolean insertRow(Location loc, String network, String event, String link, Long timestamp ) {
+			
+			ContentValues update;
+			boolean isDisaster =  PrefsActivity.isDisModeActive(context);
+			
+			if(loc != null){
+				
+				 update = createContentValues(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime(),
+						loc.getProvider(), network, event, link, timestamp, isDisaster);		
+			} else 
+				 update = createContentValues(null, null, null, timestamp,
+						null, network, event, link, timestamp, isDisaster);
+			
+		
+			
+			try{
+				database.insert(DBOpenHelper.TABLE_STATISTICS, null, update);
+				return true;
+				
+			} catch (SQLiteException e) {
+				return false;
+			}
+			
+		}
 	
 	public int deleteOldData() {
 		
-		return database.delete(DBOpenHelper.TABLE_LOCATIONS, null, null);
+		return database.delete(DBOpenHelper.TABLE_STATISTICS, null, null);
 	}
 	
 	public Cursor getData() {
 		
-		Cursor cursor = database.query(DBOpenHelper.TABLE_LOCATIONS, null, null, null, null,null,null);
+		Cursor cursor = database.query(DBOpenHelper.TABLE_STATISTICS, null, null, null, null,null,null);
 		if (cursor.getCount() > 0) {
 			cursor.moveToFirst();			
 		}
@@ -138,7 +137,7 @@ public class StatisticsDBHelper {
 		Cursor cursor = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_ISFOLLOWER + "= 1", null,null,null,null);
 		if (cursor != null){
 			cursor.moveToFirst();
-			Log.i("StatisticsDBHelper","number of followers: " + cursor.getCount());
+		
 			return cursor.getCount();	
 		}
 		return 0;
@@ -152,7 +151,7 @@ public class StatisticsDBHelper {
 	public List<Location> getLocationsSince(Date d){
 		ArrayList<Location> locationList = new ArrayList<Location>();
 		
-		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_LOCATIONS, new String[] {
+		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_STATISTICS, new String[] {
 				KEY_LOCATION_LNG, KEY_LOCATION_LAT, KEY_LOCATION_ACCURACY, KEY_LOCATION_PROVIDER, KEY_LOCATION_DATE},
 				KEY_LOCATION_DATE + ">=" + Long.toString(d.getTime()), null, null, null, null, null);
 		
@@ -184,7 +183,7 @@ public class StatisticsDBHelper {
 	 * @return
 	 */
 	private ContentValues createContentValues(Double lat, Double lng, Float accuracy, long locDate, String provider,
-			 String network, String event, String link, long timestamp) {
+			 String network, String event, String link, long timestamp, boolean isDisaster) {
 		
 		ContentValues values = new ContentValues();
 		
@@ -194,6 +193,9 @@ public class StatisticsDBHelper {
 			values.put(KEY_LOCATION_ACCURACY, (int) Math.round(accuracy));
 			values.put(KEY_LOCATION_PROVIDER, provider);
 		}
+		
+		if (isDisaster) 
+			values.put(KEY_ISDISASTER, 1);
 		
 		values.put(KEY_LOCATION_DATE, locDate);		
 		values.put(KEY_TIMESTAMP, timestamp);

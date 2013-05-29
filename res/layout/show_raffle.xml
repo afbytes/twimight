@@ -13,7 +13,7 @@
 	
     	<TextView android:id="@+id/textConditionTitle"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal" android:textSize="16dp"
+			android:layout_gravity="center_horizontal" android:textSize="16sp"
 			android:text="Participate in the Twimight Beta online competition and win one of three
 Samsung Galaxy SIII!" android:textColor="@color/black" />     	
     	

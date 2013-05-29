@@ -102,8 +102,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		showFollowersButton = (Button) findViewById(R.id.showUserFollowers);
 		showFriendsButton = (Button) findViewById(R.id.showUserFriends);
 		showDisPeersButton = (Button) findViewById(R.id.showUserDisasterPeers);
-		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
-		running = true;
+		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);		
 		
 		if(getIntent().hasExtra("rowId")){
 			rowId = (long) getIntent().getIntExtra("rowId", 0);
@@ -192,8 +191,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		running = false;
+		super.onDestroy();		
 		if(followButton!=null) followButton.setOnClickListener(null);
 		if(mentionButton!=null) mentionButton.setOnClickListener(null);
 		if(messageButton!=null) messageButton.setOnClickListener(null);
@@ -207,6 +205,13 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		handler = null;
 		
 	}
+	
+	@Override
+	 	protected void onStop() {
+	 	// TODO Auto-generated method stub
+	 	super.onStop();
+	 	running = false;
+	 	}
 
 	/**
 	 * Compare the argument with the local user ID.

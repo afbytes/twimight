@@ -75,7 +75,7 @@ public class PrefsActivity extends PreferenceActivity{
 						} 
 						
 					} else {						
-						disableDisasterMode(getBaseContext());						
+						disableDisasterMode(getApplicationContext());						
 						finish();
 					}
 					
@@ -155,16 +155,25 @@ public class PrefsActivity extends PreferenceActivity{
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);
 		else
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), false);
-
+		
+		setDisasterModeUsed();
 		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
 			startActivityForResult(discoverableIntent,REQUEST_DISCOVERABLE);           
 			
 		} else {
-			new ScanningAlarm(getApplicationContext(),0,true);
+			new ScanningAlarm(getApplicationContext(),true);
 			finish();
-		}		
+		}
+				 
+		
+	}
+	
+	private void setDisasterModeUsed() {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putBoolean(Constants.DIS_MODE_USED, true);
+		edit.commit();
 	}
 	
 	private static boolean getBluetoothInitialState(Context context) {
@@ -174,13 +183,17 @@ public class PrefsActivity extends PreferenceActivity{
 		
 		}
 	
+	public static boolean isDisModeActive(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", false);
+	}
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
 		case REQUEST_DISCOVERABLE:
 			Log.d(TAG,"resultcode = " + resultCode); 
 			
-			new ScanningAlarm(getApplicationContext(),0,true);
+			new ScanningAlarm(getApplicationContext(),true);
 			finish();
 			
 		}
