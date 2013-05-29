@@ -26,6 +26,7 @@
     <string name="ok">OK</string>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
+    <string name="cancel">Abbrechen</string>
     
     <!-- Menu -->
     <string name="home">Nach Hause</string>
@@ -98,6 +99,7 @@
     <string name="no_connection3">Deine Nachricht wird bald verschickt (sobald Internetverbindung besteht).</string>
     <string name="dm_content_title">Neue Nachricht(en)!</string>
     <string name="dm_content_text">Du hast neue Nachricht(en)</string>
+    <string name="send">Schicken</string>
     
     <!-- Tweet Notification -->
     <string name="tweet_content_title">Neue(r) Tweet(s)!</string>
@@ -126,11 +128,7 @@
     <string name="logout_question">Bist du sicher dass du dich abmelden willst?</string>
     
 
-    <!-- Feedback -->
-    <string name="feature_request">Feature anfordern</string>
-    <string name="bug_report">Fehlermeldung</string>
-    <string name="send">Schicken</string>
-    <string name="cancel">Abbrechen</string>
+  
     
     <!-- About -->
     <string name="author">Autoren: Paolo Carta und Theus Hossmann</string>

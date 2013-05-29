@@ -90,6 +90,8 @@
     <string name="no_connection3">No connectivity, your Message will be sent once we have a connection!</string>
     <string name="dm_content_title">New Direct Messages!</string>
     <string name="dm_content_text">You have new direct message(s)</string>
+    <string name="send">Send</string>
+    
     
     <!-- Tweet Notification -->
     <string name="tweet_content_title">New Tweet(s)!</string>
@@ -116,17 +118,7 @@
     <string name="disastermode_running">Warning: The disaster mode is still running in the background</string>
     <string name="disable_disastermode">Disable Disaster Mode first. NOTE: Once you log out Twimight will not work until you are connected to the internet again!</string>
     <string name="logout_question">Are you sure you want to log out?</string>
-    
-    <!-- Peering -->
-    <string name="scanning">scanning for devices..</string>
-    <string name="select_device">select a device to be added</string>
-    <string name="none_paired">No devices have been paired</string>
-    <string name="none_found">No devices found</string>
-    <string name="title_paired_devices">Paired Devices</string>
-    <string name="title_other_devices">Available Devices</string>
-    <string name="device_added">Devices added to active devices, connection will be attempted soon</string>
-    <string name="button_scan">Scan for devices</string>
-    
+        
     <!-- About -->
     <string name="author">Authors: Paolo Carta and Theus Hossmann</string>
     <string name="version">Version:</string>

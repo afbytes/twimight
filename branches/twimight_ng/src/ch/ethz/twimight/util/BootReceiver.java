@@ -50,7 +50,7 @@ public class BootReceiver extends BroadcastReceiver {
 			
 			
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-				new ScanningAlarm(context,0,false);
+				new ScanningAlarm(context,false);
 			}
 			
 						

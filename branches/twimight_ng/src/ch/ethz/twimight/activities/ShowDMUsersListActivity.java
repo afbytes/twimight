@@ -17,14 +17,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.DMUserAdapter;
@@ -60,7 +56,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);				
-		running=true;
+		
 		setContentView(R.layout.show_dm_users);
 		
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
@@ -116,8 +112,7 @@ public class ShowDMUsersListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onDestroy(){
-		super.onDestroy();
-		running = false;
+		super.onDestroy();	
 		
 		dmUsersListView.setOnItemClickListener(null);
 		dmUsersListView.setAdapter(null);

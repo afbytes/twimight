@@ -120,9 +120,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		tab = actionBar.newTab()
 				.setIcon(R.drawable.ic_twimight_mentions)
 				.setTabListener(new TabListener(viewPager ));
-		actionBar.addTab(tab);
-		
-		running = true;				
+		actionBar.addTab(tab);		
 
 	}
 	

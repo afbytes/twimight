@@ -171,9 +171,11 @@ public class TweetAdapter extends SimpleCursorAdapter {
 						textHtml.setTextColor(Color.parseColor("#9ea403"));
 					}
 					
-				}
-				textHtml.setText(text);
-				textHtml.setVisibility(View.VISIBLE);
+				} 
+				if (text != 0) {
+					textHtml.setText(context.getString(text));
+					textHtml.setVisibility(View.VISIBLE);
+				}			
 				
 			}
 			else {

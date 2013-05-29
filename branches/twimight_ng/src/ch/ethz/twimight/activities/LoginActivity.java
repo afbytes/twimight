@@ -126,7 +126,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 					Toast.makeText(this,getString(R.string.no_connection), Toast.LENGTH_LONG).show();
 				}
-				startTimeline(this);
+				startTimeline(getApplicationContext());
 				
 			} else if(hasAccessToken(this) && hasAccessTokenSecret(this)) {
 				
@@ -402,7 +402,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			Intent i = new Intent(context, ShowTweetListActivity.class);
 			
 			i.putExtra("login", true);		
-			context.startActivity(i);		
+			startActivity(i);		
 			startAlarms(context);
 			finish();
 		}
@@ -418,7 +418,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 			}		
 			
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
-				new ScanningAlarm(context,0,false);
+				new ScanningAlarm(context,false);
 			}		
 			
 			//start the twitter update alarm

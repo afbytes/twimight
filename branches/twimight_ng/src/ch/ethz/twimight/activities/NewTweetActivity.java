@@ -389,7 +389,7 @@ public class NewTweetActivity extends Activity{
 	 * @author pcarta
 	 *
 	 */
-	private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
+private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		
 		Uri insertUri = null;
 		StatisticsDBHelper statsDBHelper;	
@@ -397,34 +397,39 @@ public class NewTweetActivity extends Activity{
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			boolean result=false;
+			
 			//Statistics
 			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
 			statsDBHelper.open();
 			timestamp = System.currentTimeMillis();
 
-			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
-				
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
-				locHelper.unRegisterLocationListener();				
-			}
+			
 			if(hasMedia){
 				try {
 					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
 					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));//photoFileParent, photoFilename));
 					String fromFile = tmpPhotoUri.getPath();
-					String toFile = photoUri.getPath();					
-					sdCardHelper.copyFile(fromFile, toFile);
+					String toFile = photoUri.getPath();
+					if (TwimightBaseActivity.D) Log.i(TAG, fromFile);
+					if (TwimightBaseActivity.D) Log.i(TAG, toFile);
+					if(sdCardHelper.copyFile(fromFile, toFile)){
+
+						if (TwimightBaseActivity.D) Log.i(TAG, "file copy successful");
+
+					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					Log.e("photo", "exception!!!!!");					
+					if (TwimightBaseActivity.D) Log.d("photo", "exception!!!!!");
+					e.printStackTrace();
 				}
 			}
 			// if no connectivity, notify user that the tweet will be send later		
 				
 				ContentValues cv = createContentValues(); 
-				
+				boolean isDisaster = false;
 				if(PreferenceManager.getDefaultSharedPreferences(NewTweetActivity.this).getBoolean("prefDisasterMode", false) == true){				
-
+					
+					
 					// our own tweets go into the my disaster tweets buffer
 					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
@@ -438,11 +443,20 @@ public class NewTweetActivity extends Activity{
 
 					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
 																Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);					
+					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					//getContentResolver().notifyChange(insertUri, null);
 					ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
 						result=true;
 					}
+				}
+				if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo()!= null) {	
+
+					 Log.i(TAG,"writing log");
+					statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
+							StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
+					locHelper.unRegisterLocationListener();
+					 Log.i(TAG, String.valueOf(hasMedia));
 				}
 
 				return result;
@@ -452,7 +466,8 @@ public class NewTweetActivity extends Activity{
 		@Override
 		protected void onPostExecute(Boolean result){
 			if (result)
-				Toast.makeText(NewTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT).show();			
+				Toast.makeText(NewTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT).show();
+			
 			if(insertUri != null){
 				// schedule the tweet for uploading to twitter
 				Intent i = new Intent(NewTweetActivity.this, TwitterService.class);
@@ -463,6 +478,8 @@ public class NewTweetActivity extends Activity{
 			finish();
 		}
 	}
+	
+	
 	
 	
 	

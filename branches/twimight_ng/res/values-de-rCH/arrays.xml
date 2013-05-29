@@ -21,8 +21,6 @@
         <item>720</item>
         <item>1440</item>
     </string-array>
-    <string-array name="defaultValue">
-        <item>5</item>
-    </string-array>
+
 
 </resources>

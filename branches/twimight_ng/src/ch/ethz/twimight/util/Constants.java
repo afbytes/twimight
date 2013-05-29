@@ -40,24 +40,22 @@ public final class Constants {
     public static final int HTTP_SOCKET_TIMEOUT = 20*1000; /** How long do we wait for data? HINT: We have to wait long, since this includes authentication in the Twitter server*/
     
     // Bluetooth scanning configuration
-    public static final long SCANNING_INTERVAL = 1*60*1000L; /** Interval for Bluetooth scans */
+    public static final long SCANNING_INTERVAL = 2*60*1000L; /** Interval for Bluetooth scans */
     public static final long MIN_LISTEN_TIME = 10*1000L; /** Interval for Bluetooth scans */
     public static final long RANDOMIZATION_INTERVAL = 10*1000L; /** Randomization interval for scanning */
 	public static final boolean DISASTER_DEFAULT_ON = false; /** are we in disaster mode by default? */
 	public static final boolean OFFLINE_DEFAULT_ON = false;
 	public static final long WAIT_FOR_BLUETOOTH = 20*1000L; /** If Bluetooth is off, how long to we wait for it to enable? */
 	public static final long MEETINGS_INTERVAL = 60*1000L; /** time interval between to successive encounters */
-    
+
 	//Message types from the BluetoothService Handler	  
 	public static final int MESSAGE_READ = 2;
-	public static final int MESSAGE_CONNECTION_SUCCEEDED = 4;
-	public static final int MESSAGE_DELAY = 6;
-	public static final int MESSAGE_CONNECTION_FAILED =8;
-	public static final int MESSAGE_CONNECTION_LOST =10;
-	public static final int MESSAGE_CONNECTION_TO_CLOSE = 12;
-	public static final int BLUETOOTH_RESTART =14;
+	public static final int MESSAGE_CONNECTION_SUCCEEDED = 4;	
+	public static final int MESSAGE_CONNECTION_FAILED =6;
+	public static final int MESSAGE_CONNECTION_LOST =8;
+	public static final int BLUETOOTH_RESTART =10;
 
-	
+
 	// Key names from the BluetoothService Handler
 	public static final String DEVICE_NAME = "device_name";
 	public static final String DEVICE_ADDRESS = "device address";
@@ -120,6 +118,6 @@ public final class Constants {
 	
 	//Other
 	public static final long FRIENDS_FOLLOWERS_DELAY = 60*1000L; /** delay after which friends and followers are downloaded */
-
+	public static final String DIS_MODE_USED = "dis_mode_used";
 	
 }
