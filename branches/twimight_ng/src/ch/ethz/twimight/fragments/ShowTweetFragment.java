@@ -65,6 +65,7 @@ import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.fragments.TweetListFragment.OnInitCompletedListener;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.HtmlService;
@@ -140,6 +141,22 @@ public class ShowTweetFragment extends Fragment{
 	private boolean htmlsDownloaded = false; // whether htmls of this tweet have been downloaded
 	private boolean downloadNotSuccess = false; // whether it's a not successfully downloaded tweet
 	private int forcedDownload = 0;
+	
+	// Container Activity must implement this interface
+    public interface OnTweetDeletedListener {
+        public void onDelete();
+    }
+    
+    OnTweetDeletedListener listener;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            listener = (OnTweetDeletedListener) activity;
+        } catch (ClassCastException e) {      
+        }
+    }
 
 	public ShowTweetFragment() {};
 
@@ -561,7 +578,7 @@ public class ShowTweetFragment extends Fragment{
 		// offline view button
 		
 		//get the html status of this tweet
-		htmlStatus = c.getInt(c.getColumnIndex(Tweets.COL_HTMLS));
+		htmlStatus = c.getInt(c.getColumnIndex(Tweets.COL_HTML_PAGES));
 		
 		offlineButton = (ImageButton) view.findViewById(R.id.showTweetOfflineview);
 		//download the pages and store them locally, set up the html database
@@ -880,11 +897,10 @@ public void onResume(){
 		builder.setMessage(R.string.delete_tweet)
 		       .setCancelable(false)
 		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		        	   
-		        	   
-		        	   uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);	        	   
+		           public void onClick(DialogInterface dialog, int id) {		        	   
+		        	       	   
 		        	   queryContentProvider();
+		        	   
 		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		        	   String delPhotoName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		        	   
@@ -919,9 +935,9 @@ public void onResume(){
 		        	   if (tid != null && tid != 0)
 		        		   resolver.update(uri, setDeleteFlag(flags), null, null);
 		        	   else {
-		        		   resolver.delete(uri,null,null );
-		        	       activity.getFragmentManager().beginTransaction().remove(ShowTweetFragment.this).commit();
+		        		   resolver.delete(uri,null,null );		        	       
 		        	   }
+		        	   listener.onDelete();
 		           }
 		       })
 		       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {

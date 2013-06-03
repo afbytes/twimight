@@ -16,8 +16,14 @@
     <string name="app_name">Twimight</string>
     <string name="app_label">Twimight</string>
     <string name="twitter">Twitter</string>
+    <string name="tweets">Tweets</string>        
     <string name="placeholder">asdf</string>
-    <string name="tweet_length">140</string> 
+    <string name="tweet_length">140</string>     
+    <string name="tweet">Tweet</string>
+    <string name="users">Users</string>
+    <string name="user">User</string>
+    <string name="message">Message</string>
+    <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

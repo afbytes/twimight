@@ -10,13 +10,14 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.fragments.ShowTweetFragment.OnTweetDeletedListener;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.adapters.ShowTweetPageAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 
-public class ShowTweetActivity extends TwimightBaseActivity {
+public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDeletedListener {
 	
-	ViewPager viewPager;
+	
 	ContentResolver resolver;
 	//String query;
 	
@@ -26,6 +27,7 @@ public class ShowTweetActivity extends TwimightBaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);		
 		
+		ViewPager viewPager;
 		resolver = getContentResolver();
 		Intent intent = getIntent();
 		
@@ -99,6 +101,12 @@ public class ShowTweetActivity extends TwimightBaseActivity {
 
 		}
 		return c;
+		
+	}
+
+	@Override
+	public void onDelete() {
+		finish();
 		
 	}
 

@@ -71,7 +71,7 @@ public class Tweets implements BaseColumns {
 	public static final String COL_MEDIA = "media_url"; /**url of media*/
 	public static final String COL_FLAGS = "flags"; /** Transactional flags */
 	public static final String COL_URLS = ""; /** url hashtag */
-	public static final String COL_HTMLS = "htmls"; /** status of html pages related to this tweet, 0: not have, 1: have but not download, 2: have & download */
+	public static final String COL_HTML_PAGES = "html_pages"; /** status of html pages related to this tweet, 0: not have, 1: have but not download, 2: have & download */
 	
 	
 	// for disaster mode

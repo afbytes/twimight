@@ -49,6 +49,12 @@
 	<string name="loading_finished">Caricamento completato</string>
 	<string name="downloaded">Scaricata</string>
     <string name="downloading">Download in corso</string>
+    <!-- TO BE TRANSLATED -->
+    <string name="no_valid_pdf">No valid application for viewing pdf files</string>
+    <string name="no_valid_pictures">No valid application for viewing pictures</string>
+    <string name="no_valid_audio">No valid application for playing audio files</string>
+    <string name="no_valid_video">No valid application for playing video files</string>
+    <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
     
     <!-- Tweeting, Timeline, Favorites -->
     <string name="tweet_will_be_posted">Il tweet verrà pubblicato al più presto(non appena sarà disponibile una connessione ad internet).</string>
@@ -178,5 +184,13 @@
     <string name="tds_communication_explain">Seleziona per abilitare aggiornamenti automatici con il server</string>
     <string name="location_updates">Aggiornamenti GPS</string>
     <string name="location_updates_explain">Inviare aggiornamenti periodici al TDS sulla propria posizione?</string>
+    
+      <!--Disaster mode  -->    
+    <string name="dis_mode_description">
+        In assenza di connettività, attiva la modalità disastro nelle opzioni.
+        I tweet scritti verranno diffusi a tutti i telefoni in broadcast, anche
+        senza 3G o WiFi. Una volta che una connessione sarà nuovamente
+        disponibile i Tweet verranno pubblicati su Twitter
+        </string>
     
 </resources>
