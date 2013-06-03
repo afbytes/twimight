@@ -170,6 +170,10 @@ public class PrefsActivity extends PreferenceActivity{
 		}
 	}  
 	
+	public static boolean isDisModeActive(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", false);
+	}
+	
 	
 	/**
 	 * Important: register shared preference change listener here!

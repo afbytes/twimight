@@ -24,6 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
 
+import ch.ethz.twimight.activities.PrefsActivity;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -51,6 +52,7 @@ public class StatisticsDBHelper {
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
+	private Context context;
 
 	//EVENTS
 	public static final String APP_STARTED = "app_started";
@@ -59,13 +61,16 @@ public class StatisticsDBHelper {
 	public static final String TWEET_WRITTEN = "tweet_written";
 
 
-
+	
+   public StatisticsDBHelper(Context context) {
+	   this.context =  context;
+   }
 	/**
 	 * Opens the DB.
 	 * @return
 	 * @throws SQLException
 	 */
-	public StatisticsDBHelper open(Context context) throws SQLException {
+	public StatisticsDBHelper open() throws SQLException {
 		dbHelper = DBOpenHelper.getInstance(context);
 		database = dbHelper.getWritableDatabase();
 		return this;
@@ -83,9 +88,10 @@ public class StatisticsDBHelper {
 	 * @param loc
 	 * @return
 	 */
-	public boolean insertRow(Location loc, String network, String event, String link, Long timestamp, boolean isDisaster ) {
+	public boolean insertRow(Location loc, String network, String event, String link, Long timestamp ) {
 		
 		ContentValues update;
+		boolean isDisaster =  PrefsActivity.isDisModeActive(context);
 		
 		if(loc != null){
 			

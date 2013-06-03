@@ -7,13 +7,16 @@
     	<item name="android:colorBackground">@color/twimightBackgroundLight</item>
     	<item name="android:textAppearance">@style/twimightDefaultTextAppearance</item>
     </style>
-    
-    <style name="MessageDialog" parent="Twimight">
-		
-		<item name="android:windowContentOverlay">@null</item>
-		<item name="android:windowNoTitle">true</item>
-		<item name="android:windowIsFloating">true</item>
-		<item name="android:backgroundDimEnabled">true</item>
-	</style>
-    
+
+    <style name="Theme.Transparent" parent="style/Twimight">
+         	<item name="android:windowIsTranslucent">true</item>
+         	<item name="android:imageButtonStyle">@android:style/Widget.ImageButton</item>
+         	<item name="android:windowBackground">@color/transparent</item>
+         	<item name="android:windowContentOverlay">@null</item>
+         	<item name="android:windowNoTitle">true</item>
+         	<item name="android:windowIsFloating">true</item>
+         	<item name="android:backgroundDimEnabled">true</item>
+     </style>
+
+
 </resources>
