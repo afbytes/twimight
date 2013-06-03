@@ -102,8 +102,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		setContentView(R.layout.main);			
 		//statistics
-		statsDBHelper = new StatisticsDBHelper();
-		statsDBHelper.open(this);
+		statsDBHelper = new StatisticsDBHelper(this);
+		statsDBHelper.open();
 		
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
@@ -172,7 +172,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			if (locHelper != null && locHelper.getCount() > 0 && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {	
 				
 				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
-						StatisticsDBHelper.APP_STARTED, null, timestamp,false);
+						StatisticsDBHelper.APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
 			} else {}
@@ -307,13 +307,13 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {					
 				handler.removeCallbacks(checkLocation);				
 				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
-						StatisticsDBHelper.APP_STARTED , null, timestamp,false);
+						StatisticsDBHelper.APP_STARTED , null, timestamp);
 			} else {}
 		}
 		
 		if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null && cm.getActiveNetworkInfo() != null) {							
 			statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
-					StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis(),false);
+					StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
 		if(c!=null) c.close();				

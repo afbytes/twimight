@@ -1180,9 +1180,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		// sort according to start character
 		Collections.sort(allEntities, new Comparator<TweetEntity>(){
 			@Override
-			public int compare(TweetEntity object1, TweetEntity object2) {
-				TweetEntity entity1 =  object1;
-				TweetEntity entity2 =  object2;
+			public int compare(TweetEntity entity1, TweetEntity entity2) {
+				
 				return entity1.start - entity2.start;
 			}
 		});

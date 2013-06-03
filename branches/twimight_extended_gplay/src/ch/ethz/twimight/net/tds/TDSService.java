@@ -368,8 +368,8 @@ public class TDSService extends Service {
 				tds.createFollowerObject(fm.getLastUpdate());
 				
 				//send statistics
-				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper();
-				statisticAdapter.open(getBaseContext());
+				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getBaseContext());
+				statisticAdapter.open();
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
 				
 
@@ -393,8 +393,8 @@ public class TDSService extends Service {
 			try {
 				
 				//delete old logs
-				StatisticsDBHelper statHelper = new StatisticsDBHelper();
-				statHelper.open(getBaseContext());
+				StatisticsDBHelper statHelper = new StatisticsDBHelper(getBaseContext());
+				statHelper.open();
 				statHelper.deleteOldData();
 				
 				// authentication

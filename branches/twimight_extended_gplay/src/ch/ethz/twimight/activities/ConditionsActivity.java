@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.LogCollector;
 
 public class ConditionsActivity extends Activity {
 	
@@ -19,7 +20,9 @@ public class ConditionsActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean termsAccepted = settings.getBoolean(TERMS, false);		  
+		boolean termsAccepted = settings.getBoolean(TERMS, false);
+		
+		LogCollector.setUpCrittercism(getApplicationContext());
 		
 		if (termsAccepted) {
 			startLogin();
@@ -67,6 +70,8 @@ public class ConditionsActivity extends Activity {
 		
 	}
 	
+	
+
 	private void startLogin() {
 		Intent intent = new Intent(this,LoginActivity.class);
 		startActivity(intent);

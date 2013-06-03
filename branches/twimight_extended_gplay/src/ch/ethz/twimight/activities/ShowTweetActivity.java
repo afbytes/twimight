@@ -115,8 +115,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		setContentView(R.layout.showtweet);		
 		
 		sdCardHelper = new SDCardHelper();		
-		locDBHelper = new StatisticsDBHelper();
-		locDBHelper.open(this);
+		locDBHelper = new StatisticsDBHelper(this);
+		locDBHelper.open();
 		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);	
 		
 		locHelper = LocationHelper.getInstance(this);
@@ -470,7 +470,7 @@ public class ShowTweetActivity extends TwimightBaseActivity{
         	if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {			
     			locHelper.unRegisterLocationListener();    			
     			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
-    					StatisticsDBHelper.LINK_CLICKED , url, System.currentTimeMillis(),false);
+    					StatisticsDBHelper.LINK_CLICKED , url, System.currentTimeMillis());
     		} 
         	
 	        if(cm.getActiveNetworkInfo()!=null && cm.getActiveNetworkInfo().isConnected()){	

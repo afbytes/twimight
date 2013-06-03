@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.LogCollector;
 
 /**
  * The base activity for all Twimight activities.
@@ -46,7 +47,8 @@ public class TwimightBaseActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		
+		LogCollector.leaveBreadcrumb();
+
 	}
 	
 		

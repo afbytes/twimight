@@ -39,7 +39,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_DMS = "dms";
 
 
-	private static final int DATABASE_VERSION = 49;
+	private static final int DATABASE_VERSION = 50;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("

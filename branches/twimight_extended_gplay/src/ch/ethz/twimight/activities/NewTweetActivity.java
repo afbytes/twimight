@@ -409,8 +409,8 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			boolean result=false;
 			
 			//Statistics
-			statsDBHelper = new StatisticsDBHelper();
-			statsDBHelper.open(getApplicationContext());
+			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
+			statsDBHelper.open();
 			timestamp = System.currentTimeMillis();
 
 			
@@ -436,10 +436,9 @@ public class NewTweetActivity extends TwimightBaseActivity{
 			// if no connectivity, notify user that the tweet will be send later		
 				
 				ContentValues cv = createContentValues(); 
-				boolean isDisaster = false;
+				
 				if(PreferenceManager.getDefaultSharedPreferences(NewTweetActivity.this).getBoolean("prefDisasterMode", false) == true){				
-					
-					isDisaster = true;
+										
 					// our own tweets go into the my disaster tweets buffer
 					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE|Tweets.BUFFER_MYDISASTER);
 
@@ -464,7 +463,7 @@ public class NewTweetActivity extends TwimightBaseActivity{
 
 					if (D) Log.i(TAG,"writing log");
 					statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), 
-							StatisticsDBHelper.TWEET_WRITTEN, null, timestamp,isDisaster);
+							StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
 					locHelper.unRegisterLocationListener();
 					if (D) Log.i(TAG, String.valueOf(hasMedia));
 				}
