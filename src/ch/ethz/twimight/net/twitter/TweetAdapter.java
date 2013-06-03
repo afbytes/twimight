@@ -135,7 +135,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		}
 		
 		
-		int col_html = cursor.getColumnIndex(Tweets.COL_HTMLS);
+		int col_html = cursor.getColumnIndex(Tweets.COL_HTML_PAGES);
 		if (col_html > -1) {
 			int hasHtml = cursor.getInt(col_html);
 			TextView textHtml = (TextView) row.findViewById(R.id.linkDownloaded);

@@ -1,6 +1,5 @@
 package ch.ethz.twimight.activities;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.LogCollector;
 
 public class ConditionsActivity extends Activity {
 	
@@ -21,7 +21,9 @@ public class ConditionsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean termsAccepted = settings.getBoolean(TERMS, false);			
-			
+		
+		LogCollector.setUpCrittercism(getApplicationContext());
+		
 		if (termsAccepted) {
 			startLogin();
 			

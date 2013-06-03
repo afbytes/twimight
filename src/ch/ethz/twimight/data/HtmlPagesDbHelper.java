@@ -162,7 +162,7 @@ public class HtmlPagesDbHelper {
 	public Cursor getNewTweet(Long timestamp){
 		
 		String[] cols = {Tweets.COL_TEXT, Tweets.COL_TID, Tweets.COL_USER};
-		String sql = Tweets.COL_RECEIVED + "> '" + String.valueOf(timestamp) +"' and " + Tweets.COL_HTMLS + " = '" + String.valueOf(1) + "'";
+		String sql = Tweets.COL_RECEIVED + "> '" + String.valueOf(timestamp) +"' and " + Tweets.COL_HTML_PAGES + " = '" + String.valueOf(1) + "'";
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, cols, sql, null, null, null, null);
 		return c;
 	}

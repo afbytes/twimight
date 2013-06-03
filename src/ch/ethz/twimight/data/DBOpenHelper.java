@@ -100,7 +100,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "			
 			+ Tweets.COL_MEDIA + " string, "
-			+ Tweets.COL_HTMLS + " integer default 0, "
+			+ Tweets.COL_HTML_PAGES + " integer default 0, "
 			+ Tweets.COL_ISDISASTER + " integer default 0, "
 			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "

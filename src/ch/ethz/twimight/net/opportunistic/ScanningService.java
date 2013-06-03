@@ -684,7 +684,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 					try{
 						if(prefWebShare){
-							if(c.getInt(c.getColumnIndex(Tweets.COL_HTMLS)) == 1){
+							if(c.getInt(c.getColumnIndex(Tweets.COL_HTML_PAGES)) == 1){
 
 								if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED))> (last - 10*60*1000L)){
 									JSONObject toSend;
@@ -955,8 +955,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
 			if(c.getColumnIndex(Tweets.COL_MEDIA) >=0)
 				o.put(Tweets.COL_MEDIA, c.getString(c.getColumnIndex(Tweets.COL_MEDIA)));
-			if(c.getColumnIndex(Tweets.COL_HTMLS) >=0)
-				o.put(Tweets.COL_HTMLS, c.getString(c.getColumnIndex(Tweets.COL_HTMLS)));
+			if(c.getColumnIndex(Tweets.COL_HTML_PAGES) >=0)
+				o.put(Tweets.COL_HTML_PAGES, c.getString(c.getColumnIndex(Tweets.COL_HTML_PAGES)));
 			if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
 				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
 
@@ -1033,8 +1033,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		if(o.has(Tweets.COL_MEDIA))
 			cv.put(Tweets.COL_MEDIA, o.getString(Tweets.COL_MEDIA));
 		
-		if(o.has(Tweets.COL_HTMLS))
-			cv.put(Tweets.COL_HTMLS, o.getString(Tweets.COL_HTMLS));
+		if(o.has(Tweets.COL_HTML_PAGES))
+			cv.put(Tweets.COL_HTML_PAGES, o.getString(Tweets.COL_HTML_PAGES));
 		
 		if(o.has(TwitterUsers.COL_SCREENNAME)) {			
 			cv.put(Tweets.COL_SCREENNAME, o.getString(TwitterUsers.COL_SCREENNAME));

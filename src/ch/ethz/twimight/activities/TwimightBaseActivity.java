@@ -36,6 +36,7 @@ import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.LogCollector;
 
 /**
  * The base activity for all Twimight activities.
@@ -59,9 +60,11 @@ public class TwimightBaseActivity extends FragmentActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
+		
+		LogCollector.leaveBreadcrumb();
+		
 		//action bar
 		actionBar = getActionBar();				
 		actionBar.setHomeButtonEnabled(true);		
