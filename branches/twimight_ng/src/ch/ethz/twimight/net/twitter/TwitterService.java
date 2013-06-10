@@ -46,17 +46,17 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewDMActivity;
-import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
-import ch.ethz.twimight.net.Html.HtmlService;
-import ch.ethz.twimight.net.Html.InternetStatusReceiver;
+import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -103,6 +103,7 @@ public class TwitterService extends Service {
 	public static final String URL = "url";	
 	
 	Twitter twitter;
+	NetworkInfo currentNetworkInfo;
 	
 	public static final boolean D = true;
 
@@ -122,7 +123,9 @@ public class TwitterService extends Service {
 		//TwitterAlarm.releaseWakeLock();
 		// Do we have connectivity?
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
+		currentNetworkInfo = cm.getActiveNetworkInfo();
+		if(currentNetworkInfo==null || !currentNetworkInfo.isConnected()){
+			
 			Log.w(TAG, "Error synching: no connectivity");
 			return START_NOT_STICKY;
 			
@@ -1076,21 +1079,28 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		if (scrName != null) {			
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
-		
+
 		String tweetSpanText = createSpans(tweet).getText();
 		cv.put(Tweets.COL_TEXT, tweetSpanText);
-		
+
 		//if there are urls to this tweet, change the status of html field to 1
 		if(tweetSpanText.indexOf("http://") > 0 || tweetSpanText.indexOf("https://") > 0 ){
 			cv.put(Tweets.COL_HTML_PAGES, 1);
-		}
-		
-		
+
+			boolean isOfflineActive  = PreferenceManager.getDefaultSharedPreferences(TwitterService.this).getBoolean(
+					TwitterService.this.getString(R.string.pref_offline_mode),false);
+			if (isOfflineActive ){
+				HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+				htmlDbHelper.open();
+				htmlDbHelper.insertLinksIntoDb(tweetSpanText,tweet.getId().longValue(), HtmlPagesDbHelper.DOWNLOAD_NORMAL);
+
+			}	
+		}	
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.source);
-		
+
 		cv.put(Tweets.COL_TID, tweet.getId().longValue());
-		
+
 		if (tweet.isFavorite())
 			buffer = buffer | Tweets.BUFFER_FAVORITES;
 		cv.put(Tweets.COL_FAVORITED, tweet.isFavorite());
@@ -1115,6 +1125,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		return cv;
 	}
 	
+	
+
 	private class SpanResult {
 		private String text;
 		private ArrayList<String> urls;
@@ -1776,26 +1788,24 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			return null;
 		}
 
-	
+
 
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);	
 			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
 			
-			//send broadcast 
-			Intent i = new Intent(getBaseContext(), InternetStatusReceiver.class);
-			getBaseContext().sendBroadcast(i);
+			StartServiceHelper.startService(TwitterService.this);
 
 			Log.i(TAG,"Insert onPost Execute");
 		}
 
 	}
-	
+
 	private boolean contains(ArrayList<ContentValues> usersCv, User incomingUser) {
-		
+
 		boolean result = false;
-		
+
 		for (ContentValues cv: usersCv){			
 			if(cv.getAsLong(TwitterUsers.COL_ID).longValue() == incomingUser.id.longValue()){				
 				result = true;
@@ -3915,6 +3925,32 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		}
 
+	}
+
+	public static class LinksParser {
+
+		public static ArrayList<String> parseText(String substr){
+
+			ArrayList<String> urls = new ArrayList<String>();
+
+			String[] strarr = substr.split(" ");
+			//check the urls of the tweet
+			for(String subStrarr : strarr){
+
+				if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
+					String subUrl = null;
+					if(subStrarr.indexOf("http://") >= 0){
+						subUrl = subStrarr.substring(subStrarr.indexOf("http://"));
+					}else if(subStrarr.indexOf("https://") >= 0){
+						subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
+					}
+					urls.add(subUrl);
+
+				}
+			}
+			return urls;
+
+		}
 	}
 
 }

@@ -167,7 +167,18 @@
     <string name="remind_me">Remind me later</string>   
     <string name="no_thanks">No Thanks</string>    		
     
-    <!-- Preferences -->
+    <!-- Preferences -->    
+    <string name="pref_offline_mode">prefOfflineMode</string>
+    <string name="prefWebShare">prefWebShare</string>
+    <string name="prefDisasterMode">prefDisasterMode</string>
+    <string name="prefTDSCommunication">refTDSCommunication</string>
+    <string name="prefUpdateInterval">prefUpdateInterval</string>
+    <string name="prefRunAtBoot">prefRunAtBoot</string>
+    <string name="prefUseLocation">prefUseLocation</string>
+    <string name="prefNotifyTweets">prefNotifyTweets</string>
+    <string name="prefNotifyMentions">prefNotifyMentions</string>
+    <string name="prefNotifyDirectMessages">prefNotifyDirectMessages</string>  
+    
     <string name="notifications">Notifications</string>
     <string name="notifications_explain">click to enter in the notifications menu</string>
     <string name="notify_tweets">Notify Tweets</string>

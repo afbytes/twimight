@@ -17,7 +17,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
@@ -38,23 +40,25 @@ public class BootReceiver extends BroadcastReceiver {
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		
+
 		// we only start the services if we are logged in (i.e., we have the tokens from twitter)
 		if(LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
-			
-			
+
+			StartServiceHelper.startService(context);
+
 			// Start the service for communication with the TDS
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefTDSCommunication), 
+					Constants.TDS_DEFAULT_ON)==true){
 				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 			}
-			
-			
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
+
+
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON)==true){
 				new ScanningAlarm(context,false);
 			}
-			
+
 						
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
 				new TwitterAlarm(context,false);
 			}
 		}

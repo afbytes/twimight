@@ -22,19 +22,13 @@ public class ConditionsActivity extends Activity {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean termsAccepted = settings.getBoolean(TERMS, false);			
 		
-		LogCollector.setUpCrittercism(getApplicationContext());
-		
 		if (termsAccepted) {
 			startLogin();
 			
 		} else {
 			
-			setContentView(R.layout.show_conditions);
-
-		
-			Button buttonAgree = (Button)findViewById(R.id.buttonAgree);
-			
-			
+			setContentView(R.layout.show_conditions);		
+			Button buttonAgree = (Button)findViewById(R.id.buttonAgree);			
 			
 			buttonAgree.setOnClickListener(new OnClickListener() {
 				@Override

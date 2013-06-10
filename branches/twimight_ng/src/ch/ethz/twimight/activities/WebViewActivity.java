@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -40,7 +39,7 @@ public class WebViewActivity extends Activity {
 		Log.d("test1", tweetId);
 		String url = intent.getStringExtra("url");
 		String userId = intent.getStringExtra("user_id");
-		String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+		String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
 		htmlDbHelper = new HtmlPagesDbHelper(this);
 		sdCardHelper = new SDCardHelper();
 		WebView web = (WebView) findViewById(R.id.webview);
@@ -52,7 +51,7 @@ public class WebViewActivity extends Activity {
 		if(sdCardHelper.checkSDState(filePath)){
 
 			htmlDbHelper.open();
-			String filename = htmlDbHelper.getPageInfo(url, tweetId, userId).getAsString(HtmlPage.COL_FILENAME);
+			String filename = htmlDbHelper.getPageInfo(url).getAsString(HtmlPage.COL_FILENAME);
 			Log.d(TAG, filename);
 			if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() && sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 500){
 				progressBar = ProgressDialog.show(this, getString(R.string.loading), url);

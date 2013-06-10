@@ -32,13 +32,16 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
 	// Database table names;
 	static final String TABLE_REVOCATIONS = "revocations"; /** the table holding the local version of the revocation list */
-	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */
-	static final String TABLE_LOCATIONS = "locations";
+	static final String TABLE_MACS = "macs"; /** table holding the bluetooth MAC addresses we know */	
 	static final String TABLE_FRIENDS_KEYS = "friends_keys";
 	public static final String TABLE_TWEETS = "tweets"; 	
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 	public static final String TABLE_HTML = "htmls";
+	public static final String TABLE_HTML_TRACKERS = "html_trackers";
+	
+	public static final String ROW_ID = "_id";
+
 	static final String TABLE_STATISTICS = "statistics";
 
 
@@ -46,7 +49,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ MacsDBHelper.KEY_MAC + " string, "
 			+ MacsDBHelper.KEY_ATTEMPTS+ " integer, "
 			+ MacsDBHelper.KEY_SUCCESSFUL +" integer, "
@@ -54,7 +57,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ MacsDBHelper.KEY_LAST +" integer);";
 	
 	private static final String TABLE_STATISTICS_CREATE = "create table "+TABLE_STATISTICS+" ("
-			+ "_id integer primary key autoincrement not null, "			
+			+ ROW_ID + " integer primary key autoincrement not null, "			
 			+ StatisticsDBHelper.KEY_TIMESTAMP + " bigint not null, "
 			+ StatisticsDBHelper.KEY_LOCATION_LAT + " real, "
 			+ StatisticsDBHelper.KEY_LOCATION_LNG + " real, "
@@ -68,20 +71,20 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 
 	private static final String TABLE_REVOCATION_CREATE = "create table "+TABLE_REVOCATIONS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ "serial string not null, "
 			+ "until integer not null);";
 	
 		
 
 	private static final String TABLE_FRIENDS_KEYS_CREATE = "create table "+TABLE_FRIENDS_KEYS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ "twitter_id bigint not null, "
 			+ "key text not null);";
 	
 	// Tweets (including disaster tweets)
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ Tweets.COL_TEXT + " string not null, "
 			+ Tweets.COL_USER + " bigint, "
 			+ Tweets.COL_SCREENNAME+ " string, "
@@ -109,7 +112,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
 	// Twitter Users
 	private static final String TABLE_USERS_CREATE = "create table "+TABLE_USERS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ TwitterUsers.COL_SCREENNAME + " string not null, "
 			+ TwitterUsers.COL_ID + " bigint unique, "
 			+ TwitterUsers.COL_NAME + " string, "
@@ -140,7 +143,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
 	// Direct Messages (including disaster messages)
 	private static final String TABLE_DMS_CREATE = "create table "+TABLE_DMS+" ("
-			+ "_id integer primary key autoincrement not null, "
+			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ DirectMessages.COL_TEXT + " string, "
 			+ DirectMessages.COL_SENDER + " bigint, "
 			+ DirectMessages.COL_RECEIVER + " bigint, "
@@ -159,15 +162,22 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	// html pages 
 	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
-			+ "_id integer primary key autoincrement not null, "
-			+ HtmlPage.COL_URL + " string not null, "
-			+ HtmlPage.COL_TID + " string not null, "
-			+ HtmlPage.COL_USER + " string not null, "
+			+ HtmlPage.COL_PAGE_ID + " integer primary key autoincrement not null, "
+			+ HtmlPage.COL_URL + " string not null, "	
+			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + HtmlPage.COL_TID +") ON DELETE CASCADE, "	
 			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
 			+ HtmlPage.COL_FORCED + " integer default 0, "
-			+ HtmlPage.COL_TRIES + " integer default 0, "
-			+ HtmlPage.COL_FILENAME + " string);";
+			+ HtmlPage.COL_ATTEMPTS + " integer default 0, "
+			+ HtmlPage.COL_FILENAME + " string not null);";
 	
+	/*
+	// html pages trackers
+		private static final String TABLE_HTML_TRACKERS_CREATE = "create table "+TABLE_HTML_TRACKERS+" ("
+				+ HtmlPage.COL_PAGE_ID + " integer not null REFERENCES " + TABLE_HTML + "(" + HtmlPage.COL_PAGE_ID +") ON DELETE CASCADE, " 			
+				+ HtmlPage.COL_TID + " bigint not null REFERENCES " + TABLE_TWEETS + "(" + HtmlPage.COL_TID +") ON DELETE CASCADE, " 
+				+ "PRIMARY KEY (" + HtmlPage.COL_PAGE_ID + "," + HtmlPage.COL_TID + ")"
+			   	+ ");";
+	*/
 	
 	private static DBOpenHelper dbHelper; /** the one and only instance of this class */
 	private static SQLiteDatabase myWritableDb;
@@ -230,6 +240,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL(TABLE_USERS_CREATE);
 		database.execSQL(TABLE_DMS_CREATE);
 		database.execSQL(TABLE_HTML_CREATE);
+		//database.execSQL(TABLE_HTML_TRACKERS_CREATE);
+
 	
 	}
 	
@@ -258,6 +270,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_USERS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_DMS);
 		database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML);
+		//database.execSQL("DROP TABLE IF EXISTS "+TABLE_HTML_TRACKERS);
+
 		createTables(database);
 	}
 	
@@ -275,5 +289,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 		database.execSQL("DELETE FROM "+TABLE_USERS);
 		database.execSQL("DELETE FROM "+TABLE_DMS);
 		database.execSQL("DELETE FROM "+TABLE_HTML);
+		//database.execSQL("DELETE FROM "+TABLE_HTML_TRACKERS);
+
 	}
 }
