@@ -44,7 +44,7 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_SOURCE_NORMAL = "normal"; /** only normal tweets (no disaster tweets) */
 	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */
 	public static final String TWEETS_SOURCE_ALL = "all"; /** both, normal and disaster tweets */
-	public static final String TWEETS_ID = "id"; /** a specific tweet */
+	public static final String TWEET_ID = "tweet_id"; /** a specific tweet */
 	public static final String SEARCH = "search"; /** a search request */
 	
 	//photo path
@@ -70,9 +70,8 @@ public class Tweets implements BaseColumns {
 	public static final String COL_BUFFER = "buffer_flags"; /** which buffer(s) is the tweet in */
 	public static final String COL_MEDIA = "media_url"; /**url of media*/
 	public static final String COL_FLAGS = "flags"; /** Transactional flags */
-	public static final String COL_URLS = ""; /** url hashtag */
-	public static final String COL_HTML_PAGES = "html_pages"; /** status of html pages related to this tweet, 0: not have, 1: have but not download, 2: have & download */
-	
+	//public static final String COL_URLS = ""; /** url hashtag */
+	public static final String COL_HTML_PAGES = "html_pages"; /** status of html pages related to this tweet, 0: not have, 1: does have */
 	
 	// for disaster mode
 	public static final String COL_ISDISASTER = "is_disaster_tweet"; /** disaster or normal tweet? */

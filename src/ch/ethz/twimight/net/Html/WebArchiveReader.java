@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 @SuppressLint("NewApi")
+
 public abstract class WebArchiveReader {
 	private static final String TAG = "Web Reader";
     private Document myDoc = null;

@@ -14,6 +14,7 @@ package ch.ethz.twimight.activities;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -32,8 +33,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.Html.HtmlPage;
-import ch.ethz.twimight.net.Html.HtmlService;
+import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.Html.StartServiceHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.LogCollector;
@@ -62,7 +64,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 		super.onCreate(savedInstanceState);
 		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		
+		LogCollector.setUpCrittercism(getApplicationContext());
 		LogCollector.leaveBreadcrumb();
 		
 		//action bar
@@ -201,12 +203,15 @@ public class TwimightBaseActivity extends FragmentActivity{
 			i = new Intent(this, AboutActivity.class);
 			startActivity(i);    
 			break;
-		case R.id.menu_cache: 
-
-            i = new Intent(this, HtmlService.class);
-            i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.DOWNLOAD_ALL);
-            i.putExtra(HtmlPage.OFFLINE_MANUAL, true);
-            startService(i); 			
+		case R.id.menu_cache: 		
+			
+			ContentResolver resolver = getContentResolver();	
+			Cursor cursor = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+			htmlDbHelper.open();	
+			htmlDbHelper.saveLinksFromCursor(cursor,HtmlPagesDbHelper.DOWNLOAD_FORCED);
+			StartServiceHelper.startService(getApplicationContext());			
 			break;
 			
 		 case R.id.menu_cache_clear:             
@@ -219,12 +224,12 @@ public class TwimightBaseActivity extends FragmentActivity{
                      @Override
                      public void onClick(DialogInterface dialog, int which) {
                              // TODO Auto-generated method stub
-                             dialog.dismiss();
-                             Intent i = new Intent(getBaseContext(), HtmlService.class);
+                             dialog.dismiss();                           
                              Long timeSpan = (long) (0*24*3600*1000);
-                             i.putExtra(HtmlService.DOWNLOAD_REQUEST, HtmlService.CLEAR_ALL);
-                             i.putExtra("timespan", timeSpan);
-                             startService(i);
+                             HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+                 			 htmlDbHelper.open();	
+                 			 htmlDbHelper.clearHtmlPages(timeSpan);
+                 			
                      }
                     
              });

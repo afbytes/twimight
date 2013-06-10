@@ -598,21 +598,20 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private void processHtml(JSONObject o){
 		try {
 			Log.i(TAG, "process HTML");
-			String xmlContent = o.getString(HtmlPage.COL_HTML);
-			String userId = o.getString(HtmlPage.COL_USER);
+			String xmlContent = o.getString(HtmlPage.COL_HTML);			
 			String filename =  o.getString(HtmlPage.COL_FILENAME);
-			String tweetId = o.getString(HtmlPage.COL_TID);
+			Long tweetId = o.getLong(HtmlPage.COL_TID);
 			String htmlUrl = o.getString(HtmlPage.COL_URL);
 			int downloaded = 0;
 			
-			String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+			String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(getApplicationContext())};
 			if (sdCardHelper.checkSDState(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);//photoFileParent, photoFilename));
 				if(saveFile(targetFile, xmlContent)){
 					downloaded = 1;
 				}
 			}
-			htmlDbHelper.insertPage(htmlUrl, filename, tweetId, userId, downloaded, 0);
+			htmlDbHelper.insertPage(htmlUrl, filename, tweetId, downloaded, 0);
 			
 		} catch (JSONException e1) {
 			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
@@ -793,19 +792,18 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				}else if(subStrarr.indexOf("https://") >= 0){
 					subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
 				}
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(subUrl, "0", userId);
+				ContentValues htmlCV = htmlDbHelper.getPageInfo(subUrl);
 
 				if(htmlCV!=null){
 					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
-						String[] filePath = {HtmlPage.HTML_PATH + "/" + userId};
+						String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
 						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
 						String tweetId = htmlCV.getAsString(HtmlPage.COL_TID);
 						if(sdCardHelper.checkSDState(filePath)){
 							
 							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 							if(xmlFile.exists()){
-								toSendXml = getJSONFromXml(xmlFile);
-								toSendXml.put(HtmlPage.COL_USER, userId);
+								toSendXml = getJSONFromXml(xmlFile);								
 								toSendXml.put(HtmlPage.COL_URL, subUrl);
 								toSendXml.put(HtmlPage.COL_FILENAME, filename);
 								toSendXml.put(HtmlPage.COL_TID, tweetId);

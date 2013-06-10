@@ -12,7 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import android.app.ActionBar;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
@@ -23,11 +22,8 @@ import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.Html.HtmlPage;
-import ch.ethz.twimight.net.Html.HtmlService;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
@@ -65,8 +61,8 @@ public class PrefsActivity extends PreferenceActivity{
 			// this is where we take action after the user changes a setting!
 			public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
 
-				if (key.equals("prefDisasterMode")) { // toggle disaster mode
-					if(preferences.getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true){
+				if (key.equals(getString(R.string.prefDisasterMode))) { // toggle disaster mode
+					if(preferences.getBoolean(getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
 							enableDisasterMode(); 							
@@ -79,10 +75,10 @@ public class PrefsActivity extends PreferenceActivity{
 						finish();
 					}
 					
-				} else if(key.equals("prefTDSCommunication")){
+				} else if(key.equals(getString(R.string.prefTDSCommunication))){
 					
 					// toggle TDS communication
-					if(preferences.getBoolean("prefTDSCommunication",	Constants.TDS_DEFAULT_ON) == true){
+					if(preferences.getBoolean(getString(R.string.prefTDSCommunication),	Constants.TDS_DEFAULT_ON) == true){
 						//new TDSAlarm(getApplicationContext(), Constants.TDS_UPDATE_INTERVAL);
 						Log.i(TAG, "start TDS communication");
 					} else {
@@ -90,35 +86,35 @@ public class PrefsActivity extends PreferenceActivity{
 						//TDSAlarm.stopTDSCommuniction(getApplicationContext());						
 					}
 					
-				}  else if (key.equals("prefRunAtBoot")) {
+				}  else if (key.equals(getString(R.string.prefRunAtBoot))) {
 					
-					if (preferences.getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true ) {
-						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference("prefUpdateInterval");
+					if (preferences.getBoolean(getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true ) {
+						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference(getString(R.string.prefUpdateInterval));
 						updatesBackground.setEnabled(true);
 						new TwitterAlarm(getBaseContext(),false);
 					
 					} else {
-						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference("prefUpdateInterval");
+						ListPreference updatesBackground = (ListPreference) getPreferenceScreen().findPreference(getString(R.string.prefUpdateInterval));
 						updatesBackground.setEnabled(false);
 						TwitterAlarm.stopTwitterAlarm(getBaseContext());
 					}
-				} else if (key.equals("prefUpdateInterval")) {					
-					Constants.UPDATER_UPDATE_PERIOD = Long.parseLong(preferences.getString("prefUpdateInterval", "5") ) * 60 * 1000L;
+				} else if (key.equals(getString(R.string.prefUpdateInterval))) {					
+					Constants.UPDATER_UPDATE_PERIOD = Long.parseLong(preferences.getString(getString(R.string.prefUpdateInterval), "5") ) * 60 * 1000L;
 					Log.i(TAG, "new update interval: " + Constants.UPDATER_UPDATE_PERIOD );
 					
 					//start the twitter update alarm
-					if(PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
+					if(PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getBoolean(getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
 						new TwitterAlarm(getBaseContext(), false);
 					}
-				} else if (key.equals("prefOfflineMode")) {		
+				} else if (key.equals(getString(R.string.pref_offline_mode))) {		
 
-					if(preferences.getBoolean("prefOfflineMode", Constants.OFFLINE_DEFAULT_ON)){
+					if(preferences.getBoolean(getString(R.string.pref_offline_mode), Constants.OFFLINE_DEFAULT_ON)){
 
-						preferenceChange(true);
+						setOfflinePreference(true,PrefsActivity.this);
 					}
 					else{
 						
-						preferenceChange(false);
+						setOfflinePreference(false,PrefsActivity.this);
 
 					}
 
@@ -130,12 +126,27 @@ public class PrefsActivity extends PreferenceActivity{
 
 	}
 	
-	private void preferenceChange(boolean offlinePreference){
-		Intent i = new Intent(getBaseContext(), HtmlService.class);
-		i.putExtra(HtmlPage.OFFLINE_PREFERENCE, offlinePreference);
-		startService(i);
+	
+	//get offline mode preference
+	public static boolean getOfflinePreference(Context context) {
+
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean offlinePref = prefs.getBoolean(HtmlPage.OFFLINE_PREFERENCE, false);
+	
+		return offlinePref;
 	}
 	
+	//set offline mode preference
+	public static void setOfflinePreference(boolean pref, Context context) {
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();
+		prefEditor.putBoolean(HtmlPage.OFFLINE_PREFERENCE, pref);
+		prefEditor.commit();
+	}	
+
+
+
 	public static void disableDisasterMode(Context context) {
 		if (getBluetoothInitialState(context) == false) {
 			if (BluetoothAdapter.getDefaultAdapter().isEnabled())
