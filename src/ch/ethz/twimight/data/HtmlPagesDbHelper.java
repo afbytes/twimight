@@ -59,12 +59,13 @@ public class HtmlPagesDbHelper {
 	 * @return
 	 */
 	public boolean insertPage(String url, String filename, long tweetId, int downloaded, int forced) {
-		Log.i(TAG,"insert page url: " + url);
+		Log.i(TAG,"insert page url: " + url );
 		ContentValues cv = createContentValues(url,filename, tweetId, downloaded, forced, 0);
 		
 		try {
 			long result = database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
 			Log.i(TAG,"row: " + result);
+			 
 			if(result!=-1)
 				return true;
 		} catch (SQLException ex) {
@@ -83,6 +84,7 @@ public class HtmlPagesDbHelper {
 				
 				String rawText = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 				SpannableString str = new SpannableString(Html.fromHtml(rawText, null, new TweetTagHandler(context)));
+				Log.i(TAG,str.toString());
 				Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 				insertLinksIntoDb(str.toString(),tid, type);
 			}
@@ -133,7 +135,7 @@ public class HtmlPagesDbHelper {
 		
 		try {
 			String sql = HtmlPage.COL_URL + "='" + url + "'";
-			int result = database.delete(DBOpenHelper.TABLE_HTML, sql, null);
+			int result = database.delete(DBOpenHelper.TABLE_HTML, sql, null);			
 			Log.i(TAG,"delete row: " + result);
 			if(result!=0)
 				return true;
@@ -173,7 +175,9 @@ public class HtmlPagesDbHelper {
 	//return all urls for a tweet
 	public Cursor getUrlsByTweetId(Long tweetId){
 		
-		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_TID + " = '" + tweetId + "'" , null, null, null, null);
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_TID + " =" + tweetId + "" , null, null, null, null);
+		c.moveToFirst();		
+		
 		return c;
 	}
 	
@@ -199,16 +203,17 @@ public class HtmlPagesDbHelper {
 		String sql = null;
 		if(forced){
 			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_FORCED + " = '" 
-							+ String.valueOf(1) + "' and " + HtmlPage.COL_ATTEMPTS + " < '" + String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+					+ String.valueOf(1) + "' and " + HtmlPage.COL_ATTEMPTS + " < '" + String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
 		}else{
 			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_ATTEMPTS + " < '" 
-														+ String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+					+ String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
 		}
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " DESC");
 		return c;
 	}
+
 	
-	
+
 	/**
 	 * get downloaded pages for cleaning mess
 	 * @return
@@ -219,7 +224,7 @@ public class HtmlPagesDbHelper {
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, null);
 		return c;
 	}
-	
+
 	/**
 	 * Creates a Html page record to insert in the DB
 	 * @param url
@@ -249,10 +254,11 @@ public class HtmlPagesDbHelper {
 		return c;
 	}	
 	
+	
 
 	
 	public void clearHtmlPages(long timeSpan) {
-		new clearHtmlPages().execute(timeSpan);
+		new ClearHtmlPages().execute(timeSpan);
 	}
 	
 	
@@ -262,7 +268,7 @@ public class HtmlPagesDbHelper {
 	 * @author fshi
 	 *
 	 */
-	private class clearHtmlPages extends AsyncTask<Long, Void, Boolean>{
+	private class ClearHtmlPages extends AsyncTask<Long, Void, Boolean>{
 
 		@Override
 		protected Boolean doInBackground(Long... params) {
@@ -286,7 +292,7 @@ public class HtmlPagesDbHelper {
 						File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 
 						if(deleteFile.delete()){
-							deletePage(c.getInt(c.getColumnIndex(HtmlPage.COL_PAGE_ID)));
+							deletePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)));
 						}
 
 					}

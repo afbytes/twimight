@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.text.Html;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.Html.HtmlPage;
 
 
 /** 
@@ -153,40 +155,48 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			int hasHtml = cursor.getInt(col_html);
 			
 			holder.splitBar.setVisibility(View.GONE);
+			holder.textHtml.setVisibility(View.GONE);
 			
-			if(hasHtml == 1){	
+			if(hasHtml == 1){				
 				
 				int colTid = cursor.getColumnIndex(Tweets.COL_TID);
-				long tweetId = 0;				
+				long tweetId = 0;
+				
 				if(colTid > -1){
-					tweetId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID));
-				}
-				TODO:
-				
-				
-				//if webpages have been downloaded
-				int text =0;
-				if(retweeted){
+					tweetId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID));					
+					Cursor curHtml = htmlDbHelper.getUrlsByTweetId(tweetId);
 					
-					holder.splitBar.setText("|");
-					holder.splitBar.setVisibility(View.VISIBLE);
-					text = R.string.downloading;
-					holder.textHtml.setTextColor(Color.parseColor("#9ea403"));
-				}
-				else{
-					text = R.string.downloading;
-					holder.textHtml.setTextColor(Color.parseColor("#9ea403"));
-				} 
-				
-				if (text != 0) {
-					holder.textHtml.setText(context.getString(text));
-					holder.textHtml.setVisibility(View.VISIBLE);
+					if (curHtml != null && curHtml.getCount() > 0) {					
+
+						//if webpages have been downloaded
+						int text =0;
+						
+						if(retweeted){						
+							holder.splitBar.setText("|");						
+							holder.splitBar.setVisibility(View.VISIBLE);
+						}
+						
+						if (!allPagesStored(curHtml)) {							
+
+							text = R.string.downloading;
+							holder.textHtml.setTextColor(Color.parseColor("#9ea403"));
+						} else {
+							text = R.string.downloaded;
+							holder.textHtml.setTextColor(Color.parseColor("#1d8a04"));
+
+						}
+
+						if (text != 0) {
+							holder.textHtml.setText(context.getString(text));
+							holder.textHtml.setVisibility(View.VISIBLE);
+						}	
+					}	
 				}			
 				
+								
+				
 			}
-			else {
-				holder.textHtml.setVisibility(View.GONE);
-			}
+			
 		}
 		// Profile image		
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
@@ -256,6 +266,21 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 			holder.verifiedImage.setVisibility(ImageView.GONE);
 		}
+		
+	}
+
+
+
+
+
+
+	private boolean allPagesStored(Cursor curHtml) {
+		for(curHtml.moveToFirst(); !curHtml.isAfterLast(); curHtml.moveToNext()) {
+			
+			if ( curHtml.getInt(curHtml.getColumnIndex(HtmlPage.COL_DOWNLOADED)) ==0  )
+				return false;
+		}
+		return true;
 		
 	}
 	
