@@ -317,16 +317,17 @@ public class HtmlService extends Service {
 		
 		private String filePath;
 		private ContentValues htmlCV;
+		WebView web ;
 		
 		WebRunnable(String filePath, ContentValues htmlCV){
 			this.filePath = filePath;
 			this.htmlCV = htmlCV;
+			web = new WebView(getBaseContext());
 		}
 		
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
-			WebView web = new WebView(getBaseContext());
+			// TODO Auto-generated method stub	
 			
 			web.setWebViewClient(new WebClientDownload(filePath, htmlCV));			
 			web.getSettings().setJavaScriptEnabled(true);
@@ -427,7 +428,7 @@ public class HtmlService extends Service {
 			if(!loadingFailed){
 				view.saveWebArchive(filePath);
 				if(htmlDbHelper.updatePage(baseUrl, filename, tweetId, 1, forced, tries)){
-					Log.d(TAG, "onPageFinished and downloaded:" + url + " in " + filePath);
+					Log.i(TAG, "onPageFinished and downloaded:" + url + " in " + filePath);
 				}
 			}
 			else{

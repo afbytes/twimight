@@ -164,7 +164,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
 			+ HtmlPage.COL_PAGE_ID + " integer primary key autoincrement not null, "
 			+ HtmlPage.COL_URL + " string not null, "	
-			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + HtmlPage.COL_TID +") ON DELETE CASCADE, "	
+			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_TID +") ON DELETE CASCADE, "	
 			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
 			+ HtmlPage.COL_FORCED + " integer default 0, "
 			+ HtmlPage.COL_ATTEMPTS + " integer default 0, "
