@@ -43,6 +43,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
@@ -1063,6 +1064,27 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	}
 
 
+	private class CacheUrlTask extends AsyncTask<Void, Void, Void>{
+		
+		String tweet;
+		long id;
+		
+		public CacheUrlTask(String tweet, long id){
+			this.tweet = tweet;
+			this.id = id;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+			htmlDbHelper.open();
+			htmlDbHelper.insertLinksIntoDb(tweet, id, HtmlPagesDbHelper.DOWNLOAD_NORMAL);
+			return null;
+		}
+
+		
+	}
 
 	/**
 	 * Creates content values for a tweet from Twitter
@@ -1082,17 +1104,16 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 		String tweetSpanText = createSpans(tweet).getText();
 		cv.put(Tweets.COL_TEXT, tweetSpanText);
-
+		
+		String tweetText = Html.fromHtml(tweetSpanText).toString();
 		//if there are urls to this tweet, change the status of html field to 1
-		if(tweetSpanText.indexOf("http://") > 0 || tweetSpanText.indexOf("https://") > 0 ){
+		if(tweetText.indexOf("http://") > 0 || tweetText.indexOf("https://") > 0 ){
 			cv.put(Tweets.COL_HTML_PAGES, 1);
 
 			boolean isOfflineActive  = PreferenceManager.getDefaultSharedPreferences(TwitterService.this).getBoolean(
 					TwitterService.this.getString(R.string.pref_offline_mode),false);
 			if (isOfflineActive ){
-				HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
-				htmlDbHelper.open();
-				htmlDbHelper.insertLinksIntoDb(tweetSpanText,tweet.getId().longValue(), HtmlPagesDbHelper.DOWNLOAD_NORMAL);
+				new CacheUrlTask(tweetText,tweet.getId().longValue()).execute();
 
 			}	
 		}	

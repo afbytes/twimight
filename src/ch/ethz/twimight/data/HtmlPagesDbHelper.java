@@ -59,12 +59,12 @@ public class HtmlPagesDbHelper {
 	 * @return
 	 */
 	public boolean insertPage(String url, String filename, long tweetId, int downloaded, int forced) {
-		Log.i(TAG,"insert page url: " + url );
+		Log.d(TAG,"insert page url: " + url );
 		ContentValues cv = createContentValues(url,filename, tweetId, downloaded, forced, 0);
 		
 		try {
 			long result = database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
-			Log.i(TAG,"row: " + result);
+			Log.d(TAG,"row: " + result);
 			 
 			if(result!=-1)
 				return true;

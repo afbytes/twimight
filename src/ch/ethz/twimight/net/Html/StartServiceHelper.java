@@ -29,7 +29,7 @@ public class StartServiceHelper {
     	NetworkInfo currentNetworkInfo = cm.getActiveNetworkInfo();
 
     	// are we connected and logged in?
-    	if(currentNetworkInfo.isConnected() && LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
+    	if( currentNetworkInfo != null && currentNetworkInfo.isConnected() && LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
     		
     		int networkType = currentNetworkInfo.getType();		
 

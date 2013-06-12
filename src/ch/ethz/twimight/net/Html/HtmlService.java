@@ -23,20 +23,16 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.text.Html;
-import android.text.SpannableString;
 import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
-import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.util.SDCardHelper;
-import ch.ethz.twimight.util.TweetTagHandler;
 
 public class HtmlService extends Service {
 	
@@ -48,6 +44,7 @@ public class HtmlService extends Service {
 	public static final String DOWNLOAD_REQUEST = "download_request";
 	private SDCardHelper sdCardHelper;
 	private HtmlPagesDbHelper htmlDbHelper;
+	WebView web ;
 
 
 	@Override
@@ -58,7 +55,8 @@ public class HtmlService extends Service {
 			return START_NOT_STICKY;		
 		
 		if(intent != null){
-
+			
+			web = new WebView(getBaseContext());
 			sdCardHelper = new SDCardHelper();
 			htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();			
@@ -106,9 +104,9 @@ public class HtmlService extends Service {
 		if((System.currentTimeMillis() - lastTime) < 1000*30){
 			return;
 		}
-		else{
-			checkCacheSize();		
-			downloadPages(forced);
+		else{		
+
+			new Thread(new DownloadRunnable(forced)).start();
 			
 		}
 		
@@ -193,7 +191,7 @@ public class HtmlService extends Service {
 
 		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
 		{
-			if(downloadCount > 10) return;
+			if(downloadCount > 20) return;
 			String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
 			
 			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));			
@@ -205,9 +203,7 @@ public class HtmlService extends Service {
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl);
 				
 				switch(sdCardHelper.checkFileType(htmlUrl)){
-					case SDCardHelper.TYPE_XML:
-						
-						Log.i(TAG, "file type: xml");
+					case SDCardHelper.TYPE_XML:					
 						
 						Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 
@@ -316,23 +312,39 @@ public class HtmlService extends Service {
 	private class WebRunnable implements Runnable{
 		
 		private String filePath;
-		private ContentValues htmlCV;
-		WebView web ;
+		private ContentValues htmlCV;		
 		
 		WebRunnable(String filePath, ContentValues htmlCV){
 			this.filePath = filePath;
 			this.htmlCV = htmlCV;
-			web = new WebView(getBaseContext());
+			
+		}
+		
+		@Override
+		public void run() {
+			
+			// TODO Auto-generated method stub				
+			web.setWebViewClient(new WebClientDownload(filePath, htmlCV));			
+			web.getSettings().setJavaScriptEnabled(true);
+			web.getSettings().setDomStorageEnabled(true);
+			web.loadUrl(htmlCV.getAsString(HtmlPage.COL_URL));
+		}
+	}
+	
+	private class DownloadRunnable implements Runnable{	
+		
+		boolean forced;
+		
+		public DownloadRunnable(boolean forced) {
+			this.forced = forced;
 		}
 		
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub	
+			checkCacheSize();		
+			downloadPages(forced);		
 			
-			web.setWebViewClient(new WebClientDownload(filePath, htmlCV));			
-			web.getSettings().setJavaScriptEnabled(true);
-			web.getSettings().setDomStorageEnabled(true);
-			web.loadUrl(htmlCV.getAsString(HtmlPage.COL_URL));
 		}
 	}
 	

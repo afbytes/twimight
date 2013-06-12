@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -204,14 +205,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 			startActivity(i);    
 			break;
 		case R.id.menu_cache: 		
-			
-			ContentResolver resolver = getContentResolver();	
-			Cursor cursor = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
-					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
-			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
-			htmlDbHelper.open();	
-			htmlDbHelper.saveLinksFromCursor(cursor,HtmlPagesDbHelper.DOWNLOAD_FORCED);
-			StartServiceHelper.startService(getApplicationContext());			
+			new CacheTask().execute();			
 			break;
 			
 		 case R.id.menu_cache_clear:             
@@ -225,10 +219,7 @@ public class TwimightBaseActivity extends FragmentActivity{
                      public void onClick(DialogInterface dialog, int which) {
                              // TODO Auto-generated method stub
                              dialog.dismiss();                           
-                             Long timeSpan = (long) (0*24*3600*1000);
-                             HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
-                 			 htmlDbHelper.open();	
-                 			 htmlDbHelper.clearHtmlPages(timeSpan);
+                             new DeleteCacheTask().execute();
                  			
                      }
                     
@@ -255,16 +246,54 @@ public class TwimightBaseActivity extends FragmentActivity{
 		}
 		return true;
 	}
+
+
+	private class CacheTask extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... params) {
+
+			// TODO Auto-generated method stub	
+			ContentResolver resolver = getContentResolver();	
+			Cursor cursor = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
+					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+			htmlDbHelper.open();	
+			htmlDbHelper.saveLinksFromCursor(cursor,HtmlPagesDbHelper.DOWNLOAD_FORCED);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void params){
+			StartServiceHelper.startService(getApplicationContext());
+		}
+	}
 	
+	
+	private class DeleteCacheTask extends AsyncTask<Void, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			Long timeSpan = (long) (0*24*3600*1000);
+            HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+			htmlDbHelper.open();	
+			htmlDbHelper.clearHtmlPages(timeSpan);
+			return null;
+		}
+
+		
+	}
+	
+
 	/**
 	 * Asks the user if she really want to log out
 	 */
 	private void showLogoutDialog(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(R.string.logout_question)
-		       .setCancelable(false)
-		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
+		.setCancelable(false)
+		.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
 		        	   LoginActivity.logout(TwimightBaseActivity.this.getApplicationContext());
 		        	   finish();
 		           }
