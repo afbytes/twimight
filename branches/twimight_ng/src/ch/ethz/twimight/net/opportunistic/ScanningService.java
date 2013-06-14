@@ -41,7 +41,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -511,7 +510,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 					Log.d("disaster", "receive a dm");
 					processDM(o);				
 				}
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 				//if input parameter is a photo, then extract the photo and save it locally
 				
 			} catch (JSONException e) {
@@ -1010,8 +1009,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		if(o.has(Tweets.COL_CREATED))
 			cv.put(Tweets.COL_CREATED, o.getLong(Tweets.COL_CREATED));
 		
-		if(o.has(Tweets.COL_TEXT))
+		if(o.has(Tweets.COL_TEXT)) {
 			cv.put(Tweets.COL_TEXT, o.getString(Tweets.COL_TEXT));
+			cv.put(Tweets.COL_TEXT_PLAIN, Html.fromHtml(o.getString(Tweets.COL_TEXT)).toString());
+		}
 		
 		if(o.has(Tweets.COL_USER)) {			
 			cv.put(Tweets.COL_USER, o.getLong(Tweets.COL_USER));

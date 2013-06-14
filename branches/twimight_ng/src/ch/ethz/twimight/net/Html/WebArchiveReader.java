@@ -16,6 +16,7 @@ import org.w3c.dom.Text;
 
 import android.annotation.SuppressLint;
 import android.util.Base64;
+import android.util.Log;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -83,26 +84,23 @@ public abstract class WebArchiveReader {
                 kid = kid.getNextSibling();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+        	Log.e(TAG,"error",e);
         }
         return null;
     }
 
-    public boolean loadToWebView(WebView v) {
+    public boolean loadToWebView(WebView v) throws Exception {
         myWebView = v;
         v.setWebViewClient(new WebClient());
-        myLoadingArchive = true;
-        try {
+        
+        myLoadingArchive = true;       
             // Find the first ArchiveResource in myDoc, should be <ArchiveResource>
             Element ar = (Element) myDoc.getDocumentElement().getFirstChild().getFirstChild();
             byte b[] = getElBytes(ar, "data");
             String topHtml = new String(b);
             String baseUrl = new String(getElBytes(ar, "url"));
             v.loadDataWithBaseURL(baseUrl, topHtml, "text/html", "UTF-8", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        
         return true;
     }
 

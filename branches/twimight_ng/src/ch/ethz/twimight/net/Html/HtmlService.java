@@ -23,15 +23,16 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.AsyncTask;
-import android.os.Debug;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.util.SDCardHelper;
 
 public class HtmlService extends Service {
@@ -44,11 +45,14 @@ public class HtmlService extends Service {
 	public static final String DOWNLOAD_REQUEST = "download_request";
 	private SDCardHelper sdCardHelper;
 	private HtmlPagesDbHelper htmlDbHelper;
-	WebView web ;
+	private int limit = 0;
+	
+	Cursor c = null;
+	
 
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+	public int onStartCommand(Intent intent, int flags, int startId) {		
 		
 		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected())			
@@ -56,7 +60,7 @@ public class HtmlService extends Service {
 		
 		if(intent != null){
 			
-			web = new WebView(getBaseContext());
+			
 			sdCardHelper = new SDCardHelper();
 			htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();			
@@ -104,9 +108,8 @@ public class HtmlService extends Service {
 		if((System.currentTimeMillis() - lastTime) < 1000*30){
 			return;
 		}
-		else{		
-
-			new Thread(new DownloadRunnable(forced)).start();
+		else{			
+			new CleanCacheDownload(forced).execute();					
 			
 		}
 		
@@ -121,6 +124,32 @@ public class HtmlService extends Service {
 		if(c.getCount() > 100){
 			htmlDbHelper.clearHtmlPages(1*24*3600*1000);
 		}
+	}
+	
+	
+	private class CleanCacheDownload extends AsyncTask<Void,Void,Void>{
+		boolean forced;
+		
+		public CleanCacheDownload(boolean forced) {
+			this.forced = forced;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			// TODO Auto-generated method stub
+			
+			checkCacheSize();				
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			downloadPages(forced);	
+		}
+		
+		
+		
 	}
 	
 	
@@ -179,85 +208,115 @@ public class HtmlService extends Service {
 	}
 	
 	
+	private class GetPagesTask extends AsyncTask<Void,Void,Void>{
+		
+        boolean forced;
+		
+		public GetPagesTask(boolean forced) {
+			this.forced = forced;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			// TODO Auto-generated method stub			
+			//download unsuccessfully downloaded pages			
+			cleanupMess();
+			c = htmlDbHelper.getUndownloadedHtmls(forced);	
+			if (c.getCount() > 0) {
+				c.moveToFirst();				
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void param) {		
+			storePage();			
+
+		}
+
+
+
+	}
+
+
 	private void downloadPages(boolean forced){
 		
-		setRecentDownloadedTime(System.currentTimeMillis(), getBaseContext());
+		setRecentDownloadedTime(System.currentTimeMillis(), getBaseContext());	
+		new GetPagesTask(forced).execute();	
 		
-		int downloadCount = 1;
-		cleanupMess();
-		//download unsuccessfully downloaded pages
-		Cursor c = null;
-		c = htmlDbHelper.getUndownloadedHtmls(forced);
-
-		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
-		{
-			if(downloadCount > 20) return;
+	}
+	
+	public void storePage() {
+		
+		if (c != null && c.getCount() > 0 && (!c.isAfterLast())) {
+			
+			limit++;
+			if (limit == 10) {limit = 0; return;}
+			
 			String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
-			
-			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));			
-			
+			String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));	
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(getApplicationContext())};
-				
+
 			if(sdCardHelper.checkSDState(filePath)){
 				
 				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl);
-				
-				switch(sdCardHelper.checkFileType(htmlUrl)){
-					case SDCardHelper.TYPE_XML:					
-						
-						Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
 
-						webDownload(htmlCV, webUri.getPath());
-						break;
-					case SDCardHelper.TYPE_PDF:
+				switch(sdCardHelper.checkFileType(htmlUrl)){
+				case SDCardHelper.TYPE_XML:						
 					
-						processFiles(htmlCV, "pdf");
-						break;
-					
-					case SDCardHelper.TYPE_JPG:
-						processFiles(htmlCV, "jpg");
-						break;
-						
-					case SDCardHelper.TYPE_PNG:
-						processFiles(htmlCV, "png");
-						break;	
-						
-					case SDCardHelper.TYPE_GIF:
-						processFiles(htmlCV, "gif");
-						break;
-						
-					case SDCardHelper.TYPE_MP3:
-						processFiles(htmlCV, "mp3");
-						break;
-					
-					case SDCardHelper.TYPE_FLV:
-						processFiles(htmlCV, "flv");
-						break;		
-						
-					case SDCardHelper.TYPE_RMVB:
-						processFiles(htmlCV, "rmvb");
-						break;
-					
-					case SDCardHelper.TYPE_MP4:
-						processFiles(htmlCV, "mp4");
-						break;
-						
-					default:
-						break;
-							
+					Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
+					webDownload(htmlCV, webUri.getPath());
+					break;
+				case SDCardHelper.TYPE_PDF:
+
+					processFiles(htmlCV, "pdf");
+					break;
+
+				case SDCardHelper.TYPE_JPG:
+					processFiles(htmlCV, "jpg");
+					break;
+
+				case SDCardHelper.TYPE_PNG:
+					processFiles(htmlCV, "png");
+					break;	
+
+				case SDCardHelper.TYPE_GIF:
+					processFiles(htmlCV, "gif");
+					break;
+
+				case SDCardHelper.TYPE_MP3:
+					processFiles(htmlCV, "mp3");
+					break;
+
+				case SDCardHelper.TYPE_FLV:
+					processFiles(htmlCV, "flv");
+					break;		
+
+				case SDCardHelper.TYPE_RMVB:
+					processFiles(htmlCV, "rmvb");
+					break;
+
+				case SDCardHelper.TYPE_MP4:
+					processFiles(htmlCV, "mp4");
+					break;
+
+				default:
+					break;
+
 				}
-				
-				
-					
-				downloadCount++;
 
 			}
-
-		}
-		c.close();
-		Log.d(TAG, "download finished");
+			c.moveToNext();
+			
+		} else if (c != null)
+			c.close();
+		
+		
 	}
-	
+
+
+
 	private void processFiles(ContentValues fileCV, String fileSuffix){
 		Log.i(TAG, "file type: " + fileSuffix);
 		int len = fileSuffix.length();
@@ -272,6 +331,7 @@ public class HtmlService extends Service {
 	 * correct download errors caused by network interrupt
 	 */
 	private void cleanupMess(){
+		
 		Cursor c = htmlDbHelper.getDownloadedHtmls();
 		for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext())
 		{
@@ -285,11 +345,12 @@ public class HtmlService extends Service {
 			switch(sdCardHelper.checkFileType(htmlUrl)){
 				case SDCardHelper.TYPE_XML:
 					if(sdCardHelper.checkSDState(filePath)){
+						
 	
 						File htmlPage = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 	
-						if(!htmlPage.exists() || htmlPage.length() < 4000){
-							Log.d(TAG, "update ###" + filename);
+						if(!htmlPage.exists() || (sdCardHelper.getFileFromSDCard(filePath[0], filename).length() < 10) ){
+							Log.i(TAG, "update ###" + filename);
 							htmlDbHelper.updatePage(htmlUrl, filename, tweetId, 0, forced, tries);
 						}	
 					}
@@ -299,55 +360,24 @@ public class HtmlService extends Service {
 			}
 		}
 	}
-	
-	
+
+
 	private boolean webDownload(ContentValues htmlCV, String filePath){
 		boolean result = true;
 		
-		new Thread(new WebRunnable(filePath, htmlCV)).start();
+		WebView web = new WebView(getBaseContext());
+		// TODO Auto-generated method stub				
+		web.setWebViewClient(new WebClientDownload(filePath, htmlCV));			
+		web.getSettings().setJavaScriptEnabled(true);
+		web.getSettings().setDomStorageEnabled(true);		
+		web.loadUrl(htmlCV.getAsString(HtmlPage.COL_URL));
 		
 		return result;
 	}
 	
-	private class WebRunnable implements Runnable{
-		
-		private String filePath;
-		private ContentValues htmlCV;		
-		
-		WebRunnable(String filePath, ContentValues htmlCV){
-			this.filePath = filePath;
-			this.htmlCV = htmlCV;
-			
-		}
-		
-		@Override
-		public void run() {
-			
-			// TODO Auto-generated method stub				
-			web.setWebViewClient(new WebClientDownload(filePath, htmlCV));			
-			web.getSettings().setJavaScriptEnabled(true);
-			web.getSettings().setDomStorageEnabled(true);
-			web.loadUrl(htmlCV.getAsString(HtmlPage.COL_URL));
-		}
-	}
+
 	
-	private class DownloadRunnable implements Runnable{	
-		
-		boolean forced;
-		
-		public DownloadRunnable(boolean forced) {
-			this.forced = forced;
-		}
-		
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub	
-			checkCacheSize();		
-			downloadPages(forced);		
-			
-		}
-	}
-	
+
 	/**
 	 * store the id for the tweets of which html pages have been downloaded
 	 * @param sinceId
@@ -378,8 +408,7 @@ public class HtmlService extends Service {
 	}
 	
 	
-
-
+	
 
 	//webview only to download webarchive
 	@SuppressLint("NewApi")
@@ -391,24 +420,47 @@ public class HtmlService extends Service {
 		private int forced;
 		private int tries;
 		private boolean loadingFailed;
+		
+		private class WebArchiveCallback implements ValueCallback<String> {
+
+			@Override
+			public void onReceiveValue(String str) {				
+				if (str == null)
+					htmlDbHelper.updatePage(baseUrl, filename, tweetId, 0, forced, tries);
+				else {			
+					
+					String basePath = HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(HtmlService.this);
+					Log.i(TAG, "length: " + sdCardHelper.getFileFromSDCard(basePath, filename).length() + " bytes");
+					if (sdCardHelper.getFileFromSDCard(basePath, filename).length() > 0) {
+						
+						htmlDbHelper.updatePage(baseUrl, filename, tweetId, 1, forced, tries);
+				        getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);			
+					} 			    	
+					
+				}				
+				storePage();
+				
+			}
+			
+		}
 
 		public WebClientDownload(String filePath, ContentValues htmlCV){
 			super();
 			this.filePath = filePath;
+			Log.i(TAG,filePath);
 			this.baseUrl = htmlCV.getAsString(HtmlPage.COL_URL);
 			this.filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
 			this.tweetId = htmlCV.getAsLong(HtmlPage.COL_TID);			
 			this.forced = htmlCV.getAsInteger(HtmlPage.COL_FORCED);
 			this.tries = htmlCV.getAsInteger(HtmlPage.COL_ATTEMPTS) + 1;
-			this.loadingFailed = false;
+			this.loadingFailed = false;			
 		}
 		
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favicon) {
 			// TODO Auto-generated method stub
-			if(htmlDbHelper.updatePage(baseUrl, filename, tweetId, 0, forced, tries)){
-				Log.d(TAG, "on page started");
-			}
+			htmlDbHelper.updatePage(baseUrl, filename, tweetId, 0, forced, tries);
+			Log.d(TAG, "on page started");			
 			super.onPageStarted(view, url, favicon);
 		}
 
@@ -437,11 +489,9 @@ public class HtmlService extends Service {
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			// TODO Auto-generated method stub
-			if(!loadingFailed){
-				view.saveWebArchive(filePath);
-				if(htmlDbHelper.updatePage(baseUrl, filename, tweetId, 1, forced, tries)){
-					Log.i(TAG, "onPageFinished and downloaded:" + url + " in " + filePath);
-				}
+			if(!loadingFailed){								
+				view.saveWebArchive(filePath, false , new WebArchiveCallback() );				
+				
 			}
 			else{
 				Log.d(TAG, "download failed" + url);
@@ -452,7 +502,7 @@ public class HtmlService extends Service {
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
 			// TODO Auto-generated method stub
 			view.loadUrl(url);
-			Log.d(TAG, baseUrl + "redirect to:" + url);
+			Log.d(TAG, baseUrl + " redirect to:" + url);
 			return true;
 		}	
 

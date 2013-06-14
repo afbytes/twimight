@@ -14,14 +14,18 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.text.Html;
+import android.os.AsyncTask;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,7 +49,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	static final String[] from = {TwitterUsers.COL_NAME};
 	static final int[] to = {R.id.textUser};	
 	private static final String TAG = "tweet adapter";
-	private HtmlPagesDbHelper htmlDbHelper;
+	private HtmlPagesDbHelper htmlDbHelper ;
+	private final Bitmap mPlaceHolderBitmap;
 	
 	
 	private static class ViewHolder {
@@ -60,19 +65,17 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView favoriteStar ;
 		LinearLayout rowLayout;
 		ImageView verifiedImage ;
+		long tweetId = -1;
 	
 		 
 		}
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {		
-		super(context, R.layout.row, c, from, to);  
+		super(context, R.layout.row, c, from, to); 
+		mPlaceHolderBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_profile);
 		
-	}
-	
-	
-
-  
+	}  
 
 
 	@Override
@@ -94,6 +97,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	}
 	
 	private void setHolderFields(View row, ViewHolder holder) {
+		
 		holder.usernameTextView = (TextView) row.findViewById(R.id.textUser);
 		holder.textCreatedAt = (TextView) row.findViewById(R.id.tweetCreatedAt);
 		holder.tweetText = (TextView) row.findViewById(R.id.textText);
@@ -130,7 +134,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		holder.textCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));		
 		// here, we don't want the entities to be clickable, so we use the standard tag handler
 		
-		holder.tweetText.setText(Html.fromHtml(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT))));
+		
+		holder.tweetText.setText(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
 		
 		boolean retweeted = false;
 		//add the retweet message in case it is a retweet
@@ -144,12 +149,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				retweeted = true;
 			}
 			else {
-				//textRetweeted_by.setText("");
+				
 				holder.textRetweeted_by.setVisibility(View.GONE);		
 			}
-		}
+		}		
 		
-			
+		long tweetId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID));	
+		
 		int col_html = cursor.getColumnIndex(Tweets.COL_HTML_PAGES);
 		if (col_html > -1) {
 			int hasHtml = cursor.getInt(col_html);
@@ -157,13 +163,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.splitBar.setVisibility(View.GONE);
 			holder.textHtml.setVisibility(View.GONE);
 			
-			if(hasHtml == 1){				
-				
-				int colTid = cursor.getColumnIndex(Tweets.COL_TID);
-				long tweetId = 0;
-				
-				if(colTid > -1){
-					tweetId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID));					
+			if(hasHtml == 1){		
+									
 					Cursor curHtml = htmlDbHelper.getUrlsByTweetId(tweetId);
 					
 					if (curHtml != null && curHtml.getCount() > 0) {					
@@ -191,31 +192,23 @@ public class TweetAdapter extends SimpleCursorAdapter {
 							holder.textHtml.setVisibility(View.VISIBLE);
 						}	
 					}	
-				}			
-				
-								
+											
 				
 			}
 			
 		}
-		// Profile image		
+		// Profile image				
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
 			
-			int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
-			Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userRowId);
-			InputStream is;
-			try {
-				is = context.getContentResolver().openInputStream(imageUri);
-				if (is != null) {						
-					Bitmap bm = BitmapFactory.decodeStream(is);
-					holder.picture.setImageBitmap(bm);	
-					
-				} else
-					holder.picture.setImageResource(R.drawable.default_profile);
-			} catch (Exception e) {
-				//Log.e(TAG,"error opening input stream",e);
+			
+			if (holder.tweetId == -1 || holder.tweetId != tweetId) {
 				holder.picture.setImageResource(R.drawable.default_profile);
-			}				
+				//holder.picture.setImageResource()
+				holder.tweetId = tweetId;
+				int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
+				Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userRowId);
+				loadBitmap(imageUri, holder.picture, context);	
+			}
 
 		} else {			
 			holder.picture.setImageResource(R.drawable.default_profile);
@@ -284,4 +277,112 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 	}
 	
+	public void loadBitmap(Uri uri, ImageView imageView, Context context) {
+	    if (cancelPotentialWork(uri, imageView)) {
+	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context, uri);	       
+	        final AsyncDrawable asyncDrawable =
+	                new AsyncDrawable(context.getResources(), mPlaceHolderBitmap, task);
+	        imageView.setImageDrawable(asyncDrawable);	
+	        task.execute();
+	    }
+	}
+	
+	class BitmapWorkerTask extends AsyncTask<AsyncDrawable, Void, Bitmap> {
+	    private final WeakReference<ImageView> imageViewReference;
+	    Context context;
+	    public Uri uri;
+	    AsyncDrawable asyncDrawable;
+
+	    public BitmapWorkerTask(ImageView imageView, Context context, Uri uri) {
+	        // Use a WeakReference to ensure the ImageView can be garbage collected
+	        imageViewReference = new WeakReference<ImageView>(imageView);
+	        this.context = context;
+	        this.uri = uri;
+	    }
+
+	    // Decode image in background.
+	    @Override
+	    protected Bitmap doInBackground(AsyncDrawable... params) {
+	        
+	    	//this.asyncDrawable = params[0];
+	    	InputStream is;
+			try {
+				is = context.getContentResolver().openInputStream(uri);
+				if (is != null) 						
+					return BitmapFactory.decodeStream(is);						
+				else
+					return null;					
+			} catch (Exception e) {
+				return null;
+				
+			}
+	    }
+
+	    // Once complete, see if ImageView is still around and set bitmap.
+	    @Override
+	    protected void onPostExecute(Bitmap bitmap) {
+	    	if (isCancelled()) {
+	            bitmap = null;
+	        }
+
+	    	if (imageViewReference != null ) {
+	    		final ImageView imageView = imageViewReference.get();
+	    		
+	    		final BitmapWorkerTask bitmapWorkerTask =
+	                    getBitmapWorkerTask(imageView);
+
+	    		if (bitmap != null) {	    			
+	    			if (this == bitmapWorkerTask && imageView != null) {
+	    				imageView.setImageBitmap(bitmap);
+	    			}
+	    		} 		
+
+	    	}
+	    }
+	}
+	
+	
+	static class AsyncDrawable extends BitmapDrawable {
+	    private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
+
+	    public AsyncDrawable(Resources res, Bitmap bitmap,
+	            BitmapWorkerTask bitmapWorkerTask) {
+	    	super(res, bitmap);
+	    	bitmapWorkerTaskReference =
+	    			new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+	    }
+
+	    public BitmapWorkerTask getBitmapWorkerTask() {
+	    	return bitmapWorkerTaskReference.get();
+	    }
+	}
+
+	private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
+		if (imageView != null) {
+			final Drawable drawable = imageView.getDrawable();
+			if (drawable instanceof AsyncDrawable) {
+				final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+				return asyncDrawable.getBitmapWorkerTask();
+			}
+		}
+		return null;
+	}
+	
+	public static boolean cancelPotentialWork(Uri uri, ImageView imageView) {
+	    final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+	    if (bitmapWorkerTask != null) {
+	        final Uri bitmapUri = bitmapWorkerTask.uri;
+	        if (bitmapUri.equals(uri)) {
+	            // Cancel previous task
+	            bitmapWorkerTask.cancel(true);
+	        } else 
+	            // The same work is already in progress
+	            return false;
+	        
+	    }
+	    // No task associated with the ImageView, or an existing task was cancelled
+	    return true;
+	}
+
 }

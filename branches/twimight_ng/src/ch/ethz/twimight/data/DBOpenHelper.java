@@ -45,7 +45,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_STATISTICS = "statistics";
 
 
-	private static final int DATABASE_VERSION = 50;
+	private static final int DATABASE_VERSION = 51;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -86,6 +86,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
 			+ ROW_ID + " integer primary key autoincrement not null, "
 			+ Tweets.COL_TEXT + " string not null, "
+			+ Tweets.COL_TEXT_PLAIN + " string not null, "
 			+ Tweets.COL_USER + " bigint, "
 			+ Tweets.COL_SCREENNAME+ " string, "
 			+ Tweets.COL_TID + " bigint unique, "
@@ -163,12 +164,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	// html pages 
 	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
 			+ HtmlPage.COL_PAGE_ID + " integer primary key autoincrement not null, "
-			+ HtmlPage.COL_URL + " string not null, "	
+			+ HtmlPage.COL_URL + " string unique not null, "	
 			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_TID +") ON DELETE CASCADE, "	
 			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
 			+ HtmlPage.COL_FORCED + " integer default 0, "
 			+ HtmlPage.COL_ATTEMPTS + " integer default 0, "
-			+ HtmlPage.COL_FILENAME + " string not null);";
+			+ HtmlPage.COL_FILENAME + " string unique not null);";
 	
 	/*
 	// html pages trackers

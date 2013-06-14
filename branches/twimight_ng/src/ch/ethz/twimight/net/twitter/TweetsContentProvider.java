@@ -176,7 +176,7 @@ public class TweetsContentProvider extends ContentProvider {
 			case TWEETS: 
 				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS");
 				c = database.query(DBOpenHelper.TABLE_TWEETS, projection, where, whereArgs, null, null, sortOrder);
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.ALL_TWEETS_URI);
 				break;
 			
 			case TWEETS_ID: 
@@ -187,6 +187,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_SOURCE + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -224,6 +225,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_SOURCE + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -250,7 +252,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "WHERE  " + DBOpenHelper.TABLE_TWEETS+"."+Tweets.COL_TEXT+" LIKE '%" + where + "%' "
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_SEARCH_URI);
 				
 				//start synch service with a synch timeline request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -268,6 +270,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RECEIVED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -291,7 +294,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ " LIMIT 5;";
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
 				
 				// start synch service with a synch timeline request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -305,6 +308,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RECEIVED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -330,7 +334,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 				c = database.rawQuery(sql, null);
 				// TODO: Correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
 				
 				// start synch service with a synch timeline request
 				//i = new Intent(TwitterService.SYNCH_ACTION);
@@ -345,6 +349,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 				    + DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RECEIVED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
@@ -369,7 +374,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER +";";
 
 				c = database.rawQuery(sql, null);				
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
 				
 				// start synch service with a synch timeline request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -393,8 +398,10 @@ public class TweetsContentProvider extends ContentProvider {
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
@@ -418,7 +425,7 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				//TODO: could be done be a separate thread
 				c = database.rawQuery(sql, null); 
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);			
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_USER_URI);			
 				
 
 				if(userCursor.getCount()>0){					
@@ -439,6 +446,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
@@ -462,7 +470,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 				
 				// start synch service with a synch favorites request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -477,6 +485,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FAVORITED + ", "
@@ -500,7 +509,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 				
 				// start synch service with a synch favorites request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -513,6 +522,7 @@ public class TweetsContentProvider extends ContentProvider {
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
@@ -538,7 +548,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 				
 				// start synch service with a synch favorites request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -551,6 +561,7 @@ public class TweetsContentProvider extends ContentProvider {
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
@@ -576,7 +587,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 				
 				// start synch service with a synch mentions request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -589,6 +600,7 @@ public class TweetsContentProvider extends ContentProvider {
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_CREATED + ", "
@@ -614,7 +626,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 				
 				// start synch service with a synch mentions request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -627,6 +639,7 @@ public class TweetsContentProvider extends ContentProvider {
 				sql = "SELECT "
 					+ DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_USER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_TID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MENTIONS + ", "					
@@ -652,7 +665,7 @@ public class TweetsContentProvider extends ContentProvider {
 				c = database.rawQuery(sql, null);
 				
 				// TODO: correct notification URI
-				c.setNotificationUri(getContext().getContentResolver(), Tweets.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 				
 				// start synch service with a synch mentions request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -946,7 +959,9 @@ public class TweetsContentProvider extends ContentProvider {
 		Log.d(TAG, "Delete TWEETS_ID");
 		
 		int nrRows = database.delete(DBOpenHelper.TABLE_TWEETS, "_id="+uri.getLastPathSegment(), null);
-		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+		getContext().getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);		
+		getContext().getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+		
 		return nrRows;
 	}
 	
@@ -976,7 +991,7 @@ public class TweetsContentProvider extends ContentProvider {
 		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "=0" , null);
 		Log.d(TAG,"deleted " + result + " tweets");		
 
-		getContext().getContentResolver().notifyChange(Tweets.CONTENT_URI, null);		
+		getContext().getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);		
 	}
 
 	/**
@@ -1104,7 +1119,7 @@ public class TweetsContentProvider extends ContentProvider {
 				
 				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);						
 				if(rowId >= 0){							
-					Uri insertUri = ContentUris.withAppendedId(Tweets.CONTENT_URI, rowId);
+					Uri insertUri = ContentUris.withAppendedId(Tweets.ALL_TWEETS_URI, rowId);
 					return insertUri;
 				} else {
 					 return null; 

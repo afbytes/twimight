@@ -135,7 +135,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				Log.d(TAG, "Query USERS_FOLLOWERS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				c.setNotificationUri(getContext().getContentResolver(), uri);
-				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_FOLLOWERS_URI);
 				
 				// start synch service with a synch followers request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -147,7 +147,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 				Log.i(TAG, "Query USERS_FRIENDS");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
 				Log.i(TAG,"cursor count: "+ c.getCount());
-				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.USERS_FRIENDS_URI);
 				c.setNotificationUri(getContext().getContentResolver(),uri);
 				// start synch service with a synch friends request
 				i = new Intent(TwitterService.SYNCH_ACTION);
@@ -158,14 +158,14 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			case USERS_DISASTER:
 				Log.d(TAG, "Query USERS_DISASTER");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISDISASTER_PEER+">0 AND "+TwitterUsers.COL_SCREENNAME+" IS NOT NULL", whereArgs, null, null, sortOrder);
-				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.USERS_DISASTER_URI);
 				break;
 				
 			case USERS_SEARCH:
 				Log.d(TAG, "Query USERS_SEARCH");
 				c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" IS NOT NULL" 
 						+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' OR " + TwitterUsers.COL_NAME + " LIKE '%" + where + "%' " , whereArgs, null, null, sortOrder);
-				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.CONTENT_URI);
+				c.setNotificationUri(getContext().getContentResolver(),TwitterUsers.USERS_SEARCH_URI);
 				
 				// start synch service with a synch followers request
 				i = new Intent(TwitterService.SYNCH_ACTION);

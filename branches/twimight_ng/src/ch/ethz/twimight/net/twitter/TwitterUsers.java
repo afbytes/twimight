@@ -35,16 +35,6 @@ public class TwitterUsers implements BaseColumns {
 	 * The twitter users
 	 */
 	public static final String TWITTERUSERS = "users";
-
-	/**
-	 *  URI to reference all twitter users
-	 */
-	public static final Uri TWITTERUSERS_URI = Uri.parse("content://" + TWITTERUSERS_AUTHORITY + "/" + TWITTERUSERS);
-	
-	/**
-	 * The content:// style URL
-	 */
-	public static final Uri CONTENT_URI = TWITTERUSERS_URI;
 	
 	
 	// MIME type definitions
@@ -130,6 +120,22 @@ public class TwitterUsers implements BaseColumns {
 	public static final int FLAG_TO_FOLLOW = 2;
 	public static final int FLAG_TO_UNFOLLOW = 4;
 	public static final int FLAG_TO_UPDATEIMAGE = 8;
+	
+	
+	/**
+	 *  URI to reference all twitter users
+	 */
+	private static final String BASE_URI = "content://" + TWITTERUSERS_AUTHORITY + "/" + TWITTERUSERS + "/";
+	public static final Uri TWITTERUSERS_URI = Uri.parse(BASE_URI);
+	
+	/**
+	 * The content:// style URL
+	 */
+	public static final Uri CONTENT_URI = TWITTERUSERS_URI;
+	public static final Uri USERS_FRIENDS_URI = Uri.parse(BASE_URI + COL_ISFRIEND);
+	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI +  COL_ISFOLLOWER );
+	public static final Uri USERS_SEARCH_URI = Uri.parse(BASE_URI + TWITTERUSERS_SEARCH );
+	public static final Uri USERS_DISASTER_URI = Uri.parse(BASE_URI + COL_ISDISASTER_PEER);
 
 
 	
