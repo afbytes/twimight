@@ -26,10 +26,7 @@ public class Tweets implements BaseColumns {
 	// This class cannot be instantiated
 	private Tweets(){ }
 
-	public static final String TWEET_AUTHORITY = "ch.ethz.twimight.Tweets"; /** authority part of the URI */
-	public static final String TWEETS = "tweets"; /** the tweets part of the URI */
-	public static final Uri TWEETS_URI = Uri.parse("content://" + TWEET_AUTHORITY + "/" + TWEETS); /** URI to reference all tweets */
-	public static final Uri CONTENT_URI = TWEETS_URI; /** the content URI */	
+	public static final String TWEET_AUTHORITY = "ch.ethz.twimight.Tweets"; /** authority part of the URI */	
 	
 	// MIME type definitions
 	public static final String TWEETS_CONTENT_TYPE = "vnd.android.cursor.dir/vnd.twimight.tweet"; /** the MIME type of a set of tweets */
@@ -40,18 +37,31 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_TABLE_FAVORITES = "favorites"; /** the favorites filter */
 	public static final String TWEETS_TABLE_MENTIONS = "mentions"; /** the mentions filter */
 	public static final String TWEETS_TABLE_USER = "user"; /** the mentions filter */
-	
+
 	public static final String TWEETS_SOURCE_NORMAL = "normal"; /** only normal tweets (no disaster tweets) */
 	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */
 	public static final String TWEETS_SOURCE_ALL = "all"; /** both, normal and disaster tweets */
 	public static final String TWEET_ID = "tweet_id"; /** a specific tweet */
 	public static final String SEARCH = "search"; /** a search request */
+
+	//URI for cursor notifications
+	public static final String TWEETS = "tweets"; /** the tweets part of the URI */
+	private static final String BASE_URI = "content://" + TWEET_AUTHORITY + "/";
+	public static final Uri ALL_TWEETS_URI = Uri.parse(BASE_URI + TWEETS); /** URI to reference all tweets */	
+	public static final Uri TABLE_TIMELINE_URI = Uri.parse(BASE_URI + TWEETS_TABLE_TIMELINE );  
+	public static final Uri TABLE_FAVORITES_URI = Uri.parse(BASE_URI + TWEETS_TABLE_FAVORITES );  
+	public static final Uri TABLE_MENTIONS_URI = Uri.parse(BASE_URI + TWEETS_TABLE_MENTIONS );  
+	public static final Uri TABLE_SEARCH_URI = Uri.parse(BASE_URI + SEARCH  );  
+	public static final Uri TABLE_USER_URI = Uri.parse(BASE_URI + TWEETS_TABLE_USER );  
+
+	
 	
 	//photo path
 	public static final String PHOTO_PATH = "twimight_photos";
-	
+
 	// here start the column names
 	public static final String COL_TEXT = "text"; /** the tweet text */
+	public static final String COL_TEXT_PLAIN = "text_plain"; /** the tweet html text */
 	public static final String COL_USER = "user_id"; /** the user id of the author */
 	public static final String COL_SCREENNAME = "user_screenname"; /** the user screenname of the author */
 	public static final String COL_TID = "t_id"; /** the "official" tweet ID from twitter */

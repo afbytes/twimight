@@ -2,12 +2,15 @@ package ch.ethz.twimight.activities;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.WebView;
@@ -17,6 +20,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.WebArchiveReader;
+import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.util.SDCardHelper;
 
 public class WebViewActivity extends Activity {
@@ -24,8 +28,63 @@ public class WebViewActivity extends Activity {
 	public static final String HTML_PAGE = "html_page";	
 	public static final String TAG = "WebViewActivity";
 	private SDCardHelper sdCardHelper;
-	private HtmlPagesDbHelper htmlDbHelper;
+	String url;
 	private ProgressDialog progressBar; 
+
+	private class ReadWebArchiveTask extends AsyncTask<InputStream,Void,Boolean>{
+
+		WebArchiveReader wr;
+		WebView web;
+		
+		public ReadWebArchiveTask(WebArchiveReader wr, WebView web) {
+			this.wr = wr;
+			this.web = web;
+		}
+
+		@Override
+		protected Boolean doInBackground(InputStream... params) {
+			// To read from a file instead of an asset, use:
+			// FileInputStream is = new FileInputStream(fileName);
+			InputStream is =  params[0];
+			if (wr.readWebArchive(is)) 
+				return true;
+			else
+				return false;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean success) {
+			if (success)
+				try {
+					wr.loadToWebView(web);
+				} catch (Exception e) {	
+					
+					markFaultyPage();
+					
+				}
+
+		}
+
+		private void markFaultyPage() {
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
+			htmlDbHelper.open();	
+			ContentValues cv = htmlDbHelper.getPageInfo(url);
+			htmlDbHelper.updatePage(url,
+									cv.getAsString(HtmlPage.COL_FILENAME),
+									cv.getAsLong(HtmlPage.COL_TID),
+									0,
+									cv.getAsInteger(HtmlPage.COL_FORCED),
+									cv.getAsInteger(HtmlPage.COL_ATTEMPTS));
+			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+			Toast.makeText(getBaseContext(), getString(R.string.faulty_page), Toast.LENGTH_LONG).show();
+			finish();
+			
+		}
+
+
+
+	}
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -33,65 +92,57 @@ public class WebViewActivity extends Activity {
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.webview);
-		Log.i(TAG,"inside on create");
+		
 		Intent intent = getIntent();
-		String tweetId = intent.getStringExtra("tweet_id");
-		Log.d("test1", tweetId);
-		String url = intent.getStringExtra("url");
-		String userId = intent.getStringExtra("user_id");
+		
+		url = intent.getStringExtra("url");	
 		String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
-		htmlDbHelper = new HtmlPagesDbHelper(this);
+
 		sdCardHelper = new SDCardHelper();
 		WebView web = (WebView) findViewById(R.id.webview);
 		web.getSettings().setJavaScriptEnabled(true);
-		web.getSettings().setDomStorageEnabled(true); //twitter api and youtube api hack
-		 
-        web.getSettings().setBuiltInZoomControls(true); //Enable Multitouch if supported
-        
-		if(sdCardHelper.checkSDState(filePath)){
-
-			htmlDbHelper.open();
-			String filename = htmlDbHelper.getPageInfo(url).getAsString(HtmlPage.COL_FILENAME);
-			Log.d(TAG, filename);
-			if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() && sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 500){
-				progressBar = ProgressDialog.show(this, getString(R.string.loading), url);
-				Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], filename));
-				Log.d(TAG, webUri.getPath());
-				try {
-		            FileInputStream is = new FileInputStream(webUri.getPath());
-		            WebArchiveReader wr = new WebArchiveReader() {
-		                protected void onFinished(WebView v) {
-		                    // we are notified here when the page is fully loaded.
-		                    Log.d(TAG, "load finished");
-		                    continueWhenLoaded(v);
-		                }
-		            };
-		            // To read from a file instead of an asset, use:
-		            // FileInputStream is = new FileInputStream(fileName);
-		            if (wr.readWebArchive(is)) {
-		                wr.loadToWebView(web);
-		            }
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
-			}
-			else{
-				Log.d(TAG, "file not exist:" + filename);
-				Toast.makeText(this, getString(R.string.file_not_exists), Toast.LENGTH_LONG).show();
-			}
-
-			
-		}
+		web.getSettings().setDomStorageEnabled(true); //twitter api and youtube api hack		 
+		web.getSettings().setBuiltInZoomControls(true); //Enable Multitouch if supported
 		
+
+		if(sdCardHelper.checkSDState(filePath)){		
+			
+			progressBar = ProgressDialog.show(this, getString(R.string.loading), url);
+			progressBar.setCancelable(true);
+			
+			Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], intent.getStringExtra("filename")));
+			Log.i(TAG, webUri.getPath());
+
+			try {
+
+				FileInputStream is = new FileInputStream(webUri.getPath());
+				WebArchiveReader wr = new WebArchiveReader() {
+					protected void onFinished(WebView v) {
+						// we are notified here when the page is fully loaded.
+						Log.d(TAG, "load finished");
+						continueWhenLoaded(v);
+					}
+				};
+				new ReadWebArchiveTask(wr, web).execute(is);
+				
+			} catch (IOException e) {			            
+			}
+			
+			
+
+
+		}
+
 	}
 	
+	
+
 	private void continueWhenLoaded(WebView webView) {
         Log.d(TAG, "Page from WebArchive fully loaded.");
         // If you need to set your own WebViewClient, do it here,
         // after the WebArchive was fully loaded:
        
-        webView.setWebViewClient(new WebClientView());
-        
+        webView.setWebViewClient(new WebClientView());      
 
         // Any other code we need to execute after loading a page from a WebArchive...
         if(progressBar.isShowing()){

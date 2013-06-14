@@ -37,7 +37,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.SearchRecentSuggestions;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -413,16 +412,22 @@ public class LoginActivity extends Activity implements OnClickListener{
 		public static void startAlarms(Context context) {
 			
 			// Start the alarm for communication with the TDS
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefTDSCommunication", Constants.TDS_DEFAULT_ON)==true){
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefTDSCommunication), 
+					Constants.TDS_DEFAULT_ON)==true){
+				
 				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 			}		
 			
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefDisasterMode), 
+					Constants.DISASTER_DEFAULT_ON)==true){
+				
 				new ScanningAlarm(context,false);
 			}		
 			
 			//start the twitter update alarm
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefRunAtBoot", Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){			
+			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefRunAtBoot), 
+					Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
+				
 				new TwitterAlarm(context,true);
 			}
 							

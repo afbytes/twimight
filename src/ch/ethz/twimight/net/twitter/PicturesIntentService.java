@@ -74,9 +74,12 @@ public class PicturesIntentService extends IntentService {
 		// insert pictures into DB
 		InsertProfileImagesParameters(cv);
 		// here, we have to notify almost everyone
+		
 		getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
-		getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
+		getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+		getContentResolver().notifyChange(Tweets.TABLE_MENTIONS_URI, null);
+		getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
+		
 
 	}
 

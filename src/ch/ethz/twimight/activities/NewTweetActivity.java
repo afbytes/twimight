@@ -435,7 +435,7 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 
 					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
 																+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 				} else {				
 					
 					// our own tweets go into the timeline buffer
@@ -443,7 +443,7 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 
 					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
 																Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 					//getContentResolver().notifyChange(insertUri, null);
 					ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 					if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
@@ -491,6 +491,7 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		ContentValues tweetContentValues = new ContentValues();
 		
 		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
+		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, text.getText().toString());
 		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
 		if (isReplyTo > 0) {

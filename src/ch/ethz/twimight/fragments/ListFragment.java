@@ -32,8 +32,7 @@ public abstract class ListFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {		
 		
-		super.onCreate(savedInstanceState);
-			
+		super.onCreate(savedInstanceState);			
 		resolver = getActivity().getContentResolver();		
 		
 	}

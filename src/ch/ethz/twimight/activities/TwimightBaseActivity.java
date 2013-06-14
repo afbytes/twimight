@@ -260,12 +260,14 @@ public class TwimightBaseActivity extends FragmentActivity{
 			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();	
 			htmlDbHelper.saveLinksFromCursor(cursor,HtmlPagesDbHelper.DOWNLOAD_FORCED);
+			
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void params){
 			StartServiceHelper.startService(getApplicationContext());
+			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);		
 		}
 	}
 	

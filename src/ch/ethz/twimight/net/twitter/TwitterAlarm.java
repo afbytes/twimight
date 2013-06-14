@@ -43,7 +43,7 @@ public class TwitterAlarm extends BroadcastReceiver {
 	public TwitterAlarm(Context context, boolean isLogin) {	
 		
 	    AlarmManager alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-		isLogin=isLogin;
+		this.isLogin=isLogin;
 		intent = new Intent(context, TwitterAlarm.class);		
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);	
 		

@@ -9,15 +9,12 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.text.Html;
-import android.text.SpannableString;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService.LinksParser;
 import ch.ethz.twimight.util.SDCardHelper;
-import ch.ethz.twimight.util.TweetTagHandler;
 
 public class HtmlPagesDbHelper {
 	
@@ -82,11 +79,10 @@ public class HtmlPagesDbHelper {
 			
 			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 				
-				String rawText = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
-				SpannableString str = new SpannableString(Html.fromHtml(rawText, null, new TweetTagHandler(context)));
-				Log.i(TAG,str.toString());
+				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT_PLAIN));				
 				Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
-				insertLinksIntoDb(str.toString(),tid, type);
+				
+				insertLinksIntoDb(text,tid, type);
 			}
 		}
 	}
@@ -115,6 +111,7 @@ public class HtmlPagesDbHelper {
 	public boolean updatePage(String url, String filename, long tweetId, int downloaded, int forced, int tries){
 		
 		ContentValues cv = createContentValues(url,filename, tweetId, downloaded, forced, tries);
+		
 		Log.d(TAG, "update an entry:" + cv.toString());
 		String sql = HtmlPage.COL_URL + " = '" + url +"' ";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
@@ -156,9 +153,10 @@ public class HtmlPagesDbHelper {
 		
 			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"'" , null, null, null, null);
 			
-			c.moveToFirst();			
-			if(c.getCount() == 0)return null;		
+				
+			if(c == null || c.getCount() == 0) return null;		
 			
+			c.moveToFirst();		
 			ContentValues htmlCV = createContentValues(c.getString(c.getColumnIndex(HtmlPage.COL_URL)),
 					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
 					c.getLong(c.getColumnIndex(HtmlPage.COL_TID)),				
@@ -188,7 +186,7 @@ public class HtmlPagesDbHelper {
 	 */
 	public Cursor getNewTweets(Long timestamp){
 		
-		String[] cols = {Tweets.COL_TEXT, Tweets.COL_TID, Tweets.COL_USER};
+		String[] cols = {Tweets.COL_TEXT_PLAIN, Tweets.COL_TID, Tweets.COL_USER};
 		String sql = Tweets.COL_RECEIVED + "> '" + String.valueOf(timestamp) +"' and " + Tweets.COL_HTML_PAGES + " = '" + String.valueOf(1) + "'";
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, cols, sql, null, null, null, null);
 		return c;
@@ -198,8 +196,7 @@ public class HtmlPagesDbHelper {
 	 * get undownloaded pages
 	 * @return
 	 */
-	public Cursor getUndownloadedHtmls(boolean forced){
-		Log.d(TAG, "get undownloaded htmls");
+	public Cursor getUndownloadedHtmls(boolean forced){		
 		String sql = null;
 		if(forced){
 			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_FORCED + " = '" 

@@ -64,6 +64,7 @@
 	<string name="loading">Loading</string>	
 	<string name="file_not_exists">File does not exist</string>	
 	<string name="loading_finished">Loading finished.</string>
+	<string name="faulty_page">The page is corrupted. It will downloaded again shortly</string>
 	<string name="no_valid_pdf">No valid application for viewing pdf files</string>
     <string name="no_valid_pictures">No valid application for viewing pictures</string>
     <string name="no_valid_audio">No valid application for playing audio files</string>

@@ -148,7 +148,7 @@ public class LocationHelper {
 			if ((lm != null) && (locationListener != null)) {
 				
 		        lm.removeUpdates(locationListener);
-		        Log.i(TAG, "unregistered updates");
+		        
 		    }
 		} catch(IllegalArgumentException e) {
 			Log.i(TAG,"Can't unregister location listener: " + e.toString());

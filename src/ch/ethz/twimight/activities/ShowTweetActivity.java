@@ -42,8 +42,7 @@ public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDe
 			ShowTweetPageAdapter pageAdapter = new ShowTweetPageAdapter(getFragmentManager(), rowIdList );		
 			viewPager = (ViewPager) findViewById(R.id.viewpager);			
 			viewPager.setAdapter(pageAdapter);
-			viewPager.setOffscreenPageLimit(2);
-			Log.i("ShowTweetActivity","index: " + rowIdList.indexOf(rowId));
+			viewPager.setOffscreenPageLimit(2);			
 			viewPager.setCurrentItem(rowIdList.indexOf(rowId));
 		}
 			

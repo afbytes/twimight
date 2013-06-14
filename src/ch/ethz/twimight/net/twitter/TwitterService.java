@@ -152,7 +152,7 @@ public class TwitterService extends Service {
 
 			if (intent != null) {
 				// check what we are asked to synch
-				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);	
+				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);				
 				
 				switch(synchRequest){
 				
@@ -165,14 +165,14 @@ public class TwitterService extends Service {
 				case SYNCH_VERIFY:
 					synchVerify();
 					break;
-				case SYNCH_ALL:										
-					
-					if (!intent.hasExtra("isLogin")) {
+				case SYNCH_ALL:					
+					if (!intent.hasExtra("isLogin")) {						
 						synchTimeline(intent);
 						synchMentions(intent.getBooleanExtra(FORCE_FLAG, false));									
 						synchMessages();
 						synchTransactional();	
 					} else {
+						 Log.i(TAG,"is Login");
 						 Handler handler = new Handler();
 						 handler.postDelayed(new GetFriendsFollowersDelayed( ), Constants.FRIENDS_FOLLOWERS_DELAY );
 					}					
@@ -1101,7 +1101,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		if (scrName != null) {			
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
-
+		
+		cv.put(Tweets.COL_TEXT_PLAIN, tweet.getText());
 		String tweetSpanText = createSpans(tweet).getText();
 		cv.put(Tweets.COL_TEXT, tweetSpanText);
 		
@@ -1488,6 +1489,8 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
 			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
 				
+			    boolean isFirstRound =true;
+			    
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();						
@@ -1499,13 +1502,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						
 					} 					
 					if (cv.size() == 5) {						
-						insertDataAndNotify(cv,users);		
+						insertDataAndNotify(cv,users,isFirstRound, Tweets.TABLE_MENTIONS_URI);		
 					    cv.clear();
-					    users.clear();												
+					    users.clear();	
+					    isFirstRound = false;
 					}
 				}
 				if (cv.size() > 0) {
-					insertDataAndNotify(cv,users);		
+					insertDataAndNotify(cv,users,isFirstRound,Tweets.TABLE_MENTIONS_URI);		
 				}
 
 				// save the id of the last tweet for future timeline synchs
@@ -1521,7 +1525,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);
-			//getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.TABLE_MENTIONS_URI, null);
 			setTaskExecuted(TwitterService.TASK_MENTIONS, TwitterService.this);
 		}
 
@@ -1599,6 +1603,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
 			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
 				
+			    boolean isFirstRound =true;
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null)
 						lastId = tweet.getId();
@@ -1609,13 +1614,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 						
 					} 					
 					if (cv.size()==4) {
-						insertDataAndNotify(cv,users);						
+						insertDataAndNotify(cv,users,isFirstRound,Tweets.TABLE_FAVORITES_URI);						
 					    cv.clear();
-					    users.clear();											
+					    users.clear();
+					    isFirstRound = false;
 					}
 				}
 				if (cv.size() > 0) {
-					insertDataAndNotify(cv,users);		
+					insertDataAndNotify(cv,users,isFirstRound,Tweets.TABLE_FAVORITES_URI);		
 				}
 
 				// save the id of the last tweet for future timeline synchs
@@ -1633,20 +1639,20 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
 		}
 
 	}
 	
 	private void insertDataAndNotify(ArrayList<ContentValues> cv,
-			ArrayList<ContentValues> users) {			
+			ArrayList<ContentValues> users, boolean isFirstRound, Uri notify) {			
 		
 		updateTweets( cv.toArray(new ContentValues[0]) );
 		if (users.size()>0) {			
 			updateUsers( users.toArray(new ContentValues[0]) );
 			new SynchTransactionalUsersTask(true).execute(false);
 		}
-		getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+		if (isFirstRound) getContentResolver().notifyChange(notify, null);
 		
 		
 	}
@@ -1762,6 +1768,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
 			    ArrayList<ContentValues> allUsers = new ArrayList<ContentValues>();	
 			    
+			    boolean firstRound = true;
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					if(lastId == null) {
 						lastId = tweet.getId();						
@@ -1789,14 +1796,15 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					cv.add( getTweetContentValues(tweet,ret_screenName, Tweets.BUFFER_TIMELINE) );												
 
 					if (cv.size() == 5) {						
-						insertDataAndNotify(cv,users);		
+						insertDataAndNotify(cv,users,firstRound, Tweets.TABLE_TIMELINE_URI);		
 						cv.clear();
-						users.clear();											
+						users.clear();
+						firstRound = false;
 					}					
 				}
 				
 				if (cv.size() > 0) {
-					insertDataAndNotify(cv,users);		
+					insertDataAndNotify(cv,users,firstRound, Tweets.TABLE_TIMELINE_URI);		
 				}
 				
 				// save the id of the last tweet for future timeline synchs
@@ -1814,7 +1822,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		@Override
 		protected void onPostExecute(Void params){
 			ShowTweetListActivity.setLoading(false);	
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 			
 			StartServiceHelper.startService(TwitterService.this);
 
@@ -1925,7 +1933,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					
 					if (i == 5) {	
 						updateTweets( cv.toArray(new ContentValues[0]) );						
-						getContentResolver().notifyChange(Tweets.CONTENT_URI, null);						
+						getContentResolver().notifyChange(Tweets.TABLE_USER_URI, null);						
 						cv.clear();
 						i=0;
 					}
@@ -1934,7 +1942,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				if (cv.size() > 0) {
 					updateTweets( cv.toArray(new ContentValues[0]));
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);	
+					getContentResolver().notifyChange(Tweets.TABLE_USER_URI, null);	
 				}
 			}			
 					
@@ -2066,6 +2074,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
 			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();				
 			   
+			    boolean isFirstRound =true; 
 				for (winterwell.jtwitter.Status tweet: tweetList) {
 					
 					
@@ -2082,13 +2091,14 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 					} 
 					i++;
 					if (i == 5) {						
-						insertDataAndNotify(cv,users);		
+						insertDataAndNotify(cv,users,isFirstRound,Tweets.TABLE_SEARCH_URI);		
 					    cv.clear();
 					    users.clear();
 						i=0;
+						isFirstRound = false;
 					}
 				}
-				insertDataAndNotify(cv,users);	
+				insertDataAndNotify(cv,users,isFirstRound,Tweets.TABLE_SEARCH_URI);	
 				 
 			}					
 			SearchableActivity.setLoading(false);
@@ -2127,7 +2137,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 
 				if (users.size()==5) {
 					updateUsers( users.toArray(new ContentValues[0]) );
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					getContentResolver().notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
 					new SynchTransactionalUsersTask(true).execute(false);
 					users.clear();					
 				}			
@@ -2135,7 +2145,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 			if (users.size()>0) {
 				updateUsers( users.toArray(new ContentValues[0]) );
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				getContentResolver().notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
 				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
@@ -2298,7 +2308,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				if (users.size()==5) {
 					updateUsers( users.toArray(new ContentValues[0]) );
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					getContentResolver().notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
 					new SynchTransactionalUsersTask(true).execute(false);
 					users.clear();					
 				}
@@ -2306,7 +2316,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			}
 			if (users.size()>0) {
 				updateUsers( users.toArray(new ContentValues[0]) );
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				getContentResolver().notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
 				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
@@ -2467,7 +2477,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				if (users.size()==5){
 					updateUsers( users.toArray(new ContentValues[0]) );
-					getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+					getContentResolver().notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
 					new SynchTransactionalUsersTask(true).execute(false);
 					users.clear();					
 				}
@@ -2476,7 +2486,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			if (users.size()>0) {
 				
 				updateUsers( users.toArray(new ContentValues[0]) );
-				getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+				getContentResolver().notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
 				new SynchTransactionalUsersTask(true).execute(false);
 			}
 			return null;
@@ -2528,7 +2538,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 				buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 
-				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT_PLAIN));
 				mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 				String mediaUrl =  null;
 				
@@ -3620,7 +3630,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 		protected void onPostExecute(Void params){
 			// here, we have to notify almost everyone
 			getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-			getContentResolver().notifyChange(Tweets.CONTENT_URI, null);
+			getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 			getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 			
 			ShowUserActivity.setLoading(false);
