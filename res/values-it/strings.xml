@@ -49,6 +49,8 @@
 	<string name="loading_finished">Caricamento completato</string>
 	<string name="downloaded">Scaricata</string>
     <string name="downloading">Download in corso</string>
+    <string name="faulty_page">La pagina è corrotta. Verrà scaricata nuovamente al più presto </string>
+    
     <!-- TO BE TRANSLATED -->
     <string name="no_valid_pdf">No valid application for viewing pdf files</string>
     <string name="no_valid_pictures">No valid application for viewing pictures</string>

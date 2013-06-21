@@ -467,7 +467,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 				TwitterService.setMentionsSinceId(null, context);
 				TwitterService.setLastMentionsUpdate(null, context);
 				TwitterService.setTimelineSinceId(null, context);
-				TwitterService.setLastTimelineUpdate(null, context);
+				TwitterService.setLastTimelineUpdate(0, context);
 				TwitterService.setLastFriendsUpdate(null, context);
 				TwitterService.setLastFollowerUpdate(null, context);
 				TwitterService.setLastDMsInUpdate(null, context);

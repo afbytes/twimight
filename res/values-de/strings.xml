@@ -51,6 +51,7 @@
 	<string name="downloaded">Gespeichert</string>
     <string name="downloading">Wird geladen</string>
      <!-- TO BE TRANSLATED -->
+     	<string name="faulty_page">The page is corrupted. It will downloaded again shortly</string>
     <string name="no_valid_pdf">No valid application for viewing pdf files</string>
     <string name="no_valid_pictures">No valid application for viewing pictures</string>
     <string name="no_valid_audio">No valid application for playing audio files</string>

@@ -43,6 +43,8 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_SOURCE_ALL = "all"; /** both, normal and disaster tweets */
 	public static final String TWEET_ID = "tweet_id"; /** a specific tweet */
 	public static final String SEARCH = "search"; /** a search request */
+	public static final String TWEETS_SINCE_LAST_UPDATE = "tweetsSinceLastUpdate"; /** new tweets received */
+
 
 	//URI for cursor notifications
 	public static final String TWEETS = "tweets"; /** the tweets part of the URI */

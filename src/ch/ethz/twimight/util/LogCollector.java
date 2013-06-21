@@ -25,7 +25,7 @@ public static void setUpCrittercism(Context context) {
 		//binding twitter id to user screenName and sending it to the log server
 		if (LoginActivity.hasTwitterId(context)) {
 			
-			Crittercism.setUsername(LoginActivity.getTwitterId(context));
+			//Crittercism.setUsername(LoginActivity.getTwitterId(context));
 			
 			// instantiate metadata json object
 			JSONObject metadata = new JSONObject();
@@ -76,7 +76,7 @@ public static void setUpCrittercism(Context context) {
 		    crittercismConfig.put("customVersionName", version);
 		    crittercismConfig.put("shouldCollectLogcat", true);
 		}
-		catch (JSONException je){}
+		catch (JSONException je){ return null;}
 		return crittercismConfig;
 	}
 	

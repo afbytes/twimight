@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.util.LogCollector;
 
 public class ConditionsActivity extends Activity {
 	

@@ -37,6 +37,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.LogCollector;
@@ -251,12 +252,12 @@ public class TwimightBaseActivity extends FragmentActivity{
 	private class CacheTask extends AsyncTask<Void, Void, Void>{
 
 		@Override
-		protected Void doInBackground(Void... params) {
-
+		protected Void doInBackground(Void... params) {			
+			
 			// TODO Auto-generated method stub	
 			ContentResolver resolver = getContentResolver();	
 			Cursor cursor = resolver.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" 
-					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL), null, null, null, null);
+					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SINCE_LAST_UPDATE), null, null, null, null);
 			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();	
 			htmlDbHelper.saveLinksFromCursor(cursor,HtmlPagesDbHelper.DOWNLOAD_FORCED);

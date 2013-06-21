@@ -6,8 +6,8 @@ import java.io.InputStream;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -30,6 +30,7 @@ public class WebViewActivity extends Activity {
 	private SDCardHelper sdCardHelper;
 	String url;
 	private ProgressDialog progressBar; 
+	Uri webUri;
 
 	private class ReadWebArchiveTask extends AsyncTask<InputStream,Void,Boolean>{
 
@@ -58,9 +59,8 @@ public class WebViewActivity extends Activity {
 				try {
 					wr.loadToWebView(web);
 				} catch (Exception e) {	
-					
-					markFaultyPage();
-					
+					//Log.e(TAG,"faulty page",e);
+					markFaultyPage();					
 				}
 
 		}
@@ -68,14 +68,14 @@ public class WebViewActivity extends Activity {
 		private void markFaultyPage() {
 			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();	
-			ContentValues cv = htmlDbHelper.getPageInfo(url);
+			Cursor c = htmlDbHelper.getPageInfo(url);			
+			sdCardHelper.deleteFile(webUri.getPath());
 			htmlDbHelper.updatePage(url,
-									cv.getAsString(HtmlPage.COL_FILENAME),
-									cv.getAsLong(HtmlPage.COL_TID),
-									0,
-									cv.getAsInteger(HtmlPage.COL_FORCED),
-									cv.getAsInteger(HtmlPage.COL_ATTEMPTS));
-			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+									null,
+									c.getLong(c.getColumnIndex(HtmlPage.COL_TID)),									
+									c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED)),
+									c.getInt(c.getColumnIndex(HtmlPage.COL_ATTEMPTS)));
+			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);		
 			Toast.makeText(getBaseContext(), getString(R.string.faulty_page), Toast.LENGTH_LONG).show();
 			finish();
 			
@@ -110,7 +110,7 @@ public class WebViewActivity extends Activity {
 			progressBar = ProgressDialog.show(this, getString(R.string.loading), url);
 			progressBar.setCancelable(true);
 			
-			Uri webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], intent.getStringExtra("filename")));
+		    webUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], intent.getStringExtra("filename")));
 			Log.i(TAG, webUri.getPath());
 
 			try {

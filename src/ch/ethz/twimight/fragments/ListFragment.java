@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ public abstract class ListFragment extends Fragment {
 	ListAdapter adapter;
 	//String query;
 	TweetListView list;
+	protected static final String TAG = "ListFragment";
 	
 	public static final String FRAGMENT_TYPE = "fragment_type";	
 	public static final String SEARCH_QUERY = "search_query";
@@ -42,7 +44,7 @@ public abstract class ListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 		
-		
+		Log.i(TAG,"onCreateView");
         // Inflate the layout for this fragment	
 	    View view = inflater.inflate(R.layout.fragment_layout, container, false);
 		list = (TweetListView) view.findViewById(R.id.tweetListView);

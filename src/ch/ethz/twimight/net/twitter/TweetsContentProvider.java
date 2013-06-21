@@ -24,6 +24,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -60,6 +61,8 @@ public class TweetsContentProvider extends ContentProvider {
 	private DBOpenHelper dbHelper;
 	private String localScreenName;
 	
+	private static final String LAST_CACHE_ALL_PAGES = "lastCacheAllPages";
+	
 	private static UriMatcher tweetUriMatcher;
 		
 	private static final int TWEETS = 1;
@@ -69,6 +72,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private static final int TWEETS_TIMELINE_NORMAL = 4;
 	private static final int TWEETS_TIMELINE_DISASTER = 5;
 	private static final int TWEETS_TIMELINE_ALL = 6;
+	private static final int TWEETS_TIMELINE_NEW = 7;
 	
 
 	private static final int TWEETS_FAVORITES_NORMAL = 8;
@@ -99,6 +103,7 @@ public class TweetsContentProvider extends ContentProvider {
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL, TWEETS_TIMELINE_NORMAL);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER, TWEETS_TIMELINE_DISASTER);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_ALL, TWEETS_TIMELINE_ALL);
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SINCE_LAST_UPDATE, TWEETS_TIMELINE_NEW);
 
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_NORMAL, TWEETS_FAVORITES_NORMAL);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_FAVORITES + "/" + Tweets.TWEETS_SOURCE_DISASTER, TWEETS_FAVORITES_DISASTER);
@@ -158,6 +163,26 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 	}
 	
+	/**
+	 * Reads the timestamp of the last timeline update from shared preferences.
+	 * @return
+	 */
+	public static long getLastCacheAllPages(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getLong(LAST_CACHE_ALL_PAGES, 0);
+	}
+
+	/**
+	 * Stores the current timestamp as the time of last timeline update
+	 */
+	public static void setLastCacheAllPages(Context context) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor prefEditor = prefs.edit();		
+		prefEditor.putLong(LAST_CACHE_ALL_PAGES, System.currentTimeMillis());
+		
+		prefEditor.commit();
+	}
+	
 	 
 
 	/**
@@ -173,6 +198,15 @@ public class TweetsContentProvider extends ContentProvider {
 		String sql;
 		Intent i;
 		switch(tweetUriMatcher.match(uri)){
+		
+		    case TWEETS_TIMELINE_NEW:		    	
+		    	long timestamp = getLastCacheAllPages(getContext());
+		    	sql = Tweets.COL_RECEIVED + "> " + timestamp +" and " + Tweets.COL_HTML_PAGES + " = " + 1 ;
+				c = database.query(DBOpenHelper.TABLE_TWEETS, null, sql, null, null, null, null);
+				setLastCacheAllPages(getContext());
+				
+			break;
+			
 			case TWEETS: 
 				if (TwimightBaseActivity.D) Log.d(TAG, "Query TWEETS");
 				c = database.query(DBOpenHelper.TABLE_TWEETS, projection, where, whereArgs, null, null, sortOrder);
