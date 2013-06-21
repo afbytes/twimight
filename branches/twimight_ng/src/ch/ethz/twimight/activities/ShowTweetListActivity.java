@@ -63,6 +63,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public static final String FILTER_REQUEST = "filter_request";
 
 	ViewPager viewPager;
+	ListViewPageAdapter pagAdapter;
 	
 	/** 
 	 * Called when the activity is first created. 
@@ -71,7 +72,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);				
 		setContentView(R.layout.main);
-		
+		Log.i(TAG,"calling on create");
 
 		//statistics
 		locDBHelper = new StatisticsDBHelper(getApplicationContext());
@@ -89,8 +90,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		
 		Bundle bundle = new Bundle();
 		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
-		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
-        viewPager = (ViewPager)  findViewById(R.id.viewpager);			
+		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
+        
+		viewPager = (ViewPager)  findViewById(R.id.viewpager);			
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
 		viewPager.setOnPageChangeListener(
@@ -226,8 +228,10 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
-		running = false;	
-	
+		running = false;
+		pagAdapter = null;
+		viewPager = null;
+		Log.i(TAG,"destroying main activity");
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
 				cm.getActiveNetworkInfo() != null) {
 			

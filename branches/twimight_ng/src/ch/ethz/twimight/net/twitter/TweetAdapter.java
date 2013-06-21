@@ -137,6 +137,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		holder.tweetText.setText(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
 		
+		
 		boolean retweeted = false;
 		//add the retweet message in case it is a retweet
 		int col = cursor.getColumnIndex(Tweets.COL_RETWEETED_BY);
@@ -162,45 +163,46 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			
 			holder.splitBar.setVisibility(View.GONE);
 			holder.textHtml.setVisibility(View.GONE);
-			
-			if(hasHtml == 1){		
-									
-					Cursor curHtml = htmlDbHelper.getUrlsByTweetId(tweetId);
-					
-					if (curHtml != null && curHtml.getCount() > 0) {					
 
-						//if webpages have been downloaded
-						int text =0;
+			if(hasHtml == 1){				
+
+				Cursor curHtml = htmlDbHelper.getTweetUrls(tweetId);
+
+				if (curHtml != null && curHtml.getCount() > 0) {		
+
+					//if webpages have been downloaded
+					int text =0;
+
+					if(retweeted){						
+						holder.splitBar.setText("|");						
+						holder.splitBar.setVisibility(View.VISIBLE);
+					}
+
+					if (!htmlDbHelper.allPagesStored(curHtml)) {							
 						
-						if(retweeted){						
-							holder.splitBar.setText("|");						
-							holder.splitBar.setVisibility(View.VISIBLE);
-						}
+						text = R.string.downloading;
+						holder.textHtml.setTextColor(Color.parseColor("#9ea403"));
+					} else {
 						
-						if (!allPagesStored(curHtml)) {							
+						text = R.string.downloaded;
+						holder.textHtml.setTextColor(Color.parseColor("#1d8a04"));
 
-							text = R.string.downloading;
-							holder.textHtml.setTextColor(Color.parseColor("#9ea403"));
-						} else {
-							text = R.string.downloaded;
-							holder.textHtml.setTextColor(Color.parseColor("#1d8a04"));
+					}
 
-						}
-
-						if (text != 0) {
-							holder.textHtml.setText(context.getString(text));
-							holder.textHtml.setVisibility(View.VISIBLE);
-						}	
+					if (text != 0) {
+						holder.textHtml.setText(context.getString(text));
+						holder.textHtml.setVisibility(View.VISIBLE);
 					}	
-											
-				
+				}	
+
+
 			}
-			
+
 		}
 		// Profile image				
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
-			
-			
+
+
 			if (holder.tweetId == -1 || holder.tweetId != tweetId) {
 				holder.picture.setImageResource(R.drawable.default_profile);
 				//holder.picture.setImageResource()
@@ -260,26 +262,11 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.verifiedImage.setVisibility(ImageView.GONE);
 		}
 		
-	}
-
-
-
-
-
-
-	private boolean allPagesStored(Cursor curHtml) {
-		for(curHtml.moveToFirst(); !curHtml.isAfterLast(); curHtml.moveToNext()) {
-			
-			if ( curHtml.getInt(curHtml.getColumnIndex(HtmlPage.COL_DOWNLOADED)) ==0  )
-				return false;
-		}
-		return true;
-		
-	}
+	}	
 	
 	public void loadBitmap(Uri uri, ImageView imageView, Context context) {
 	    if (cancelPotentialWork(uri, imageView)) {
-	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context, uri);	       
+	        final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context, uri);	        
 	        final AsyncDrawable asyncDrawable =
 	                new AsyncDrawable(context.getResources(), mPlaceHolderBitmap, task);
 	        imageView.setImageDrawable(asyncDrawable);	
@@ -303,7 +290,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	    // Decode image in background.
 	    @Override
 	    protected Bitmap doInBackground(AsyncDrawable... params) {
-	        
+	        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 	    	//this.asyncDrawable = params[0];
 	    	InputStream is;
 			try {

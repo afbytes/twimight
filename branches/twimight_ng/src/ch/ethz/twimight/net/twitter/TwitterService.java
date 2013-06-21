@@ -275,25 +275,25 @@ public class TwitterService extends Service {
 		protected void onPostExecute(Cursor c) {
 			synchUser(c,true);
 			c.close();
-			
+
 		}
 	}
-	
-private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {	
-		
+
+	private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {	
+
 
 		@Override
 		protected Cursor doInBackground(Long... params) {
-			
+
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+params[0]);
 			Cursor c = null;					
 			c = getContentResolver().query(queryUri, null, null, null, null);
-			
+
 			if(c.getCount() == 1){
 				c.moveToFirst();
 				return c;				
 			}				
-				
+
 			return null;			
 		}
 
@@ -304,16 +304,16 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			if(c!=null) c.close();	
 		}
 	}	
-	
+
 	private class GetFriendsFollowersDelayed implements Runnable {
 		@Override
 		public void run() {
 			synchFriends(FALSE);
-		    synchFollowers(FALSE);
+			synchFollowers(FALSE);
 		}
 	}
-	
-	
+
+
 
 	public static void setTaskExecuted(String which, Context context){
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -756,13 +756,11 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 	/**
 	 * Stores the current timestamp as the time of last timeline update
 	 */
-	public static void setLastTimelineUpdate(Date date, Context context) {
+	public static void setLastTimelineUpdate(long timestamp, Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor prefEditor = prefs.edit();
-		if(date!=null)
-			prefEditor.putLong("timelineLastUpdate", date.getTime());
-		else
-			prefEditor.putLong("timelineLastUpdate", 0);
+		SharedPreferences.Editor prefEditor = prefs.edit();		
+		prefEditor.putLong("timelineLastUpdate", timestamp);
+		
 		prefEditor.commit();
 	}
 
@@ -1102,9 +1100,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			cv.put(Tweets.COL_RETWEETED_BY,scrName);
 		}
 		
-		cv.put(Tweets.COL_TEXT_PLAIN, tweet.getText());
+		
 		String tweetSpanText = createSpans(tweet).getText();
 		cv.put(Tweets.COL_TEXT, tweetSpanText);
+		cv.put(Tweets.COL_TEXT_PLAIN, Html.fromHtml(tweetSpanText).toString()  );
 		
 		String tweetText = Html.fromHtml(tweetSpanText).toString();
 		//if there are urls to this tweet, change the status of html field to 1
@@ -1763,6 +1762,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null; 
+				long timestamp = System.currentTimeMillis();
 				
 			    ArrayList<ContentValues> cv = new ArrayList<ContentValues>();	  
 			    ArrayList<ContentValues> users = new ArrayList<ContentValues>();	
@@ -1809,11 +1809,10 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 				
 				// save the id of the last tweet for future timeline synchs
 				if (setTimelineSinceId)
-					setTimelineSinceId(lastId, getBaseContext());				
+					setTimelineSinceId(lastId, getBaseContext());	
+		    // save the timestamp of the last update
+			setLastTimelineUpdate(timestamp,getBaseContext());
 			}
-			// save the timestamp of the last update
-			setLastTimelineUpdate(new Date(), getBaseContext());
-
 			return null;
 		}
 
@@ -3010,6 +3009,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{
 				getContentResolver().update(updateUri, cv, null, null);
+				getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
 				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Favorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){
@@ -3134,6 +3134,7 @@ private class TweetQueryTask extends AsyncTask<Long, Void, Cursor> {
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{
 				getContentResolver().update(updateUri, cv, null, null);
+				getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
 				if (ShowTweetListActivity.running)
 						Toast.makeText(getBaseContext(), "Unfavorite successful.", Toast.LENGTH_SHORT).show();
 			} catch(Exception ex){

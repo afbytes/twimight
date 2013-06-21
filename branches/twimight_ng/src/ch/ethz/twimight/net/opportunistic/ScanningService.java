@@ -601,16 +601,16 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			String filename =  o.getString(HtmlPage.COL_FILENAME);
 			Long tweetId = o.getLong(HtmlPage.COL_TID);
 			String htmlUrl = o.getString(HtmlPage.COL_URL);
-			int downloaded = 0;
+			
 			
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(getApplicationContext())};
 			if (sdCardHelper.checkSDState(filePath)) {
 				File targetFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);//photoFileParent, photoFilename));
 				if(saveFile(targetFile, xmlContent)){
-					downloaded = 1;
+					//downloaded = 1;
 				}
 			}
-			htmlDbHelper.insertPage(htmlUrl, filename, tweetId, downloaded, 0);
+			htmlDbHelper.insertPage(htmlUrl,filename, tweetId, 0);		
 			
 		} catch (JSONException e1) {
 			Log.e(TAG, "Exception while receiving disaster tweet photo" , e1);
@@ -791,13 +791,15 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				}else if(subStrarr.indexOf("https://") >= 0){
 					subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
 				}
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(subUrl);
+				Cursor cursorHtml = htmlDbHelper.getPageInfo(subUrl);
 
-				if(htmlCV!=null){
-					if(htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 1){
+				if(cursorHtml !=null){					
+					
+					if( !cursorHtml.isNull(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME) ) ){
+						
 						String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
-						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
-						String tweetId = htmlCV.getAsString(HtmlPage.COL_TID);
+						String filename = cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME));
+						Long tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_TID));
 						if(sdCardHelper.checkSDState(filePath)){
 							
 							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);

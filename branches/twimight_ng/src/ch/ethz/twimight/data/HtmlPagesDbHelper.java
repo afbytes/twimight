@@ -55,14 +55,18 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean insertPage(String url, String filename, long tweetId, int downloaded, int forced) {
-		Log.d(TAG,"insert page url: " + url );
-		ContentValues cv = createContentValues(url,filename, tweetId, downloaded, forced, 0);
+	public boolean insertPage(String url, long tweetId, int forced) {
+		
+		return this.insertPage(url, null, tweetId, forced);
+	}
+	
+	public boolean insertPage(String url,String filename, long tweetId, int forced) {
+		Log.i(TAG,"insert page url: " + url );
+		ContentValues cv = createContentValues(url, filename, tweetId, forced, 0);
 		
 		try {
 			long result = database.insertOrThrow(DBOpenHelper.TABLE_HTML, null, cv);
-			Log.d(TAG,"row: " + result);
-			 
+						 
 			if(result!=-1)
 				return true;
 		} catch (SQLException ex) {
@@ -76,7 +80,7 @@ public class HtmlPagesDbHelper {
 	public void saveLinksFromCursor(Cursor c, int type){
 		
 		if (c != null) {
-			
+			Log.i(TAG,"cursor count: " + c.getCount());
 			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 				
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT_PLAIN));				
@@ -92,9 +96,8 @@ public class HtmlPagesDbHelper {
 	public void insertLinksIntoDb(String tweetText, long tweetId, int type) {
 		
 		ArrayList<String> urls = LinksParser.parseText(tweetText);
-		for (String url: urls) {
-			String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-			insertPage(url, filename, tweetId, 0, type);
+		for (String url: urls) {			
+			insertPage(url, tweetId, type);
 
 		}
 		
@@ -108,16 +111,16 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	public boolean updatePage(String url, String filename, long tweetId, int downloaded, int forced, int tries){
+	public boolean updatePage(String url, String filename, long tweetId, int forced, int tries){
 		
-		ContentValues cv = createContentValues(url,filename, tweetId, downloaded, forced, tries);
+		ContentValues cv = createContentValues(url,filename, tweetId, forced, tries);
 		
-		Log.d(TAG, "update an entry:" + cv.toString());
+		Log.i(TAG, "update an entry:" + cv.toString());
 		String sql = HtmlPage.COL_URL + " = '" + url +"' ";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
-		Log.d(TAG, "row:" + String.valueOf(row));
+		
 		if(row!=0) return true;
-		Log.d(TAG, "update html database failed");
+	
 		return false;
 	}
 	
@@ -148,49 +151,40 @@ public class HtmlPagesDbHelper {
 	 * @param tweetId
 	 * @return
 	 */
-	public ContentValues getPageInfo(String url) {
-		
-		
-			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"'" , null, null, null, null);
+	public Cursor getPageInfo(String url) {		
+		   
+			Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_URL + " = '" + url +"'" , null, null, null, null);				
+			if(c == null || c.getCount() == 0) return null;					
+			c.moveToFirst();	
 			
-				
-			if(c == null || c.getCount() == 0) return null;		
-			
-			c.moveToFirst();		
-			ContentValues htmlCV = createContentValues(c.getString(c.getColumnIndex(HtmlPage.COL_URL)),
-					c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)),
-					c.getLong(c.getColumnIndex(HtmlPage.COL_TID)),				
-					c.getInt(c.getColumnIndex(HtmlPage.COL_DOWNLOADED)),
-					c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED)),
-					c.getInt(c.getColumnIndex(HtmlPage.COL_ATTEMPTS)));
-			Log.d(TAG, "page info:" + htmlCV.toString());
-			
-			return htmlCV;
+			return c;
 		
 		
 	}
 	
 	//return all urls for a tweet
-	public Cursor getUrlsByTweetId(Long tweetId){
+	public Cursor getTweetUrls(long tweetId){
 		
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_TID + " =" + tweetId + "" , null, null, null, null);
-		c.moveToFirst();		
-		
+				
 		return c;
 	}
 	
-	/**
-	 * get the tweet we received after timestamp
-	 * @param timestamp
-	 * @return
-	 */
-	public Cursor getNewTweets(Long timestamp){
+	public boolean allPagesStored(Cursor curHtml) {		
 		
-		String[] cols = {Tweets.COL_TEXT_PLAIN, Tweets.COL_TID, Tweets.COL_USER};
-		String sql = Tweets.COL_RECEIVED + "> '" + String.valueOf(timestamp) +"' and " + Tweets.COL_HTML_PAGES + " = '" + String.valueOf(1) + "'";
-		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, cols, sql, null, null, null, null);
-		return c;
+		if (curHtml.getCount() == 0) throw new IllegalArgumentException("The cursor has no elements");
+		
+		for(curHtml.moveToFirst(); !curHtml.isAfterLast(); curHtml.moveToNext()) {
+			
+			if ( curHtml.isNull(curHtml.getColumnIndex(HtmlPage.COL_FILENAME)) )
+				return false;
+			else
+				Log.i(TAG,"filename: " + curHtml.getString(curHtml.getColumnIndex(HtmlPage.COL_FILENAME)));
+		}
+		return true;
+		
 	}
+	
 	
 	/**
 	 * get undownloaded pages
@@ -199,13 +193,13 @@ public class HtmlPagesDbHelper {
 	public Cursor getUndownloadedHtmls(boolean forced){		
 		String sql = null;
 		if(forced){
-			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_FORCED + " = '" 
-					+ String.valueOf(1) + "' and " + HtmlPage.COL_ATTEMPTS + " < '" + String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+			sql = HtmlPage.COL_FILENAME + " is null and " + HtmlPage.COL_FORCED + " = " 
+					+ 1 + " and " + HtmlPage.COL_ATTEMPTS + " < " + HtmlPage.DOWNLOAD_LIMIT + "";
 		}else{
-			sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(0) + "' and " + HtmlPage.COL_ATTEMPTS + " < '" 
-					+ String.valueOf(HtmlPage.DOWNLOAD_LIMIT) + "'";
+			sql = HtmlPage.COL_FILENAME + " is null and " + HtmlPage.COL_ATTEMPTS + " < " 
+					+ HtmlPage.DOWNLOAD_LIMIT + "";
 		}
-		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " DESC");
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, HtmlPage.COL_FILENAME + " ASC");
 		return c;
 	}
 
@@ -217,7 +211,7 @@ public class HtmlPagesDbHelper {
 	 */
 	public Cursor getDownloadedHtmls(){
 		Log.d(TAG, "get downloaded htmls");
-		String sql = HtmlPage.COL_DOWNLOADED + "= '" + String.valueOf(1) + "'";
+		String sql = HtmlPage.COL_FILENAME + " is not null";
 		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, sql, null, null, null, null);
 		return c;
 	}
@@ -230,12 +224,12 @@ public class HtmlPagesDbHelper {
 	 * @param downloaded
 	 * @return
 	 */
-	private ContentValues createContentValues(String url, String filename, long tweetId, int downloaded, int forced , int tries) {
+	private ContentValues createContentValues(String url, String filename, long tweetId, int forced , int tries) {
 		ContentValues values = new ContentValues();
+		
 		values.put(HtmlPage.COL_FILENAME ,filename);
 		values.put(HtmlPage.COL_URL ,url);
-		values.put(HtmlPage.COL_TID,tweetId );	
-		values.put(HtmlPage.COL_DOWNLOADED, downloaded);
+		values.put(HtmlPage.COL_TID,tweetId );			
 		values.put(HtmlPage.COL_FORCED, forced);
 		values.put(HtmlPage.COL_ATTEMPTS, tries);
 		return values;
@@ -278,22 +272,26 @@ public class HtmlPagesDbHelper {
 			
 			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
 				
-				String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
+				if (!c.isNull(c.getColumnIndex(HtmlPage.COL_FILENAME))){
+					
+					String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
 
-				Long createdTime = Long.parseLong(filename.substring(8,filename.length()-4));
-				
-				if((System.currentTimeMillis() - createdTime) > timeSpan){
+					Long createdTime = Long.parseLong(filename.substring(8,filename.length()-4));
+					
+					if((System.currentTimeMillis() - createdTime) > timeSpan){
 
-					String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(context)};
-					if(sdCardHelper.checkSDState(filePath)){
-						File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
+						String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(context)};
+						if(sdCardHelper.checkSDState(filePath)){
+							File deleteFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
 
-						if(deleteFile.delete()){
-							deletePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)));
+							if(deleteFile.delete()){
+								deletePage(c.getString(c.getColumnIndex(HtmlPage.COL_URL)));
+							}
+
 						}
-
 					}
 				}
+				
 
 			}
 			return null;

@@ -41,6 +41,7 @@ public class TweetListFragment extends ListFragment {
     
     @Override
     public void onAttach(Activity activity) {
+    	Log.i(TAG, "onAttach");
         super.onAttach(activity);
         try {
             listener = (OnInitCompletedListener) activity;
@@ -59,11 +60,24 @@ public class TweetListFragment extends ListFragment {
             this.type=type;           
            
 	}   
+	
+	
+
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		Log.i(TAG, "onDestroy");
+	}
+
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
 		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);		
+		super.onCreate(savedInstanceState);	
+		Log.i(TAG, "onCreate");
 		if (type == USER_TWEETS) {
 			userId = getArguments().getLong(USER_ID);
 			Log.i("TEST","userId: " + userId);
@@ -106,7 +120,7 @@ public class TweetListFragment extends ListFragment {
 		// set all header button colors to transparent
 	
 		if(c!=null) c.close();	
-
+		Log.i(TAG, "getData");
 		overscrollIntent = new Intent(getActivity(), TwitterService.class); 
 		
 		switch(filter) {

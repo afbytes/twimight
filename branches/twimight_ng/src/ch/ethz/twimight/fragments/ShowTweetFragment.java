@@ -127,9 +127,7 @@ public class ShowTweetFragment extends Fragment{
 	private SDCardHelper sdCardHelper;
 
 	private String userID = null;
-	private String tweetId;
-
-
+	
 	//offline html pages
 	private int htmlStatus;
 	private ArrayList<String> htmlUrls;
@@ -280,40 +278,45 @@ public class ShowTweetFragment extends Fragment{
 	private void setHtml() {
 
 		htmlsToDownload = new ArrayList<String>();
-		tweetId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TID)));
+		//tweetId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		boolean buttonStatus = false;
 		//try to retrieve the filename of attached html pages
 		if(!htmlUrls.isEmpty()){
-			for(String htmlUrl : htmlUrls){
-				
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl);
+			for(String htmlUrl : htmlUrls){					 
+			
+				Cursor cursorInfo= htmlDbHelper.getPageInfo(htmlUrl);
+				String filename = null;
 				boolean fileStatusNormal = true;
-				if(htmlCV!=null){
+				
+				if(cursorInfo !=null){
+					
 					//check if file status normal, exists and size
 					String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity)}; 
-					
-					if(sdCardHelper.checkSDState(filePath)){
-						String filename = htmlCV.getAsString(HtmlPage.COL_FILENAME);
-						if(!sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() || 
-														sdCardHelper.getFileFromSDCard(filePath[0], filename).length() < 500){
-							fileStatusNormal = false;
-						}
+
+					if(sdCardHelper.checkSDState(filePath)){						
+
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) 	{
+						    filename = cursorInfo.getString(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME));
+							
+							if(sdCardHelper.getFileFromSDCard(filePath[0], filename).length() <= 1){
+								fileStatusNormal = false;
+							}
+						}					
+
 					}
-					
+
 				}
-				
+
 				//if entry does not exist, add the url in to be downloaded list				
-				if(htmlCV == null || (htmlCV.getAsInteger(HtmlPage.COL_DOWNLOADED) == 0) || !fileStatusNormal){
-					
+				if(cursorInfo == null || (filename == null) || !fileStatusNormal){
+
 					htmlsToDownload.add(htmlUrl);
 					buttonStatus = true;					
-					
+
 				}
-				else{
-					Log.d(TAG, htmlCV.toString());
-				}
+				
 			}
-			Log.d(TAG, "htmls to be downloaded:" + htmlsToDownload.toString());
+			
 		}
 		
 		if(!buttonStatus){			
@@ -331,22 +334,28 @@ public class ShowTweetFragment extends Fragment{
 			Long tweetId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 			for(int i=0; i<htmlsToDownload.size();i++){
 				
-				ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlsToDownload.get(i));
-				if(htmlCV != null){
+				Cursor cursorInfo = htmlDbHelper.getPageInfo(htmlsToDownload.get(i));
+				if(cursorInfo != null){					
 					
-					int limit = htmlCV.getAsInteger(HtmlPage.COL_ATTEMPTS);
+					int attempts  = cursorInfo.getInt(cursorInfo.getColumnIndex(HtmlPage.COL_ATTEMPTS));
+					if( attempts > HtmlPage.DOWNLOAD_LIMIT) {		
+						
+						String filename = null;
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) {
+							 filename =  cursorInfo.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
+							 sdCardHelper.deleteFile(filePath[0] + "/" + filename );
+						}
+						 
+						 htmlDbHelper.updatePage(htmlsToDownload.get(i), null, 
+									tweetId, HtmlPagesDbHelper.DOWNLOAD_FORCED, 0);
+					}						
 					
-					if(! (htmlCV.getAsInteger(HtmlPage.COL_ATTEMPTS) < HtmlPage.DOWNLOAD_LIMIT))
-						limit = 0;					
-					 htmlDbHelper.updatePage(htmlsToDownload.get(i),	htmlCV.getAsString(HtmlPage.COL_FILENAME), 
-							tweetId, 0, HtmlPagesDbHelper.DOWNLOAD_FORCED, limit);
-					
-				}else{
-					String filename = "twimight" + String.valueOf(System.currentTimeMillis()) + ".xml";
-					 htmlDbHelper.insertPage(htmlsToDownload.get(i), filename, tweetId, 0, HtmlPagesDbHelper.DOWNLOAD_FORCED);
+				}else{					 
+					 htmlDbHelper.insertPage(htmlsToDownload.get(i), tweetId, HtmlPagesDbHelper.DOWNLOAD_FORCED);
 				}
 			}
 			
+			resolver.notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 			//insert database and start downloading service
 			StartServiceHelper.startService(activity);
 		}
@@ -542,7 +551,7 @@ public class ShowTweetFragment extends Fragment{
 						favorited=true;
 					} 
 				}
-				resolver.notifyChange(Tweets.TABLE_FAVORITES_URI, null);
+				
 			}
 			
 		});
@@ -654,102 +663,130 @@ public class ShowTweetFragment extends Fragment{
 			else{				
 				String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity)};
 				PackageManager pm;
+				Cursor c;
+				
 				switch(sdCardHelper.checkFileType(url)){
-				case SDCardHelper.TYPE_XML:
+				
+				case SDCardHelper.TYPE_XML:	
 					
-					Log.i(TAG, url);
-					ContentValues cv =  htmlDbHelper.getPageInfo(url);
-					if (cv != null ) {
+					Cursor cursorInfo =  htmlDbHelper.getPageInfo(url);
+					if (cursorInfo != null ) {
 						
-						String filename = cv.getAsString(HtmlPage.COL_FILENAME);				
-					
-						Log.i(TAG, "length: " + sdCardHelper.getFileFromSDCard(filePath[0], filename).length() + " bytes");
-						
-						if(sdCardHelper.getFileFromSDCard(filePath[0], filename).exists() && 
-								sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 10){
+						String filename = null;
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) {
+							filename = cursorInfo.getString(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME));
 							
-							//set up our own web view
-							Intent intentToWeb = new Intent(activity, WebViewActivity.class);
-							intentToWeb.putExtra("url", url);						
-							intentToWeb.putExtra("tweet_id", tweetId);
-							intentToWeb.putExtra("filename", filename);
-							startActivity(intentToWeb);
+							Log.i(TAG, "length: " + sdCardHelper.getFileFromSDCard(filePath[0], filename).length() + " bytes");
+							
+							if(sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 0){
+								
+								//set up our own web view
+								Intent intentToWeb = new Intent(activity, WebViewActivity.class);
+								intentToWeb.putExtra("url", url);							
+								intentToWeb.putExtra("filename", filename);
+								startActivity(intentToWeb);
 
-						} 
-						else{
-						
+							} 
+							else	{						
+								Toast.makeText(activity, getString(R.string.faulty_page), Toast.LENGTH_LONG).show();
+								
+							}
+							
+						} else
 							Toast.makeText(activity, getString(R.string.file_not_exists), Toast.LENGTH_LONG).show();
-						}
+						
 
 					} else {
-						Log.i(TAG,"content values null");
-						Toast.makeText(activity, getString(R.string.file_not_exists), Toast.LENGTH_LONG).show();
+						Log.i(TAG,"content values null");						
 					}
 					
 					break;
 
 				case SDCardHelper.TYPE_PDF:
 					Log.i(TAG, "view pdf");
-					Intent intentToPDF = new Intent(Intent.ACTION_VIEW, Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], 
-							htmlDbHelper.getPageInfo(url).getAsString(HtmlPage.COL_FILENAME))));
-					pm = activity.getPackageManager();
-					List<ResolveInfo> activitiesPDF = pm.queryIntentActivities(intentToPDF, 0);
-					if (activitiesPDF.size() > 0) {
-						startActivity(intentToPDF);
-					} else {
-						// Do something else here. Maybe pop up a Dialog or Toast
-						Toast.makeText(activity, R.string.no_valid_pdf, Toast.LENGTH_LONG).show();
+					c = htmlDbHelper.getPageInfo(url);
+					if (c != null) {
+						Intent intentToPDF = new Intent(Intent.ACTION_VIEW, Uri.fromFile(sdCardHelper.getFileFromSDCard(filePath[0], 
+								c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)))));
+						pm = activity.getPackageManager();
+						List<ResolveInfo> activitiesPDF = pm.queryIntentActivities(intentToPDF, 0);
+						if (activitiesPDF.size() > 0) {
+							startActivity(intentToPDF);
+						} else {
+							// Do something else here. Maybe pop up a Dialog or Toast
+							Toast.makeText(activity, R.string.no_valid_pdf, Toast.LENGTH_LONG).show();
+						}
+						c.close();
 					}
+					
 					break;
 				case SDCardHelper.TYPE_PNG:
 				case SDCardHelper.TYPE_GIF:
 				case SDCardHelper.TYPE_JPG:
 					Log.i(TAG, "view picture");
-					File picFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url)
-							.getAsString(HtmlPage.COL_FILENAME));
-					Intent intentToPic = new Intent(Intent.ACTION_VIEW);
-					intentToPic.setDataAndType(Uri.parse("file://" + Uri.fromFile(picFile).getPath()), "image/*");
-					pm = activity.getPackageManager();
-					List<ResolveInfo> activitiesPic = pm.queryIntentActivities(intentToPic, 0);
-					if (activitiesPic.size() > 0) {
-						startActivity(intentToPic);
-					} else {
-						// Do something else here. Maybe pop up a Dialog or Toast
-						Toast.makeText(activity, R.string.no_valid_pictures, Toast.LENGTH_LONG).show();
+					c = htmlDbHelper.getPageInfo(url);
+					if (c != null) {
+						
+						File picFile = sdCardHelper.getFileFromSDCard(filePath[0], c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
+						Intent intentToPic = new Intent(Intent.ACTION_VIEW);
+						intentToPic.setDataAndType(Uri.parse("file://" + Uri.fromFile(picFile).getPath()), "image/*");
+						pm = activity.getPackageManager();
+						List<ResolveInfo> activitiesPic = pm.queryIntentActivities(intentToPic, 0);
+						if (activitiesPic.size() > 0) {
+							startActivity(intentToPic);
+						} else {
+							// Do something else here. Maybe pop up a Dialog or Toast
+							Toast.makeText(activity, R.string.no_valid_pictures, Toast.LENGTH_LONG).show();
+						}
+						c.close();
 					}
+					
 
 					break;
 				case SDCardHelper.TYPE_MP3:
 					Log.i(TAG, "play audio");
-					File mp3File = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url)
-							.getAsString(HtmlPage.COL_FILENAME));
-					Intent intentToMp3 = new Intent(Intent.ACTION_VIEW);
-					intentToMp3.setDataAndType(Uri.parse("file://" + Uri.fromFile(mp3File).getPath()), "audio/mp3");
-					pm = activity.getPackageManager();
-					List<ResolveInfo> activitiesAudio = pm.queryIntentActivities(intentToMp3, 0);
-					if (activitiesAudio.size() > 0) {
-						startActivity(intentToMp3);
-					} else {
-						// Do something else here. Maybe pop up a Dialog or Toast
-						Toast.makeText(activity, R.string.no_valid_audio, Toast.LENGTH_LONG).show();
+					
+					c = htmlDbHelper.getPageInfo(url);
+					if (c != null) {
+						
+						File mp3File = sdCardHelper.getFileFromSDCard(filePath[0], 
+								c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
+						Intent intentToMp3 = new Intent(Intent.ACTION_VIEW);
+						intentToMp3.setDataAndType(Uri.parse("file://" + Uri.fromFile(mp3File).getPath()), "audio/mp3");
+						pm = activity.getPackageManager();
+						List<ResolveInfo> activitiesAudio = pm.queryIntentActivities(intentToMp3, 0);
+						if (activitiesAudio.size() > 0) {
+							startActivity(intentToMp3);
+						} else {
+							// Do something else here. Maybe pop up a Dialog or Toast
+							Toast.makeText(activity, R.string.no_valid_audio, Toast.LENGTH_LONG).show();
+						}
+						c.close();
 					}
+					
+					
 					break;
 				case SDCardHelper.TYPE_MP4:
 				case SDCardHelper.TYPE_RMVB:
 				case SDCardHelper.TYPE_FLV:
 					Log.i(TAG, "play video");
-					File videoFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlDbHelper.getPageInfo(url)
-							.getAsString(HtmlPage.COL_FILENAME));
-					Intent intentToVideo = new Intent(Intent.ACTION_VIEW);
-					intentToVideo.setDataAndType(Uri.parse("file://" + Uri.fromFile(videoFile).getPath()), "video/flv");
-					pm = activity.getPackageManager();
-					List<ResolveInfo> activitiesVideo = pm.queryIntentActivities(intentToVideo, 0);
-					if (activitiesVideo.size() > 0) {
-						startActivity(intentToVideo);
-					} else {
-						// Do something else here. Maybe pop up a Dialog or Toast
-						Toast.makeText(activity,R.string.no_valid_video, Toast.LENGTH_LONG).show();
-					}
+					
+					c = htmlDbHelper.getPageInfo(url);
+					if (c != null) {
+						
+						File videoFile = sdCardHelper.getFileFromSDCard(filePath[0], c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
+						Intent intentToVideo = new Intent(Intent.ACTION_VIEW);
+						intentToVideo.setDataAndType(Uri.parse("file://" + Uri.fromFile(videoFile).getPath()), "video/flv");
+						pm = activity.getPackageManager();
+						List<ResolveInfo> activitiesVideo = pm.queryIntentActivities(intentToVideo, 0);
+						if (activitiesVideo.size() > 0) {
+							startActivity(intentToVideo);
+						} else {
+							// Do something else here. Maybe pop up a Dialog or Toast
+							Toast.makeText(activity,R.string.no_valid_video, Toast.LENGTH_LONG).show();
+						}
+						c.close();
+					}					
 					break;
 
 				}
@@ -777,7 +814,6 @@ public class ShowTweetFragment extends Fragment{
 
 		try {
 			String substr = str.toString();
-
 			String[] strarr = substr.split(" ");
 
 			//save the urls of the tweet in a list
@@ -794,7 +830,7 @@ public class ShowTweetFragment extends Fragment{
 				}	
 				passedLen = passedLen + subStrarr.length() + 1;
 			}
-			Log.d("test1", htmlUrls.toString());			
+					
 		} catch (Exception ex) {
 		}
 		tweetTextView.setText(str);
@@ -835,7 +871,7 @@ public class ShowTweetFragment extends Fragment{
 	 */
 	@Override
 	public void onPause(){
-		Log.i(TAG, "on pause");
+		
 		super.onPause();
 		if (locHelper != null) 			
 			locHelper.unRegisterLocationListener();    			
@@ -867,6 +903,7 @@ public class ShowTweetFragment extends Fragment{
 			replyButton.setOnClickListener(null);
 		if (favoriteButton != null)
 			favoriteButton.setOnClickListener(null);
+		observer = null;
 		if (c != null)
 			c.close();
 
@@ -901,11 +938,12 @@ public class ShowTweetFragment extends Fragment{
 		        	   //delete html pages
 		        	   if(!htmlUrls.isEmpty()){
 		        		   for(String htmlUrl:htmlUrls){
-		        			   ContentValues htmlCV = htmlDbHelper.getPageInfo(htmlUrl);
-		        			   if(htmlCV != null){
+		        			   Cursor cursorHtml = htmlDbHelper.getPageInfo(htmlUrl);
+		        			   if(cursorHtml != null){
 		        				   String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity)};
 				       			   if(sdCardHelper.checkSDState(filePath)){
-				       				   File htmlFile = sdCardHelper.getFileFromSDCard(filePath[0], htmlCV.getAsString(HtmlPage.COL_FILENAME));//photoFileParent, photoFilename));
+				       				   File htmlFile = sdCardHelper.getFileFromSDCard(filePath[0], 
+				       						   cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME)));//photoFileParent, photoFilename));
 				       				   htmlFile.delete();
 				       				   htmlDbHelper.deletePage(htmlUrl);
 				       			   }

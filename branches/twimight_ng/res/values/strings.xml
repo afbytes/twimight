@@ -62,7 +62,9 @@
 	<string name="clear_cache_question">Are you sure you want to clear all files and data of saved webpages?</string>
 	<string name="clear_cache_title">Clear Cache</string>
 	<string name="loading">Loading</string>	
-	<string name="file_not_exists">File does not exist</string>	
+	<string name="file_not_exists">Page not downloaded yet</string>	
+     <string name="url_not_added">The URL has not been added to the Database</string>	
+	
 	<string name="loading_finished">Loading finished.</string>
 	<string name="faulty_page">The page is corrupted. It will downloaded again shortly</string>
 	<string name="no_valid_pdf">No valid application for viewing pdf files</string>

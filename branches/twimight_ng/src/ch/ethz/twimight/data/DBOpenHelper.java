@@ -45,7 +45,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_STATISTICS = "statistics";
 
 
-	private static final int DATABASE_VERSION = 51;
+	private static final int DATABASE_VERSION = 52;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -165,11 +165,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
 			+ HtmlPage.COL_PAGE_ID + " integer primary key autoincrement not null, "
 			+ HtmlPage.COL_URL + " string unique not null, "	
-			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_TID +") ON DELETE CASCADE, "	
-			+ HtmlPage.COL_DOWNLOADED + " integer default 0, "
+			+ HtmlPage.COL_TID+ " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_TID +") ON DELETE CASCADE, "			
 			+ HtmlPage.COL_FORCED + " integer default 0, "
 			+ HtmlPage.COL_ATTEMPTS + " integer default 0, "
-			+ HtmlPage.COL_FILENAME + " string unique not null);";
+			+ HtmlPage.COL_FILENAME + " string unique);";
 	
 	/*
 	// html pages trackers
