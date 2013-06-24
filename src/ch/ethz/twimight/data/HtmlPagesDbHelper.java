@@ -61,7 +61,7 @@ public class HtmlPagesDbHelper {
 	}
 	
 	public boolean insertPage(String url,String filename, long tweetId, int forced) {
-		Log.i(TAG,"insert page url: " + url );
+		
 		ContentValues cv = createContentValues(url, filename, tweetId, forced, 0);
 		
 		try {
@@ -80,7 +80,7 @@ public class HtmlPagesDbHelper {
 	public void saveLinksFromCursor(Cursor c, int type){
 		
 		if (c != null) {
-			Log.i(TAG,"cursor count: " + c.getCount());
+			
 			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 				
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT_PLAIN));				
@@ -113,9 +113,8 @@ public class HtmlPagesDbHelper {
 	 */
 	public boolean updatePage(String url, String filename, long tweetId, int forced, int tries){
 		
-		ContentValues cv = createContentValues(url,filename, tweetId, forced, tries);
+		ContentValues cv = createContentValues(url,filename, tweetId, forced, tries);		
 		
-		Log.i(TAG, "update an entry:" + cv.toString());
 		String sql = HtmlPage.COL_URL + " = '" + url +"' ";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
 		
@@ -136,7 +135,7 @@ public class HtmlPagesDbHelper {
 		try {
 			String sql = HtmlPage.COL_URL + "='" + url + "'";
 			int result = database.delete(DBOpenHelper.TABLE_HTML, sql, null);			
-			Log.i(TAG,"delete row: " + result);
+		
 			if(result!=0)
 				return true;
 		} catch (SQLException ex) {
@@ -178,8 +177,7 @@ public class HtmlPagesDbHelper {
 			
 			if ( curHtml.isNull(curHtml.getColumnIndex(HtmlPage.COL_FILENAME)) )
 				return false;
-			else
-				Log.i(TAG,"filename: " + curHtml.getString(curHtml.getColumnIndex(HtmlPage.COL_FILENAME)));
+			
 		}
 		return true;
 		

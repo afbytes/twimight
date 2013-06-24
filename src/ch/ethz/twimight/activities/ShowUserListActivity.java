@@ -42,7 +42,7 @@ public class ShowUserListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);		
+		super.onCreate(null);		
 		setContentView(R.layout.main);
 		
 		Intent intent = getIntent();

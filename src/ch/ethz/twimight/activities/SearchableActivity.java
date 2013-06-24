@@ -49,7 +49,7 @@ public class SearchableActivity extends TwimightBaseActivity implements OnInitCo
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
-		super.onCreate(savedInstanceState);
+		super.onCreate(null);
 		setContentView(R.layout.main);	
 
 		viewPager = (ViewPager)  findViewById(R.id.viewpager); 

@@ -12,6 +12,8 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.util.HashMap;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.content.Context;
@@ -26,7 +28,9 @@ import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
+import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
@@ -70,10 +74,9 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);				
+		super.onCreate(null);				
 		setContentView(R.layout.main);
-		Log.i(TAG,"calling on create");
-
+					
 		//statistics
 		locDBHelper = new StatisticsDBHelper(getApplicationContext());
 		locDBHelper.open();
@@ -92,7 +95,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
 		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
         
-		viewPager = (ViewPager)  findViewById(R.id.viewpager);			
+		viewPager = (ViewPager)  findViewById(R.id.viewpager);	
+		
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
 		viewPager.setOnPageChangeListener(
@@ -125,7 +129,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		actionBar.addTab(tab);		
 
 	}
-	
+		
 
 
 	private class CheckLocation implements Runnable {

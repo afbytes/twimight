@@ -83,8 +83,9 @@ public class ShowUserActivity extends TwimightBaseActivity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.showuser);
-
+		
 		profileImage = (ImageView) findViewById(R.id.showUserProfileImage);
 		screenName = (TextView) findViewById(R.id.showUserScreenName);
 		realName = (TextView) findViewById(R.id.showUserRealName);
@@ -319,11 +320,13 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		
 		// disable the normal user buttons
 		LinearLayout remoteUserButtons = (LinearLayout) findViewById(R.id.showUserButtons);
-		remoteUserButtons.setVisibility(LinearLayout.GONE);
+		if (remoteUserButtons != null)
+			remoteUserButtons.setVisibility(LinearLayout.GONE);
 
 		// enable the show followers and show followee's buttons
 		LinearLayout localUserButtons = (LinearLayout) findViewById(R.id.showLocalUserButtons);
-		localUserButtons.setVisibility(LinearLayout.VISIBLE);
+		if (localUserButtons != null)
+			localUserButtons.setVisibility(LinearLayout.VISIBLE);
 		
 		// the followers Button
 		showFollowersButton.setOnClickListener(null);
