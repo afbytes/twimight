@@ -1,5 +1,6 @@
 package ch.ethz.twimight.fragments.adapters;
 
+
 import java.util.HashMap;
 
 import android.app.Fragment;
@@ -7,6 +8,7 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.util.Log;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.UserListFragment;
@@ -17,12 +19,16 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 	public static final int BUNDLE_TYPE_TWEETS = 0;
 	public static final int BUNDLE_TYPE_USERS = 1;
 	public static final int BUNDLE_TYPE_SEARCH_RESULTS = 2;
+	
+	private static final String TAG = "ListViewPageAdapter";
 
 	Bundle bundle;
 	HashMap<Integer,ListFragment> map;
+	FragmentManager fragMan;
 	
 	public ListViewPageAdapter( FragmentManager fm, Bundle bundle) {
-		super(fm);		
+		super(fm);
+		fragMan = fm;
 		this.bundle=bundle;
 		Log.i("ListViewPageAdapter","creating adapter");
 		switch (bundle.getInt(BUNDLE_TYPE)) {
@@ -54,15 +60,20 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 
 	}
 	
+	public ListFragment getFragmentByPosition(int pos) {
+        String tag = "android:switcher:" + R.id.viewpager + ":" + pos;
+      
+        return (ListFragment) fragMan.findFragmentByTag(tag);
+    }
+	
 
 	
 	private HashMap<Integer,ListFragment> createSearchListFragments() {
 
-		HashMap<Integer,ListFragment> map = new HashMap<Integer,ListFragment>();
-		ListFragment searchTweetsFrag = new TweetListFragment(TweetListFragment.SEARCH_TWEETS);
-		ListFragment searchUserFrag = new UserListFragment(UserListFragment.SEARCH_USERS);		
-		map.put(0,searchTweetsFrag);
-		map.put(1,searchUserFrag);
+		HashMap<Integer,ListFragment> map = new HashMap<Integer,ListFragment>();	
+			
+		map.put(0,(getFragmentByPosition(0) == null) ? new TweetListFragment(TweetListFragment.SEARCH_TWEETS) : getFragmentByPosition(0) );
+		map.put(1, (getFragmentByPosition(1) == null) ? new UserListFragment(UserListFragment.SEARCH_USERS) : getFragmentByPosition(1) );
 
 		return map;
 	}
@@ -70,9 +81,9 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 	private HashMap<Integer,ListFragment> createUserListFragments() {
 
 		HashMap<Integer,ListFragment> map = new HashMap<Integer,ListFragment>();
-		map.put(0, new UserListFragment(UserListFragment.FRIENDS_KEY));
-		map.put(1, new UserListFragment(UserListFragment.FOLLOWERS_KEY));
-		map.put(2, new UserListFragment(UserListFragment.PEERS_KEY));
+		map.put(0, (getFragmentByPosition(0) == null) ? new UserListFragment(UserListFragment.FRIENDS_KEY) : getFragmentByPosition(0) );
+		map.put(1, (getFragmentByPosition(1) == null) ? new UserListFragment(UserListFragment.FOLLOWERS_KEY) : getFragmentByPosition(1) );
+		map.put(2, (getFragmentByPosition(2) == null) ? new UserListFragment(UserListFragment.PEERS_KEY) : getFragmentByPosition(2) );
 
 		return map;
 	}
@@ -80,9 +91,10 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 	private HashMap<Integer,ListFragment> createTweetListFragments() {
 
 		HashMap<Integer,ListFragment> map = new HashMap<Integer,ListFragment>();
-		map.put(0, new TweetListFragment(TweetListFragment.TIMELINE_KEY));
-		map.put(1, new TweetListFragment(TweetListFragment.FAVORITES_KEY));
-		map.put(2, new TweetListFragment(TweetListFragment.MENTIONS_KEY));
+		
+		map.put(0, (getFragmentByPosition(0) == null) ? new TweetListFragment(TweetListFragment.TIMELINE_KEY) : getFragmentByPosition(0));
+		map.put(1, (getFragmentByPosition(1) == null) ? new TweetListFragment(TweetListFragment.FAVORITES_KEY) : getFragmentByPosition(1));
+		map.put(2, (getFragmentByPosition(2) == null) ? new TweetListFragment(TweetListFragment.MENTIONS_KEY) : getFragmentByPosition(2));
 
 		return map;
 	}

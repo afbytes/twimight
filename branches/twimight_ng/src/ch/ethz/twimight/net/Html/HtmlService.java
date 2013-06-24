@@ -53,7 +53,6 @@ public class HtmlService extends Service {
 		
 		if(intent != null){
 			
-			Log.i(TAG, "starting html service");
 			sdCardHelper = new SDCardHelper();
 			htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();			
@@ -394,9 +393,8 @@ public class HtmlService extends Service {
 	 * @param sinceId
 	 * @param context
 	 */
-	public static void setRecentDownloadedTime(long sinceTime, Context context) {
+	public static void setRecentDownloadedTime(long sinceTime, Context context) {		
 		
-		Log.i(TAG,"set preference to:" + String.valueOf(sinceTime));
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putLong(DOWNLOAD_SINCE_TIME , sinceTime);
@@ -412,8 +410,7 @@ public class HtmlService extends Service {
 		
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		Long lastTime = prefs.getLong(DOWNLOAD_SINCE_TIME,Long.valueOf(0));
-		Log.i(TAG, "get preference:" + String.valueOf(lastTime));
+		Long lastTime = prefs.getLong(DOWNLOAD_SINCE_TIME,Long.valueOf(0));	
 		return lastTime;
 		
 	}
