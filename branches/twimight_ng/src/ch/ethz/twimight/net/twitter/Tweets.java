@@ -39,8 +39,9 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_TABLE_USER = "user"; /** the mentions filter */
 
 	public static final String TWEETS_SOURCE_NORMAL = "normal"; /** only normal tweets (no disaster tweets) */
-	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */
+	public static final String TWEETS_SOURCE_DISASTER = "disaster"; /** only disaster tweets */	
 	public static final String TWEETS_SOURCE_ALL = "all"; /** both, normal and disaster tweets */
+	
 	public static final String TWEET_ID = "tweet_id"; /** a specific tweet */
 	public static final String SEARCH = "search"; /** a search request */
 	public static final String TWEETS_SINCE_LAST_UPDATE = "tweetsSinceLastUpdate"; /** new tweets received */

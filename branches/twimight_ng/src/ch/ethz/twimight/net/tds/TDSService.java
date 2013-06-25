@@ -351,17 +351,7 @@ public class TDSService extends Service {
 				// wait a bit until we have connectivity
 				// TODO: This is a hack, we should wait for a connectivity change intent, or a timeout, to proceed.
 				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
-
-				/*// push locations to the server
-				LocationDBHelper locationAdapter = new LocationDBHelper(getBaseContext());
-				locationAdapter.open();
-
-				Date sinceWhen = new Date(getLastUpdate(getBaseContext()));
-				ArrayList<Location> locationList = (ArrayList<Location>) locationAdapter.getLocationsSince(sinceWhen);
-				if(!locationList.isEmpty()){
-					tds.createLocationObject(locationList);
-				}
-				 */
+				
 				// request potential bluetooth peers
 				String mac = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null);
 				if(mac!=null){
@@ -389,6 +379,10 @@ public class TDSService extends Service {
 				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getApplicationContext());
 				statisticAdapter.open();
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
+				
+				//Preparing disaster tweets to be sent to the server
+				
+				getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
 				
 
 			} catch(Exception e) {
