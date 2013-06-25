@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 
@@ -41,12 +42,12 @@ public class TDSRequestMessage {
 	Context context;
 	
 	private JSONObject authenticationObject;
-	private JSONObject locationObject;
 	private JSONObject bluetoothObject;
 	private JSONObject certificateObject;
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
 	private JSONObject statisticObject;
+	private JSONObject disTweetsObject;
 	
 	
 	/**
@@ -84,7 +85,29 @@ public class TDSRequestMessage {
 		bluetoothObject.put("mac", mac);
 	}
 	
-
+    
+	
+	public void createDisTweetsObject(Cursor tweets) throws JSONException {
+		if(tweets != null) {			
+			disTweetsObject = new JSONObject();
+			JSONArray disTweetsArray = new JSONArray();
+			
+			while(!tweets.isAfterLast()) {
+				
+				JSONObject row = new JSONObject();
+				row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );
+				row.put("twitter_id", tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER)));
+				row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
+				
+				disTweetsArray.put(row);
+				tweets.moveToNext();
+			}
+			tweets.close();
+			
+			disTweetsObject.put("content", disTweetsArray);
+			
+		}
+	}
 	
 
 	/**
@@ -126,43 +149,7 @@ public class TDSRequestMessage {
 		}
 	}
 
-	/**
-	 * Sends all the locations since the last successful update to the TDS
-	 * @param client
-	 * @return true if operation was successful, false otherwise
-	 * @throws JSONException 
-	 */
-	public int createLocationObject(ArrayList<Location> locationList) throws JSONException{
-		
-		locationObject = new JSONObject();
-		
-		if(!locationList.isEmpty()){
-			
-			JSONArray locationArray = new JSONArray();
-			// iterate through all location
-			Iterator<Location> iterator = locationList.iterator();
-		    while (iterator.hasNext()) {
-		    	Location loc = iterator.next();
-		    	JSONObject wayPoint = new JSONObject();
-		    	
-		    	Integer providerInteger = Constants.locationProvidersMap.get(loc.getProvider());
-		    	
-		    	// TODO: reduce precision of lat, lng
-	    		wayPoint.put("latitude", Double.toString(loc.getLatitude()));
-	    		wayPoint.put("longitude", Double.toString(loc.getLongitude()));
-	    		wayPoint.put("accuracy", Integer.toString((int)Math.round(loc.getAccuracy())));
-	    		wayPoint.put("provider", providerInteger==null? Integer.toString(0):providerInteger.toString());
-	    		wayPoint.put("date", Long.toString(loc.getTime()));
-	    		
-	    		locationArray.put(wayPoint);
-	    	
-		    }
-		    
-		    locationObject.put("waypoints", locationArray);
-		}
-		
-		return 0;
-	}
+	
 	
 	/**
 	 * Creates a JSON object for the revocation list update request
@@ -228,6 +215,15 @@ public class TDSRequestMessage {
 		return statisticObject != null;
 	}
 	
+
+	/**
+	 * is the Disaster tweets object set?
+	 * @return
+	 */
+	public boolean hasDisTweetsObject(){
+		return disTweetsObject != null;
+	}
+	
 	
 	/**
 	 * Is the version field set?
@@ -244,13 +240,7 @@ public class TDSRequestMessage {
 		return certificateObject != null;
 	}
 	
-	/**
-	 * Is the Location object set?
-	 */
-	public boolean hasLocationObject(){
-		return locationObject != null;
-	}
-	
+
 	/**
 	 * Is the Revocation object set?
 	 * @return
@@ -294,6 +284,13 @@ public class TDSRequestMessage {
 	
 	
 
+	/**
+	 * Getter
+	 * @return
+	 */
+	public JSONObject getDisTweetsObject(){
+		return disTweetsObject;
+	}
 	
 	/**
 	 * Getter
@@ -303,13 +300,7 @@ public class TDSRequestMessage {
 		return statisticObject;
 	}
 	
-	/**
-	 * Getter
-	 * @return
-	 */
-	public JSONObject getLocationObject(){
-		return locationObject;
-	}
+
 	
 	/**
 	 * Getter

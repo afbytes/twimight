@@ -273,8 +273,8 @@ public class HtmlPagesDbHelper {
 				if (!c.isNull(c.getColumnIndex(HtmlPage.COL_FILENAME))){
 					
 					String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
-
-					Long createdTime = Long.parseLong(filename.substring(8,filename.length()-4));
+					
+					Long createdTime = Long.parseLong(filename.substring(8,filename.length()-4));				
 					
 					if((System.currentTimeMillis() - createdTime) > timeSpan){
 

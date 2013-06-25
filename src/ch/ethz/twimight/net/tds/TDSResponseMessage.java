@@ -42,7 +42,7 @@ public class TDSResponseMessage {
 	private JSONObject revocationObject;
 	private JSONObject followerObject;
 	private JSONObject notificationObject;
-	private String response =  null;
+	private JSONObject disTweetsObject;
 	
 	private Context context;
 	
@@ -56,11 +56,8 @@ public class TDSResponseMessage {
 
 	public void setAuthenticationObject(JSONObject authenticationObject) {		
 		this.authenticationObject = authenticationObject;
-	}
+	}	
 	
-	public void setLocationObject(JSONObject locationObject){
-		this.locationObject = locationObject;
-	}
 	
 	public void setBluetoothObject(JSONObject bluetoothObject){
 		this.bluetoothObject = bluetoothObject;
@@ -82,6 +79,10 @@ public class TDSResponseMessage {
 	public void setNotificationObject(JSONObject notificationObject) {
 		this.notificationObject = notificationObject;
 	}
+	
+	public void setDisTweetsObject(JSONObject disTweetsObject) {
+		this.disTweetsObject = disTweetsObject;
+	}
 
 	public boolean hasAuthenticationObject(){
 		return authenticationObject != null;
@@ -90,11 +91,6 @@ public class TDSResponseMessage {
 	public boolean hasBluetoothObject(){
 		return bluetoothObject != null;
 	}	
-
-	
-	public boolean hasLocationObject(){
-		return locationObject != null;
-	}
 	
 	public boolean hasCertificateObject(){
 		return certificateObject != null;
@@ -112,6 +108,10 @@ public class TDSResponseMessage {
 		return notificationObject != null;
 	}
 	
+	public boolean hasDisTweetsObject(){
+		return disTweetsObject != null;
+	}
+	
 	/**
 	 * Parses the Notification object
 	 */
@@ -119,15 +119,22 @@ public class TDSResponseMessage {
 
 		if(!hasNotificationObject()) 
 			return null;
-		else return notificationObject;
-		
-		//String twitterId = authenticationObject.getString("twitter_id");
-		
+		else return notificationObject;	
 		
 		
 	}
 	
 
+	/**
+	 * Parses the Notification object
+	 */
+	public JSONObject getDisTweetsResponse() throws JSONException{
+
+		if(!hasDisTweetsObject()) 
+			return null;
+		else return disTweetsObject;	
+		
+	}
 
 	/**
 	 * Parses the authentication object
@@ -142,20 +149,7 @@ public class TDSResponseMessage {
 		
 	}
 	
-	/**
-	 * Parses the returned location object 
-	 */
-	public int parseLocation() throws JSONException{
-
-		if(!hasLocationObject()) return -1;
-
-		// check status code
-		int statusCode = locationObject.getInt("status");
-		if(statusCode != 200){
-			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned location status error code " + statusCode);
-		} 
-		return statusCode;
-	}
+	
 		
 	/**
 	 * Requests a list of MAC addresses of potential Bluetooth peers 

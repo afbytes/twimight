@@ -98,15 +98,7 @@ public class TDSCommunication {
 		return 0;
 	}
 	
-	/**
-	 * Creates a new location object in the request
-	 * @return
-	 * @throws JSONException 
-	 */
-	public int createLocationObject(ArrayList<Location> locationList) throws Exception{
-		tdsRequest.createLocationObject(locationList);
-		return 0;
-	}
+
 	
 	/**
 	 * Creates a new revocation object in the request
@@ -246,12 +238,7 @@ public class TDSCommunication {
 		// bluetooth
 		if(tdsRequest.hasBluetoothObject()){
 			requestObject.put(BLUETOOTH, tdsRequest.getBluetoothObject());
-		}
-
-		// location
-		if(tdsRequest.hasLocationObject()){
-			requestObject.put(LOCATION, tdsRequest.getLocationObject());
-		}
+		}		
 
 		// certificate
 		if(tdsRequest.hasCertificatObject()){
@@ -311,15 +298,7 @@ public class TDSCommunication {
 			tdsResponse.setBluetoothObject(bluetoothObject);
 		} catch(JSONException e) {
 			if (TwimightBaseActivity.D) Log.i(TAG, "No Bluetooth object");
-		}
-		
-		try{
-			// location
-			JSONObject locationObject = messageObject.getJSONObject(LOCATION);
-			tdsResponse.setLocationObject(locationObject);
-		} catch(JSONException e){
-			if (TwimightBaseActivity.D) Log.i(TAG, "No location object");
-		}
+		}		
 
 		try{
 			// certificate
@@ -366,10 +345,6 @@ public class TDSCommunication {
 	
 	public JSONObject getNotification() throws Exception{
 		return tdsResponse.getNotification();
-	}
-	
-	public int parseLocation() throws Exception{
-		return tdsResponse.parseLocation();
 	}
 	
 	public String parseCertificate() throws Exception{

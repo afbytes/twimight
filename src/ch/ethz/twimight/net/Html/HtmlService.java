@@ -113,7 +113,7 @@ public class HtmlService extends Service {
 		
 		Log.i(TAG, "check cache size");
 		Cursor c = htmlDbHelper.getDownloadedHtmls();
-		if(c.getCount() > 100){
+		if(c != null && c.getCount() > 100){
 			htmlDbHelper.clearHtmlPages(1*24*3600*1000);
 		}
 	}
@@ -214,7 +214,7 @@ public class HtmlService extends Service {
 			//download unsuccessfully downloaded pages			
 			cleanupMess();
 			c = htmlDbHelper.getUndownloadedHtmls(forced);	
-			if (c.getCount() > 0) {
+			if (c != null && c.getCount() > 0) {
 				c.moveToFirst();				
 			}
 			
