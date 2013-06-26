@@ -14,8 +14,6 @@
 package ch.ethz.twimight.net.tds;
 
 import java.security.KeyPair;
-import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,8 +22,8 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.location.Location;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.KeyManager;
@@ -88,15 +86,18 @@ public class TDSRequestMessage {
     
 	
 	public void createDisTweetsObject(Cursor tweets) throws JSONException {
-		if(tweets != null) {			
+		if(tweets != null && tweets.getCount() > 0) {
+			
+			tweets.moveToFirst();
 			disTweetsObject = new JSONObject();
 			JSONArray disTweetsArray = new JSONArray();
 			
 			while(!tweets.isAfterLast()) {
-				
+				Log.i("TDSRequestMessage" , "creating json object for disaster tweet");
 				JSONObject row = new JSONObject();
 				row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );
 				row.put("twitter_id", tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER)));
+				row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
 				row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 				
 				disTweetsArray.put(row);

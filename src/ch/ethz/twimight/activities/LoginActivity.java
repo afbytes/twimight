@@ -220,8 +220,8 @@ public class LoginActivity extends Activity implements OnClickListener{
 			if(buttonLogin != null){
 				buttonLogin.setOnClickListener(null);
 			}
+			TwimightBaseActivity.unbindDrawables(findViewById(R.id.showLoginRoot));
 			
-			unbindDrawables(findViewById(R.id.showLoginRoot));
 		}
 		
 		/**
@@ -710,25 +710,6 @@ public class LoginActivity extends Activity implements OnClickListener{
 		}
 		
 		
-		/**
-		 * Clean up the views
-		 * @param view
-		 */
-		private void unbindDrawables(View view) {
-		    if (view.getBackground() != null) {
-		        view.getBackground().setCallback(null);
-		    }
-		    if (view instanceof ViewGroup) {
-		        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-		            unbindDrawables(((ViewGroup) view).getChildAt(i));
-		        }
-		        try{
-		        	((ViewGroup) view).removeAllViews();
-		        } catch(UnsupportedOperationException e){
-		        	// No problem, nothing to do here
-		        }
-		    }
-		}
 		
 		/**
 		 * returns the one instance of this activity

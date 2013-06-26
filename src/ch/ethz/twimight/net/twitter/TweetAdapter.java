@@ -27,7 +27,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,6 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
-import ch.ethz.twimight.net.Html.HtmlPage;
 
 
 /** 
@@ -65,7 +63,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView favoriteStar ;
 		LinearLayout rowLayout;
 		ImageView verifiedImage ;
-		long tweetId = -1;
+		long disId = -1;
 	
 		 
 		}
@@ -155,7 +153,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			}
 		}		
 		
-		long tweetId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_TID));	
+		long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));	
 		
 		int col_html = cursor.getColumnIndex(Tweets.COL_HTML_PAGES);
 		if (col_html > -1) {
@@ -165,8 +163,9 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.textHtml.setVisibility(View.GONE);
 
 			if(hasHtml == 1){				
-
-				Cursor curHtml = htmlDbHelper.getTweetUrls(tweetId);
+				
+				
+				Cursor curHtml = htmlDbHelper.getTweetUrls(disId);
 
 				if (curHtml != null && curHtml.getCount() > 0) {		
 
@@ -203,10 +202,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){			
 
 
-			if (holder.tweetId == -1 || holder.tweetId != tweetId) {
+			if (holder.disId == -1 || holder.disId != disId) {
 				holder.picture.setImageResource(R.drawable.default_profile);
 				//holder.picture.setImageResource()
-				holder.tweetId = tweetId;
+				holder.disId = disId;
 				int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
 				Uri imageUri = Uri.parse("content://" +TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userRowId);
 				loadBitmap(imageUri, holder.picture, context);	

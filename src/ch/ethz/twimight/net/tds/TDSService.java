@@ -28,6 +28,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,6 +43,7 @@ import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
+import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
@@ -82,7 +84,7 @@ public class TDSService extends Service {
 
 	TDSCommunication tds;
 	// TDS request URL
-		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "/messages/push.json";		
+		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "messages/push.json";		
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -381,9 +383,10 @@ public class TDSService extends Service {
 				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
 				
 				//Preparing disaster tweets to be sent to the server
+				Cursor cursor = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + 
+						"/" + Tweets.TWEETS_TABLE_TIMELINE 	+ "/" + Tweets.TWEETS_SOURCE_DISASTER + "/" + Tweets.TWEETS_SINCE_LAST_UPDATE), null, null, null, null);
 				
-				getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
-				
+				tds.createDisTweetsObject(cursor);
 
 			} catch(Exception e) {
 				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
@@ -415,41 +418,6 @@ public class TDSService extends Service {
 					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				
-
-				// bluetooth
-				List<String> macsList = tds.parseBluetooth();
-				
-				if (macsList != null) {					
-					//TODO: 
-					///////////////////////////////////////////////////////////////////////
-					macsList.clear();
-					///////////////////////////////////////////////////////////////////////
-					if(!macsList.isEmpty()){
-						MacsDBHelper dbHelper = new MacsDBHelper(getApplicationContext());
-						dbHelper.open();
-
-						// temporarily de-activate all local MACs
-						dbHelper.updateMacsDeActive();
-
-						// insert new macs in the DB
-						Iterator<String> iterator = macsList.iterator();
-						while(iterator.hasNext()) {
-
-							String mac = iterator.next();
-							if(dbHelper.createMac(mac, 1) == -1){
-								dbHelper.updateMacActive(mac, 1);
-								if (TwimightBaseActivity.D) Log.d(TAG, "Already have MAC: " + mac);
-							} else {
-								if (TwimightBaseActivity.D) Log.d(TAG,"New MAC: " + mac);
-							}
-						}
-					} else {
-						if (TwimightBaseActivity.D) Log.d(TAG, "bluetooth mac list empty");
-					}
-				}			
-				
-				// location, nothing to do here
 
 				// certificate
 				String certPem = tds.parseCertificate();
@@ -498,7 +466,7 @@ public class TDSService extends Service {
 				}
 				if (TwimightBaseActivity.D) Log.i(TAG, "followers parsed");
 				
-				//NOTIFICATION				
+				//notification
 				try {
 					JSONObject notifMessage = tds.getNotification();
 					JSONArray notifArray = notifMessage.getJSONArray("list");					
@@ -513,6 +481,8 @@ public class TDSService extends Service {
 					
 				} catch(Exception ex){}
 				
+				//TODO: parsing list of tweets posted to the twitter servers
+				tds.parseDisTweets();
 
 			} catch(Exception e) {
 				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response",e);

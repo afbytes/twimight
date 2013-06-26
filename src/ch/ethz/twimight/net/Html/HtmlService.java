@@ -344,7 +344,7 @@ public class HtmlService extends Service {
 			if (!c.isNull(c.getColumnIndex(HtmlPage.COL_FILENAME))) {
 				
 				String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
-				Long tweetId = c.getLong(c.getColumnIndex(HtmlPage.COL_TID));
+				Long tweetId = c.getLong(c.getColumnIndex(HtmlPage.COL_DISASTERID));
 				String filename = c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME));
 				int forced = c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED));
 				int tries = c.getInt(c.getColumnIndex(HtmlPage.COL_ATTEMPTS));	
@@ -457,7 +457,7 @@ public class HtmlService extends Service {
 		public WebClientDownload(Cursor cursorHtml){
 
 			this.baseUrl = cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_URL));
-			this.tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_TID));	
+			this.tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_DISASTERID));	
 			this.forced = cursorHtml.getInt(cursorHtml.getColumnIndex(HtmlPage.COL_FORCED));
 			this.attempts = cursorHtml.getInt(cursorHtml.getColumnIndex(HtmlPage.COL_ATTEMPTS)) + 1;
 			this.loadingFailed = false;			

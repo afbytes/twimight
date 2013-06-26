@@ -722,9 +722,9 @@ public class TwitterService extends Service {
 		} else
 			return null;
 		
-		Long id = c.getLong(c.getColumnIndex(Tweets.COL_TID));		
-		if (id != null) {			
-			return new BigInteger(Long.toString(id));
+			
+		if (!c.isNull(c.getColumnIndex(Tweets.COL_TID))) {			
+			return new BigInteger(Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_TID))));
 		}
 		else
 			return null;
@@ -2931,7 +2931,7 @@ public class TwitterService extends Service {
 				c.moveToFirst();
 
 				// making sure we have an official Tweet ID from Twitter
-				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
+				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.isNull(c.getColumnIndex(Tweets.COL_TID))){
 					Log.w(TAG, "FavoriteStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					return null;
@@ -3058,7 +3058,7 @@ public class TwitterService extends Service {
 				c.moveToFirst();
 
 				// making sure we have an official Tweet ID from Twitter
-				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
+				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.isNull(c.getColumnIndex(Tweets.COL_TID))){
 					if (D) Log.w(TAG, "UnavoriteStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					ex = new Exception();
@@ -3183,7 +3183,7 @@ public class TwitterService extends Service {
 				c.moveToFirst();
 
 				// making sure we have an official Tweet ID from Twitter
-				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.getLong(c.getColumnIndex(Tweets.COL_TID)) == 0){
+				if(c.getColumnIndex(Tweets.COL_TID)<0 || c.isNull(c.getColumnIndex(Tweets.COL_TID))){
 					if (D) Log.w(TAG, "RetweetStatusTask: Tweet has no ID! " + this.rowId);
 					c.close();
 					ex = new Exception();

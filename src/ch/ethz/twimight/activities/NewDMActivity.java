@@ -167,6 +167,7 @@ public class NewDMActivity extends Activity{
 		
 		textWatcher = null;
 		
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showNewDMRoot));
 		
 	}
 	

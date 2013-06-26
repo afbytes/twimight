@@ -376,11 +376,10 @@ public class NewTweetActivity extends Activity{
 		sendButton.setOnClickListener(null);
 		sendButton = null;
 		
-		text.removeTextChangedListener(textWatcher);
-		text = null;
+		text.removeTextChangedListener(textWatcher);		
 		textWatcher = null;
 		
-		//unbindDrawables(findViewById(R.id.showNewTweetRoot));
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showNewTweetRoot));
 	}
 	
 	/**	
@@ -426,7 +425,7 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 			// if no connectivity, notify user that the tweet will be send later		
 				
 				ContentValues cv = createContentValues(); 
-				boolean isDisaster = false;
+				
 				if(PreferenceManager.getDefaultSharedPreferences(NewTweetActivity.this).getBoolean("prefDisasterMode", false) == true){				
 					
 					

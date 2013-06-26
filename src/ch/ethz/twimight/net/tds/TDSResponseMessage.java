@@ -15,7 +15,9 @@ package ch.ethz.twimight.net.tds;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,17 +126,20 @@ public class TDSResponseMessage {
 		
 	}
 	
-
+	
+	
 	/**
-	 * Parses the Notification object
+	 * Parses the authentication object
 	 */
-	public JSONObject getDisTweetsResponse() throws JSONException{
-
-		if(!hasDisTweetsObject()) 
-			return null;
-		else return disTweetsObject;	
+	public Map<Long,Long> parseDisTweetsResponse() throws JSONException{
+		
+		Log.i(TAG,"parsing dis tweets result");
+		if(!hasDisTweetsObject()) return null;
+		
+		return new HashMap<Long,Long>();
 		
 	}
+	
 
 	/**
 	 * Parses the authentication object
@@ -154,30 +159,14 @@ public class TDSResponseMessage {
 	/**
 	 * Requests a list of MAC addresses of potential Bluetooth peers 
 	 */
-	public List<String> parseBluetooth() throws JSONException{
+	public int getBluetoothResponse() throws JSONException{
 
-		if(!hasBluetoothObject()) return null;
+		if(!hasBluetoothObject()) return -1;
 
 		int statusCode = bluetoothObject.getInt("status"); 
-		if(statusCode != 200) {
-			if (TwimightBaseActivity.D) Log.e(TAG, "TDS returned bluetooth status error code" + statusCode);
-			return null;
-		}
+		return statusCode;
 		
-		if (TwimightBaseActivity.D) Log.d(TAG, "Bluetooth object status ok");
-		List<String> macList = new ArrayList<String>();
-		JSONArray macs = bluetoothObject.getJSONArray("list");
 		
-		if(macs!= null){
-			for(int i = 0 ; i < macs.length(); i++){
-				if (TwimightBaseActivity.D) Log.d(TAG, "macs length: " + macs.length() + " " + i);
-				if (TwimightBaseActivity.D) Log.d(TAG, "MAC: " + macs.getString(i));
-				macList.add(macs.getString(i));
-			}
-		}
-		if (TwimightBaseActivity.D) Log.i(TAG, "macs done ");
-
-		return macList;
 	}
 	
 	/**

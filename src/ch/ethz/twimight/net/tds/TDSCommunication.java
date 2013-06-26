@@ -18,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -34,7 +35,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
 import android.util.Log;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.security.RevocationListEntry;
@@ -55,6 +55,7 @@ public class TDSCommunication {
 	private static final String REVOCATION = "revocation";
 	private static final String FOLLOWER = "follower";	
 	private static final String STATISTIC = "statistic";	
+	private static final String DISASTER_TWEETS = "disaster_tweets";	
 	private static final String NOTIFICATION = "notification";
 	private static final String BUGS = "bugs";
 	
@@ -127,6 +128,16 @@ public class TDSCommunication {
 	 */
 	public int createStatisticObject(Cursor stats, long follCount) throws Exception{
 		tdsRequest.createStatisticObject(stats,follCount);
+		return 0;
+	}
+	
+	/**
+	 * Creates a new disaster tweets object in the request
+	 * @return
+	 * @throws JSONException 
+	 */
+	public int createDisTweetsObject(Cursor tweets ) throws Exception{
+		tdsRequest.createDisTweetsObject(tweets);
 		return 0;
 	}
 	
@@ -259,6 +270,12 @@ public class TDSCommunication {
 		if(tdsRequest.hasStatisticObject()){
 			requestObject.put(STATISTIC, tdsRequest.getStatisticObject());
 		}
+		
+
+		// disaster tweets
+		if(tdsRequest.hasDisTweetsObject()){
+			requestObject.put(DISASTER_TWEETS, tdsRequest.getDisTweetsObject());
+		}
 
 		if (TwimightBaseActivity.D) Log.i(TAG, requestObject.toString(5));
 		return requestObject;
@@ -339,12 +356,12 @@ public class TDSCommunication {
 		return tdsResponse.parseAuthentication();
 	}
 	
-	public List<String> parseBluetooth() throws Exception{
-		return tdsResponse.parseBluetooth();
-	}
-	
 	public JSONObject getNotification() throws Exception{
 		return tdsResponse.getNotification();
+	}
+	
+	public Map<Long,Long> parseDisTweets() throws Exception{
+		return tdsResponse.parseDisTweetsResponse();
 	}
 	
 	public String parseCertificate() throws Exception{

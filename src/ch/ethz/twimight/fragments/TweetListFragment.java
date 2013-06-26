@@ -12,8 +12,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -65,6 +67,8 @@ public class TweetListFragment extends ListFragment {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
+		listener = null;
+		
 		super.onDestroy();		
 	}
 
