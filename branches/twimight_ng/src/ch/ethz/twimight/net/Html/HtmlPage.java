@@ -27,7 +27,7 @@ public class HtmlPage implements BaseColumns {
 	public static final String COL_URL = "url"; /** url of the page */
 	public static final String COL_HTML = "text"; /** the page */
 	public static final String COL_FILENAME = "filename"; /** xml file filename of the web page stored locally */	
-	public static final String COL_TID = Tweets.COL_TID; /** the tweet id associated with this page*/	
+	public static final String COL_DISASTERID = Tweets.COL_DISASTERID; /** the tweet id associated with this page*/	
 	public static final String COL_ATTEMPTS= "attempts"; /** how many times app has tried to download the page */
 	public static final String COL_PAGE_ID = DBOpenHelper.ROW_ID;
 	public static final String COL_FORCED = "forced"; /** Transactional flags */

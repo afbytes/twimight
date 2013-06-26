@@ -84,9 +84,9 @@ public class HtmlPagesDbHelper {
 			for(c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 				
 				String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT_PLAIN));				
-				Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
+				Long disId = c.getLong(c.getColumnIndex(Tweets.COL_DISASTERID));
 				
-				insertLinksIntoDb(text,tid, type);
+				insertLinksIntoDb(text,disId, type);
 			}
 		}
 	}
@@ -164,7 +164,7 @@ public class HtmlPagesDbHelper {
 	//return all urls for a tweet
 	public Cursor getTweetUrls(long tweetId){
 		
-		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_TID + " =" + tweetId + "" , null, null, null, null);
+		Cursor c = database.query(DBOpenHelper.TABLE_HTML, null, HtmlPage.COL_DISASTERID + " = " + tweetId  , null, null, null, null);
 				
 		return c;
 	}
@@ -227,7 +227,7 @@ public class HtmlPagesDbHelper {
 		
 		values.put(HtmlPage.COL_FILENAME ,filename);
 		values.put(HtmlPage.COL_URL ,url);
-		values.put(HtmlPage.COL_TID,tweetId );			
+		values.put(HtmlPage.COL_DISASTERID,tweetId );			
 		values.put(HtmlPage.COL_FORCED, forced);
 		values.put(HtmlPage.COL_ATTEMPTS, tries);
 		return values;

@@ -60,6 +60,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.ShowUserActivity;
+import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
@@ -162,6 +163,7 @@ public class ShowTweetFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
     		Bundle savedInstanceState) {
+    	
     	// TODO Auto-generated method stub
     	super.onCreateView(inflater, container, savedInstanceState);
     	// Inflate the layout for activity fragment	
@@ -331,7 +333,8 @@ public class ShowTweetFragment extends Fragment{
 		String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity)};
 		if(sdCardHelper.checkSDState(filePath)){
 			
-			Long tweetId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
+			
+			Long tweetId = c.getLong(c.getColumnIndex(Tweets.COL_DISASTERID));
 			for(int i=0; i<htmlsToDownload.size();i++){
 				
 				Cursor cursorInfo = htmlDbHelper.getPageInfo(htmlsToDownload.get(i));
@@ -507,13 +510,13 @@ public class ShowTweetFragment extends Fragment{
 	
 		// Reply button: we show it only if we have a Tweet ID!
 		replyButton = (ImageButton) view.findViewById(R.id.showTweetReply);
-		if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0 || 
+		if(!c.isNull(c.getColumnIndex(Tweets.COL_TID)) || 
 				PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true){
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(activity, NewTweetActivity.class);
-					if(c.getLong(c.getColumnIndex(Tweets.COL_TID)) != 0)
+					if(!c.isNull(c.getColumnIndex(Tweets.COL_TID)))
 						i.putExtra("isReplyTo", c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 					else
 						i.putExtra("isReplyTo", -1);
@@ -906,7 +909,7 @@ public class ShowTweetFragment extends Fragment{
 		observer = null;
 		if (c != null)
 			c.close();
-
+		TwimightBaseActivity.unbindDrawables(getActivity().findViewById(R.id.showTweetRoot));
 
 	}
 
@@ -920,9 +923,8 @@ public class ShowTweetFragment extends Fragment{
 		       .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {		        	   
 		        	       	   
-		        	   queryContentProvider();
+		        	   queryContentProvider();	        	   
 		        	   
-		        	   Long tid = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		        	   String delPhotoName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		        	   
 		        	   if(delPhotoName != null){
@@ -954,7 +956,7 @@ public class ShowTweetFragment extends Fragment{
 		        		   }
 		        	   }
 		  
-		        	   if (tid != null && tid != 0)
+		        	   if (!c.isNull((c.getColumnIndex(Tweets.COL_TID))))
 		        		   resolver.update(uri, setDeleteFlag(flags), null, null);
 		        	   else {
 		        		   resolver.delete(uri,null,null );		        	       

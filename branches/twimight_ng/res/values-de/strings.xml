@@ -149,7 +149,7 @@
     <string name="revoke">Widerrufen</string>
     <string name="revoke_key">Bist du sicher dass du den Schlüssel widerrufen willst? Nur komprimittierte Schlüssel sollten widerrufen werden (z.B. fallst dein Telefon gestolen wurde).</string>
     <string name="revoking">Schlüssel wird widerrufen</string>
-    <string name="update">Twimight Server Update</string>
+    <string name="update">TDS Update</string>
     <string name="update_button">Update</string>
     
     <!-- Terms & Conditions -->

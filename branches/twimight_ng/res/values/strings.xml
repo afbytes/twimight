@@ -140,7 +140,7 @@
     <string name="revoke">Revoke</string>
     <string name="revoke_key">Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).</string>
     <string name="revoking">Revoking key.</string>
-    <string name="update">Twimight Server Update</string>
+    <string name="update">TDS Update</string>
     <string name="update_button">Update</string>
     
     <!-- Terms & Conditions -->

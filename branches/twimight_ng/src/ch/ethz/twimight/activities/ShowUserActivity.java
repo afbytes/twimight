@@ -200,7 +200,7 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		if(showFriendsButton!=null) showFriendsButton.setOnClickListener(null);
 		if(showUserTweetsButton!=null) showUserTweetsButton.setOnClickListener(null);
 		
-		unbindDrawables(findViewById(R.id.showUserRoot));
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showUserRoot));
 		
 		observer = null;
 		handler = null;

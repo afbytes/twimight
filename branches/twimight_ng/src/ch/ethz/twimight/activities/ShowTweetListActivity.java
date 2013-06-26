@@ -12,8 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.util.HashMap;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.content.Context;
@@ -28,9 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
-import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
@@ -49,7 +45,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	
 		
 	public static boolean running= false;
-	
 	// handler
 	static Handler handler;
 
@@ -249,7 +244,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis());
 		} else {}
 
-			
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.rootRelativeLayout));	
 		
 		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
 			Toast.makeText(this, getString(R.string.disastermode_running), Toast.LENGTH_LONG).show();

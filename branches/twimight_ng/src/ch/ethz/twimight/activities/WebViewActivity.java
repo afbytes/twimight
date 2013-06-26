@@ -72,7 +72,7 @@ public class WebViewActivity extends Activity {
 			sdCardHelper.deleteFile(webUri.getPath());
 			htmlDbHelper.updatePage(url,
 									null,
-									c.getLong(c.getColumnIndex(HtmlPage.COL_TID)),									
+									c.getLong(c.getColumnIndex(HtmlPage.COL_DISASTERID)),									
 									c.getInt(c.getColumnIndex(HtmlPage.COL_FORCED)),
 									c.getInt(c.getColumnIndex(HtmlPage.COL_ATTEMPTS)));
 			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);		

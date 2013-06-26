@@ -74,13 +74,31 @@ public class TwimightBaseActivity extends FragmentActivity{
 		actionBar.setHomeButtonEnabled(true);		
 		actionBar.setDisplayShowTitleEnabled(true);		
 		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
-		Resources resources = getResources();
-		dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
-		dn = resources.getDrawable(R.drawable.top_bar_background);
+		
+		if(dd == null || dn == null) {
+			Resources resources = getResources();
+			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
+			dn = resources.getDrawable(R.drawable.top_bar_background);
+		}		
 		actionBar.setBackgroundDrawable(dd);	
 		actionBar.setBackgroundDrawable(dn);	
 
 	}
+	
+	
+    
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		dd.setCallback(null);
+		dn.setCallback(null);
+		dd = null;
+		dn = null;
+		super.onDestroy();
+	}
+
+
 
 
 	/**
@@ -94,8 +112,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) 
 			actionBar.setBackgroundDrawable(dd);		
 		else 			
-			actionBar.setBackgroundDrawable(dn);			
-		
+			actionBar.setBackgroundDrawable(dn);		
 
 	}
 	
@@ -340,7 +357,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 	 * Clean up the views
 	 * @param view
 	 */
-	protected void unbindDrawables(View view) {
+	public static void unbindDrawables(View view) {
 	
 	    if (view.getBackground() != null) {
 	        view.getBackground().setCallback(null);

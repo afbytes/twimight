@@ -124,7 +124,7 @@ public class AboutActivity extends Activity{
 		revokeButton.setOnClickListener(null);
 		updateButton.setOnClickListener(null);
 		
-		//unbindDrawables(findViewById(R.id.showAboutRoot));
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showAboutRoot));
 
 
 	}

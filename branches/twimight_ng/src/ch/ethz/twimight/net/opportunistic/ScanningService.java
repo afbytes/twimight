@@ -599,7 +599,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			Log.i(TAG, "process HTML");
 			String xmlContent = o.getString(HtmlPage.COL_HTML);			
 			String filename =  o.getString(HtmlPage.COL_FILENAME);
-			Long tweetId = o.getLong(HtmlPage.COL_TID);
+			Long tweetId = o.getLong(HtmlPage.COL_DISASTERID);
 			String htmlUrl = o.getString(HtmlPage.COL_URL);
 			
 			
@@ -671,7 +671,9 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private void sendDisasterTweets(Long last) {			
 		// get disaster tweets
 			
-		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+		Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS + "/" + 
+											Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER);
+		
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);			
 		Log.d(TAG, "count:" + String.valueOf(c.getCount()));
 		boolean prefWebShare = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefWebShare", false);
@@ -799,7 +801,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 						
 						String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
 						String filename = cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME));
-						Long tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_TID));
+						Long tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_DISASTERID));
 						if(sdCardHelper.checkSDState(filePath)){
 							
 							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
@@ -807,7 +809,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 								toSendXml = getJSONFromXml(xmlFile);								
 								toSendXml.put(HtmlPage.COL_URL, subUrl);
 								toSendXml.put(HtmlPage.COL_FILENAME, filename);
-								toSendXml.put(HtmlPage.COL_TID, tweetId);
+								toSendXml.put(HtmlPage.COL_DISASTERID, tweetId);
 								Log.d(TAG, "sending htmls");
 								Log.d(TAG, toSendXml.toString(5));
 								bluetoothHelper.write(toSendXml.toString());
@@ -957,7 +959,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			if(c.getColumnIndex(Tweets.COL_HTML_PAGES) >=0)
 				o.put(Tweets.COL_HTML_PAGES, c.getString(c.getColumnIndex(Tweets.COL_HTML_PAGES)));
 			if(c.getColumnIndex(Tweets.COL_SOURCE) >=0)
-				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));		
+				o.put(Tweets.COL_SOURCE, c.getString(c.getColumnIndex(Tweets.COL_SOURCE)));	
+			
+			if(c.getColumnIndex(Tweets.COL_TID) >=0 && !c.isNull(c.getColumnIndex(Tweets.COL_TID)))
+				o.put(Tweets.COL_TID, c.getLong(c.getColumnIndex(Tweets.COL_TID)));				
 
 			if( c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH) >=0 && c.getColumnIndex("userRowId") >= 0 ) {
 				Log.i(TAG,"adding picture");
@@ -1019,6 +1024,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		if(o.has(Tweets.COL_USER)) {			
 			cv.put(Tweets.COL_USER, o.getLong(Tweets.COL_USER));
 		}
+		
+		if(o.has(Tweets.COL_TID)) {			
+			cv.put(Tweets.COL_TID, o.getLong(Tweets.COL_TID));
+		}
+		
 		if(o.has(Tweets.COL_REPLYTO))
 			cv.put(Tweets.COL_REPLYTO, o.getLong(Tweets.COL_REPLYTO));
 		

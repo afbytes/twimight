@@ -57,7 +57,7 @@ import android.util.Log;
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		// When the tab is selected, switch to the
         // corresponding page in the ViewPager.
-		Log.i("TabListener", "inside onTabSelecred, position = " + tab.getPosition());
+		Log.d("TabListener", "inside onTabSelecred, position = " + tab.getPosition());
         vPager.setCurrentItem(tab.getPosition());
 		
 	}
