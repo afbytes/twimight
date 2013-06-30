@@ -228,8 +228,16 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 	public void onDestroy(){
 		super.onDestroy();
 		running = false;
+		
 		pagAdapter = null;
 		viewPager = null;
+		
+		dd.setCallback(null);
+		dn.setCallback(null);
+		dd = null;
+		dn = null;
+		actionBar = null;
+		
 		Log.i(TAG,"destroying main activity");
 		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
 				cm.getActiveNetworkInfo() != null) {

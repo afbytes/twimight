@@ -597,7 +597,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
 						// notify user
 						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
-						Log.i(TAG,"notifying");
+						
 					}
 				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
@@ -628,7 +628,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	 * Creates and triggers the status bar notifications
 	 */
 	private void notifyUser(int type, String tickerText){
-		Log.i(TAG,"notify dm");
+		
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();

@@ -85,8 +85,7 @@ public class Tweets implements BaseColumns {
 	//public static final String COL_URLS = ""; /** url hashtag */
 	public static final String COL_HTML_PAGES = "html_pages"; /** status of html pages related to this tweet, 0: not have, 1: does have */
 	
-	// for disaster mode
-	public static final String COL_ISDISASTER = "is_disaster_tweet"; /** disaster or normal tweet? */
+	// for disaster mode	
 	public static final String COL_DISASTERID = "d_id"; /** the disaster ID of the tweet (for both, disaster and normal tweets) this is the java hashcode (32Bit) of the String TWEETS_COLUMNS_TEXT+TWEETS_COLUMNS_USER */
 	public static final String COL_ISVERIFIED = "is_verified"; /** is the signature of the disaster tweet valid? */
 	public static final String COL_SIGNATURE = "signature"; /** the signature of the disaster tweet */

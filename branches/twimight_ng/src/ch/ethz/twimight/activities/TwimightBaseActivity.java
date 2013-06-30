@@ -51,7 +51,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 	
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
-	public static final boolean D = false;
+	public static final boolean D = true;
 	
 	
 	ActionBar actionBar;
@@ -79,27 +79,10 @@ public class TwimightBaseActivity extends FragmentActivity{
 			Resources resources = getResources();
 			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
 			dn = resources.getDrawable(R.drawable.top_bar_background);
-		}		
-		actionBar.setBackgroundDrawable(dd);	
-		actionBar.setBackgroundDrawable(dn);	
+		}	
 
 	}
 	
-	
-    
-
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		dd.setCallback(null);
-		dn.setCallback(null);
-		dd = null;
-		dn = null;
-		super.onDestroy();
-	}
-
-
-
 
 	/**
 	 * on Resume
@@ -107,15 +90,19 @@ public class TwimightBaseActivity extends FragmentActivity{
 	@Override
 	public void onResume(){
 		super.onResume();
-		instance = this;	
-		
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) 
-			actionBar.setBackgroundDrawable(dd);		
-		else 			
-			actionBar.setBackgroundDrawable(dn);		
+		instance = this;				
+
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			actionBar.setBackgroundDrawable(dd);  
+			Log.i(TAG,"setting disaster background");
+		}
+		else  {             
+			actionBar.setBackgroundDrawable(dn);
+			Log.i(TAG,"setting normal background");
+		}
 
 	}
-	
+
 
 	/*
 
@@ -358,20 +345,22 @@ public class TwimightBaseActivity extends FragmentActivity{
 	 * @param view
 	 */
 	public static void unbindDrawables(View view) {
-	
-	    if (view.getBackground() != null) {
-	        view.getBackground().setCallback(null);
-	    }
-	    if (view instanceof ViewGroup) {
-	        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
-	            unbindDrawables(((ViewGroup) view).getChildAt(i));
-	        }
-	        try{
-	        	((ViewGroup) view).removeAllViews();
-	        } catch(UnsupportedOperationException e){
-	        	// No problem, nothing to do here
-	        }
-	    }
+		if (view != null){
+			if (view.getBackground() != null) {
+		        view.getBackground().setCallback(null);
+		    }
+		    if (view instanceof ViewGroup) {
+		        for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+		            unbindDrawables(((ViewGroup) view).getChildAt(i));
+		        }
+		        try{
+		        	((ViewGroup) view).removeAllViews();
+		        } catch(UnsupportedOperationException e){
+		        	// No problem, nothing to do here
+		        }
+		    }
+		}
+	    
 	}
 	
 	

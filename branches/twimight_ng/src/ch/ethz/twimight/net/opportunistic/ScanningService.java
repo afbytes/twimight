@@ -33,6 +33,7 @@ import android.app.AlarmManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -142,16 +143,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
         bluetoothHelper = new BluetoothComms(mHandler);
         bluetoothHelper.start();
 		dbHelper = new MacsDBHelper(getApplicationContext());
-		dbHelper.open();			
-		
-		receiver = new DevicesReceiver(getApplicationContext());
-		
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);		
-		registerReceiver(receiver,filter);
-		// Register for broadcasts when discovery has finished
-		filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-		registerReceiver(receiver, filter);
-		receiver.setListener(this);
+		dbHelper.open();	
 
 		//sdCard helper
 		sdCardHelper = new SDCardHelper();
@@ -164,30 +156,43 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 
 
+	private void registerDevicesReceiver() {
+		unregisterDevReceiver();
+		receiver = new DevicesReceiver(getApplicationContext());
+		receiver.setListener(this);
+		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);		
+		registerReceiver(receiver,filter);
+		filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+		registerReceiver(receiver, filter);
+		
+	}
+
+
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		
 		super.onStartCommand(intent, flags, startId);
-		Log.i(TAG,"scanning service started");
 		
 		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 			
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);		
-		
+		Log.i(TAG,"onStartCommand");
+		// Register for broadcasts when discovery has finished
+		registerDevicesReceiver();		
+
 		//Bundle scanInfo = receiver.getScanInfo();
 		//float scanRef = scanInfo.getFloat(receiver.SCAN_PROBABILITY);	
 		float scanRef = 1;		
 		float scanProb;
-		
-		if (intent.getBooleanExtra(FORCED_BLUE_SCAN, false))
+
+		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, true))
 			scanProb = 0;
 		else {
 			//get a random number
 			Random r = new Random(System.currentTimeMillis());
 			scanProb = r.nextFloat();
-		}	
-		
-		Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
+		}
 		
 		if (mBtAdapter != null && ! restartingBlue) {
 			if(scanProb <= scanRef){
@@ -199,8 +204,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				}
 				// Request discover from BluetoothAdapter
 				dbHelper.updateMacsDeActive();
-				mBtAdapter.startDiscovery();
-				Log.i(TAG,"discovery started");
+				mBtAdapter.startDiscovery();				
 
 				ShowTweetListActivity.setLoading(true);
 			}
@@ -263,15 +267,15 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		mHandler.removeMessages(Constants.BLUETOOTH_RESTART);
 		releaseWakeLock();
 		bluetoothHelper.stop();
-		bluetoothHelper = null;
-		Log.i(TAG,"blue helper is now null");
+		bluetoothHelper = null;		
 	   // Make sure we're not doing discovery anymore
         if (mBtAdapter != null) {
             mBtAdapter.cancelDiscovery();
         }
-		unregisterReceiver(receiver);
-		receiver = null;
-		unregisterStateReceiver();
+        if (receiver != null)
+        	Log.i(TAG, "receiver not null");
+		unregisterDevReceiver();		
+		unregisterStateReceiver();		
 		super.onDestroy();
 	}
 
@@ -414,13 +418,14 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {          
-
+			
 			case Constants.MESSAGE_READ:  
-				if(msg.obj.toString().equals("####CLOSING_REQUEST####")) {
+				if(msg.obj.toString().equals("<closing_request>")) {					
+					bluetoothHelper.write("<ack_closing_request>");					
 
-					if (TwimightBaseActivity.D) Log.i(TAG,"closing request received, connection shutdown");
+				} else if (msg.obj.toString().equals("<ack_closing_request>")) {
+					if (TwimightBaseActivity.D) Log.i(TAG,"ack closing request received, connection shutdown");
 					bluetoothHelper.start();
-
 				} else 
 					new ProcessDataReceived().execute(msg.obj.toString());	//not String, object instead
 				
@@ -441,7 +446,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				//new SendDisasterData(msg.obj.toString()).execute(last);				
 				sendDisasterTweets(last);
 				sendDisasterDM(last);	
-				bluetoothHelper.write("####CLOSING_REQUEST####");
+				bluetoothHelper.write("<closing_request>");
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
 				
 				
@@ -467,7 +472,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				
 			case Constants.BLUETOOTH_RESTART:         	 
 				if (TwimightBaseActivity.D) Log.i(TAG, "blue restart"); 
-				unregisterStateReceiver();
+				unregisterStateReceiver();				
 				stateReceiver = new StateChangedReceiver();
 				IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
 				stateReceiver.setListener(ScanningService.this);
@@ -553,8 +558,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		try {
 			Log.i(TAG, "processTweet");
 			ContentValues cvTweet = getTweetCV(o);
-			cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);			
-
+			cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);	
+			
 			// we don't enter our own tweets into the DB.
 			if(!cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(getApplicationContext()))){				
 
@@ -1137,15 +1142,26 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	@Override
 	public void onScanningFinished() {
 		Log.i(TAG,"onScanningFinished");
+		unregisterDevReceiver();
+		receiver = null;
 		startScanning();
 		ShowTweetListActivity.setLoading(false);
 		
 	}
 
 	
+	private void unregisterDevReceiver() {
+		if (receiver != null) {
+			receiver.setListener(null);
+			unregisterReceiver(receiver);			
+			receiver = null;
+		}
+	}
+	
 	private void unregisterStateReceiver() {
 		if (stateReceiver != null) {
-			unregisterReceiver(stateReceiver);
+			stateReceiver.setListener(null);
+			unregisterReceiver(stateReceiver);			
 			stateReceiver = null;
 		}
 	}
@@ -1154,7 +1170,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	public void onSwitchingFinished() {
 		if (bluetoothHelper != null) {
 			bluetoothHelper.start();	
-			unregisterStateReceiver();
+			unregisterStateReceiver();			
 			restartingBlue = true;
 		}
 		

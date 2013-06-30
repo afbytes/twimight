@@ -134,7 +134,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		
 		
 		holder.tweetText.setText(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
-		
+		//Log.i(TAG, "text: " + cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
 		
 		boolean retweeted = false;
 		//add the retweet message in case it is a retweet
@@ -236,9 +236,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.favoriteStar.setVisibility(ImageView.GONE);
 		}
 		
+		int buffer = cursor.getInt(cursor.getColumnIndex(Tweets.COL_BUFFER));
 		// disaster info		
-		if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISDISASTER))>0){
-			
+		if( (buffer & Tweets.BUFFER_DISASTER) != 0 ){
+			//Log.i(TAG,"col is disaster > 0");
 			holder.rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
 		
 			holder.verifiedImage.setVisibility(ImageView.VISIBLE);
@@ -260,6 +261,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
 			holder.verifiedImage.setVisibility(ImageView.GONE);
 		}
+		
+		
 		
 	}	
 	

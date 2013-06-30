@@ -194,11 +194,13 @@ public class ShowTweetFragment extends Fragment{
     			setTweetInfo();
     			setUserInfo();			
     			setProfilePicture();	
-    			
+
     			setPhotoAttached();
 
-    			// Tweet background and disaster info
-    			if(c.getInt(c.getColumnIndex(Tweets.COL_ISDISASTER))>0){
+    			int buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+    			// disaster info		
+    			if( (buffer & Tweets.BUFFER_DISASTER) != 0 ){
+
     				if(c.getInt(c.getColumnIndex(Tweets.COL_ISVERIFIED))==0){
     					LinearLayout unverifiedInfo = (LinearLayout) view.findViewById(R.id.showTweetUnverified);
     					unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
@@ -210,7 +212,7 @@ public class ShowTweetFragment extends Fragment{
 
     			handleTweetFlags();					
     			setupButtons();		
-    			
+
     			setHtml();
 
     			// If there are any flags, schedule the Tweet for synch
@@ -1036,7 +1038,7 @@ public class ShowTweetFragment extends Fragment{
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_RETWEET);
 		
 		if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON)==true) {
-			cv.put(Tweets.COL_ISDISASTER, 1);
+			
 			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_DISASTER);
 		} else
 			cv.put(Tweets.COL_BUFFER, buffer);
