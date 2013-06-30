@@ -90,13 +90,14 @@ public class DevicesReceiver extends BroadcastReceiver {
 		} else  if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {   
 			Log.i(TAG, "received discovery finished");
 
-			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 5000) {
+			if ( (System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
 			    	setDiscoveryFinishedTimestamp(sharedPref,System.currentTimeMillis());
 			    	addPairedDevices();
-			    	sf.onScanningFinished();
+			    	if (sf != null)
+			    		sf.onScanningFinished();
 			    	//compareDevice();
-			    }
-				
+			}
+
         } 
 
 	}

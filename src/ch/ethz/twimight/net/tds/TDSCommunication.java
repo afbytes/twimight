@@ -48,7 +48,6 @@ public class TDSCommunication {
 	// the object names in requests and responses
 	private static final String MESSAGE = "message";
 	private static final String CERTIFICATE = "certificate";
-	private static final String LOCATION = "location";
 	private static final String BLUETOOTH = "bluetooth";
 	private static final String AUTHENTICATION = "authentication";
 	private static final String VERSION = "version";

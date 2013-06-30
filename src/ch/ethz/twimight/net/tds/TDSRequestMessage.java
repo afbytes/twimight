@@ -93,19 +93,27 @@ public class TDSRequestMessage {
 			JSONArray disTweetsArray = new JSONArray();
 			
 			while(!tweets.isAfterLast()) {
-				Log.i("TDSRequestMessage" , "creating json object for disaster tweet");
-				JSONObject row = new JSONObject();
-				row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );
-				row.put("twitter_id", tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER)));
-				row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
-				row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
+				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))){
+					JSONObject row = new JSONObject();
+					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );
+					if (tweets.isNull(tweets.getColumnIndex(Tweets.COL_TID)))				
+						row.put("published", false);
+					else
+						row.put("published", true);
+					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
+					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
+					
+					disTweetsArray.put(row);
+				}
 				
-				disTweetsArray.put(row);
 				tweets.moveToNext();
 			}
 			tweets.close();
 			
-			disTweetsObject.put("content", disTweetsArray);
+			if (disTweetsArray.length() > 0)
+				disTweetsObject.put("content", disTweetsArray);
+			else
+				disTweetsObject = null;
 			
 		}
 	}
