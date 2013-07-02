@@ -20,11 +20,13 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -223,6 +225,22 @@ public class KeyManager {
 
 		return PUBLIC;
 	}
+	
+	private byte[] computeHash(String text) {
+		MessageDigest crypt;
+		
+		try {
+			crypt = MessageDigest.getInstance("SHA-1");
+			crypt.reset();
+			crypt.update(text.getBytes());
+			return crypt.digest();
+			
+		} catch (NoSuchAlgorithmException e) {
+			
+		}
+		return null;
+		
+	}
 
 	/**
 	 * Computes a signature: RSA Encrypted the hash of the text.
@@ -231,30 +249,33 @@ public class KeyManager {
 	 */
 	public String getSignature(String text){
 
-		String hash = Long.toString(text.hashCode());
+		byte[] hash = computeHash(text);
 
-		try {			
-			Cipher cipher = Cipher.getInstance("RSA");
-			KeyPair kp = getKey();			    
+		if (hash != null) {
+			try {			
+				Cipher cipher = Cipher.getInstance("RSA");
+				KeyPair kp = getKey();			    
 
-			RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+				RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
 
-			cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-			byte[] signature = cipher.doFinal(hash.getBytes());
+				cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+				byte[] signature = cipher.doFinal(hash);
 
-			String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
-			Log.d(TAG, "Signature: " + signatureString);
+				String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
+				Log.d(TAG, "Signature: " + signatureString);
 
-			return signatureString;			
+				return signatureString;			
 
-		} catch (NoSuchAlgorithmException e) {				
-		} catch (NoSuchPaddingException e) {				
-		} catch (IllegalBlockSizeException e) {				
-		} catch (BadPaddingException e) {				
-		} catch (InvalidKeyException e) {				
-		} 
+			} catch (NoSuchAlgorithmException e) {				
+			} catch (NoSuchPaddingException e) {				
+			} catch (IllegalBlockSizeException e) {				
+			} catch (BadPaddingException e) {				
+			} catch (InvalidKeyException e) {				
+			} 
+		}
 		return null;
 	}
+
 
 
 	/**
@@ -267,25 +288,28 @@ public class KeyManager {
 	public boolean checkSignature(X509CertificateObject cert, String signature, String text) {
 
 		
-		String originalHash = Long.toString(text.hashCode());
-		  		  
-		  try {
-			  
-				// get the public key from the certificate
-			  	RSAPublicKey PUBLIC = (RSAPublicKey) cert.getPublicKey();
-			  	
-				Cipher cipher = Cipher.getInstance("RSA");			    	    
-				cipher.init(Cipher.DECRYPT_MODE, PUBLIC);
-				// we get the signature in base 64 encoding -> decode first
-				String decryptedHash = new String(cipher.doFinal(Base64.decode(signature, Base64.DEFAULT)));
-				return originalHash.equals(decryptedHash);
-				
-		  	} catch (NoSuchAlgorithmException e) {			
-			} catch (NoSuchPaddingException e) {			
-			} catch (InvalidKeyException e) {			
-			} catch (IllegalBlockSizeException e) {			
-			} catch (BadPaddingException e) {			
-			} 
+		  byte[] originalHash = computeHash(text);
+		  
+		  if (originalHash != null) {
+			  try {
+				  
+					// get the public key from the certificate
+				  	RSAPublicKey PUBLIC = (RSAPublicKey) cert.getPublicKey();
+				  	
+					Cipher cipher = Cipher.getInstance("RSA");			    	    
+					cipher.init(Cipher.DECRYPT_MODE, PUBLIC);
+					// we get the signature in base 64 encoding -> decode first					
+					return Arrays.equals(originalHash,cipher.doFinal(Base64.decode(signature, Base64.DEFAULT)) );					
+					
+			  	} catch (NoSuchAlgorithmException e) {			
+				} catch (NoSuchPaddingException e) {			
+				} catch (InvalidKeyException e) {			
+				} catch (IllegalBlockSizeException e) {			
+				} catch (BadPaddingException e) {			
+				}
+		  }
+		  
+		   
 		return false;
 	}
 	
