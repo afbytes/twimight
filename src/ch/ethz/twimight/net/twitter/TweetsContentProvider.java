@@ -226,8 +226,8 @@ public class TweetsContentProvider extends ContentProvider {
 		    case TWEETS_TIMELINE_DISASTER_NEW:		   
 		    	Log.i(TAG,"executing query for new dis tweets");
 		    	long timestamp_dis = TDSService.getLastUpdate(getContext());
-		    	sql = Tweets.COL_BUFFER+"&"+Tweets.BUFFER_DISASTER + " != 0 AND " + Tweets.COL_RECEIVED + "> " + timestamp_dis 
-		    			+ " AND " + Tweets.COL_TID + " is null" ; 
+		    	sql = Tweets.COL_BUFFER+" & ("+Tweets.BUFFER_DISASTER + "|" + Tweets.BUFFER_MYDISASTER + ") != 0 AND " + 
+		    	Tweets.COL_RECEIVED + " > " + timestamp_dis; 
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, sql, null, null, null, Tweets.DEFAULT_SORT_ORDER);
 				
 				
@@ -899,6 +899,7 @@ public class TweetsContentProvider extends ContentProvider {
 		if(cm.hasCertificate()){
 			// we put the signature
 			String text = values.getAsString(Tweets.COL_TEXT);
+			//Log.i(TAG,"text: "+ text);
 			String userId = LoginActivity.getTwitterId(getContext()).toString();
 			
 			String signature = km.getSignature(new String(text+userId));

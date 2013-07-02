@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.KeyManager;
@@ -93,13 +92,11 @@ public class TDSRequestMessage {
 			JSONArray disTweetsArray = new JSONArray();
 			
 			while(!tweets.isAfterLast()) {
+				
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))){
 					JSONObject row = new JSONObject();
-					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );
-					if (tweets.isNull(tweets.getColumnIndex(Tweets.COL_TID)))				
-						row.put("published", false);
-					else
-						row.put("published", true);
+					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );					
+					row.put(Tweets.COL_TID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TID)));
 					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
 					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 					
