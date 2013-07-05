@@ -223,11 +223,11 @@ public class TweetsContentProvider extends ContentProvider {
 		Intent i;
 		switch(tweetUriMatcher.match(uri)){
 		
-		    case TWEETS_TIMELINE_DISASTER_NEW:		   
-		    	Log.i(TAG,"executing query for new dis tweets");
+		    case TWEETS_TIMELINE_DISASTER_NEW:				    	
 		    	long timestamp_dis = TDSService.getLastUpdate(getContext());
 		    	sql = Tweets.COL_BUFFER+" & ("+Tweets.BUFFER_DISASTER + "|" + Tweets.BUFFER_MYDISASTER + ") != 0 AND " + 
-		    	Tweets.COL_RECEIVED + " > " + timestamp_dis; 
+		    	Tweets.COL_RECEIVED + " >= " + timestamp_dis; 
+		    	Log.i(TAG,"sql: " + sql);
 				c = database.query(DBOpenHelper.TABLE_TWEETS, null, sql, null, null, null, Tweets.DEFAULT_SORT_ORDER);
 				
 				
@@ -902,7 +902,7 @@ public class TweetsContentProvider extends ContentProvider {
 			//Log.i(TAG,"text: "+ text);
 			String userId = LoginActivity.getTwitterId(getContext()).toString();
 			
-			String signature = km.getSignature(new String(text+userId));
+			String signature = km.getSignature(new String(text+userId));			
 			values.put(Tweets.COL_SIGNATURE, signature);
 			
 			// and the certificate

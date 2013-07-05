@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -41,9 +42,6 @@ public class PrefsActivity extends PreferenceActivity{
 	private OnSharedPreferenceChangeListener prefListener;
 	private SharedPreferences prefs;
 	BluetoothAdapter mBluetoothAdapter;
-
-	// the menu
-	private static final int OPTIONS_MENU_HOME = 10;
 	static final int REQUEST_DISCOVERABLE = 2;
 
 	/**
@@ -166,8 +164,9 @@ public class PrefsActivity extends PreferenceActivity{
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), true);
 		else
 			ScanningAlarm.setBluetoothInitialState(getBaseContext(), false);
-		
+		//for statistics
 		setDisasterModeUsed();
+		
 		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {		
 			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);			
@@ -201,11 +200,19 @@ public class PrefsActivity extends PreferenceActivity{
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
-		case REQUEST_DISCOVERABLE:
-			Log.d(TAG,"resultcode = " + resultCode); 
+		case REQUEST_DISCOVERABLE:		
 			
-			new ScanningAlarm(getApplicationContext(),true);
-			finish();
+			if (resultCode == BluetoothAdapter.STATE_CONNECTING) {
+				new ScanningAlarm(getApplicationContext(),true);
+				finish();
+			} else if (resultCode == BluetoothAdapter.STATE_DISCONNECTED) {
+				SharedPreferences.Editor edit = prefs.edit();
+				edit.putBoolean(getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON);
+				edit.commit();	
+				CheckBoxPreference disPref = (CheckBoxPreference)findPreference(getString(R.string.prefDisasterMode));
+				disPref.setChecked(false);
+			}
+			
 			
 		}
 	}  

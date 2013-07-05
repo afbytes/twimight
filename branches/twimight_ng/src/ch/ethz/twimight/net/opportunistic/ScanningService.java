@@ -266,8 +266,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		mHandler.removeMessages(Constants.MESSAGE_CONNECTION_SUCCEEDED);
 		mHandler.removeMessages(Constants.BLUETOOTH_RESTART);
 		releaseWakeLock();
-		bluetoothHelper.stop();
-		bluetoothHelper = null;		
+		bluetoothHelper.stop();		
 	   // Make sure we're not doing discovery anymore
         if (mBtAdapter != null) {
             mBtAdapter.cancelDiscovery();
@@ -445,10 +444,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
 				//new SendDisasterData(msg.obj.toString()).execute(last);				
 				sendDisasterTweets(last);
-				sendDisasterDM(last);	
-				bluetoothHelper.write("<closing_request>");
-				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
-				
+				sendDisasterDM(last);
+				if (bluetoothHelper != null) {
+					bluetoothHelper.write("<closing_request>");
+					dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
+				}				
 				
 				break;   
 			case Constants.MESSAGE_CONNECTION_FAILED:             

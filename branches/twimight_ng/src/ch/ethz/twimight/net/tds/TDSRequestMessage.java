@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.KeyManager;
@@ -85,7 +86,9 @@ public class TDSRequestMessage {
     
 	
 	public void createDisTweetsObject(Cursor tweets) throws JSONException {
-		if(tweets != null && tweets.getCount() > 0) {
+		
+		Log.i("tdsRequest", "tweet cursor count: " + tweets.getCount());
+		if(tweets != null && tweets.getCount() > 0) {			
 			
 			tweets.moveToFirst();
 			disTweetsObject = new JSONObject();
@@ -96,7 +99,7 @@ public class TDSRequestMessage {
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))){
 					JSONObject row = new JSONObject();
 					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );					
-					row.put(Tweets.COL_TID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TID)));
+					row.put(Tweets.COL_USER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER)));
 					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
 					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 					
