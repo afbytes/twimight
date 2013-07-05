@@ -232,6 +232,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		pagAdapter = null;
 		viewPager = null;
 		
+		Log.i(TAG,"setting dd and dn to null");
 		dd.setCallback(null);
 		dn.setCallback(null);
 		dd = null;

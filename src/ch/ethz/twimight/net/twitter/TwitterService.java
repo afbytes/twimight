@@ -400,25 +400,25 @@ public class TwitterService extends Service {
 			// get the flagged tweets
 			Uri queryUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS);
 			Cursor c = null;
-			
-				c = getContentResolver().query(queryUri, null, Tweets.COL_FLAGS+"!=0", null, null);		
-				if(c!=null) {
-					if(c.getCount() >= 0){
-						c.moveToFirst();
-						while(!c.isAfterLast()){
-							synchTweet(c,FALSE);
-							c.moveToNext();
-						}
-					}				
+
+			c = getContentResolver().query(queryUri, null, Tweets.COL_FLAGS+"!=0", null, null);		
+			if(c!=null && c.getCount() >= 0) {
 				
-					c.close();
+				c.moveToFirst();
+				while(!c.isAfterLast()){					
+					synchTweet(c,FALSE);
+					c.moveToNext();
 				}
-				
-			
+
+
+				c.close();
+			}
+
+
 			return null;
 		}
-		
-		
+
+
 	}
 
 	/**
@@ -428,7 +428,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			
+
 			// get the flagged messages
 			Uri queryUri = Uri.parse("content://"+DirectMessages.DM_AUTHORITY+"/"+DirectMessages.DMS);
 			Cursor c = null;

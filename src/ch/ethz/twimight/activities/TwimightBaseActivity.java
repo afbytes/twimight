@@ -76,6 +76,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
 		
 		if(dd == null || dn == null) {
+			Log.i(TAG,"loading action bar backgrounds");
 			Resources resources = getResources();
 			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
 			dn = resources.getDrawable(R.drawable.top_bar_background);
@@ -91,12 +92,17 @@ public class TwimightBaseActivity extends FragmentActivity{
 	public void onResume(){
 		super.onResume();
 		instance = this;				
-
+		
+		
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
+			if (dd == null)
+				Log.i(TAG,"dd null");			
 			actionBar.setBackgroundDrawable(dd);  
 			Log.i(TAG,"setting disaster background");
 		}
-		else  {             
+		else  {   
+			if (dn == null)
+				Log.i(TAG,"dn null");
 			actionBar.setBackgroundDrawable(dn);
 			Log.i(TAG,"setting normal background");
 		}

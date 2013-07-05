@@ -439,7 +439,9 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 					
 					// our own tweets go into the timeline buffer
 					cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE);
-
+					//we publish on twitter directly only normal tweets
+					cv.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);	
+					
 					insertUri = getContentResolver().insert(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + 
 																Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
 					getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
@@ -495,10 +497,7 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
 		if (isReplyTo > 0) {
 			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
-		}
-		
-		// we mark the tweet for posting to twitter
-		tweetContentValues.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);		
+		}	
 		// set the current timestamp
 		tweetContentValues.put(Tweets.COL_CREATED, System.currentTimeMillis());
 		

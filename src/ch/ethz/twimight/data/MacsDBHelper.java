@@ -292,7 +292,7 @@ public class MacsDBHelper {
 	public Cursor fetchActiveMacs() throws SQLException {
 		Cursor mCursor = database.query(true, DBOpenHelper.TABLE_MACS, new String[] {
 				KEY_MAC, KEY_ATTEMPTS, KEY_SUCCESSFUL, KEY_ACTIVE},
-				KEY_ACTIVE + "= 1 ", null, null, null, null, null);
+				KEY_ACTIVE + "= 1 ", null, null, null, MacsDBHelper.KEY_SUCCESSFUL + " DESC",null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}
