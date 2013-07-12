@@ -33,7 +33,6 @@ import android.app.AlarmManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -179,8 +178,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		getWakeLock(this);		
 		Log.i(TAG,"onStartCommand");
 		// Register for broadcasts when discovery has finished
-		registerDevicesReceiver();		
-
+		registerDevicesReceiver();	
 		//Bundle scanInfo = receiver.getScanInfo();
 		//float scanRef = scanInfo.getFloat(receiver.SCAN_PROBABILITY);	
 		float scanRef = 1;		
@@ -561,7 +559,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);	
 			
 			// we don't enter our own tweets into the DB.
-			if(!cvTweet.getAsLong(Tweets.COL_USER).toString().equals(LoginActivity.getTwitterId(getApplicationContext()))){				
+			if(!cvTweet.getAsLong(Tweets.COL_TWITTERUSER).toString().equals(LoginActivity.getTwitterId(getApplicationContext()))){				
 
 				ContentValues cvUser = getUserCV(o);
 
@@ -753,7 +751,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		JSONObject toSendPhoto;
 		String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		Log.d("photo", "photo name:"+ photoFileName);
-		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 		//locate the directory where the photos are stored
 		photoPath = PHOTO_PATH + "/" + userID;
 		String[] filePath = {photoPath};
@@ -782,7 +780,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		
 		JSONObject toSendXml;
 		
-		String userId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_USER)));
+		String userId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER)));
 		
 		String substr = Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_TEXT))).toString();
 
@@ -934,14 +932,14 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	 */
 	protected JSONObject getJSON(Cursor c) throws JSONException {
 		JSONObject o = new JSONObject();
-		if(c.getColumnIndex(Tweets.COL_USER) < 0 || c.getColumnIndex(TwitterUsers.COL_SCREENNAME) < 0 ) {
+		if(c.getColumnIndex(Tweets.COL_TWITTERUSER) < 0 || c.getColumnIndex(TwitterUsers.COL_SCREENNAME) < 0 ) {
 			Log.i(TAG,"missing user data");
 			return null;
 		}
 		
 		else {
 			
-			o.put(Tweets.COL_USER, c.getLong(c.getColumnIndex(Tweets.COL_USER)));	
+			o.put(Tweets.COL_TWITTERUSER, c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER)));	
 			o.put(TYPE, TWEET);
 			o.put(TwitterUsers.COL_SCREENNAME, c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 			if(c.getColumnIndex(Tweets.COL_CREATED) >=0)
@@ -1026,8 +1024,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			cv.put(Tweets.COL_TEXT_PLAIN, Html.fromHtml(o.getString(Tweets.COL_TEXT)).toString());
 		}
 		
-		if(o.has(Tweets.COL_USER)) {			
-			cv.put(Tweets.COL_USER, o.getLong(Tweets.COL_USER));
+		if(o.has(Tweets.COL_TWITTERUSER)) {			
+			cv.put(Tweets.COL_TWITTERUSER, o.getLong(Tweets.COL_TWITTERUSER));
 		}
 		
 		if(o.has(Tweets.COL_TID)) {			
@@ -1122,8 +1120,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		}
 
 
-		if(o.has(Tweets.COL_USER)) {
-			cv.put(TwitterUsers.COL_ID, o.getLong(Tweets.COL_USER));
+		if(o.has(Tweets.COL_TWITTERUSER)) {
+			cv.put(TwitterUsers.COL_TWITTERUSER_ID, o.getLong(Tweets.COL_TWITTERUSER));
 
 		}
 		cv.put(TwitterUsers.COL_ISDISASTER_PEER, 1);
@@ -1153,16 +1151,23 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private void unregisterDevReceiver() {
 		if (receiver != null) {
 			receiver.setListener(null);
-			unregisterReceiver(receiver);			
-			receiver = null;
+            try {
+            	unregisterReceiver(receiver);			
+    			receiver = null;
+			} 
+            catch (IllegalArgumentException ex){}
+			
 		}
 	}
 	
 	private void unregisterStateReceiver() {
 		if (stateReceiver != null) {
 			stateReceiver.setListener(null);
-			unregisterReceiver(stateReceiver);			
-			stateReceiver = null;
+			try {
+				unregisterReceiver(stateReceiver);			
+				stateReceiver = null;
+			} catch (IllegalArgumentException ex){}
+			
 		}
 	}
 

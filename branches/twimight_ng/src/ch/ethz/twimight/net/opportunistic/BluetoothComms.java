@@ -474,10 +474,10 @@ public class BluetoothComms{
             }
         }
 
-        public void cancel() {
+        public synchronized void cancel() {
             try {
                 mmSocket.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "close() of connect socket failed");
             }
         }

@@ -73,14 +73,8 @@ public class TwimightBaseActivity extends FragmentActivity{
 		actionBar = getActionBar();				
 		actionBar.setHomeButtonEnabled(true);		
 		actionBar.setDisplayShowTitleEnabled(true);		
-		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
+		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));		
 		
-		if(dd == null || dn == null) {
-			Log.i(TAG,"loading action bar backgrounds");
-			Resources resources = getResources();
-			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
-			dn = resources.getDrawable(R.drawable.top_bar_background);
-		}	
 
 	}
 	
@@ -93,6 +87,12 @@ public class TwimightBaseActivity extends FragmentActivity{
 		super.onResume();
 		instance = this;				
 		
+		if(dd == null || dn == null) {
+			Log.i(TAG,"loading action bar backgrounds");
+			Resources resources = getResources();
+			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
+			dn = resources.getDrawable(R.drawable.top_bar_background);
+		}	
 		
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			if (dd == null)
@@ -175,7 +175,7 @@ public class TwimightBaseActivity extends FragmentActivity{
 	
 		case R.id.menu_my_profile:
 			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_ID+"="+LoginActivity.getTwitterId(this), null, null);
+			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_TWITTERUSER_ID+"="+LoginActivity.getTwitterId(this), null, null);
 			if(c.getCount()!=1) return false;
 			c.moveToFirst();
 			int rowId = c.getInt(c.getColumnIndex("_id"));

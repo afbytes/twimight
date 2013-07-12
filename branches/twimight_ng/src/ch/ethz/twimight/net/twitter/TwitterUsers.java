@@ -82,7 +82,7 @@ public class TwitterUsers implements BaseColumns {
 	
 	// here start the column names
 	public static final String COL_SCREENNAME = "user_screenname";
-	public static final String COL_ID = "user_id";
+	public static final String COL_TWITTERUSER_ID = "twitteruser_id";
 	public static final String COL_NAME = "name";
 	public static final String COL_LANG = "lang";
 	public static final String COL_DESCRIPTION = "description";

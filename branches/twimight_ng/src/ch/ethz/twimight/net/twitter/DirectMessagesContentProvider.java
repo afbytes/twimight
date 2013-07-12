@@ -152,14 +152,14 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			case USER:
 				Log.d(TAG, "Query USER");
 				// get the twitter user id
-				sql = "SELECT "+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID + " "
+				sql = "SELECT "+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_TWITTERUSER_ID + " "
 				+ "FROM "+ DBOpenHelper.TABLE_USERS+" "
 				+ "WHERE _id=" +uri.getLastPathSegment() +";";
 				c = database.rawQuery(sql, null);
 				
 				if(c.getCount()==0) return null; // this should not happen
 				c.moveToFirst();
-				long userId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ID));
+				long userId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
 				c.close();
 				
 				// get the direct messages
@@ -176,7 +176,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				+ DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_PROFILEIMAGE_PATH + " "
 				+ "FROM " + DBOpenHelper.TABLE_DMS + " "
 				+ "JOIN "+DBOpenHelper.TABLE_USERS+" "
-				+ "ON "+DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_ID+" "				
+				+ "ON "+DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS+"."+TwitterUsers.COL_TWITTERUSER_ID+" "				
 				+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+userId+" "
 				+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+userId+" "
 				+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
@@ -192,33 +192,33 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				// selects the last DM of which the given user is either a sender or recepient
 				String subQuery1 = "SELECT " + DirectMessages.COL_TEXT + " " 
 					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
-					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
-					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+" "
+					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+" "
 					+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
 					+ "LIMIT 1";
 				// selects the timestamp of the last DM of which the given user is either a sender or recepient
 				String subQuery2 = "SELECT " + DirectMessages.COL_CREATED + " " 
 					+ "FROM " + DBOpenHelper.TABLE_DMS + " "
-					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
-					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+" "
+					+ "WHERE " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_RECEIVER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+" "
+					+ "OR " + DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_SENDER+"="+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+" "
 					+ "ORDER BY "+ DBOpenHelper.TABLE_DMS+"."+DirectMessages.COL_CREATED +" DESC "
 					+ "LIMIT 1";
 
 				// selects all users who have sent or received at least one DM
 				sql= "SELECT "
 					+ DBOpenHelper.TABLE_USERS + "._id, "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+ ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+ ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME+ ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME+ ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH+ ", "
 					+ "("+ subQuery1 + ") AS text, "
 					+ "("+ subQuery2 + ") AS created "
 					+ "FROM " + DBOpenHelper.TABLE_USERS + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS sent ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID +"=sent." +DirectMessages.COL_SENDER + " "
-					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS received ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID +"=received." +DirectMessages.COL_RECEIVER + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS sent ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_TWITTERUSER_ID +"=sent." +DirectMessages.COL_SENDER + " "
+					+ "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS received ON " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_TWITTERUSER_ID +"=received." +DirectMessages.COL_RECEIVER + " "
 					+ "WHERE "+"(sent."+DirectMessages.COL_TEXT+" IS NOT NULL OR "+"received."+DirectMessages.COL_TEXT+" IS NOT NULL) "
-					+ "AND "+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ID+"<>"+LoginActivity.getTwitterId(getContext())+" "
-					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_ID + " "
+					+ "AND "+DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID+"<>"+LoginActivity.getTwitterId(getContext())+" "
+					+ "GROUP BY " + DBOpenHelper.TABLE_USERS + "." +TwitterUsers.COL_TWITTERUSER_ID + " "
 					+ "ORDER BY created DESC LIMIT 100;";
 				
 					Log.e(TAG, sql);
@@ -450,7 +450,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		Cursor c = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_SCREENNAME + "='" + screenName + "'", null, null, null, null);
 		if(c.getCount() > 0){
 			c.moveToFirst();
-			return c.getLong(c.getColumnIndex(TwitterUsers.COL_ID));
+			return c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
 		}
 		return null;
 	}
@@ -576,12 +576,12 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			// for our own new messages, we have a receiver screenname but no ID.
 			// Check if we have a corresponding ID in the TwitterUsers
 			if(!values.containsKey(DirectMessages.COL_RECEIVER) && values.containsKey(DirectMessages.COL_RECEIVER_SCREENNAME)){
-				String [] projection = {TwitterUsers.COL_ID};
+				String [] projection = {TwitterUsers.COL_TWITTERUSER_ID};
 				String where = TwitterUsers.COL_SCREENNAME+"='"+values.getAsString(DirectMessages.COL_RECEIVER_SCREENNAME)+"'";
 				Cursor c = getContext().getContentResolver().query(Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS), projection, where, null, null);
 				if(c.getCount()>0){
 					c.moveToFirst();
-					values.put(DirectMessages.COL_RECEIVER, c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+					values.put(DirectMessages.COL_RECEIVER, c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 				}
 				c.close();
 			}

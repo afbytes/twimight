@@ -22,6 +22,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
@@ -76,38 +77,38 @@ public class KeyManager {
      */
     public KeyPair getKey(){
 
-            // load all the ingredients from shared preferences
-            String PUBLICModulusString = prefs.getString(PUBLIC_MODULUS, null);
-            String PUBLICExponentString = prefs.getString(PUBLIC_EXPONENT, null);
-            String PRIVATEModulusString = prefs.getString(PRIVATE_MODULUS, null);
-            String PRIVATEExponentString = prefs.getString(PRIVATE_EXPONENT, null);
+    	// load all the ingredients from shared preferences
+    	String PUBLICModulusString = prefs.getString(PUBLIC_MODULUS, null);
+    	String PUBLICExponentString = prefs.getString(PUBLIC_EXPONENT, null);
+    	String PRIVATEModulusString = prefs.getString(PRIVATE_MODULUS, null);
+    	String PRIVATEExponentString = prefs.getString(PRIVATE_EXPONENT, null);
 
-            //return generateKey();
+    	//return generateKey();
 
-            // if we had a key saved, this should be true. otherwise we will now create one.
-            if(PUBLICModulusString != null && PUBLICExponentString != null && PRIVATEModulusString != null && PRIVATEExponentString != null){
+    	// if we had a key saved, this should be true. otherwise we will now create one.
+    	if(PUBLICModulusString != null && PUBLICExponentString != null && PRIVATEModulusString != null && PRIVATEExponentString != null){
 
-                    try{
+    		try{
 
-                            KeyFactory fact = KeyFactory.getInstance("RSA");
-                            RSAPublicKeySpec pub = new RSAPublicKeySpec(new BigInteger(PUBLICModulusString), new BigInteger(PUBLICExponentString));
-                            RSAPublicKey publicKey = (RSAPublicKey) fact.generatePublic(pub);
+    			KeyFactory fact = KeyFactory.getInstance("RSA");
+    			RSAPublicKeySpec pub = new RSAPublicKeySpec(new BigInteger(PUBLICModulusString), new BigInteger(PUBLICExponentString));
+    			RSAPublicKey publicKey = (RSAPublicKey) fact.generatePublic(pub);
 
-                            RSAPrivateKeySpec priv = new RSAPrivateKeySpec(new BigInteger(PRIVATEModulusString),new BigInteger(PRIVATEExponentString));
-                            RSAPrivateKey privKey = (RSAPrivateKey) fact.generatePrivate(priv);
+    			RSAPrivateKeySpec priv = new RSAPrivateKeySpec(new BigInteger(PRIVATEModulusString),new BigInteger(PRIVATEExponentString));
+    			RSAPrivateKey privKey = (RSAPrivateKey) fact.generatePrivate(priv);
 
-                            KeyPair kp = new KeyPair(publicKey, privKey);
-                            return kp;
+    			KeyPair kp = new KeyPair(publicKey, privKey);
+    			return kp;
 
-                    } catch(Exception e) {
-                            Log.e(TAG, "Exception while getting keys!");
-                    }
-            } else {
-                    KeyPair kp = generateKey();
-                    return kp;
-            }
+    		} catch(Exception e) {
+    			Log.e(TAG, "Exception while getting keys!");
+    		}
+    	} else {
+    		KeyPair kp = generateKey();
+    		return kp;
+    	}
 
-            return null;
+    	return null;
 
     }
 
@@ -118,22 +119,27 @@ public class KeyManager {
      * @return
      */
     public static String getPemPublicKey(KeyPair kp){
-            String encoded = new String(Base64.encode(kp.getPublic().getEncoded(), Base64.DEFAULT));
-            encoded = encoded.replace("\n", "");
-            StringBuilder builder = new StringBuilder();
-            builder.append("-----BEGIN PUBLIC KEY-----");
-            builder.append("\n");
-            int i = 0;
-            while (i < encoded.length()) {
-                    builder.append(encoded.substring(i,
-                                    Math.min(i + 64, encoded.length())));
-                    builder.append("\n");
-                    i += 64;
-            }
-            builder.append("-----END PUBLIC KEY-----");
-
-            return builder.toString();
+    	return getPemPublicKey(kp.getPublic());
     }
+
+    public static String getPemPublicKey(PublicKey key){
+    	String encoded = new String(Base64.encode(key.getEncoded(), Base64.DEFAULT));
+        encoded = encoded.replace("\n", "");
+        StringBuilder builder = new StringBuilder();
+        builder.append("-----BEGIN PUBLIC KEY-----");
+        builder.append("\n");
+        int i = 0;
+        while (i < encoded.length()) {
+                builder.append(encoded.substring(i,
+                                Math.min(i + 64, encoded.length())));
+                builder.append("\n");
+                i += 64;
+        }
+        builder.append("-----END PUBLIC KEY-----");
+
+        return builder.toString();
+}
+
 
     /**
      * Generate a new public/private key pair
@@ -169,8 +175,7 @@ public class KeyManager {
             try{
                     KeyFactory fact = KeyFactory.getInstance("RSA");
                     RSAPublicKeySpec pub = fact.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
-                    RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
-
+                    RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);                    
 
                     SharedPreferences.Editor editor = prefs.edit();
 
@@ -239,7 +244,7 @@ public class KeyManager {
                    
             }
             return null;
-           
+
     }
 
     /**
@@ -249,31 +254,31 @@ public class KeyManager {
      */
     public String getSignature(String text){
 
-            byte[] hash = computeHash(text);
-            Log.i(TAG, "hash length: " + hash.length);
-            if (hash != null) {
-                    try {                  
-                            Cipher cipher = Cipher.getInstance("RSA");
-                            KeyPair kp = getKey();                      
+    	byte[] hash = computeHash(text);      
+    	//byte[] test = computeHash("paolo");    	
+    	//Log.i(TAG, Base64.encodeToString(test, Base64.DEFAULT));
+    	if (hash != null) {
+    		try {                  
+    			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+    			KeyPair kp = getKey();                      
 
-                            RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+    			RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+    			//Log.i(TAG, "my public key: " + getPemPublicKey(kp.getPublic()));
+    			cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+    			byte[] signature = cipher.doFinal(hash);                            
+    			String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
+    			Log.i(TAG, "Signature: " + signatureString);
+    			
+    			return signatureString;                
 
-                            cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-                            byte[] signature = cipher.doFinal(hash);
-                            Log.i(TAG, "signature array length: " + signature.length);
-                            String signatureString = Base64.encodeToString(signature, Base64.DEFAULT);
-                            Log.d(TAG, "Signature: " + signatureString);
-                            
-                            return signatureString;                
-
-                    } catch (NoSuchAlgorithmException e) {                          
-                    } catch (NoSuchPaddingException e) {                            
-                    } catch (IllegalBlockSizeException e) {                        
-                    } catch (BadPaddingException e) {                              
-                    } catch (InvalidKeyException e) {                              
-                    }
-            }
-            return null;
+    		} catch (NoSuchAlgorithmException e) {                          
+    		} catch (NoSuchPaddingException e) {                            
+    		} catch (IllegalBlockSizeException e) {                        
+    		} catch (BadPaddingException e) {                              
+    		} catch (InvalidKeyException e) {                              
+    		}
+    	}
+    	return null;
     }
 
 
@@ -287,55 +292,56 @@ public class KeyManager {
      */
     public boolean checkSignature(X509CertificateObject cert, String signature, String text) {
 
-           
-              byte[] originalHash = computeHash(text);
-             
-              if (originalHash != null) {
-                      try {
-                             
-                                    // get the public key from the certificate
-                                    RSAPublicKey PUBLIC = (RSAPublicKey) cert.getPublicKey();
-                                   
-                                    Cipher cipher = Cipher.getInstance("RSA");                                  
-                                    cipher.init(Cipher.DECRYPT_MODE, PUBLIC);
-                                    // we get the signature in base 64 encoding -> decode first                                    
-                                    return Arrays.equals(originalHash,cipher.doFinal(Base64.decode(signature, Base64.DEFAULT)) );                                  
-                                   
-                            } catch (NoSuchAlgorithmException e) {                  
-                            } catch (NoSuchPaddingException e) {                    
-                            } catch (InvalidKeyException e) {                      
-                            } catch (IllegalBlockSizeException e) {                
-                            } catch (BadPaddingException e) {                      
-                            }
-              }
-             
-               
-            return false;
+
+    	byte[] originalHash = computeHash(text);
+    	
+
+    	if (originalHash != null) {
+    		try {
+
+    			// get the public key from the certificate
+    			RSAPublicKey publickey = (RSAPublicKey) cert.getPublicKey();
+    			Log.d(TAG, "peer public key " + getPemPublicKey(publickey));
+    			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");                                  
+    			cipher.init(Cipher.DECRYPT_MODE, publickey);
+    			// we get the signature in base 64 encoding -> decode first      		
+    			return Arrays.equals(originalHash,cipher.doFinal(Base64.decode(signature, Base64.DEFAULT)) );                                  
+
+    		} catch (NoSuchAlgorithmException e) {                  
+    		} catch (NoSuchPaddingException e) {                    
+    		} catch (InvalidKeyException e) {                      
+    		} catch (IllegalBlockSizeException e) {                
+    		} catch (BadPaddingException e) {                      
+    		}
+    	}
+
+
+    	return false;
     }
-   
-     public String encrypt(String text, Long twitterId ) {          
-             try {                  
-                            Cipher cipher = Cipher.getInstance("RSA");
-                            //I NEED PEER'S PUBLIC KEY    
-                            FriendsKeysDBHelper kHelper = new FriendsKeysDBHelper(context);
-                            kHelper.open();
-                            if (kHelper.hasKey(twitterId)) {
-                                    Log.i(TAG,"has Key");
-                                    String publicKeyString =  kHelper.getKey(twitterId);                                    
-                                    RSAPublicKey publicKey = parsePem(publicKeyString);
-                                    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-                                    byte[] cipherText = cipher.doFinal(text.getBytes());
 
-                                    String cipherTextString = Base64.encodeToString(cipherText, Base64.DEFAULT);                    
+    public String encrypt(String text, Long twitterId ) {          
+    	try {                  
+    		Cipher cipher = Cipher.getInstance("RSA");
+    		//I NEED PEER'S PUBLIC KEY    
+    		FriendsKeysDBHelper kHelper = new FriendsKeysDBHelper(context);
+    		kHelper.open();
+    		if (kHelper.hasKey(twitterId)) {
+    			Log.i(TAG,"has Key");
+    			String publicKeyString =  kHelper.getKey(twitterId);                                    
+    			RSAPublicKey publicKey = parsePem(publicKeyString);
+    			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    			byte[] cipherText = cipher.doFinal(text.getBytes());
 
-                                    return cipherTextString;        
-                            }
-                                           
+    			String cipherTextString = Base64.encodeToString(cipherText, Base64.DEFAULT);                    
 
-                    } catch (NoSuchAlgorithmException e) {
-                            Log.e(TAG,"NoSuchAlgorithmException",e);
-                    } catch (NoSuchPaddingException e) {
-                            Log.e(TAG,"NoSuchPaddingException",e);
+    			return cipherTextString;        
+    		}
+
+
+    	} catch (NoSuchAlgorithmException e) {
+    		Log.e(TAG,"NoSuchAlgorithmException",e);
+    	} catch (NoSuchPaddingException e) {
+    		Log.e(TAG,"NoSuchPaddingException",e);
                     } catch (IllegalBlockSizeException e) {
                             Log.e(TAG,"IllegalBlockSizeException",e);
                     } catch (BadPaddingException e) {

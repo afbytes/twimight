@@ -70,7 +70,7 @@ public class HtmlPagesDbHelper {
 			if(result!=-1)
 				return true;
 		} catch (SQLException ex) {
-			Log.e(TAG,"error inserting html page",ex);
+			Log.e(TAG,"error inserting html page");
 		}
 		return false;
 	}
@@ -113,7 +113,7 @@ public class HtmlPagesDbHelper {
 	 */
 	public boolean updatePage(String url, String filename, long tweetId, int forced, int tries){
 		
-		ContentValues cv = createContentValues(url,filename, tweetId, forced, tries);		
+		ContentValues cv = createContentValues(null,filename, tweetId, forced, tries);		
 		
 		String sql = HtmlPage.COL_URL + " = '" + url +"' ";
 		int row = database.update(DBOpenHelper.TABLE_HTML, cv, sql, null);
@@ -226,7 +226,8 @@ public class HtmlPagesDbHelper {
 		ContentValues values = new ContentValues();
 		
 		values.put(HtmlPage.COL_FILENAME ,filename);
-		values.put(HtmlPage.COL_URL ,url);
+		if (url != null)
+			values.put(HtmlPage.COL_URL ,url);
 		values.put(HtmlPage.COL_DISASTERID,tweetId );			
 		values.put(HtmlPage.COL_FORCED, forced);
 		values.put(HtmlPage.COL_ATTEMPTS, tries);

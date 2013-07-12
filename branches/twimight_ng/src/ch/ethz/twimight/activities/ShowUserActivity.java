@@ -284,21 +284,21 @@ public class ShowUserActivity extends TwimightBaseActivity{
 		statsFollowers.setText(String.valueOf(followed));
 
 		// if the user we show is the local user, disable the follow button
-		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID))))){
+		if(isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))))){
 			showLocalUser();
 		} else {
 			showRemoteUser();
 		}
 		
 		// if we have a user ID we show the recent tweets
-		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_ID))){
+		if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))){
 			showUserTweetsButton.setOnClickListener(new OnClickListener(){
 
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getBaseContext(), ShowUserTweetListActivity.class);
 					c.moveToFirst();
-					int index = c.getColumnIndex(TwitterUsers.COL_ID);
+					int index = c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID);
 					if (index != -1) {
 						i.putExtra("userId",c.getLong(index));
 						startActivity(i);
