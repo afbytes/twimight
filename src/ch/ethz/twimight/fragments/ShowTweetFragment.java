@@ -187,7 +187,7 @@ public class ShowTweetFragment extends Fragment{
     			// register content observer to refresh when user was updated	    			
     			handler = new Handler();											
     			
-    			userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+    			userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
     			//locate the directory where the photos are stored
     			photoPath = Tweets.PHOTO_PATH + "/" + userID;
     			
@@ -469,7 +469,7 @@ public class ShowTweetFragment extends Fragment{
 	 */
 	private void setupButtons() {		
 		
-		String userString = Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+		String userString = Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 		String localUserString = LoginActivity.getTwitterId(activity);		
 
 		

@@ -1,7 +1,6 @@
 package ch.ethz.twimight.net.Html;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
@@ -10,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.http.SslError;
@@ -38,8 +38,7 @@ public class HtmlService extends Service {
 	
 	private SDCardHelper sdCardHelper;
 	private HtmlPagesDbHelper htmlDbHelper;
-	private int limit = 0;
-	
+		
 	Cursor c = null;
 	
 
@@ -242,15 +241,7 @@ public class HtmlService extends Service {
 	public void storePage() {
 		
 		if (c != null && c.getCount() > 0 && (!c.isAfterLast())) {
-
-			limit++;
-			if (limit == 10) {
-				limit = 0; 
-				c.close(); 
-				c = null; 
-				return;
-			}
-
+			
 			String htmlUrl = c.getString(c.getColumnIndex(HtmlPage.COL_URL));
 		
 			String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(getApplicationContext())};
@@ -441,17 +432,17 @@ public class HtmlService extends Service {
 					String filename = pathSlices[pathSlices.length-1];					
 					if (sdCardHelper.getFileFromSDCard(basePath, filename).length() > 1) {						
 
-						htmlDbHelper.updatePage(baseUrl, filename, tweetId, forced, attempts);
-						getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);			
-					} //else
-						//sdCardHelper.deleteFile(sdCardHelper.getFileFromSDCard(basePath, filePath).getPath());	
-				    	//htmlDbHelper.updatePage(baseUrl, null, tweetId, forced, attempts);	
-
+						try {
+							htmlDbHelper.updatePage(baseUrl, filename, tweetId, forced, attempts);
+							getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);			
+						} catch (SQLException ex){
+							Log.i(TAG,"error updating page: ", ex);
+						}
+						
+					} 
 				}				
 				storePage();
-
 			}
-
 		}
 
 		public WebClientDownload(Cursor cursorHtml){

@@ -248,7 +248,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			} else {
 				holder.verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
 			}
-		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(context))) {
+		} else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_TWITTERUSER))).equals(LoginActivity.getTwitterId(context))) {
 			
 			holder.rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
 			holder.verifiedImage.setVisibility(ImageView.GONE);

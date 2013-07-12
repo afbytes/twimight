@@ -18,14 +18,17 @@ import java.security.KeyPair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.spongycastle.jce.provider.X509CertificateObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
 
@@ -85,21 +88,21 @@ public class TDSRequestMessage {
 	
     
 	
-	public void createDisTweetsObject(Cursor tweets) throws JSONException {
+	public void createDisTweetsObject(Cursor tweets) throws JSONException {		
 		
-		Log.i("tdsRequest", "tweet cursor count: " + tweets.getCount());
 		if(tweets != null && tweets.getCount() > 0) {			
 			
 			tweets.moveToFirst();
 			disTweetsObject = new JSONObject();
 			JSONArray disTweetsArray = new JSONArray();
+			CertificateManager cm = new CertificateManager(context.getApplicationContext());
 			
 			while(!tweets.isAfterLast()) {
 				
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))){
-					JSONObject row = new JSONObject();
+					JSONObject row = new JSONObject();							
 					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );					
-					row.put(Tweets.COL_USER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER)));
+					row.put(Tweets.COL_TWITTERUSER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TWITTERUSER)));
 					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
 					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 					

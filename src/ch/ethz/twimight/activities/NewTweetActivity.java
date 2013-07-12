@@ -32,6 +32,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -492,8 +493,9 @@ private class SendTweetTask extends AsyncTask<Void, Void, Boolean>{
 		ContentValues tweetContentValues = new ContentValues();
 		
 		tweetContentValues.put(Tweets.COL_TEXT, text.getText().toString());
+
 		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, text.getText().toString());
-		tweetContentValues.put(Tweets.COL_USER, LoginActivity.getTwitterId(this));
+		tweetContentValues.put(Tweets.COL_TWITTERUSER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
 		if (isReplyTo > 0) {
 			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);

@@ -199,7 +199,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	private Cursor isUserAlreadyStored(ContentValues values) {
 		// if we already have the user, we update with the new info
 		String[] projection = {"_id", TwitterUsers.COL_PROFILEIMAGE_PATH};
-		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" = '"+values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_ID+"="+values.getAsString(TwitterUsers.COL_ID), null, null, null, null);
+		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME+" = '" + 
+				values.getAsString(TwitterUsers.COL_SCREENNAME)+"' OR "+ TwitterUsers.COL_TWITTERUSER_ID+"=" + 
+				values.getAsString(TwitterUsers.COL_TWITTERUSER_ID), null, null, null, null);
 		if(c.getCount()==1){			
 			c.moveToFirst();
 			return c;

@@ -172,7 +172,7 @@ public class TwitterService extends Service {
 						synchMessages();
 						synchTransactional();	
 					} else {
-						 Log.i(TAG,"is Login");
+						 
 						 Handler handler = new Handler();
 						 handler.postDelayed(new GetFriendsFollowersDelayed( ), Constants.FRIENDS_FOLLOWERS_DELAY );
 					}					
@@ -1133,7 +1133,7 @@ public class TwitterService extends Service {
 			cv.put(Tweets.COL_REPLYTO, tweet.inReplyToStatusId.longValue());
 		}
 		
-		cv.put(Tweets.COL_USER, tweet.getUser().getId());
+		cv.put(Tweets.COL_TWITTERUSER, tweet.getUser().getId());	
 		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
 		
 		//insert the picture url to the database
@@ -1291,8 +1291,7 @@ public class TwitterService extends Service {
 
 		if(user!=null){
 			if(user.screenName!=null ) {				
-				userContentValues.put(TwitterUsers.COL_ID, user.getId());	
-				
+				userContentValues.put(TwitterUsers.COL_TWITTERUSER_ID, user.getId());					
 				userContentValues.put(TwitterUsers.COL_SCREENNAME, user.getScreenName());				
 				userContentValues.put(TwitterUsers.COL_NAME, user.getName());
 				if(user.description!=null) userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.getDescription());
@@ -1835,7 +1834,7 @@ public class TwitterService extends Service {
 		boolean result = false;
 
 		for (ContentValues cv: usersCv){			
-			if(cv.getAsLong(TwitterUsers.COL_ID).longValue() == incomingUser.id.longValue()){				
+			if(cv.getAsLong(TwitterUsers.COL_TWITTERUSER_ID).longValue() == incomingUser.id.longValue()){				
 				result = true;
 				
 				break;		
@@ -3537,8 +3536,8 @@ public class TwitterService extends Service {
 
 			try{				
 				// we need a user id or a screenname
-				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_ID))){					
-					user = twitter.users().getUser(c.getLong(c.getColumnIndex(TwitterUsers.COL_ID)));
+				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))){					
+					user = twitter.users().getUser(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 					
 				} else if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
 					user = twitter.users().getUser(c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
