@@ -38,14 +38,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_USERS = "users";
 	public static final String TABLE_DMS = "dms";
 	public static final String TABLE_HTML = "htmls";
-	public static final String TABLE_HTML_TRACKERS = "html_trackers";
+	static final String TABLE_STATISTICS = "statistics";
+	//public static final String TABLE_HTML_TRACKERS = "html_trackers";
 	
 	public static final String ROW_ID = "_id";
 
-	static final String TABLE_STATISTICS = "statistics";
-
-
-	private static final int DATABASE_VERSION = 53;
+	private static final int DATABASE_VERSION = 54;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -90,8 +88,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_TWITTERUSER + " bigint, "			
 			+ Tweets.COL_SCREENNAME+ " string, "
 			+ Tweets.COL_TID + " bigint unique, "
-			+ Tweets.COL_REPLYTO + " bigint, "
-			+ Tweets.COL_FAVORITED + " int, "
+			+ Tweets.COL_REPLYTO + " bigint, "			
 			+ Tweets.COL_RETWEETED + " int, "
 			+ Tweets.COL_RETWEETCOUNT + " int, "		
 			+ Tweets.COL_RETWEETED_BY + " string, "

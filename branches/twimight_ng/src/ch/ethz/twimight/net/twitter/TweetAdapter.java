@@ -143,7 +143,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			String retweeted_by = cursor.getString(col);
 			
 			if (retweeted_by != null) {
-				holder.textRetweeted_by.setText(context.getString(R.string.retweeted_by) + retweeted_by);		
+				holder.textRetweeted_by.setText(context.getString(R.string.retweeted_by) + " " + retweeted_by);		
 				holder.textRetweeted_by.setVisibility(View.VISIBLE);	
 				retweeted = true;
 			}
@@ -226,8 +226,10 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.toPostInfo.setVisibility(ImageView.GONE);
 		}
 		
+		
 		// favorited
-		boolean favorited = ((cursor.getInt(cursor.getColumnIndex(Tweets.COL_FAVORITED)) > 0) 
+		int buffer = cursor.getInt(cursor.getColumnIndex(Tweets.COL_BUFFER));
+		boolean favorited = (( (buffer & Tweets.BUFFER_FAVORITES) != 0) 
 								&& ((flags & Tweets.FLAG_TO_UNFAVORITE)==0))
 								|| ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		if(favorited){
@@ -236,7 +238,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.favoriteStar.setVisibility(ImageView.GONE);
 		}
 		
-		int buffer = cursor.getInt(cursor.getColumnIndex(Tweets.COL_BUFFER));
+		
 		// disaster info		
 		if( (buffer & Tweets.BUFFER_DISASTER) != 0 ){
 			//Log.i(TAG,"col is disaster > 0");
