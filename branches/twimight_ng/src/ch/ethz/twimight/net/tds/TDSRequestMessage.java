@@ -14,17 +14,17 @@
 package ch.ethz.twimight.net.tds;
 
 import java.security.KeyPair;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.jce.provider.X509CertificateObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
-import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -104,7 +104,9 @@ public class TDSRequestMessage {
 					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)) );					
 					row.put(Tweets.COL_TWITTERUSER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TWITTERUSER)));
 					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
-					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
+					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));					
+					SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");					
+					row.put(Tweets.COL_CREATED + "_phone", simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED)))) );
 					
 					disTweetsArray.put(row);
 				}
