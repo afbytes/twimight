@@ -389,7 +389,7 @@ public class TDSService extends Service {
 				tds.createDisTweetsObject(cursor);
 
 			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
+				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request", e);
 				return false;
 			}
 
