@@ -1123,8 +1123,7 @@ public class TwitterService extends Service {
 		cv.put(Tweets.COL_TID, tweet.getId().longValue());
 
 		if (tweet.isFavorite())
-			buffer = buffer | Tweets.BUFFER_FAVORITES;
-		cv.put(Tweets.COL_FAVORITED, tweet.isFavorite());
+			buffer = buffer | Tweets.BUFFER_FAVORITES;		
 		
 		// TODO: How do we know if we have retweeted the tweet?
 		cv.put(Tweets.COL_RETWEETED, 0);
@@ -2999,11 +2998,7 @@ public class TwitterService extends Service {
 			ContentValues cv = new ContentValues();
 			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_FAVORITE);
 			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_FAVORITES);
-
-			// we get null if there was a problem with favoriting (already a favorite, etc.).
-			if(result!=null) {
-				cv.put(Tweets.COL_FAVORITED, 1);
-			}
+			
 
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{
@@ -3124,11 +3119,7 @@ public class TwitterService extends Service {
 
 			ContentValues cv = new ContentValues();
 			cv.put(Tweets.COL_FLAGS, flags & ~Tweets.FLAG_TO_UNFAVORITE);
-			cv.put(Tweets.COL_BUFFER, buffer & ~Tweets.BUFFER_FAVORITES);
-
-			if(result!=null) {
-				cv.put(Tweets.COL_FAVORITED, 0);
-			}
+			cv.put(Tweets.COL_BUFFER, buffer & ~Tweets.BUFFER_FAVORITES);		
 
 			Uri updateUri = Uri.parse("content://"+Tweets.TWEET_AUTHORITY+"/"+Tweets.TWEETS+"/"+this.rowId);
 			try{

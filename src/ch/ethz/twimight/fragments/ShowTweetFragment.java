@@ -136,7 +136,7 @@ public class ShowTweetFragment extends Fragment{
 	private ArrayList<String> htmlsToDownload;	
 	
 	// Container Activity must implement this interface
-    public interface OnTweetDeletedListener {
+    public static interface OnTweetDeletedListener {
         public void onDelete();
     }
     
@@ -195,9 +195,7 @@ public class ShowTweetFragment extends Fragment{
     			setUserInfo();			
     			setProfilePicture();	
 
-    			setPhotoAttached();
-
-    			int buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+    			setPhotoAttached();    		
     			// disaster info		
     			if( (buffer & Tweets.BUFFER_DISASTER) != 0 ){
 
@@ -207,8 +205,8 @@ public class ShowTweetFragment extends Fragment{
     				}
     			}
 
-    			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-    			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+    			
+    			
 
     			handleTweetFlags();					
     			setupButtons();		
@@ -371,10 +369,17 @@ public class ShowTweetFragment extends Fragment{
 	
 	private void queryContentProvider() {
 		// get data from local DB and mark for update
+		if (c != null && !c.isClosed())
+			c.close();	
+		
 		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);		
 		c = resolver.query(uri, null, null, null, null);
-		if(c.getCount() > 0) 
+		
+		if(c != null && c.getCount() > 0) {
 			c.moveToFirst();
+			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+		}
 		
 			
 		
@@ -531,7 +536,7 @@ public class ShowTweetFragment extends Fragment{
 		}
 		
 		// Favorite button
-		favorited = (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
+		favorited = ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0 ) || ((flags & Tweets.FLAG_TO_FAVORITE)>0);
 		favoriteButton = (ImageButton) view.findViewById(R.id.showTweetFavorite);
 		if( favorited && !((flags & Tweets.FLAG_TO_UNFAVORITE)>0)){
 			favoriteButton.setImageResource(R.drawable.btn_twimight_favorite_on);
@@ -1058,12 +1063,12 @@ public class ShowTweetFragment extends Fragment{
 
 		try {
 			// set favorite flag und clear unfavorite flag
-			if (c.getInt(c.getColumnIndexOrThrow(Tweets.COL_FAVORITED)) > 0)
+			if ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0 )
 				cv.put(Tweets.COL_FLAGS, (flags  & ~Tweets.FLAG_TO_UNFAVORITE));
 			else			
 				cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE) & (~Tweets.FLAG_TO_UNFAVORITE));
 			// put in favorites bufer
-			cv.put(Tweets.COL_BUFFER, buffer|Tweets.BUFFER_FAVORITES);
+			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_FAVORITES);
 			return cv;
 		} catch (Exception ex){
 			Log.e(TAG,"error: ",ex);
@@ -1084,7 +1089,7 @@ public class ShowTweetFragment extends Fragment{
 		ContentValues cv = new ContentValues();
 		
 		// clear favorite flag and set unfavorite flag
-		if (c.getInt(c.getColumnIndex(Tweets.COL_FAVORITED)) > 0)
+		if ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0 )
 			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)) | Tweets.FLAG_TO_UNFAVORITE);	
 		else
 			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)));	
