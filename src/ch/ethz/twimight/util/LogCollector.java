@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.activities.LoginActivity;
 
 import com.crittercism.app.Crittercism;
@@ -18,9 +19,9 @@ public static void setUpCrittercism(Context context) {
 		JSONObject parameters =  setUpParams(context);
 		
 		if (parameters != null)
-			Crittercism.init(context, Constants.CRITTERCISM_ID, parameters);
+			Crittercism.init(context, Obfuscator.getCrittercismId(), parameters);
 		else
-			Crittercism.init(context, Constants.CRITTERCISM_ID);		
+			Crittercism.init(context, Obfuscator.getCrittercismId() );		
 		
 		//binding twitter id to user screenName and sending it to the log server
 		if (LoginActivity.hasTwitterId(context)) {
