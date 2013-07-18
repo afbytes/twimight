@@ -376,11 +376,12 @@ public class ShowTweetFragment extends Fragment{
 		c = resolver.query(uri, null, null, null, null);
 		
 		if(c != null && c.getCount() > 0) {
+			Log.i(TAG,"cursor ok");
 			c.moveToFirst();
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 		}
-		
+		Log.i(TAG,"cursor not ok");
 			
 		
 	}
