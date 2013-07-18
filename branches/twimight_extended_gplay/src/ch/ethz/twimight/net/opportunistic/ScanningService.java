@@ -163,7 +163,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		super.onStartCommand(intent, flags, startId);
 		
 		
-		Log.i(TAG,"onStartCommand " + Thread.currentThread().toString() + " " + Thread.currentThread().getId());
+		
 		//Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler()); 			
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);			
@@ -173,20 +173,17 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		float scanRef = 1;		
 		float scanProb;
 		
-		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, false))
+		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, true))
 			scanProb = 0;
 		else {
 			//get a random number
 			Random r = new Random(System.currentTimeMillis());
 			scanProb = r.nextFloat();
-		}			
-		//get a random number
-		Random r = new Random(System.currentTimeMillis());
-		scanProb = r.nextFloat();
+		}		
 		
 		//if (TwimightBaseActivity.D) Log.i(TAG, "begin scanning with a probability:" + String.valueOf(scanProb));
 		
-		if (mBtAdapter != null && ! restartingBlue) {
+		if (mBtAdapter != null && !restartingBlue) {
 			if(scanProb <= scanRef){
 				if (TwimightBaseActivity.D) Log.i(TAG, "begin scanning");
 				//receiver.initDeivceList();
@@ -412,14 +409,17 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		public void handleMessage(Message msg) {
 			switch (msg.what) {          
 
-			case Constants.MESSAGE_READ:  
+			case Constants.MESSAGE_READ:
+				
 				if(msg.obj.toString().equals("####CLOSING_REQUEST####")) {
 
 					if (TwimightBaseActivity.D) Log.i(TAG,"closing request received, connection shutdown");
 					bluetoothHelper.start();
 
-				} else 
+				} else {
+					Log.i(TAG,"data received");
 					new ProcessDataReceived().execute(msg.obj.toString());	//not String, object instead
+				}
 				
 				break;
 
@@ -439,6 +439,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				sendDisasterTweets(last);
 				sendDisasterDM(last);	
 				bluetoothHelper.write("####CLOSING_REQUEST####");
+				Log.i(TAG,"closing req sent");
 				dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
 				
 				
