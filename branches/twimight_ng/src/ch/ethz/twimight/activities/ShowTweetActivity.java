@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ShowTweetFragment.OnTweetDeletedListener;
 import ch.ethz.twimight.fragments.TweetListFragment;
@@ -31,8 +30,7 @@ public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDe
 		resolver = getContentResolver();
 		Intent intent = getIntent();
 		
-		long rowId = intent.getIntExtra("rowId", 0);
-		Log.i("ShowTweetActivity","rowId: " + rowId);
+		long rowId = intent.getIntExtra("rowId", 0);		
 		int type = intent.getIntExtra("type", TweetListFragment.TIMELINE_KEY);
 		//if (type == TweetListFragment.SEARCH_TWEETS)
 			//query = intent.getStringExtra(ListFragment.SEARCH_QUERY);
@@ -42,7 +40,7 @@ public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDe
 			ShowTweetPageAdapter pageAdapter = new ShowTweetPageAdapter(getFragmentManager(), rowIdList );		
 			viewPager = (ViewPager) findViewById(R.id.viewpager);			
 			viewPager.setAdapter(pageAdapter);
-			viewPager.setOffscreenPageLimit(2);			
+			//viewPager.setOffscreenPageLimit(2);			
 			viewPager.setCurrentItem(rowIdList.indexOf(rowId));
 		}
 			

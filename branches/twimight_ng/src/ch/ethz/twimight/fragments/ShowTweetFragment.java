@@ -162,8 +162,7 @@ public class ShowTweetFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-    		Bundle savedInstanceState) {
-    	
+    		Bundle savedInstanceState) {    	
     	// TODO Auto-generated method stub
     	super.onCreateView(inflater, container, savedInstanceState);
     	// Inflate the layout for activity fragment	
@@ -180,10 +179,11 @@ public class ShowTweetFragment extends Fragment{
     		
     		queryContentProvider();
 
-    		if(c.getCount() == 0) 
+    		if(c.getCount() == 0) {    			
     			activity.getFragmentManager().beginTransaction().remove(this).commit();
+    		}
 
-    		else {				
+    		else {	    			
     			// register content observer to refresh when user was updated	    			
     			handler = new Handler();											
     			
@@ -380,8 +380,8 @@ public class ShowTweetFragment extends Fragment{
 			c.moveToFirst();
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-		}
-		Log.i(TAG,"cursor not ok");
+		} else
+			Log.i(TAG,"cursor not ok");
 			
 		
 	}
@@ -844,10 +844,16 @@ public class ShowTweetFragment extends Fragment{
 					
 		} catch (Exception ex) {
 		}
+		Log.i(TAG,"setting tweet text: " + str.toString());
 		tweetTextView.setText(str);
 		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-		createdTextView.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))).toString());
+		createdTextView.setText(				
+				DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(
+						new Date(c.getLong(c.getColumnIndex(Tweets.COL_CREATED)))
+						).toString()
+						);
+		
 		if(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))!=null){
 			createdWithView.setText(Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_SOURCE))));
 		} else {
@@ -901,7 +907,7 @@ public class ShowTweetFragment extends Fragment{
 	 * Called at the end of the Activity lifecycle
 	 */
 	@Override
-	public void onDestroy(){
+	public void onDestroy(){		
 		super.onDestroy();	
 
 		if (userInfoView != null)

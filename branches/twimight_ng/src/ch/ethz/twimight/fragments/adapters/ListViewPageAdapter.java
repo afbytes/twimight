@@ -7,7 +7,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
-import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.TweetListFragment;
@@ -29,8 +28,7 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 	public ListViewPageAdapter( FragmentManager fm, Bundle bundle) {
 		super(fm);
 		fragMan = fm;
-		this.bundle=bundle;
-		Log.i("ListViewPageAdapter","creating adapter");
+		this.bundle=bundle;		
 		switch (bundle.getInt(BUNDLE_TYPE)) {
 			
 		case BUNDLE_TYPE_TWEETS:
