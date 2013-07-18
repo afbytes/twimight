@@ -22,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.text.Html;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -138,7 +139,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
             ImageView verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
            
             if(cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISDISASTER))>0){
-                   
+            	    Log.i(TAG,"col is disaster > 0");
                     rowLayout.setBackgroundResource(R.drawable.disaster_tweet_background);
                     verifiedImage = (ImageView) row.findViewById(R.id.showTweetVerified);
                     verifiedImage.setVisibility(ImageView.VISIBLE);
@@ -148,7 +149,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
                             verifiedImage.setImageResource(android.R.drawable.ic_partial_secure);
                     }
             } else if(Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER))).equals(LoginActivity.getTwitterId(context))) {
-                   
+            	Log.i(TAG,"own tweet");
                     rowLayout.setBackgroundResource(R.drawable.own_tweet_background);
                     verifiedImage.setVisibility(ImageView.GONE);
                    

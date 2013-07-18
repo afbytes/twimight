@@ -33,7 +33,7 @@ public class TwimightBaseActivity extends Activity{
 	
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
-	public static final boolean D = false;
+	public static final boolean D = true;
 	
 	// the menu
 	private static final int OPTIONS_MENU_HOME = 10;
@@ -47,8 +47,8 @@ public class TwimightBaseActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		LogCollector.setUpCrittercism(getApplicationContext());
 		LogCollector.leaveBreadcrumb();
-
 	}
 	
 		

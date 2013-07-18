@@ -575,8 +575,8 @@ public class ShowTweetActivity extends TwimightBaseActivity{
 		
 		if (locHelper != null) 			
 			locHelper.unRegisterLocationListener();    			
-		
-		userInfoView.setOnClickListener(null);
+		if (userInfoView != null)
+			userInfoView.setOnClickListener(null);
 		retweetButton.setOnClickListener(null);
 		deleteButton.setOnClickListener(null);
 		replyButton.setOnClickListener(null);

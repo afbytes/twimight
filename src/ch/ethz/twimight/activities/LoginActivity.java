@@ -55,6 +55,7 @@ import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.LogCollector;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
@@ -107,8 +108,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
-		setContentView(R.layout.login);
-		
+		setContentView(R.layout.login);		
 		
 		setRestartIntent(PendingIntent.getActivity(this.getBaseContext(), 0, 
 				new Intent(getIntent()), getIntent().getFlags()));

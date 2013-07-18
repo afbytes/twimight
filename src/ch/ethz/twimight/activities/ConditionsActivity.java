@@ -22,7 +22,6 @@ public class ConditionsActivity extends Activity {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean termsAccepted = settings.getBoolean(TERMS, false);
 		
-		LogCollector.setUpCrittercism(getApplicationContext());
 		
 		if (termsAccepted) {
 			startLogin();
