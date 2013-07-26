@@ -76,11 +76,15 @@ import ch.ethz.twimight.util.TweetTagHandler;
 
 /**
  * Display a tweet
+ * 
  * @author thossmann
  * @author pcarta
  */
 @SuppressLint("ValidFragment")
-public class ShowTweetFragment extends Fragment{	
+public class ShowTweetFragment extends Fragment {
+
+	private static final String ARG_KEY_ROWID = "rowId";
+	
 	Cursor c;
 
 	// Views
@@ -111,68 +115,76 @@ public class ShowTweetFragment extends Fragment{
 
 	protected String TAG = "ShowTweetFragment";
 
-	//LOGS
-	LocationHelper locHelper ;	
+	// LOGS
+	LocationHelper locHelper;
 	Intent intent;
 	ConnectivityManager cm;
-	StatisticsDBHelper statsDBHelper;	
+	StatisticsDBHelper statsDBHelper;
 
 	Activity activity;
 	ContentResolver resolver;
 	View view;
 
-	//photo
+	// photo
 	private String photoPath;
 
-	//SDcard helper
+	// SDcard helper
 	private SDCardHelper sdCardHelper;
 
 	private String userID = null;
-	
-	//offline html pages
+
+	// offline html pages
 	private int htmlStatus;
 	private ArrayList<String> htmlUrls;
 	private HtmlPagesDbHelper htmlDbHelper;
-	private ArrayList<String> htmlsToDownload;	
-	
+	private ArrayList<String> htmlsToDownload;
+
 	// Container Activity must implement this interface
-    public static interface OnTweetDeletedListener {
-        public void onDelete();
-    }
-    
-    OnTweetDeletedListener listener;
-    
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            listener = (OnTweetDeletedListener) activity;
-        } catch (ClassCastException e) {      
-        }
-    }
+	public interface OnTweetDeletedListener {
+		public void onDelete();
+	}
 
-	public ShowTweetFragment() {};
+	OnTweetDeletedListener listener;
 
-	public ShowTweetFragment(long rowId) {
-		this.rowId = rowId;		
-    };
-    
-    
-    
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			listener = (OnTweetDeletedListener) activity;
+		} catch (ClassCastException e) {
+		}
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-    		Bundle savedInstanceState) {    	
-    	// TODO Auto-generated method stub
-    	super.onCreateView(inflater, container, savedInstanceState);
-    	// Inflate the layout for activity fragment	
-    	view = inflater.inflate(R.layout.showtweet, container, false);
-    	screenNameView = (TextView) view.findViewById(R.id.showTweetScreenName);
-    	realNameView = (TextView) view.findViewById(R.id.showTweetRealName);
+	public static ShowTweetFragment newInstance(long rowId) {
+		ShowTweetFragment instance = new ShowTweetFragment();
+		Bundle args = new Bundle();
+		args.putLong(ARG_KEY_ROWID, rowId);
+		instance.setArguments(args);
+		return instance;
+	}
 
-    	tweetTextView = (TextView) view.findViewById(R.id.showTweetText);
-    	createdTextView = (TextView) view.findViewById(R.id.showTweetCreatedAt);
-    	createdWithView = (TextView) view.findViewById(R.id.showTweetCreatedWith);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		// TODO Auto-generated method stub
+		super.onCreateView(inflater, container, savedInstanceState);
+		// Inflate the layout for activity fragment
+		view = inflater.inflate(R.layout.showtweet, container, false);
+		screenNameView = (TextView) view.findViewById(R.id.showTweetScreenName);
+		realNameView = (TextView) view.findViewById(R.id.showTweetRealName);
+
+		tweetTextView = (TextView) view.findViewById(R.id.showTweetText);
+		createdTextView = (TextView) view.findViewById(R.id.showTweetCreatedAt);
+		createdWithView = (TextView) view
+				.findViewById(R.id.showTweetCreatedWith);
+
+		// if we are creating a new instance, get row id from arguments, otherwise from saved instance state
+		if (savedInstanceState == null) {
+			rowId = getArguments().getLong(ARG_KEY_ROWID);
+		} else {
+			rowId = savedInstanceState.getLong(ARG_KEY_ROWID);
+		}
 
     	// If we don't know which tweet to show, we stop the activity
     	if(rowId != 0) {

@@ -23,7 +23,7 @@ public class ShowTweetPageAdapter extends FragmentPagerAdapter {
 	public Fragment getItem(int pos) {
 		long rowId = list.get(pos);
 		Log.i(TAG, "rowId: " + rowId);
-		return new ShowTweetFragment(rowId);
+		return ShowTweetFragment.newInstance(rowId);
 	}
 
 	@Override
