@@ -40,7 +40,6 @@ import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.security.CertificateManager;
@@ -829,10 +828,11 @@ public class TweetsContentProvider extends ContentProvider {
 			// second to insert the tweet and then schedule a scanning operation
 			if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){			
 					//new ScanningAlarm(getContext(),0,true);    
-					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
-					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);
+//					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
+//					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);
+//					getContext().getApplicationContext().startService(i);
+					Intent i = new Intent(getContext().getApplicationContext(), ScanningService.class);
 					getContext().getApplicationContext().startService(i);
-				
 	    							
 				
 			}
