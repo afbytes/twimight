@@ -14,6 +14,7 @@ package ch.ethz.twimight.data;
 
 import java.util.Date;
 
+import ch.ethz.twimight.net.opportunistic.BluetoothStatus;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -87,6 +88,7 @@ public class MacsDBHelper {
 		long result = 0;
 		try{
 			result = database.insert(DBOpenHelper.TABLE_MACS, null, initialValues);
+			updateActiveMacsCount();
 		} catch (SQLiteException e) {
 			return -1;
 		}
@@ -109,10 +111,22 @@ public class MacsDBHelper {
 			return false;
 		}
 
+		// update count in BluetoothStatus
+		updateActiveMacsCount();
+		
 		if(result > 0)
 			return  true;
 		else 
 			return false;
+
+
+	}
+	
+	private void updateActiveMacsCount(){
+		Cursor activeMacsCursor = fetchActiveMacs();
+		int activeMacsCount = activeMacsCursor.getCount();
+		activeMacsCursor.close();
+		BluetoothStatus.getInstance().setNeighborCount(activeMacsCount);
 	}
 	
 	/**
@@ -128,7 +142,7 @@ public class MacsDBHelper {
 			Log.e(TAG, "SQLiteException: " + e.toString());
 			
 		}
-		
+		updateActiveMacsCount();
 		if(resultCode > 0){
 			return true;
 		}else{
