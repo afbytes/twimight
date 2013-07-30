@@ -193,5 +193,10 @@
     <string name="tds_communication_explain">Markiere um outomatisch Updates vom Twimight Server z lade.</string>
     <string name="location_updates">Standort-Updates</string>
     <string name="location_updates_explain">Söue periodisch Standort-Updates a Twimight Server gschickt wärde?</string>
+    <string name="btstatus_connected_to">verbunde mit %s</string>
+    <string name="btstatus_connecting_to">verbindä mit %s</string>
+    <string name="btstatus_listening">wartä</string>
+    <string name="btstatus_resetting">dä Adapter wird zrugggsetzt</string>
+    <string name="btstatus_searching">suächä</string>
     
 </resources>

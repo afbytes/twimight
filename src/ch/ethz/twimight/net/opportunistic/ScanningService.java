@@ -49,6 +49,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
@@ -137,7 +138,7 @@ public class ScanningService extends Service implements
 		handler = new Handler();
 		// set up Bluetooth
 
-		bluetoothHelper = new BluetoothComms(mHandler);
+		bluetoothHelper = new BluetoothComms(this, mHandler);
 		bluetoothHelper.start();
 		dbHelper = new MacsDBHelper(getApplicationContext());
 		dbHelper.open();
@@ -199,7 +200,7 @@ public class ScanningService extends Service implements
 				dbHelper.updateMacsDeActive();
 				bluetoothHelper.stop();
 				boolean ret = mBtAdapter.startDiscovery();
-				BluetoothStatus.getInstance().setStatusDescription("discovering");
+				BluetoothStatus.getInstance().setStatusDescription(getString(R.string.btstatus_searching));
 				Log.d(T, "started discovery (ret=" + ret + ")");
 				Log.d(T, "discovery running: " + mBtAdapter.isDiscovering());
 			}
@@ -525,7 +526,7 @@ public class ScanningService extends Service implements
 						mBtAdapter.enable();
 					}
 				}
-				BluetoothStatus.getInstance().setStatusDescription("resetting adapter");
+				BluetoothStatus.getInstance().setStatusDescription(getString(R.string.btstatus_resetting));
 				restartingBlue = true;
 				break;
 
