@@ -27,11 +27,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
-import ch.ethz.twimight.activities.TwimightBaseActivity;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -60,6 +60,7 @@ public class BluetoothComms{
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private final Context mContext;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -75,7 +76,8 @@ public class BluetoothComms{
      * @param context  The UI Activity Context
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothComms( Handler handler) {
+    public BluetoothComms( Context context, Handler handler) {
+    	mContext = context;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
@@ -296,7 +298,7 @@ public class BluetoothComms{
                     try {
                         // This is a blocking call and will only return on a
                         // successful connection or an exception
-                    	BluetoothStatus.getInstance().setStatusDescription("listening");
+                    	BluetoothStatus.getInstance().setStatusDescription(mContext.getString(R.string.btstatus_listening));
                         socket = mmServerSocket.accept();
                         Log.i(T,"connection received, socket created");
                     } catch (IOException e) {
@@ -382,7 +384,9 @@ public class BluetoothComms{
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
             	Log.d("btdebug", "discovering: " +mAdapter.isDiscovering());
-            	BluetoothStatus.getInstance().setStatusDescription("connecting to " + mmDevice.getName());
+            	String remoteDeviceName = mmDevice.getName()!=null ? mmDevice.getName() : "?";
+            	String statusDescription = String.format(mContext.getString(R.string.btstatus_connecting_to), remoteDeviceName);
+            	BluetoothStatus.getInstance().setStatusDescription(statusDescription);
                 mmSocket.connect();
             } catch (IOException e) {
                 // Close the socket
@@ -443,8 +447,9 @@ public class BluetoothComms{
 
         public void run() {
             Log.d(T, "BEGIN mConnectedThread");
-            String remoteDeviceName = mmSocket.getRemoteDevice().getName()!=null ? mmSocket.getRemoteDevice().getName() : "remote device";
-            BluetoothStatus.getInstance().setStatusDescription("connected to " + remoteDeviceName);
+            String remoteDeviceName = mmSocket.getRemoteDevice().getName()!=null ? mmSocket.getRemoteDevice().getName() : "?"; 
+            String statusDescription = String.format(mContext.getString(R.string.btstatus_connected_to), remoteDeviceName);
+            BluetoothStatus.getInstance().setStatusDescription(statusDescription);
             // Keep listening to the InputStream while connected
             while (true) {
                 try {

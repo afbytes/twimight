@@ -194,5 +194,6 @@
         senza 3G o WiFi. Una volta che una connessione sarà nuovamente
         disponibile i Tweet verranno pubblicati su Twitter
         </string>
+    <string name="btstatus_searching">ricerca</string>
     
 </resources>

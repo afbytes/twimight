@@ -211,5 +211,10 @@
         Once connectivity is re-established, your Tweets will be published
         to Twitter.
         </string>
+    <string name="btstatus_resetting">resetting adapter</string>
+    <string name="btstatus_searching">searching</string>
+    <string name="btstatus_listening">listening</string>
+    <string name="btstatus_connecting_to">connecting to %s</string>
+    <string name="btstatus_connected_to">connected to %s</string>
     
 </resources>
