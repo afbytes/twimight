@@ -6,7 +6,7 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="ch.ethz.twimight" android:versionCode="1700020" android:versionName="1.0.0">
+	package="ch.ethz.twimight" android:versionCode="1700021" android:versionName="1.0.0">
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="17"/>
 	
 	<permission android:description="@string/permDescription"
@@ -15,7 +15,7 @@
 	
 
 	<application android:icon="@drawable/ic_launcher_twimight"
-		android:theme="@style/Twimight" android:hardwareAccelerated="true" android:debuggable="true">
+		android:theme="@style/Twimight" android:hardwareAccelerated="true" android:debuggable="true" android:label="@string/app_label">
 		
 	    <activity android:name=".activities.ConditionsActivity"
 			android:label="Twimight" android:launchMode="singleTop"
