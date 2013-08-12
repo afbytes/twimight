@@ -111,7 +111,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 					DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
 				setDiscoveryFinishedTimestamp(sharedPref,
 						System.currentTimeMillis());
-				addPairedDevices();
+				// addPairedDevices();
 				if (sf != null)
 					sf.onScanningFinished();
 				// compareDevice();
