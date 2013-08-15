@@ -155,7 +155,7 @@
 
 
 		<provider android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
-			android:authorities="ch.ethz.twimight.Tweets" android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
+			android:authorities="ch.ethz.twimight.Tweets" android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" android:exported="true"/>
 
 		<provider android:name="ch.ethz.twimight.net.twitter.TwitterUsersContentProvider"
 			android:authorities="ch.ethz.twimight.TwitterUsers"
