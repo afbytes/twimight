@@ -630,7 +630,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 	private void notifyUser(int type, String tickerText){
 		
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_launcher_twimight;
+		int icon = R.drawable.ic_notification;
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, tickerText, when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;

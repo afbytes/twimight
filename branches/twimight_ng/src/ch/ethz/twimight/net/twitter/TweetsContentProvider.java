@@ -1230,7 +1230,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private void notifyUser(int type, String tickerText){
 		
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_launcher_twimight;
+		int icon = R.drawable.ic_notification;
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
