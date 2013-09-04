@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.NewTweetActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
@@ -853,6 +854,11 @@ public class TweetsContentProvider extends ContentProvider {
 		// delete everything that now falls out of the buffer
 		purgeTweets(values);
 		
+		// trigger upload to Twimight Disaster Server
+		Intent synchIntent = new Intent(getContext(), TDSService.class);
+		synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL_FORCE);
+		getContext().startService(synchIntent);
+		
 		return insertUri;
 	}
 
@@ -1189,6 +1195,15 @@ public class TweetsContentProvider extends ContentProvider {
 				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);						
 				if(rowId >= 0){							
 					Uri insertUri = ContentUris.withAppendedId(Tweets.ALL_TWEETS_URI, rowId);
+					
+					// trigger twitter upload
+					// --> deactivated for now. is done in NewTweetActivity
+					
+//					Intent i = new Intent(getContext(), TwitterService.class);
+//					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
+//					i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
+//					getContext().startService(i);
+					
 					return insertUri;
 				} else {
 					 return null; 

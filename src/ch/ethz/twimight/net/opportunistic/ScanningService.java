@@ -126,7 +126,7 @@ public class ScanningService extends Service implements
 	DevicesReceiver receiver;
 	BluetoothAdapter mBtAdapter;
 	volatile boolean restartingBlue = false;
-	
+
 	// has a scan been skipped because the adapter was restarting?
 	private boolean mScanPending = false;
 
@@ -173,8 +173,8 @@ public class ScanningService extends Service implements
 		ScanningAlarm.releaseWakeLock();
 		getWakeLock(this);
 		// Register for broadcasts when discovery has finished
-		registerDevicesReceiver();	
-		
+		registerDevicesReceiver();
+
 		float probability;
 
 		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, true))
@@ -188,8 +188,8 @@ public class ScanningService extends Service implements
 
 		return START_STICKY;
 	}
-	
-	private void initiateScanningRound(float probability){
+
+	private void initiateScanningRound(float probability) {
 		if (mBtAdapter != null && !restartingBlue) {
 			if (probability <= 1) {
 				// If we're already discovering, stop it
@@ -200,13 +200,15 @@ public class ScanningService extends Service implements
 				dbHelper.updateMacsDeActive();
 				bluetoothHelper.stop();
 				boolean ret = mBtAdapter.startDiscovery();
-				BluetoothStatus.getInstance().setStatusDescription(getString(R.string.btstatus_searching));
+				BluetoothStatus.getInstance().setStatusDescription(
+						getString(R.string.btstatus_searching));
 				Log.d(T, "started discovery (ret=" + ret + ")");
 				Log.d(T, "discovery running: " + mBtAdapter.isDiscovering());
 			}
 			mScanPending = false;
 		} else {
-			Log.d(T, "skipping scan (mBtAdapter=" + mBtAdapter + ", restartingBlue=" + restartingBlue + ")");
+			Log.d(T, "skipping scan (mBtAdapter=" + mBtAdapter
+					+ ", restartingBlue=" + restartingBlue + ")");
 			mScanPending = true;
 			stopSelf();
 		}
@@ -295,30 +297,31 @@ public class ScanningService extends Service implements
 							+ dbHelper.fetchMacSuccessful(mac) + "/"
 							+ dbHelper.fetchMacAttempts(mac) + ")");
 
-//			if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {
+			// if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {
 
-				// if ( (System.currentTimeMillis() -
-				// dbHelper.getLastSuccessful(mac) ) >
-				// Constants.MEETINGS_INTERVAL) {
-				// If we're already discovering, stop it
-				if (mBtAdapter.isDiscovering()) {
-					mBtAdapter.cancelDiscovery();
-				}
-				bluetoothHelper.connect(mac);
-				connTimeout = new ConnectionAttemptTimeout();
-				handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); // timeout
-																		// for
-																		// the
-																		// conn
-																		// attempt
-				// } else {
-				// Log.i(TAG,"skipping connection, last meeting was too recent");
-				// nextScanning();
-				// }
-//			} else if (bluetoothHelper.getState() != bluetoothHelper.STATE_CONNECTED) {
-//				bluetoothHelper.start();
-//
-//			}
+			// if ( (System.currentTimeMillis() -
+			// dbHelper.getLastSuccessful(mac) ) >
+			// Constants.MEETINGS_INTERVAL) {
+			// If we're already discovering, stop it
+			if (mBtAdapter.isDiscovering()) {
+				mBtAdapter.cancelDiscovery();
+			}
+			bluetoothHelper.connect(mac);
+			connTimeout = new ConnectionAttemptTimeout();
+			handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); // timeout
+																	// for
+																	// the
+																	// conn
+																	// attempt
+			// } else {
+			// Log.i(TAG,"skipping connection, last meeting was too recent");
+			// nextScanning();
+			// }
+			// } else if (bluetoothHelper.getState() !=
+			// bluetoothHelper.STATE_CONNECTED) {
+			// bluetoothHelper.start();
+			//
+			// }
 
 		} else
 			stopScanning();
@@ -516,7 +519,7 @@ public class ScanningService extends Service implements
 						BluetoothAdapter.ACTION_STATE_CHANGED);
 				stateReceiver.setListener(ScanningService.this);
 				registerReceiver(stateReceiver, filter);
-				
+
 				if (mBtAdapter != null) {
 					if (mBtAdapter.isEnabled()) {
 						Log.d(T, "disbling bt");
@@ -526,7 +529,8 @@ public class ScanningService extends Service implements
 						mBtAdapter.enable();
 					}
 				}
-				BluetoothStatus.getInstance().setStatusDescription(getString(R.string.btstatus_resetting));
+				BluetoothStatus.getInstance().setStatusDescription(
+						getString(R.string.btstatus_resetting));
 				restartingBlue = true;
 				break;
 
@@ -611,7 +615,10 @@ public class ScanningService extends Service implements
 			cvTweet.put(Tweets.COL_BUFFER, Tweets.BUFFER_DISASTER);
 
 			// we don't enter our own tweets into the DB.
-			if(!cvTweet.getAsLong(Tweets.COL_TWITTERUSER).toString().equals(LoginActivity.getTwitterId(getApplicationContext()))){				
+			if (!cvTweet
+					.getAsLong(Tweets.COL_TWITTERUSER)
+					.toString()
+					.equals(LoginActivity.getTwitterId(getApplicationContext()))) {
 
 				ContentValues cvUser = getUserCV(o);
 
@@ -813,77 +820,77 @@ public class ScanningService extends Service implements
 
 	private boolean sendDisasterPhoto(Cursor c) throws JSONException {
 		JSONObject toSendPhoto;
-		String photoFileName =  c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
-		Log.d("photo", "photo name:"+ photoFileName);
-		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
-		//locate the directory where the photos are stored
-		photoPath = PHOTO_PATH + "/" + userID;
-		String[] filePath = { photoPath };
+		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		Log.d("photo", "photo name:" + photoFileName);
+		String userID = String.valueOf(c.getLong(c
+				.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		// locate the directory where the photos are stored
+		photoPath = Tweets.PHOTO_PATH + "/" + userID;
 
-		if (sdCardHelper.checkSDState(filePath)) {
-			Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(
-					photoPath, photoFileName));// photoFileParent,
-												// photoFilename));
-			Log.d(TAG, "photo path:" + photoUri.getPath());
-			Bitmap photoBitmap = sdCardHelper.decodeBitmapFile(photoUri
-					.getPath());
-			Log.d("photo", "photo ready");
-			if (photoBitmap != null) {
-				Log.d("photo", "photo ready to be sent");
-				toSendPhoto = getJSONFromBitmap(photoBitmap);
-				toSendPhoto.put("userID", userID);
-				toSendPhoto.put("photoName", photoFileName);
-				Log.i(TAG, "sending photo");
-				Log.d(TAG, toSendPhoto.toString(5));
-				bluetoothHelper.write(toSendPhoto.toString());
-				return true;
-			}
+		try {
+			String base64Photo = sdCardHelper.getAsBas64Jpeg(photoPath, photoFileName, 500);
+			toSendPhoto = new JSONObject("{\"image\":\"" + base64Photo + "\"}");
+			toSendPhoto.put(TYPE, PHOTO);
+			toSendPhoto.put("userID", userID);
+			toSendPhoto.put("photoName", photoFileName);
+			bluetoothHelper.write(toSendPhoto.toString());
+			return true;
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "Can't open file. Not sending photo.", e);
 		}
 
 		return false;
 	}
-	
-	private void sendDisasterHtmls(Cursor c) throws JSONException{
-		
+
+	private void sendDisasterHtmls(Cursor c) throws JSONException {
+
 		JSONObject toSendXml;
-		
-		String userId = String.valueOf(c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER)));
-		
-		String substr = Html.fromHtml(c.getString(c.getColumnIndex(Tweets.COL_TEXT))).toString();
+
+		String userId = String.valueOf(c.getLong(c
+				.getColumnIndex(Tweets.COL_TWITTERUSER)));
+
+		String substr = Html.fromHtml(
+				c.getString(c.getColumnIndex(Tweets.COL_TEXT))).toString();
 
 		String[] strarr = substr.split(" ");
-		
-		//check the urls of the tweet
-		for(String subStrarr : strarr){
 
-			if(subStrarr.indexOf("http://") >= 0 || subStrarr.indexOf("https://") >= 0){
+		// check the urls of the tweet
+		for (String subStrarr : strarr) {
+
+			if (subStrarr.indexOf("http://") >= 0
+					|| subStrarr.indexOf("https://") >= 0) {
 				String subUrl = null;
-				if(subStrarr.indexOf("http://") >= 0){
+				if (subStrarr.indexOf("http://") >= 0) {
 					subUrl = subStrarr.substring(subStrarr.indexOf("http://"));
-				}else if(subStrarr.indexOf("https://") >= 0){
+				} else if (subStrarr.indexOf("https://") >= 0) {
 					subUrl = subStrarr.substring(subStrarr.indexOf("https://"));
 				}
 				Cursor cursorHtml = htmlDbHelper.getPageInfo(subUrl);
 
-				if(cursorHtml !=null){					
-					
-					if( !cursorHtml.isNull(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME) ) ){
-						
-						String[] filePath = {HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(this)};
-						String filename = cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME));
-						Long tweetId = cursorHtml.getLong(cursorHtml.getColumnIndex(HtmlPage.COL_DISASTERID));
-						if(sdCardHelper.checkSDState(filePath)){
-							
-							File xmlFile = sdCardHelper.getFileFromSDCard(filePath[0], filename);
-							if(xmlFile.exists()){
-								toSendXml = getJSONFromXml(xmlFile);								
+				if (cursorHtml != null) {
+
+					if (!cursorHtml.isNull(cursorHtml
+							.getColumnIndex(HtmlPage.COL_FILENAME))) {
+
+						String[] filePath = { HtmlPage.HTML_PATH + "/"
+								+ LoginActivity.getTwitterId(this) };
+						String filename = cursorHtml.getString(cursorHtml
+								.getColumnIndex(HtmlPage.COL_FILENAME));
+						Long tweetId = cursorHtml.getLong(cursorHtml
+								.getColumnIndex(HtmlPage.COL_DISASTERID));
+						if (sdCardHelper.checkSDState(filePath)) {
+
+							File xmlFile = sdCardHelper.getFileFromSDCard(
+									filePath[0], filename);
+							if (xmlFile.exists()) {
+								toSendXml = getJSONFromXml(xmlFile);
 								toSendXml.put(HtmlPage.COL_URL, subUrl);
 								toSendXml.put(HtmlPage.COL_FILENAME, filename);
 								toSendXml.put(HtmlPage.COL_DISASTERID, tweetId);
 								Log.d(TAG, "sending htmls");
 								Log.d(TAG, toSendXml.toString(5));
 								bluetoothHelper.write(toSendXml.toString());
-								
+
 							}
 
 						}
@@ -925,36 +932,6 @@ public class ScanningService extends Service implements
 			Log.d(TAG, "exception:" + e.getMessage());
 			return null;
 		}
-	}
-
-	/**
-	 * convert photo attached to this tweet to JSONobject
-	 * 
-	 * @param bitmapPicture
-	 * @return
-	 */
-	private JSONObject getJSONFromBitmap(Bitmap bitmapPicture) {
-
-		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-		try {
-			bitmapPicture.compress(Bitmap.CompressFormat.JPEG, 100,
-					byteArrayBitmapStream);
-			Log.d("photo",
-					"bitmap array size:"
-							+ String.valueOf(byteArrayBitmapStream.size()));
-			byte[] b = byteArrayBitmapStream.toByteArray();
-			String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-			JSONObject jsonObj;
-
-			jsonObj = new JSONObject("{\"image\":\"" + encodedImage + "\"}");
-			jsonObj.put(TYPE, PHOTO);
-			return jsonObj;
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			Log.d(TAG, "exception:" + e.getMessage());
-			return null;
-		}
-
 	}
 
 	/**
@@ -1008,14 +985,16 @@ public class ScanningService extends Service implements
 	 */
 	protected JSONObject getJSON(Cursor c) throws JSONException {
 		JSONObject o = new JSONObject();
-		if(c.getColumnIndex(Tweets.COL_TWITTERUSER) < 0 || c.getColumnIndex(TwitterUsers.COL_SCREENNAME) < 0 ) {
-			Log.i(TAG,"missing user data");
+		if (c.getColumnIndex(Tweets.COL_TWITTERUSER) < 0
+				|| c.getColumnIndex(TwitterUsers.COL_SCREENNAME) < 0) {
+			Log.i(TAG, "missing user data");
 			return null;
 		}
 
 		else {
-			
-			o.put(Tweets.COL_TWITTERUSER, c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER)));	
+
+			o.put(Tweets.COL_TWITTERUSER,
+					c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER)));
 			o.put(TYPE, TWEET);
 			o.put(TwitterUsers.COL_SCREENNAME,
 					c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
@@ -1120,8 +1099,8 @@ public class ScanningService extends Service implements
 			cv.put(Tweets.COL_TEXT_PLAIN,
 					Html.fromHtml(o.getString(Tweets.COL_TEXT)).toString());
 		}
-		
-		if(o.has(Tweets.COL_TWITTERUSER)) {			
+
+		if (o.has(Tweets.COL_TWITTERUSER)) {
 			cv.put(Tweets.COL_TWITTERUSER, o.getLong(Tweets.COL_TWITTERUSER));
 		}
 
@@ -1230,9 +1209,9 @@ public class ScanningService extends Service implements
 
 		}
 
-
-		if(o.has(Tweets.COL_TWITTERUSER)) {
-			cv.put(TwitterUsers.COL_TWITTERUSER_ID, o.getLong(Tweets.COL_TWITTERUSER));
+		if (o.has(Tweets.COL_TWITTERUSER)) {
+			cv.put(TwitterUsers.COL_TWITTERUSER_ID,
+					o.getLong(Tweets.COL_TWITTERUSER));
 
 		}
 		cv.put(TwitterUsers.COL_ISDISASTER_PEER, 1);
@@ -1257,23 +1236,24 @@ public class ScanningService extends Service implements
 	private void unregisterDevReceiver() {
 		if (receiver != null) {
 			receiver.setListener(null);
-            try {
-            	unregisterReceiver(receiver);			
-    			receiver = null;
-			} 
-            catch (IllegalArgumentException ex){}
-			
+			try {
+				unregisterReceiver(receiver);
+				receiver = null;
+			} catch (IllegalArgumentException ex) {
+			}
+
 		}
 	}
-	
+
 	private void unregisterStateReceiver() {
 		if (stateReceiver != null) {
 			stateReceiver.setListener(null);
 			try {
-				unregisterReceiver(stateReceiver);			
+				unregisterReceiver(stateReceiver);
 				stateReceiver = null;
-			} catch (IllegalArgumentException ex){}
-			
+			} catch (IllegalArgumentException ex) {
+			}
+
 		}
 	}
 
@@ -1283,8 +1263,9 @@ public class ScanningService extends Service implements
 			unregisterStateReceiver();
 			restartingBlue = false;
 			Log.i(T, "switching finished");
-			// if a scan was postponed due to the adapter being restarted, do it now, otherwise start listening
-			if(mScanPending) {
+			// if a scan was postponed due to the adapter being restarted, do it
+			// now, otherwise start listening
+			if (mScanPending) {
 				Log.d(T, "executing pending scan");
 				initiateScanningRound(1);
 			} else {
