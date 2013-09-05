@@ -5,7 +5,7 @@
     <style name="Twimight" parent="android:style/Theme.Holo.Light">
         <item name="android:buttonStyle">@style/Button</item>
         <item name="android:imageButtonStyle">@style/ImageButton</item>
-        <item name="android:windowBackground">@color/twimightBackgroundLight</item>
+        <item name="android:windowBackground">@color/activityBackground</item>
     	<item name="android:colorBackground">@color/twimightBackgroundLight</item>
     	<item name="android:textAppearance">@style/twimightDefaultTextAppearance</item>
     	<item name="android:actionBarStyle">@style/MyActionBar</item>
@@ -19,7 +19,7 @@
      <style name="Twimight.NoActionBar" parent="android:style/Theme.Holo.Light.NoActionBar">
         <item name="android:buttonStyle">@style/Button</item>
         <item name="android:imageButtonStyle">@style/ImageButton</item>
-        <item name="android:windowBackground">@color/twimightBackgroundLight</item>
+        <item name="android:windowBackground">@color/activityBackground</item>
     	<item name="android:colorBackground">@color/twimightBackgroundLight</item>
     	<item name="android:textAppearance">@style/twimightDefaultTextAppearance</item>    	
     
