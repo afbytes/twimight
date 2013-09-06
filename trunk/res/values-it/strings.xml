@@ -184,10 +184,15 @@
     <string name="location_updates_explain">Inviare aggiornamenti periodici al TDS sulla propria posizione?</string>
 
     <!-- Disaster mode -->
-    <string name="dis_mode_description">        In assenza di connettività, attiva la modalità disastro nelle opzioni.
+    <string name="dis_mode_description">Twimight ha superpoteri!
+        \n\nIn assenza di connettività, attiva la <b><i>modalità disastro</i></b> nelle opzioni.
         I tweet scritti verranno diffusi a tutti i telefoni in broadcast, anche
-        senza 3G o WiFi. Una volta che una connessione sarà nuovamente
+        senza 3G o WiFi.
+        \n\nUna volta che una connessione sarà nuovamente
         disponibile i Tweet verranno pubblicati su Twitter</string>
     <string name="btstatus_searching">ricerca</string>
+    <string name="tips_title">Lo sapevate che?</string>
+    <string name="cool">Cool!</string>
+    <string name="welcome">Benvenuti a Twimight</string>
 
 </resources>
