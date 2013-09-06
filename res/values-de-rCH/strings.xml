@@ -9,7 +9,7 @@
   Contributors:
       Paolo Carta - Implementation
       Theus Hossmann - Implementation
-      Dominik Schatzmann - Message specification
+      Dominik Schatzmann - Message specification
 -->
 <resources>
 
@@ -59,10 +59,10 @@
     <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
 
     <!-- Disaster mode -->
-    <string name="dis_mode_description">        Falls d Internetverbindig zämäbricht, aktivier dr Katastrophe-Modus
-        i de Istellige. Katastrophe-Tweets wärde epidemisch zwüsche aune
+    <string name="dis_mode_description">Twimight hät Superchräft!
+        \n\nFalls d Internetverbindig zämäbricht, aktivier dr <b><i>Katastrophe-Modus</i></b>        i de Istellige. Katastrophe-Tweets wärde epidemisch zwüsche aune
         Telefon im Katastrophe-Modus verbreitet, o ohni 3G oder WLAN.
-        Sobald d Verbindig wider härgstellt wird, wärde diner
+        \n\nSobald d Verbindig wider härgstellt wird, wärde diner
         Tweets när uf Twitter ufeglade.</string>
 
     <!-- Tweeting, Timeline, Favorites -->
@@ -191,5 +191,8 @@
     <string name="btstatus_listening">wartä</string>
     <string name="btstatus_resetting">dä Adapter wird zrugggsetzt</string>
     <string name="btstatus_searching">suächä</string>
+    <string name="tips_title">Häsch gwüsst?</string>
+    <string name="cool">So gääch!</string>
+    <string name="welcome">Willkomme bi Twimight</string>
 
 </resources>

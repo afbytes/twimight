@@ -59,11 +59,12 @@
     <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
 
     <!-- Disaster mode -->
-    <string name="dis_mode_description">        Falls die Internetverbindung zusammenbricht, aktiviere den
-        Katastrophen-Modus in den Einstellungen. Katastrophen-Tweets
+    <string name="dis_mode_description">Twimight hat Superkräfte!
+        \n\nFalls die Internetverbindung zusammenbricht, aktiviere den
+        <b><i>Katastrophen-Modus</i></b> in den Einstellungen. Katastrophen-Tweets
         werden epidemisch zwischen allen Telefonen im Katastrophen-Modus
         verbreitet, auch ohne 3G oder WLAN.
-        Sobald die Verbindung wieder hergestellt wird, werden deine
+        \n\nSobald die Verbindung wieder hergestellt wird, werden deine
         Tweets dann auf Twitter hochgeladen.</string>
 
     <!-- Tweeting, Timeline, Favorites -->
@@ -192,5 +193,8 @@
     <string name="btstatus_searching">suche</string>
     <string name="btstatus_listening">warte</string>
     <string name="btstatus_resetting">Adapter wird zurückgesetzt</string>
+    <string name="tips_title">Schon gewusst?</string>
+    <string name="cool">Cool!</string>
+    <string name="welcome">Willkommen bei Twimight</string>
 
 </resources>

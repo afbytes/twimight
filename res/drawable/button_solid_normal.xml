@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item 
 		android:state_enabled="false"
-        android:drawable="@drawable/button_passive" 
+        android:drawable="@drawable/button_solid_normal_disabled" 
         />
     <item 
     	android:state_pressed="true" 
@@ -11,7 +11,7 @@
     <item 
     	android:state_focused="true" 
     	android:state_enabled="true"
-        android:drawable="@drawable/button_selected" />
+        android:drawable="@drawable/button_solid_normal_focused" />
     <item 
     	android:state_enabled="true"
         android:drawable="@drawable/button_solid_normal_enabled" />

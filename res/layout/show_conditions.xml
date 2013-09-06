@@ -51,7 +51,8 @@
                 android:layout_marginRight="6dp"
                 style="@style/Button.Solid.Normal"
                 android:text="@string/agree" 
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:onClick="agreeToTerms"/>
 
             <Button
                 android:id="@+id/buttonDecline"

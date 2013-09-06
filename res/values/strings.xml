@@ -194,15 +194,19 @@
     <string name="location_updates_explain">Send periodic location updates to Twimight Server? Note that this will be of great use for the Disaster Mode when needed!</string>
 
     <!-- Disaster mode -->
-    <string name="dis_mode_description">        If you loose Internet connectivity, activate the disaster mode
+    <string name="dis_mode_description">Twimight has superpowers!
+        \n\nIf you lose Internet connectivity, activate the <b><i>disaster mode</i></b>
     	in the Settings. Disaster tweets will spread epidemically
         among all phones in disaster mode, even without 3G or WiFi.
-        Once connectivity is re-established, your Tweets will be published
+        \n\nOnce connectivity is re-established, your Tweets will be published
         to Twitter.</string>
     <string name="btstatus_resetting">resetting adapter</string>
     <string name="btstatus_searching">searching</string>
     <string name="btstatus_listening">listening</string>
     <string name="btstatus_connecting_to">connecting to %s</string>
     <string name="btstatus_connected_to">connected to %s</string>
+    <string name="tips_title">Did you know?</string>
+    <string name="cool">Cool!</string>
+    <string name="welcome">Welcome to Twimight</string>
 
 </resources>
