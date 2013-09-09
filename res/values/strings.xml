@@ -18,7 +18,6 @@
     <string name="app_label">Twimight</string>
     <string name="twitter">Twitter</string>
     <string name="tweets">Tweets</string>
-    <string name="placeholder">asdf</string>
     <string name="tweet_length">140</string>
     <string name="tweet">Tweet</string>
     <string name="users">Users</string>
@@ -124,9 +123,10 @@
     <string name="logout_question">Are you sure you want to log out?</string>
 
     <!-- About -->
-    <string name="author">Authors: Paolo Carta and Theus Hossmann</string>
-    <string name="version">Version:</string>
-    <string name="keys">Keys</string>
+    <string name="authors_title">Authors</string>
+    <string name="authors">Paolo Carta and Theus Hossmann</string>
+    <string name="version_title">Version</string>
+    <string name="keys_title">Keys</string>
     <string name="no_certificate">No valid certificate.</string>
     <string name="no_update">No update</string>
     <string name="starting_update">Starting TDS update.</string>
@@ -135,7 +135,7 @@
     <string name="revoke">Revoke</string>
     <string name="revoke_key">Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).</string>
     <string name="revoking">Revoking key.</string>
-    <string name="update">TDS Update</string>
+    <string name="tds_update_title">TDS Update</string>
     <string name="update_button">Update</string>
 
     <!-- Terms & Conditions -->

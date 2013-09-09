@@ -72,6 +72,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		updateTheme();
 		super.onCreate(savedInstanceState);
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -82,7 +83,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		actionBar.setDisplayShowTitleEnabled(true);
-		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));		
+		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
 
 	}
 
@@ -91,47 +92,61 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onResume() {
+		updateTheme();
 		super.onResume();
 		instance = this;
-		
-		if(dd == null || dn == null) {
-			Log.i(TAG,"loading action bar backgrounds");
+
+		if (dd == null || dn == null) {
+			Log.i(TAG, "loading action bar backgrounds");
 			Resources resources = getResources();
 			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
 			dn = resources.getDrawable(R.drawable.top_bar_background);
-		}	
-		
-		// bottom status bar (can't do it in onCreate because layout is not set yet)
+		}
+
+		// bottom status bar (can't do it in onCreate because layout is not set
+		// yet)
 		bottomStatusBar = findViewById(R.id.bottomStatusBar);
 		tvNeighborCount = (TextView) findViewById(R.id.tvNeighborCount);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 		// setup disaster mode specific stuff
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"prefDisasterMode", false) == true) {
-			if (dd == null)
-				Log.i(TAG,"dd null");			
-			actionBar.setBackgroundDrawable(dd);
-			Log.i(TAG,"setting disaster background");
-			// does the current layout have a bottom status bar?
-			if (bottomStatusBar != null) {
-				bottomStatusBar.setVisibility(View.VISIBLE);
-				updateStatusBar();
-				// register for bluetooth status updates
-				BluetoothStatus.getInstance().addObserver(this);
-			}
-		} else {
-			actionBar.setBackgroundDrawable(dn);
-			Log.i(TAG,"setting normal background");
-			if (bottomStatusBar != null) {
-				bottomStatusBar.setVisibility(View.GONE);
-			}
-		}
+//		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+//				"prefDisasterMode", false) == true) {
+//			if (dd == null)
+//				Log.i(TAG, "dd null");
+//			actionBar.setBackgroundDrawable(dd);
+//			Log.i(TAG, "setting disaster background");
+//			// does the current layout have a bottom status bar?
+//			if (bottomStatusBar != null) {
+//				bottomStatusBar.setVisibility(View.VISIBLE);
+//				updateStatusBar();
+//				// register for bluetooth status updates
+//				BluetoothStatus.getInstance().addObserver(this);
+//			}
+//		} else {
+//			actionBar.setBackgroundDrawable(dn);
+//			Log.i(TAG, "setting normal background");
+//			if (bottomStatusBar != null) {
+//				bottomStatusBar.setVisibility(View.GONE);
+//			}
+//		}
 		// actionbar hack to make sure the background drawable is applied
 		// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setDisplayShowTitleEnabled(true);
+//		actionBar.setDisplayShowTitleEnabled(false);
+//		actionBar.setDisplayShowTitleEnabled(true);
 	}
 
+	private boolean isDisasterModeEnabled() {
+		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"prefDisasterMode", false);
+	}
+	
+	private void updateTheme(){
+		if(isDisasterModeEnabled()){
+			setTheme(R.style.Theme_Disastertheme);
+		} else {
+			setTheme(R.style.Theme_Normaltheme);
+		}
+	}
 
 	@Override
 	protected void onPause() {
@@ -139,6 +154,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		BluetoothStatus.getInstance().deleteObserver(this);
 		super.onPause();
 	}
+
 	/*
 	 * 
 	 * @Override protected void onRestart() { // TODO Auto-generated method stub
@@ -199,9 +215,16 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 			return true;
 
 		case R.id.menu_my_profile:
-			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
-			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_TWITTERUSER_ID+"="+LoginActivity.getTwitterId(this), null, null);
-			if(c.getCount()!=1) return false;
+			Uri uri = Uri.parse("content://"
+					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS);
+			Cursor c = getContentResolver().query(
+					uri,
+					null,
+					TwitterUsers.COL_TWITTERUSER_ID + "="
+							+ LoginActivity.getTwitterId(this), null, null);
+			if (c.getCount() != 1)
+				return false;
 			c.moveToFirst();
 			int rowId = c.getInt(c.getColumnIndex("_id"));
 

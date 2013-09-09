@@ -125,9 +125,10 @@
     <string name="logout_question">Sei sicuro di voler uscire?</string>
 
     <!-- About -->
-    <string name="author">Autori: Paolo Carta and Theus Hossmann</string>
-    <string name="version">Versione:</string>
-    <string name="keys">Chiavi</string>
+    <string name="authors_title">Autori</string>
+    <string name="authors">Paolo Carta e Theus Hossmann</string>
+    <string name="version_title">Versione</string>
+    <string name="keys_title">Chiavi</string>
     <string name="no_certificate">Nessun Certificato valido.</string>
     <string name="no_update">Nessun aggiornamento</string>
     <string name="starting_update">Aggiornamento con il TDS iniziato.</string>
@@ -136,7 +137,7 @@
     <string name="revoke">Revoca</string>
     <string name="revoke_key">Sei sicuro vuoi revocare la tua chiave? Questo va effettuato in caso di telefono smarrito o rubato.</string>
     <string name="revoking">Revoca la chiave.</string>
-    <string name="update">Aggiornamento TDS</string>
+    <string name="tds_update_title">Aggiornamento TDS</string>
     <string name="update_button">Aggiorna</string>
 
     <!-- Terms & Conditions -->

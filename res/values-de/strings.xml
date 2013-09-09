@@ -133,9 +133,10 @@
     <string name="logout_question">Bist du sicher dass du dich abmelden willst?</string>
 
     <!-- About -->
-    <string name="author">Autoren: Paolo Carta und Theus Hossmann</string>
-    <string name="version">Version:</string>
-    <string name="keys">Keys</string>
+    <string name="authors_title">Autoren</string>
+    <string name="authors">Paolo Carta und Theus Hossmann</string>
+    <string name="version_title">Version</string>
+    <string name="keys_title">Keys</string>
     <string name="no_certificate">Kein gültiges Zertifikat.</string>
     <string name="no_update">Keine Aktualisierung</string>
     <string name="starting_update">TDS Update wird gestartet.</string>
@@ -144,7 +145,7 @@
     <string name="revoke">Widerrufen</string>
     <string name="revoke_key">Bist du sicher dass du den Schlüssel widerrufen willst? Nur komprimittierte Schlüssel sollten widerrufen werden (z.B. fallst dein Telefon gestolen wurde).</string>
     <string name="revoking">Schlüssel wird widerrufen</string>
-    <string name="update">TDS Update</string>
+    <string name="tds_update_title">TDS Update</string>
     <string name="update_button">Update</string>
 
     <!-- Terms & Conditions -->

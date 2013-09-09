@@ -14,7 +14,7 @@
 		android:protectionLevel="dangerous" />
 	
 
-	<application android:icon="@drawable/ic_launcher_twimight"
+	<application android:icon="@drawable/ic_launcher"
 		android:theme="@style/Twimight" android:hardwareAccelerated="true" android:debuggable="true" android:label="@string/app_label">
 		
 	    <activity android:name=".activities.ConditionsActivity"

@@ -17,15 +17,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/mightybird_starglow_background_1080p" />
+        android:src="@drawable/gray_background_gradient" />
 
     <!-- container for padding -->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="24dp" >
+        android:padding="@dimen/activity_padding" >
 
         <TextView
             android:id="@+id/twimightTitle"
@@ -33,17 +34,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:gravity="center"
             android:layout_marginBottom="0dp"
+            android:gravity="center"
             android:text="@string/welcome" />
 
         <TextView
+            android:id="@+id/twimightSlogan"
             style="@style/NormalText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/twimightTitle"
             android:gravity="center"
-            android:text="@string/mighty"/>
+            android:text="@string/mighty" />
 
         <Button
             android:id="@+id/buttonLogin"
@@ -52,6 +54,22 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:text="@string/login" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/buttonLogin"
+            android:layout_below="@id/twimightSlogan"
+            android:gravity="center_vertical"
+            android:orientation="vertical" 
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:src="@drawable/mightybird" />
+        </LinearLayout>
     </RelativeLayout>
 
 </RelativeLayout>
