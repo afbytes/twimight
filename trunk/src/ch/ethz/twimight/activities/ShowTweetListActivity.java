@@ -109,17 +109,17 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		Tab tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_twimight_speech)
+				.setIcon(R.drawable.ic_timeline)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_twimight_favorites)
+				.setIcon(R.drawable.ic_favorites)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_twimight_mentions)
+				.setIcon(R.drawable.ic_mentions)
 				.setTabListener(new TabListener(viewPager ));
 		actionBar.addTab(tab);		
 

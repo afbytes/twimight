@@ -131,9 +131,10 @@
     <string name="logout_question">Bisch sicher dass di wosch abmäude?</string>
 
     <!-- About -->
-    <string name="author">Outore: Paolo Carta u Theus Hossmann</string>
-    <string name="version">Version:</string>
-    <string name="keys">Keys</string>
+    <string name="authors_title">Outore</string>
+    <string name="authors">Paolo Carta u Theus Hossmann</string>
+    <string name="version_title">Version</string>
+    <string name="keys_title">Keys</string>
     <string name="no_certificate">Kes güutigs Zertifikat.</string>
     <string name="no_update">Ke Aktualisierig</string>
     <string name="starting_update">TDS Update wird gstartet.</string>
@@ -142,7 +143,7 @@
     <string name="revoke">Widerruefe</string>
     <string name="revoke_key">Bisch sicher dass dr Schlüssu wosch widerruefe? Nume komprimittierti Schlüssu sötte widerruefe wärde (z.B. falls ds Telefon isch gmugget worde).</string>
     <string name="revoking">Schlüssu wird jetz widerruefe</string>
-    <string name="update">Twimight Server Update</string>
+    <string name="tds_update_title">Twimight Server Update</string>
     <string name="update_button">Update</string>
 
     <!-- Terms & Conditions -->
