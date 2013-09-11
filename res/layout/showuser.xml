@@ -49,7 +49,7 @@
                     android:id="@+id/showUserRealName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder"
+                    android:text="@string/placeholder_short"
                     android:textColor="@color/twimightTextDark"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -58,7 +58,7 @@
                     android:id="@+id/showUserScreenName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder"
+                    android:text="@string/placeholder_short"
                     android:textColor="@color/twimightTextDark"
                     android:textSize="18sp" />
 
@@ -66,7 +66,7 @@
                     android:id="@+id/showUserLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder"
+                    android:text="@string/placeholder_short"
                     android:textColor="@color/twimightTextLight"
                     android:textSize="18sp" />
             </LinearLayout>
@@ -214,7 +214,7 @@
                 android:layout_marginBottom="10dp"
                 android:autoLink="web"
                 android:padding="10dp"
-                android:text="@string/placeholder"
+                android:text="@string/placeholder_long"
                 android:textColor="@color/twimightTextDark"
                 android:textSize="18sp" />
 
@@ -243,7 +243,7 @@
                         android:id="@+id/statsTweets"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/placeholder"
+                        android:text="@string/placeholder_short"
                         android:textColor="@color/twimightTextDark" />
                 </LinearLayout>
                 <LinearLayout
@@ -265,7 +265,7 @@
                         android:id="@+id/statsFavorits"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/placeholder"
+                        android:text="@string/placeholder_short"
                         android:textColor="@color/twimightTextDark" />
                 </LinearLayout>
                 <LinearLayout
@@ -287,7 +287,7 @@
                         android:id="@+id/statsFollowers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/placeholder"
+                        android:text="@string/placeholder_short"
                         android:textColor="@color/twimightTextDark" />
                 </LinearLayout>
                 <LinearLayout
@@ -310,7 +310,7 @@
                         android:id="@+id/statsFriends"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/placeholder"
+                        android:text="@string/placeholder_short"
                         android:textColor="@color/twimightTextDark" />
                 </LinearLayout>
             </LinearLayout>

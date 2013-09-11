@@ -77,7 +77,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/placeholder" />
+            android:text="@string/placeholder_short" />
 
         <TextView
             android:id="@+id/titleKeys"
@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/placeholder" />
+            android:text="@string/placeholder_short" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,7 +125,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="@string/placeholder" />
+            android:text="@string/placeholder_short" />
 
         <LinearLayout
             android:layout_width="match_parent"

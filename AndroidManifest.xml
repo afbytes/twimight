@@ -167,6 +167,7 @@
 		<provider android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
 			android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
 		<activity android:name=".activities.TipsActivity" android:theme="@style/Twimight.NoActionBar" android:label="Twimight" android:launchMode="singleTop" android:noHistory="false"></activity>
+		<activity android:name=".activities.SettingsActivity"></activity>
 
 
 

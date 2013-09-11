@@ -30,7 +30,7 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_normaltheme</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Normaltheme</item>
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        
+        <item name="bottomStatusBarVisibility">gone</item>
     </style>
 
     <style name="ActionBar.Solid.Normaltheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
