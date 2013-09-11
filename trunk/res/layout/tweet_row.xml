@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingRight="6dp" >
+
+    <!-- The outer LinearLayout is necessary for creating the colored stripe on the right. The color is assigned as a background for the complete outer LinearLayout and the inner obscures everything but the stripe with white. -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:padding="@dimen/activity_padding" >
+
+        <ImageView
+            android:id="@+id/ivProfilePicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/default_profile" />
+
+        <!-- container for the all the text and icons of the tweet -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_padding"
+            android:orientation="vertical" >
+
+            <!-- row with username + created at -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:id="@+id/tvUsername"
+                    style="@style/MediumTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:singleLine="true"
+                    android:text="@string/placeholder_short" />
+
+                <TextView
+                    android:id="@+id/tvCreatedAt"
+                    style="@style/LightText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="right"
+                    android:singleLine="true"
+                    android:text="@string/placeholder_short"/>
+            </LinearLayout>
+
+            <!-- tweet text -->
+
+            <TextView
+                android:id="@+id/tvTweetText"
+                style="@style/NormalText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/placeholder_long" />
+
+            <!-- "retweeted by" text -->
+
+            <TextView
+                android:id="@+id/tvRetweetedBy"
+                style="@style/LightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/placeholder_short"
+                android:textColor="@color/twimightTextLight" />
+
+            <!-- row status icons -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/ivPendingIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_small_pending" />
+
+                <ImageView
+                    android:id="@+id/ivVerifiedIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_small_verified" />
+
+                <ImageView
+                    android:id="@+id/ivRetweetedIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_small_retweeted" />
+
+                <ImageView
+                    android:id="@+id/ivFavoriteIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_small_favorite" />
+
+                <ImageView
+                    android:id="@+id/ivDownloadIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_small_downloaded" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

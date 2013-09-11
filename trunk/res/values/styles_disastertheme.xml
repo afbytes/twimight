@@ -18,7 +18,7 @@
      limitations under the License.
 -->
 
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Theme.Disastertheme" parent="@android:style/Theme.Holo.Light">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_disastertheme</item>
@@ -31,6 +31,7 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_disastertheme</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Disastertheme</item>
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="bottomStatusBarVisibility">visible</item>
     </style>
 
     <style name="ActionBar.Solid.Disastertheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">

@@ -7,11 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.PrefsActivity;
 import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.fragments.SettingsFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 
 public class OMFReceiver extends BroadcastReceiver {
@@ -39,7 +38,7 @@ public class OMFReceiver extends BroadcastReceiver {
 							
 							
 						} else if ( intent.getStringExtra(SWITCH_DIS_MODE_STATUS).equals("off")){
-							PrefsActivity.disableDisasterMode(context);
+							SettingsFragment.disableDisasterMode(context);
 							setPreferences(context,false);
 							Toast.makeText(context, "Disaster Mode disabled by OMF", Toast.LENGTH_SHORT).show();
 						}

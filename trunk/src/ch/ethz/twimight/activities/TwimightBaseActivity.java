@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -59,6 +60,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = true;
+	private boolean isDisasterThemeSet = false;
 
 	ActionBar actionBar;
 	static Drawable dd, dn;
@@ -74,7 +76,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		updateTheme();
 		super.onCreate(savedInstanceState);
-
+		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		LogCollector.setUpCrittercism(getApplicationContext());
 		LogCollector.leaveBreadcrumb();
@@ -92,7 +94,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onResume() {
-		updateTheme();
+		checkTheme();
 		super.onResume();
 		instance = this;
 
@@ -109,44 +111,73 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		tvNeighborCount = (TextView) findViewById(R.id.tvNeighborCount);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 		// setup disaster mode specific stuff
-//		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-//				"prefDisasterMode", false) == true) {
-//			if (dd == null)
-//				Log.i(TAG, "dd null");
-//			actionBar.setBackgroundDrawable(dd);
-//			Log.i(TAG, "setting disaster background");
-//			// does the current layout have a bottom status bar?
-//			if (bottomStatusBar != null) {
-//				bottomStatusBar.setVisibility(View.VISIBLE);
-//				updateStatusBar();
-//				// register for bluetooth status updates
-//				BluetoothStatus.getInstance().addObserver(this);
-//			}
-//		} else {
-//			actionBar.setBackgroundDrawable(dn);
-//			Log.i(TAG, "setting normal background");
-//			if (bottomStatusBar != null) {
-//				bottomStatusBar.setVisibility(View.GONE);
-//			}
-//		}
+		// if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+		// "prefDisasterMode", false) == true) {
+		// if (dd == null)
+		// Log.i(TAG, "dd null");
+		// actionBar.setBackgroundDrawable(dd);
+		// Log.i(TAG, "setting disaster background");
+		// // does the current layout have a bottom status bar?
+		// if (bottomStatusBar != null) {
+		// bottomStatusBar.setVisibility(View.VISIBLE);
+		// updateStatusBar();
+		// // register for bluetooth status updates
+		// BluetoothStatus.getInstance().addObserver(this);
+		// }
+		// } else {
+		// actionBar.setBackgroundDrawable(dn);
+		// Log.i(TAG, "setting normal background");
+		// if (bottomStatusBar != null) {
+		// bottomStatusBar.setVisibility(View.GONE);
+		// }
+		// }
 		// actionbar hack to make sure the background drawable is applied
 		// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
-//		actionBar.setDisplayShowTitleEnabled(false);
-//		actionBar.setDisplayShowTitleEnabled(true);
+		// actionBar.setDisplayShowTitleEnabled(false);
+		// actionBar.setDisplayShowTitleEnabled(true);
 	}
 
 	private boolean isDisasterModeEnabled() {
 		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
 				"prefDisasterMode", false);
 	}
-	
-	private void updateTheme(){
-		if(isDisasterModeEnabled()){
-			setTheme(R.style.Theme_Disastertheme);
-		} else {
-			setTheme(R.style.Theme_Normaltheme);
+
+	/**
+	 * Checks if the correct theme is currently set and if necessary restarts
+	 * the activity so that a different them can be applied.
+	 */
+	private void checkTheme() {
+		if (isDisasterModeEnabled() != isDisasterThemeSet) {
+			recreate();
 		}
 	}
+
+	private void updateTheme() {
+		if (isDisasterModeEnabled()) {
+			setTheme(R.style.Theme_Disastertheme);
+			if (bottomStatusBar != null) {
+				bottomStatusBar.setVisibility(View.VISIBLE);
+			}
+			isDisasterThemeSet = true;
+		} else {
+			setTheme(R.style.Theme_Normaltheme);
+			if (bottomStatusBar != null) {
+				bottomStatusBar.setVisibility(View.GONE);
+			}
+			isDisasterThemeSet = false;
+		}
+	}
+
+//	private void setBottomStatusBarVisibility() {
+//		if (bottomStatusBar != null) {
+//			if (isDisasterModeEnabled()) {
+//
+//				bottomStatusBar.setVisibility(View.VISIBLE);
+//			} else {
+//				bottomStatusBar.setVisibility(View.GONE);
+//			}
+//		}
+//	}
 
 	@Override
 	protected void onPause() {
@@ -245,7 +276,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 		case R.id.menu_settings:
 			// Launch PrefsActivity
-			i = new Intent(this, PrefsActivity.class);
+			i = new Intent(this, SettingsActivity.class);
 			startActivity(i);
 			break;
 

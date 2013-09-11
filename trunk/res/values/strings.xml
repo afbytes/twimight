@@ -27,6 +27,8 @@
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="placeholder_short">Lorem Ipsum</string>
+    <string name="placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed urna lacus, iaculis feugiat magna in, ornare pellentesque purus.</string>
 
     <!-- Menu -->
     <string name="home">Home</string>
