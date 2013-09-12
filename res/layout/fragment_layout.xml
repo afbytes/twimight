@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-    
+    <!-- use px - not dp - for the divider height because we actually want 1px on every display -->
        <ch.ethz.twimight.net.twitter.TweetListView  xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent" 
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" 
             android:id="@+id/tweetListView"
             android:fastScrollEnabled="true" 
-            android:scrollingCache="true" 
-            android:divider="@color/twimightBackgroundLight"/>
+            android:scrollingCache="true"/>
         
-  
-    
-

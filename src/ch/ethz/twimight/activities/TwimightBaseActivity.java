@@ -29,7 +29,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,7 +42,6 @@ import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.opportunistic.BluetoothStatus;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.LogCollector;
@@ -154,13 +152,13 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 	private void updateTheme() {
 		if (isDisasterModeEnabled()) {
-			setTheme(R.style.Theme_Disastertheme);
+			setTheme(R.style.TwimightHolo_DisasterMode);
 			if (bottomStatusBar != null) {
 				bottomStatusBar.setVisibility(View.VISIBLE);
 			}
 			isDisasterThemeSet = true;
 		} else {
-			setTheme(R.style.Theme_Normaltheme);
+			setTheme(R.style.TwimightHolo_NormalMode);
 			if (bottomStatusBar != null) {
 				bottomStatusBar.setVisibility(View.GONE);
 			}
