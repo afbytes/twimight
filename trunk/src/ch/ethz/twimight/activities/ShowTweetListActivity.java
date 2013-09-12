@@ -43,13 +43,11 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowTweetListActivity";	
 	
-		
 	public static boolean running= false;
 	// handler
 	static Handler handler;
 
 
-	
 	//LOGS
 	LocationHelper locHelper ;
 	long timestamp;	

@@ -29,4 +29,44 @@
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
+    <!-- Holo redesign -->
+
+
+    <!--
+    Base Theme for NormalMode and DisasterMode themes. 
+    Add any properties that apply in both themes here.
+    -->
+
+    <style name="TwimightHolo" parent="@android:style/Theme.Holo.Light">
+        <item name="android:listViewStyle">@style/ListView.TwimightHolo</item>
+    </style>
+
+    <style name="TwimightHolo.DisasterMode">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_disastermode</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.DisastertMode</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.DisasterMode</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.DisasterMode</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.DisasterMode</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.DisastertMode</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_disastertheme</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_disastertheme</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.DisasterMode</item>
+        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="bottomStatusBarVisibility">visible</item>
+    </style>
+
+    <style name="TwimightHolo.NormalMode" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_normalmode</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.NormalMode</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.NormalMode</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.NormalMode</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.NormalMode</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.NormalMode</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_normaltheme</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_normaltheme</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.NormalMode</item>
+        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="bottomStatusBarVisibility">gone</item>
+    </style>
+
 </resources>

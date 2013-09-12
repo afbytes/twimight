@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
     <!--
     <style name="Button" parent="@android:style/Widget.Button">
@@ -60,7 +60,13 @@
         <item name="android:background">@drawable/tab_bar_background</item>
     </style>
 
-    <!-- NEW STYLES -->
+    <!-- Holo redesign -->
+
+    <style name="ListView.TwimightHolo" parent="@android:style/Widget.ListView">
+        <item name="android:divider">@color/lightGray</item>
+        <!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
+        <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
+    </style>
 
     <style name="TitleText">
         <item name="android:fontFamily">sans-serif-light</item>
@@ -131,6 +137,115 @@
     <style name="Button.Outline">
         <item name="android:background">@drawable/button_outline</item>
         <item name="android:textColor">@color/darkText</item>
+    </style>
+
+    <!--
+    ******************* 
+    DisasterMode styles
+     ******************
+    -->
+
+    <style name="ActionBar.Solid.DisastertMode" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_disastertheme</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_disastertheme</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_disastertheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
+        <item name="android:titleTextStyle">@style/ActionBar.TitleTextStyle.DisastertMode</item>
+    </style>
+
+    <style name="ActionBar.TitleTextStyle.DisastertMode" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ActionBar.Transparent.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_disastertheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
+    </style>
+
+    <style name="PopupMenu.DisastertMode" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
+    </style>
+
+    <style name="DropDownListView.DisasterMode" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_disastermode</item>
+    </style>
+
+    <style name="ActionBarTabStyle.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_disastermode</item>
+    </style>
+
+    <style name="DropDownNav.DisasterMode" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_disastermode</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_disastermode</item>
+    </style>
+
+    <style name="ProgressBar.DisasterMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_disastermode</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_disastermode</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.DisasterMode.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.DisastertMode</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.DisasterMode</item>
+    </style>
+
+    <!--
+    *****************
+    NormalMode styles
+    *****************
+    -->
+    <style name="ActionBar.Solid.NormalMode" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_normalmode</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_normalmode</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_normalmode</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
+        <item name="android:titleTextStyle">@style/ActionBar.TitleTextStyle.NormalMode</item>
+    </style>
+
+    <style name="ActionBar.TitleTextStyle.NormalMode" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ActionBar.Transparent.NormalMode" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_normalmode</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
+    </style>
+
+    <style name="PopupMenu.NormalMode" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
+    </style>
+
+    <style name="DropDownListView.NormalMode" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_normalmode</item>
+    </style>
+
+    <style name="ActionBarTabStyle.NormalMode" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_normalmode</item>
+    </style>
+
+    <style name="DropDownNav.NormalMode" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_normalmode</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_normalmode</item>
+    </style>
+
+    <style name="ProgressBar.NormalMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_normalmode</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.NormalMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_normalmode</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.NormalMode.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.NormalMode</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.NormalMode</item>
     </style>
 
 </resources>
