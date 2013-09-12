@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
@@ -39,7 +40,7 @@ import ch.ethz.twimight.util.Constants;
  * @author thossmann
  * 
  */
-public class ShowTweetListActivity extends TwimightBaseActivity{
+public class ShowTweetListActivity extends TwimightBaseActivity implements OnPageChangeListener {
 
 	private static final String TAG = "ShowTweetListActivity";	
 	
@@ -230,11 +231,6 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 		pagAdapter = null;
 		viewPager = null;
 		
-		Log.i(TAG,"setting dd and dn to null");
-		dd.setCallback(null);
-		dn.setCallback(null);
-		dd = null;
-		dn = null;
 		actionBar = null;
 		
 		Log.i(TAG,"destroying main activity");
@@ -257,6 +253,29 @@ public class ShowTweetListActivity extends TwimightBaseActivity{
 			Toast.makeText(this, getString(R.string.disastermode_running), Toast.LENGTH_LONG).show();
 
 
+	}
+
+
+
+	@Override
+	public void onPageScrollStateChanged(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onPageScrolled(int arg0, float arg1, int arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void onPageSelected(int position) {
+		Log.d(TAG, "position: " + position);
 	}
 
 	
