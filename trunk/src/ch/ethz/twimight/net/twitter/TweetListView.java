@@ -1,8 +1,12 @@
 package ch.ethz.twimight.net.twitter;
 
+import java.lang.reflect.Field;
+
 import ch.ethz.twimight.util.Constants;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ListView;
@@ -16,8 +20,7 @@ public class TweetListView extends ListView {
 
 	public TweetListView(Context context) {
 		super(context);
-		
-		setOverScrollMode(this.OVER_SCROLL_NEVER);
+		setOverScrollMode(OVER_SCROLL_NEVER);
 		this.context = context;
 	}
 
@@ -87,6 +90,6 @@ public class TweetListView extends ListView {
 		//Log.i(TAG, "scrollY:" + scrollY );
 
 		super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
-
 	}
+	
 }

@@ -74,6 +74,17 @@ public class TweetListFragment extends ListFragment {
 		super.onDestroy();
 	}
 
+	/**
+	 * Updates the action bar title with a description of the fragment when it becomes visible.
+	 */
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		super.setUserVisibleHint(isVisibleToUser);
+		if (isVisibleToUser) {
+			getActivity().getActionBar().setTitle(String.valueOf(type));
+		}
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {

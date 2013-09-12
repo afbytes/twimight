@@ -15,6 +15,8 @@ package ch.ethz.twimight.net.twitter;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -25,7 +27,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.format.DateUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -126,8 +131,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 					+ cursor.getString(cursor
 							.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 		} else {
-			holder.tvUsername.setText(
-			cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)));
+			holder.tvUsername.setText(cursor.getString(cursor
+					.getColumnIndex(TwitterUsers.COL_NAME)));
 		}
 
 		// set tweet text
@@ -266,16 +271,24 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			// no verified icon for own tweets
 			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
 		} else {
-			holder.tvUsername.setTextColor(context.getResources().getColor(R.color.darkText));
+			holder.tvUsername.setTextColor(context.getResources().getColor(
+					R.color.darkText));
 		}
 
-		// mentions
-		if ((cursor.getColumnIndex(Tweets.COL_MENTIONS) >= 0)
-				&& (cursor.getInt(cursor.getColumnIndex(Tweets.COL_MENTIONS)) > 0)) {
-
-			// holder.rowLayout
-			// .setBackgroundResource(R.drawable.mention_tweet_background);
+		// higlight mentions
+		String ownHandle = "@" + LoginActivity.getTwitterScreenname(context);
+		String tweetText = (String) holder.tvTweetText.getText();
+		Pattern pattern = Pattern.compile(ownHandle, Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(tweetText);
+		Spannable tweetSpannable = new SpannableString(tweetText);
+		while (matcher.find()) {
+			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor),
+					matcher.start(), matcher.end(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
+		holder.tvTweetText.setText(tweetSpannable);
+		// holder.rowLayout
+		// .setBackgroundResource(R.drawable.mention_tweet_background);
 
 	}
 

@@ -41,5 +41,7 @@
     <color name="darkText">#303030</color>
     <color name="lightGray">#e0e0e0</color>
     <color name="mediumGray">#909090</color>
+    <color name="pressed_normaltheme">#CC33B5E5</color>
+    <color name="pressed_disastertheme">#CCFF4444</color>
 
 </resources>

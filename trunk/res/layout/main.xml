@@ -4,6 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="-7dp"
+            android:layout_marginBottom="-7dp"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+    
     <LinearLayout
         android:id="@+id/bottomStatusBar"
         android:layout_width="match_parent"
@@ -27,7 +40,8 @@
             android:id="@+id/tvNeighborCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:fontFamily="sans-serif-light"/>
 
         <View
             android:layout_width="1dp"
@@ -41,13 +55,15 @@
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:fontFamily="sans-serif-light"/>
     </LinearLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" 
-        android:layout_above="@id/bottomStatusBar"/>
+        android:layout_above="@id/bottomStatusBar"
+        android:layout_below="@id/progressBar"/>
 
 </RelativeLayout>
