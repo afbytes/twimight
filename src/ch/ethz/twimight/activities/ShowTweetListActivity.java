@@ -89,7 +89,7 @@ public class ShowTweetListActivity extends TwimightBaseActivity implements OnPag
 		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
 		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
         
-		viewPager = (ViewPager)  findViewById(R.id.viewpager);	
+		viewPager = (ViewPager) findViewById(R.id.viewpager);	
 		
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);

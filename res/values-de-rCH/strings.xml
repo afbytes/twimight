@@ -79,11 +79,13 @@
     <string name="retweeted_by">Retweet vo</string>
     <string name="delete_tweet">Bisch sicher dass di Tweet wosch lösche?</string>
     <string name="modify_tweet">Wosch dä Tweet vor em retweete verändere?</string>
+    <string name="timeline">Timeline</string>
+    <string name="mentions">Erwähnige</string>
 
     <!-- User, Friends -->
     <string name="followers">Fouge Mir</string>
     <string name="friends">Fouge Ig</string>
-    <string name="favorits">Favorite</string>
+    <string name="favorites">Favorite</string>
     <string name="peers">Peers</string>
     <string name="will_stop_following">Du wirsch däm Benutzer gli nümme fouge (sobau Internetverbindig besteit).</string>
     <string name="will_start_following">Du wirsch däm Benutzer gli fougen (sobau Internetverbindig besteit).</string>
@@ -95,6 +97,7 @@
     <string name="no_results">Kener Resultat</string>
     <string name="search_hint">Tweets u Benutzer sueche</string>
     <string name="results_for">Suechresultat für</string>
+    <string name="search_results">Suechresultat</string>
 
     <!-- Direct Messages -->
     <string name="no_dms">Kener Nachrichte verfüegbar</string>

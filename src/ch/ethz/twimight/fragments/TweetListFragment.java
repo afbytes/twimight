@@ -1,6 +1,7 @@
 package ch.ethz.twimight.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
@@ -75,14 +78,44 @@ public class TweetListFragment extends ListFragment {
 	}
 
 	/**
-	 * Updates the action bar title with a description of the fragment when it becomes visible.
+	 * Updates the action bar title with a description of the fragment when it
+	 * becomes visible.
 	 */
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
 		super.setUserVisibleHint(isVisibleToUser);
 		if (isVisibleToUser) {
-			getActivity().getActionBar().setTitle(String.valueOf(type));
+			setActionBarTitles();
 		}
+	}
+
+	private void setActionBarTitles() {
+		String title = null;
+		String subtitle = null;
+		switch (type) {
+		case TIMELINE_KEY:
+			title = getString(R.string.timeline);
+			subtitle = "@" + LoginActivity.getTwitterScreenname(getActivity());
+			break;
+		case FAVORITES_KEY:
+			title = getString(R.string.favorites);
+			subtitle = "@" + LoginActivity.getTwitterScreenname(getActivity());
+			break;
+		case MENTIONS_KEY:
+			title = getString(R.string.mentions);
+			subtitle = "@" + LoginActivity.getTwitterScreenname(getActivity());
+			break;
+		case SEARCH_TWEETS:
+			title = getString(R.string.search_results);
+			subtitle = "\"" + SearchableActivity.query + "\"";
+			break;
+		case USER_TWEETS:
+			title = getString(R.string.timeline);
+			break;
+		}
+		ActionBar actionBar = getActivity().getActionBar();
+		actionBar.setTitle(title);
+		actionBar.setSubtitle(subtitle);
 	}
 
 	@Override

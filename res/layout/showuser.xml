@@ -258,7 +258,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
-                        android:text="@string/favorits"
+                        android:text="@string/favorites"
                         android:textColor="@color/twimightTextDark" />
 
                     <TextView
