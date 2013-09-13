@@ -72,15 +72,14 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		updateTheme();
 		super.onCreate(savedInstanceState);
 
-//		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		LogCollector.setUpCrittercism(getApplicationContext());
 		LogCollector.leaveBreadcrumb();
 
 		// action bar
 		actionBar = getActionBar();
-		actionBar.setHomeButtonEnabled(true);
-//		actionBar.setDisplayShowTitleEnabled(true);
-		
+		// actionBar.setHomeButtonEnabled(true);
+		// actionBar.setDisplayShowTitleEnabled(true);
 
 	}
 
@@ -361,7 +360,11 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 				instance.runOnUiThread(new Runnable() {
 					public void run() {
-						instance.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+						if (instance.progressBar != null) {
+							instance.progressBar
+									.setVisibility(isLoading ? View.VISIBLE
+											: View.GONE);
+						}
 					}
 				});
 

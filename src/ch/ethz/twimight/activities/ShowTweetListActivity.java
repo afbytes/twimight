@@ -105,6 +105,8 @@ public class ShowTweetListActivity extends TwimightBaseActivity implements OnPag
 
 		//action bar
 		actionBar = getActionBar();	
+		actionBar.setHomeButtonEnabled(false);
+		actionBar.setDisplayHomeAsUpEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		Tab tab = actionBar.newTab()
