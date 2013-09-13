@@ -73,11 +73,13 @@
     <string name="retweeted_by">Retweet da</string>
     <string name="delete_tweet">Il tweet verrà cancellato, continuare?</string>
     <string name="modify_tweet">Vuole modificare il tweet prima di effettuare il retweet?</string>
+    <string name="timeline">Timeline</string>
+    <string name="mentions">Menzioni</string>
 
     <!-- User, Friends -->
     <string name="followers">Followers</string>
     <string name="friends">Amici</string>
-    <string name="favorits">Preferiti</string>
+    <string name="favorites">Preferiti</string>
     <string name="peers">Peers</string>
     <string name="will_stop_following">L\'utente verrà seguito non appena la connessione internet sarà disponibile.</string>
     <string name="will_start_following">L\'utente non verrà più seguito non appena la connessione internet sarà disponibile</string>
@@ -89,6 +91,7 @@
     <string name="no_results">Nessun risultato</string>
     <string name="search_hint">Cerca Tweets e Utenti</string>
     <string name="results_for">Risultati ricerca per</string>
+    <string name="search_results">Risultati ricerca</string>
 
     <!-- Direct Messages -->
     <string name="no_dms">Nessun messaggio diretto disponibile</string>

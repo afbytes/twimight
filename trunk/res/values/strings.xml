@@ -58,6 +58,8 @@
     <string name="retweeted_by">retweeted by</string>
     <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
     <string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
+    <string name="timeline">Timeline</string>
+    <string name="mentions">Mentions</string>
 
     <!-- web page caching and pictures -->
     <string name="clear_cache_question">Are you sure you want to clear all files and data of saved webpages?</string>
@@ -78,7 +80,7 @@
     <!-- User, Friends -->
     <string name="followers">Followers</string>
     <string name="friends">Friends</string>
-    <string name="favorits">Favorites</string>
+    <string name="favorites">Favorites</string>
     <string name="peers">Peers</string>
     <string name="will_stop_following">You will stop following this user once Internet connectivity is available.</string>
     <string name="will_start_following">You will start following this user once Internet connectivity is available.</string>
@@ -90,6 +92,7 @@
     <string name="no_results">No results</string>
     <string name="search_hint">Search Tweets and users</string>
     <string name="results_for">Search Results for</string>
+    <string name="search_results">Search Results</string>
 
     <!-- Direct Messages -->
     <string name="no_dms">No direct messages available</string>

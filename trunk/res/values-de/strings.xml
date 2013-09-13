@@ -81,11 +81,13 @@
     <string name="retweeted_by">Retweet von</string>
     <string name="delete_tweet">Bist du sicher, dass du deinen Tweet löschen willst?</string>
     <string name="modify_tweet">Möchtest du den Tweet verändert Retweeten?</string>
+    <string name="timeline">Timeline</string>
+    <string name="mentions">Erwähnungen</string>
 
     <!-- User, Friends -->
     <string name="followers">Folgen Mir</string>
     <string name="friends">Folge Ich</string>
-    <string name="favorits">Favoriten</string>
+    <string name="favorites">Favoriten</string>
     <string name="peers">Peer</string>
     <string name="will_stop_following">Du wirst dem Benutzer bald nicht mehr folgen (sobald Internetverbindung besteht).</string>
     <string name="will_start_following">Du wirst dem Benutzer bald folgen (sobald Internetverbindung besteht).</string>
@@ -97,6 +99,7 @@
     <string name="no_results">Keine Resultate</string>
     <string name="search_hint">Tweets und Benutzer suchen</string>
     <string name="results_for">Suchresultate für</string>
+    <string name="search_results">Suchresultate</string>
 
     <!-- Direct Messages -->
     <string name="no_dms">Keine Nachrichten verfügbar</string>

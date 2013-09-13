@@ -79,8 +79,8 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		// action bar
 		actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(true);
-		actionBar.setDisplayShowTitleEnabled(true);
-		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));
+//		actionBar.setDisplayShowTitleEnabled(true);
+		
 
 	}
 
