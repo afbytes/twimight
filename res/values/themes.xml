@@ -41,6 +41,7 @@
         <item name="android:actionBarStyle">@style/ActionBar.Solid.TwimightHolo</item>
         <item name="android:listViewStyle">@style/ListView.TwimightHolo</item>
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_twimightholo</item>
+        <item name="android:actionBarTabBarStyle">@style/ActionBarTabBarStyle.TwimightHolo</item>
     </style>
 
     <style name="TwimightHolo.DisasterMode">

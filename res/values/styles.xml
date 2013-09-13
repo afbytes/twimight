@@ -156,10 +156,14 @@
     </style>
 
     <style name="ActionBar.SubtitleTextStyle.TwimightHolo" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
-        <item name="android:textColor">@color/whit_semi_transparent</item>
+        <item name="android:textColor">@color/white_semi_transparent</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textSize">10sp</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ActionBarTabBarStyle.TwimightHolo" parent="@android:style/Widget.Holo.ActionBar.TabBar">
+        <item name="android:divider">@drawable/tab_bar_divider</item>
     </style>
 
     <!--
