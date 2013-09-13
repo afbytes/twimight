@@ -169,7 +169,7 @@
     -->
 
     <style name="ActionBar.Solid.TwimightHolo.DisastertMode">
-        <item name="android:background">@drawable/ab_solid_disastertheme</item>
+        <item name="android:background">@drawable/ab_solid_disastermode</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_disastermode</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_disastermode</item>
         <item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>

@@ -50,8 +50,8 @@
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.DisasterMode</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.DisasterMode</item>
         <item name="android:actionBarStyle">@style/ActionBar.Solid.TwimightHolo.DisastertMode</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_disastertheme</item>
-        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_disastertheme</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_disastermode</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_disastermode</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.DisasterMode</item>
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
         <item name="bottomStatusBarVisibility">visible</item>
@@ -66,8 +66,8 @@
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.NormalMode</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.NormalMode</item>
         <item name="android:actionBarStyle">@style/ActionBar.Solid.TwimightHolo.NormalMode</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_normaltheme</item>
-        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_normaltheme</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_normalmode</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_normalmode</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.NormalMode</item>
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
         <item name="bottomStatusBarVisibility">gone</item>
