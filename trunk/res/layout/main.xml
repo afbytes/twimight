@@ -10,17 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/accentDisaster"
+        android:background="@drawable/bottom_status_bar_background"
         android:orientation="horizontal"
-        android:paddingBottom="1dp"
-        android:paddingLeft="5dp"
+        android:gravity="center_vertical"
+        android:padding="3dp"
         android:visibility="?attr/bottomStatusBarVisibility" >
 
         <ImageView
             android:id="@+id/neighborIcon"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginLeft="4dp"
             android:layout_marginRight="2dp"
             android:src="@drawable/ic_small_smartphone" />
 
@@ -28,22 +28,21 @@
             android:id="@+id/tvNeighborCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
+            android:textSize="12sp"
             android:textColor="@color/white" />
 
         <View
             android:layout_width="1dp"
-            android:layout_height="match_parent"
+            android:layout_height="14dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:alpha="0.2"
-            android:background="@android:color/white" />
+            android:background="@color/white_semi_transparent" />
 
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
+            android:textSize="12sp"
             android:textColor="@color/white" />
     </LinearLayout>
 
