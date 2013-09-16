@@ -16,10 +16,10 @@
         android:padding="@dimen/activity_padding" >
 
         <ImageView
-            android:id="@+id/ivProfilePicture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/default_profile" />
+            android:id="@+id/ivProfileImage"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@color/white" />
 
         <!-- container for the all the text and icons of the tweet -->
 
@@ -53,9 +53,17 @@
                     android:layout_marginLeft="5dp"
                     android:gravity="right"
                     android:singleLine="true"
-                    android:text="@string/placeholder_short"/>
+                    android:text="@string/placeholder_short" />
             </LinearLayout>
+            <!-- "retweeted by" text -->
 
+            <TextView
+                android:id="@+id/tvRetweetedBy"
+                style="@style/LightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/placeholder_short" />
             <!-- tweet text -->
 
             <TextView
@@ -65,17 +73,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="@string/placeholder_long" />
-
-            <!-- "retweeted by" text -->
-
-            <TextView
-                android:id="@+id/tvRetweetedBy"
-                style="@style/LightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/placeholder_short"
-                android:textColor="@color/twimightTextLight" />
 
             <!-- row status icons -->
 

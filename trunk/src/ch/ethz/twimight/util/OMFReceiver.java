@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.fragments.SettingsFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 
@@ -52,7 +52,7 @@ public class OMFReceiver extends BroadcastReceiver {
 	}
 	
 	private void createActivity(Context context) {
-		Intent refreshIntent = new Intent(context,ShowTweetListActivity.class);
+		Intent refreshIntent = new Intent(context,TweetListActivity.class);
 		refreshIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);		
 		context.startActivity(refreshIntent);
 		

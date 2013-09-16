@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import ch.ethz.twimight.activities.ShowTweetListActivity;
+import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 
 public class DevicesReceiver extends BroadcastReceiver {

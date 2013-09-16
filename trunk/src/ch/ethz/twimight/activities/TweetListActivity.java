@@ -40,7 +40,7 @@ import ch.ethz.twimight.util.Constants;
  * @author thossmann
  * 
  */
-public class ShowTweetListActivity extends TwimightBaseActivity implements OnPageChangeListener {
+public class TweetListActivity extends TwimightBaseActivity implements OnPageChangeListener {
 
 	private static final String TAG = "ShowTweetListActivity";	
 	
