@@ -36,7 +36,7 @@
                 android:layout_height="45dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/image_border"
-                android:src="@drawable/default_profile" />
+                android:src="@drawable/profile_image_placeholder" />
 
             <LinearLayout
                 android:id="@+id/linearLayout1"

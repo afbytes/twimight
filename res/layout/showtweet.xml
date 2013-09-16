@@ -21,7 +21,7 @@
 			android:paddingBottom="20dp" android:paddingRight="10dp">
 			<ImageView android:id="@+id/showTweetProfileImage"
 				android:layout_height="45dp" android:layout_width="45dp"
-				android:src="@drawable/default_profile" android:background="@drawable/image_border"
+				android:src="@drawable/profile_image_placeholder" android:background="@drawable/image_border"
 				android:layout_marginRight="10dp" />
 			<LinearLayout android:id="@+id/linearLayout1"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"

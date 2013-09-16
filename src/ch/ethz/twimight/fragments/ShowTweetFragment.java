@@ -628,10 +628,10 @@ public class ShowTweetFragment extends Fragment {
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					picture.setImageBitmap(bm);	
 				} else
-					picture.setImageResource(R.drawable.default_profile);
+					picture.setImageResource(R.drawable.profile_image_placeholder);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG,"error opening input stream",e);
-				picture.setImageResource(R.drawable.default_profile);
+				picture.setImageResource(R.drawable.profile_image_placeholder);
 			}	
 		}
 		

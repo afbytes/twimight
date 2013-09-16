@@ -395,7 +395,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 
 		private void startTimeline(Context context) {		
-			Intent i = new Intent(context, ShowTweetListActivity.class);
+			Intent i = new Intent(context, TweetListActivity.class);
 			
 			i.putExtra("login", true);		
 			startActivity(i);		

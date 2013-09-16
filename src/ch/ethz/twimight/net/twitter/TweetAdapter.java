@@ -50,7 +50,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	static final int[] to = { R.id.textUser };
 	private static final String TAG = "tweet adapter";
 	private HtmlPagesDbHelper htmlDbHelper;
-	private final Bitmap mPlaceHolderBitmap;
+	private final Drawable mProfileImagePlaceholder;
 
 	private static class ViewHolder {
 		View rootView;
@@ -71,11 +71,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
-		super(context, R.layout.row, c, from, to,
-				FLAG_REGISTER_CONTENT_OBSERVER);
-		mPlaceHolderBitmap = BitmapFactory.decodeResource(
-				context.getResources(), R.drawable.default_profile);
-
+		super(context, R.layout.row, c, from, to);
+		mProfileImagePlaceholder = context.getResources().getDrawable(R.drawable.profile_image_placeholder);
 	}
 
 	@Override
@@ -102,7 +99,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		holder.tvRetweetedBy = (TextView) row.findViewById(R.id.tvRetweetedBy);
 		row.findViewById(R.id.tvRetweetedBy);
 		holder.ivProfilePicture = (ImageView) row
-				.findViewById(R.id.ivProfilePicture);
+				.findViewById(R.id.ivProfileImage);
 		holder.ivPendingIcon = (ImageView) row.findViewById(R.id.ivPendingIcon);
 		holder.ivVerifiedIcon = (ImageView) row
 				.findViewById(R.id.ivVerifiedIcon);
@@ -124,7 +121,30 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 		htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
 		htmlDbHelper.open();
+		
+		long disId = cursor.getLong(cursor
+				.getColumnIndex(Tweets.COL_DISASTERID));
 
+		// set profile image
+		if (!cursor.isNull(cursor
+				.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+
+			if (holder.disId == -1 || holder.disId != disId) {
+				holder.ivProfilePicture.setBackground(mProfileImagePlaceholder);
+				holder.disId = disId;
+				int userRowId = cursor.getInt(cursor
+						.getColumnIndex("userRowId"));
+				Uri imageUri = Uri.parse("content://"
+						+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+						+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
+				loadBitmap(imageUri, holder.ivProfilePicture, context);
+			}
+
+		} else {
+			holder.ivProfilePicture
+					.setImageResource(R.drawable.profile_image_placeholder);
+		}
+		
 		// if we don't have a real name, we use the screen name
 		if (cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)) == null) {
 			holder.tvUsername.setText("@"
@@ -153,16 +173,14 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 			if (retweeted_by != null) {
 				holder.tvRetweetedBy.setText(context
-						.getString(R.string.retweeted_by) + " " + retweeted_by);
+						.getString(R.string.retweeted_by) + " @" + retweeted_by);
 				holder.tvRetweetedBy.setVisibility(View.VISIBLE);
 			} else {
 				holder.tvRetweetedBy.setVisibility(View.GONE);
 			}
 		}
 
-		long disId = cursor.getLong(cursor
-				.getColumnIndex(Tweets.COL_DISASTERID));
-
+		// downloading / downloaded?
 		int col_html = cursor.getColumnIndex(Tweets.COL_HTML_PAGES);
 		if (col_html > -1) {
 			int hasHtml = cursor.getInt(col_html);
@@ -178,36 +196,15 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 					if (!htmlDbHelper.allPagesStored(curHtml)) {
 						// downloading
-						// holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloading);
+						 holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloading);
 					} else {
 						// downloaded
-						// holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloaded);
+						 holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloaded);
 					}
 				}
 
 			}
 
-		}
-		// set profile image
-		if (!cursor.isNull(cursor
-				.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-
-			if (holder.disId == -1 || holder.disId != disId) {
-				holder.ivProfilePicture
-						.setImageResource(R.drawable.default_profile);
-				// holder.picture.setImageResource()
-				holder.disId = disId;
-				int userRowId = cursor.getInt(cursor
-						.getColumnIndex("userRowId"));
-				Uri imageUri = Uri.parse("content://"
-						+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-						+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-				loadBitmap(imageUri, holder.ivProfilePicture, context);
-			}
-
-		} else {
-			holder.ivProfilePicture
-					.setImageResource(R.drawable.default_profile);
 		}
 
 		// pending?
@@ -297,7 +294,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			final BitmapWorkerTask task = new BitmapWorkerTask(imageView,
 					context, uri);
 			final AsyncDrawable asyncDrawable = new AsyncDrawable(
-					context.getResources(), mPlaceHolderBitmap, task);
+					context.getResources(), task);
 			imageView.setImageDrawable(asyncDrawable);
 			task.execute();
 		}
@@ -349,6 +346,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 				if (bitmap != null) {
 					if (this == bitmapWorkerTask && imageView != null) {
+						imageView.setBackground(null);
 						imageView.setImageBitmap(bitmap);
 					}
 				}
@@ -360,9 +358,8 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	static class AsyncDrawable extends BitmapDrawable {
 		private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
 
-		public AsyncDrawable(Resources res, Bitmap bitmap,
-				BitmapWorkerTask bitmapWorkerTask) {
-			super(res, bitmap);
+		public AsyncDrawable(Resources res, BitmapWorkerTask bitmapWorkerTask) {
+			super(res);
 			bitmapWorkerTaskReference = new WeakReference<BitmapWorkerTask>(
 					bitmapWorkerTask);
 		}

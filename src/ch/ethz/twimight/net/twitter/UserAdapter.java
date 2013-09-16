@@ -45,7 +45,7 @@ public class UserAdapter extends SimpleCursorAdapter {
 			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH));
 			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
 		} else {
-			picture.setImageResource(R.drawable.default_profile);
+			picture.setImageResource(R.drawable.profile_image_placeholder);
 		}
 		//LinearLayout rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);		
 		//rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);

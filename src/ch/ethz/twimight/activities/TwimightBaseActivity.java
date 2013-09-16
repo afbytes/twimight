@@ -178,7 +178,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 		case android.R.id.home:
 			// app icon in action bar clicked; go home
-			i = new Intent(this, ShowTweetListActivity.class);
+			i = new Intent(this, TweetListActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			return true;
