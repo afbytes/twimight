@@ -76,11 +76,11 @@
     </style>
 
     <style name="TitleText.Normal">
-        <item name="android:textColor">@color/accentNormal</item>
+        <item name="android:textColor">@color/accent_normalmode_1</item>
     </style>
 
     <style name="TitleText.Disaster" parent="TitleText">
-        <item name="android:textColor">@color/accentDisaster</item>
+        <item name="android:textColor">@color/accent_disastermode_1</item>
     </style>
 
     <style name="MediumTitleText">

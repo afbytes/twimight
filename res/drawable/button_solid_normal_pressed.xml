@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 	<item>
 		<shape>
-			<solid android:color="@color/accentLightNormal" />
+			<solid android:color="@color/accent_normalmode_2" />
 		</shape>
 	</item>
 </layer-list>
