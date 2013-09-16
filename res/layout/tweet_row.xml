@@ -55,15 +55,7 @@
                     android:singleLine="true"
                     android:text="@string/placeholder_short" />
             </LinearLayout>
-            <!-- "retweeted by" text -->
 
-            <TextView
-                android:id="@+id/tvRetweetedBy"
-                style="@style/LightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/placeholder_short" />
             <!-- tweet text -->
 
             <TextView
@@ -74,6 +66,15 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/placeholder_long" />
 
+            <!-- "retweeted by" text -->
+
+            <TextView
+                android:id="@+id/tvRetweetedBy"
+                style="@style/LightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/placeholder_short" />
             <!-- row status icons -->
 
             <LinearLayout
