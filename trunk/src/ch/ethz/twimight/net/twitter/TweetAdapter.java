@@ -54,11 +54,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 	private static class ViewHolder {
 		View rootView;
+		View modeStripe;
 		TextView tvUsername;
 		TextView tvCreatedAt;
 		TextView tvTweetText;
 		TextView tvRetweetedBy;
-		ImageView ivProfilePicture;
+		ImageView ivProfileImage;
 		ImageView ivPendingIcon;
 		ImageView ivVerifiedIcon;
 		ImageView ivRetweetedIcon;
@@ -93,12 +94,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 	private void setHolderFields(View row, ViewHolder holder) {
 		holder.rootView = row.findViewById(R.id.rootView);
+		holder.modeStripe = row.findViewById(R.id.modeStripe);
 		holder.tvUsername = (TextView) row.findViewById(R.id.tvUsername);
 		holder.tvCreatedAt = (TextView) row.findViewById(R.id.tvCreatedAt);
 		holder.tvTweetText = (TextView) row.findViewById(R.id.tvTweetText);
 		holder.tvRetweetedBy = (TextView) row.findViewById(R.id.tvRetweetedBy);
 		row.findViewById(R.id.tvRetweetedBy);
-		holder.ivProfilePicture = (ImageView) row
+		holder.ivProfileImage = (ImageView) row
 				.findViewById(R.id.ivProfileImage);
 		holder.ivPendingIcon = (ImageView) row.findViewById(R.id.ivPendingIcon);
 		holder.ivVerifiedIcon = (ImageView) row
@@ -130,18 +132,18 @@ public class TweetAdapter extends SimpleCursorAdapter {
 				.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
 
 			if (holder.disId == -1 || holder.disId != disId) {
-				holder.ivProfilePicture.setBackground(mProfileImagePlaceholder);
+				holder.ivProfileImage.setBackground(mProfileImagePlaceholder);
 				holder.disId = disId;
 				int userRowId = cursor.getInt(cursor
 						.getColumnIndex("userRowId"));
 				Uri imageUri = Uri.parse("content://"
 						+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 						+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-				loadBitmap(imageUri, holder.ivProfilePicture, context);
+				loadBitmap(imageUri, holder.ivProfileImage, context);
 			}
 
 		} else {
-			holder.ivProfilePicture
+			holder.ivProfileImage
 					.setImageResource(R.drawable.profile_image_placeholder);
 		}
 		
@@ -239,8 +241,11 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		// disaster/normal? -> select accent color / set verified icon
 		int accentColor;
 		if ((buffer & Tweets.BUFFER_DISASTER) != 0) {
+			// set pressed state background color
+			row.setBackgroundResource(R.drawable.pressable_background_disastermode);
+			// select accent color
 			accentColor = context.getResources().getColor(
-					R.color.accentLightDisaster);
+					R.color.accent_disastermode_2);
 			// set verified icon for disaster tweets
 			holder.ivVerifiedIcon.setVisibility(ImageView.VISIBLE);
 			if (cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISVERIFIED)) > 0) {
@@ -251,13 +256,16 @@ public class TweetAdapter extends SimpleCursorAdapter {
 						.setImageResource(R.drawable.ic_small_unverified);
 			}
 		} else {
+			// set pressed state background color
+			row.setBackgroundResource(R.drawable.pressable_background_normalmode);
+			// select accent color
 			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
 			accentColor = context.getResources().getColor(
-					R.color.accentLightNormal);
+					R.color.accent_normalmode_2);
 		}
 
 		// set side stripe color
-		holder.rootView.setBackgroundColor(accentColor);
+		holder.modeStripe.setBackgroundColor(accentColor);
 
 		// highlight own tweet
 		boolean ownTweet = Long.toString(
@@ -284,8 +292,6 @@ public class TweetAdapter extends SimpleCursorAdapter {
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		holder.tvTweetText.setText(tweetSpannable);
-		// holder.rowLayout
-		// .setBackgroundResource(R.drawable.mention_tweet_background);
 
 	}
 

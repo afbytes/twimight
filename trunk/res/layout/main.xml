@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bottom_status_bar_background"
+        android:background="@color/accent_disastermode_1"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="3dp"

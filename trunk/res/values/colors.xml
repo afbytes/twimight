@@ -34,11 +34,12 @@
     <!-- new colors -->
 
     <color name="activityBackground">#FFFFFF</color>
-    <color name="accentNormal">#0099CC</color>
-    <color name="accentLightNormal">#33B5E5</color>
-    <color name="accentDisaster">#CC0000</color>
-    <color name="accentLightDisaster">#FF4444</color>
-    <color name="accentDarkDisaster">#BF0000</color>
+    <color name="accent_normalmode_1">#0099CC</color>
+    <color name="accent_normalmode_2">#33B5E5</color>
+    <color name="accent_normalmode_3">#99DAF2</color>
+    <color name="accent_disastermode_1">#CC0000</color>
+    <color name="accent_disastermode_2">#FF4444</color>
+    <color name="accent_disastermode_3">#FFA1A1</color>
     <color name="darkText">#303030</color>
     <color name="lightGray">#e0e0e0</color>
     <color name="mediumGray">#909090</color>
