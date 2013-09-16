@@ -34,8 +34,8 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
@@ -44,16 +44,13 @@ import ch.ethz.twimight.data.HtmlPagesDbHelper;
 /**
  * Cursor adapter for a cursor containing tweets.
  */
-public class TweetAdapter extends SimpleCursorAdapter {
+public class TweetAdapter extends CursorAdapter {
 
 	static final String[] from = { TwitterUsers.COL_NAME };
-	static final int[] to = { R.id.textUser };
-	private static final String TAG = "tweet adapter";
 	private HtmlPagesDbHelper htmlDbHelper;
 	private final Drawable mProfileImagePlaceholder;
 
 	private static class ViewHolder {
-		View rootView;
 		View modeStripe;
 		TextView tvUsername;
 		TextView tvCreatedAt;
@@ -67,13 +64,14 @@ public class TweetAdapter extends SimpleCursorAdapter {
 		ImageView ivDownloadIcon;
 
 		long disId = -1;
-
 	}
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
-		super(context, R.layout.row, c, from, to);
-		mProfileImagePlaceholder = context.getResources().getDrawable(R.drawable.profile_image_placeholder);
+		super(context, c, true);
+//		super(context, c);
+		mProfileImagePlaceholder = context.getResources().getDrawable(
+				R.drawable.profile_image_placeholder);
 	}
 
 	@Override
@@ -93,7 +91,6 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	}
 
 	private void setHolderFields(View row, ViewHolder holder) {
-		holder.rootView = row.findViewById(R.id.rootView);
 		holder.modeStripe = row.findViewById(R.id.modeStripe);
 		holder.tvUsername = (TextView) row.findViewById(R.id.tvUsername);
 		holder.tvCreatedAt = (TextView) row.findViewById(R.id.tvCreatedAt);
@@ -117,13 +114,13 @@ public class TweetAdapter extends SimpleCursorAdapter {
 	/** This is where data is mapped to its view */
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
-		super.bindView(row, context, cursor);
+		// super.bindView(row, context, cursor);
 
 		ViewHolder holder = (ViewHolder) row.getTag();
 
 		htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
 		htmlDbHelper.open();
-		
+
 		long disId = cursor.getLong(cursor
 				.getColumnIndex(Tweets.COL_DISASTERID));
 
@@ -146,7 +143,7 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			holder.ivProfileImage
 					.setImageResource(R.drawable.profile_image_placeholder);
 		}
-		
+
 		// if we don't have a real name, we use the screen name
 		if (cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)) == null) {
 			holder.tvUsername.setText("@"
@@ -174,8 +171,9 @@ public class TweetAdapter extends SimpleCursorAdapter {
 			String retweeted_by = cursor.getString(col);
 
 			if (retweeted_by != null) {
-				holder.tvRetweetedBy.setText(context
-						.getString(R.string.retweeted_by) + " @" + retweeted_by);
+				holder.tvRetweetedBy
+						.setText(context.getString(R.string.retweeted_by)
+								+ " @" + retweeted_by);
 				holder.tvRetweetedBy.setVisibility(View.VISIBLE);
 			} else {
 				holder.tvRetweetedBy.setVisibility(View.GONE);
@@ -198,10 +196,12 @@ public class TweetAdapter extends SimpleCursorAdapter {
 
 					if (!htmlDbHelper.allPagesStored(curHtml)) {
 						// downloading
-						 holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloading);
+						holder.ivDownloadIcon
+								.setImageResource(R.drawable.ic_small_downloading);
 					} else {
 						// downloaded
-						 holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloaded);
+						holder.ivDownloadIcon
+								.setImageResource(R.drawable.ic_small_downloaded);
 					}
 				}
 

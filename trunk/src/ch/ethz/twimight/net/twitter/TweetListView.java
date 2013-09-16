@@ -1,15 +1,11 @@
 package ch.ethz.twimight.net.twitter;
 
-import java.lang.reflect.Field;
-
-import ch.ethz.twimight.util.Constants;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ListView;
+import ch.ethz.twimight.util.Constants;
 
 public class TweetListView extends ListView {
 	private final String TAG = "TweetListView";
