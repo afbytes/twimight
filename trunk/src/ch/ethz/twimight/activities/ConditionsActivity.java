@@ -22,7 +22,7 @@ public class ConditionsActivity extends Activity {
 		if (termsAccepted) {
 			advanceToLogin();
 		} else {
-			setContentView(R.layout.show_conditions);
+			setContentView(R.layout.conditions);
 		}
 	}
 
