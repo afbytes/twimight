@@ -10,10 +10,11 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/showConditionsRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
+    android:layout_height="match_parent"
+    android:fillViewport="true"
     >
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" 
@@ -24,25 +25,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/TitleText.Normal"
-            android:text="@string/terms_and_conditions" 
-            android:layout_alignParentTop="true"/>
+            android:text="@string/terms_and_conditions"/>
 
         <TextView
             android:id="@+id/textConditions"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1.0"
             android:text="@string/conditions"
             style="@style/NormalText"
-            android:layout_below="@id/textConditionTitle"
             />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:orientation="horizontal"
-            android:layout_below="@id/textConditions" 
-            android:layout_alignParentBottom="true">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/buttonAgree"
@@ -51,7 +49,7 @@
                 android:layout_marginRight="6dp"
                 style="@style/Button.Solid.Normal"
                 android:text="@string/agree" 
-                android:layout_weight="1"
+                android:layout_weight="1.0"
                 android:onClick="agreeToTerms"/>
 
             <Button
@@ -61,8 +59,8 @@
                 android:layout_marginLeft="6dp"
                 style="@style/Button.Outline"
                 android:text="@string/decline" 
-                android:layout_weight="1"/>
+                android:layout_weight="1.0"/>
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
 </ScrollView>

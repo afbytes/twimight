@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/showTipsRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent" 
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,27 +15,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/mightybird_starglow_header_1080p" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/disaster_illustration" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1.0"
             android:orientation="vertical"
             android:padding="@dimen/activity_padding" >
 
             <TextView
                 android:id="@+id/tipsTitle"
                 style="@style/TitleText.Normal"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/tips_title" />
 
             <TextView
                 android:id="@+id/tipsText"
                 style="@style/NormalText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.0"
                 android:text="@string/dis_mode_description" />
 
             <Button
