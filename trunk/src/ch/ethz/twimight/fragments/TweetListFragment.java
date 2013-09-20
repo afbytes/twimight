@@ -17,8 +17,8 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
+import ch.ethz.twimight.net.twitter.PullToRefreshListView;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
-import ch.ethz.twimight.net.twitter.TweetListView;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 
@@ -122,7 +122,7 @@ public class TweetListFragment extends ListFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		TweetListView list = (TweetListView) super.onCreateView(inflater,
+		PullToRefreshListView list = (PullToRefreshListView) super.onCreateView(inflater,
 				container, savedInstanceState);
 		// Click listener when the user clicks on a tweet
 		list.setClickable(true);
