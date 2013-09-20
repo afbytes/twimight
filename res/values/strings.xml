@@ -200,8 +200,7 @@
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight has superpowers!
-        \n\nIf you lose Internet connectivity, activate the <b><i>disaster mode</i></b>
-    	in the Settings. Disaster tweets will spread epidemically
+        \n\nIf you lose Internet connectivity, activate the <b><i>disaster mode</i></b>    	in the Settings. Disaster tweets will spread epidemically
         among all phones in disaster mode, even without 3G or WiFi.
         \n\nOnce connectivity is re-established, your Tweets will be published
         to Twitter.</string>
@@ -213,5 +212,11 @@
     <string name="tips_title">Did you know?</string>
     <string name="cool">Cool!</string>
     <string name="welcome">Welcome to Twimight</string>
+
+    <!-- Pull to refresh -->
+    <string name="pull_to_refresh_label">Pull to refresh…</string>
+    <string name="release_to_refresh_label">Release to refresh…</string>
+    <string name="pull_to_load_more_label">Pull to load more…</string>
+    <string name="release_to_load_more_label">Release to load more…</string>
 
 </resources>
