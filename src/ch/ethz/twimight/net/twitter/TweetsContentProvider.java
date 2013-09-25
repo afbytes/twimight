@@ -37,7 +37,7 @@ import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewTweetActivity;
-import ch.ethz.twimight.activities.TweetListActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
@@ -842,7 +842,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			verifySignature(cm,km,values);		
 			
-			if (TweetListActivity.running==false && 
+			if (ShowTweetListActivity.running==false && 
 					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true) {
 				// notify user 
 				notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
@@ -980,7 +980,7 @@ public class TweetsContentProvider extends ContentProvider {
 		// if none of the before was true, this is a proper new tweet which we now insert
 		try {
 			Uri insertUri = insertTweet(values);
-			if (TweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
+			if (ShowTweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
 					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true ) {
 				// notify user 				
 				notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
@@ -1175,7 +1175,7 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
 					}
 					
-					if (TweetListActivity.running==false && 
+					if (ShowTweetListActivity.running==false && 
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions", true) == true 
 							&& hasBeenExecuted()  ) {
 						// notify user						
@@ -1254,21 +1254,21 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		CharSequence contentTitle = getContext().getString(R.string.tweet_content_title);
 		CharSequence contentText = "New Tweets!";
-		Intent notificationIntent = new Intent(getContext(), TweetListActivity.class);
+		Intent notificationIntent = new Intent(getContext(), ShowTweetListActivity.class);
 		PendingIntent contentIntent;
 		
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = getContext().getString(R.string.mention_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = getContext().getString(R.string.dis_tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
 			break;
 		case(NOTIFY_TWEET):
 			contentText = getContext().getString(R.string.tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
 			break;
 		default:
 			break;

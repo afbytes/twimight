@@ -20,7 +20,9 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
@@ -39,6 +42,7 @@ import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.opportunistic.BluetoothStatus;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.LogCollector;
@@ -55,12 +59,11 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = true;
-	private boolean isDisasterThemeSet = false;
 
 	ActionBar actionBar;
+	static Drawable dd, dn;
 
 	private View bottomStatusBar;
-	private View progressBar;
 	private TextView tvNeighborCount;
 	private TextView tvStatus;
 
@@ -69,17 +72,17 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		updateTheme();
 		super.onCreate(savedInstanceState);
 
-		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		LogCollector.setUpCrittercism(getApplicationContext());
 		LogCollector.leaveBreadcrumb();
 
 		// action bar
 		actionBar = getActionBar();
-		// actionBar.setHomeButtonEnabled(true);
-		// actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setTitle("@" + LoginActivity.getTwitterScreenname(this));		
 
 	}
 
@@ -88,56 +91,47 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onResume() {
-		checkTheme();
 		super.onResume();
 		instance = this;
-
-		// bottom status bar (can't get it in onCreate because layout is not set
-		// yet)
+		
+		if(dd == null || dn == null) {
+			Log.i(TAG,"loading action bar backgrounds");
+			Resources resources = getResources();
+			dd = resources.getDrawable(R.drawable.top_bar_background_disaster);
+			dn = resources.getDrawable(R.drawable.top_bar_background);
+		}	
+		
+		// bottom status bar (can't do it in onCreate because layout is not set yet)
 		bottomStatusBar = findViewById(R.id.bottomStatusBar);
-		progressBar = findViewById(R.id.progressBar);
 		tvNeighborCount = (TextView) findViewById(R.id.tvNeighborCount);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
-
 		// setup disaster mode specific stuff
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
 				"prefDisasterMode", false) == true) {
-			updateStatusBar();
-			// register for bluetooth status updates
-			BluetoothStatus.getInstance().addObserver(this);
-		}
-	}
-
-	private boolean isDisasterModeEnabled() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"prefDisasterMode", false);
-	}
-
-	/**
-	 * Checks if the correct theme is currently set and if necessary restarts
-	 * the activity so that a different them can be applied.
-	 */
-	private void checkTheme() {
-		if (isDisasterModeEnabled() != isDisasterThemeSet) {
-			recreate();
-		}
-	}
-
-	private void updateTheme() {
-		if (isDisasterModeEnabled()) {
-			setTheme(R.style.TwimightHolo_DisasterMode);
+			if (dd == null)
+				Log.i(TAG,"dd null");			
+			actionBar.setBackgroundDrawable(dd);
+			Log.i(TAG,"setting disaster background");
+			// does the current layout have a bottom status bar?
 			if (bottomStatusBar != null) {
 				bottomStatusBar.setVisibility(View.VISIBLE);
+				updateStatusBar();
+				// register for bluetooth status updates
+				BluetoothStatus.getInstance().addObserver(this);
 			}
-			isDisasterThemeSet = true;
 		} else {
-			setTheme(R.style.TwimightHolo_NormalMode);
+			actionBar.setBackgroundDrawable(dn);
+			Log.i(TAG,"setting normal background");
 			if (bottomStatusBar != null) {
 				bottomStatusBar.setVisibility(View.GONE);
 			}
-			isDisasterThemeSet = false;
 		}
+		// actionbar hack to make sure the background drawable is applied
+		// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setDisplayShowTitleEnabled(true);
 	}
+
 
 	@Override
 	protected void onPause() {
@@ -145,7 +139,28 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		BluetoothStatus.getInstance().deleteObserver(this);
 		super.onPause();
 	}
-
+	/*
+	 * 
+	 * @Override protected void onRestart() { // TODO Auto-generated method stub
+	 * super.onRestart(); restartOnThemeSwitch(TwimightBaseActivity.this); }
+	 * 
+	 * 
+	 * public static void restartOnThemeSwitch(Activity act) {
+	 * 
+	 * 
+	 * 
+	 * if (PreferenceManager.getDefaultSharedPreferences(act).getBoolean(
+	 * "prefDisasterMode", false) == true) {
+	 * 
+	 * 
+	 * Intent it = act.getIntent(); it.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	 * 
+	 * act.startActivity(it);
+	 * 
+	 * }
+	 * 
+	 * }
+	 */
 	/**
 	 * Populate the Options menu with the "home" option. For the "main" activity
 	 * ShowTweetListActivity we don't add the home option.
@@ -178,22 +193,15 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 		case android.R.id.home:
 			// app icon in action bar clicked; go home
-			i = new Intent(this, TweetListActivity.class);
+			i = new Intent(this, ShowTweetListActivity.class);
 			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			return true;
 
 		case R.id.menu_my_profile:
-			Uri uri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS);
-			Cursor c = getContentResolver().query(
-					uri,
-					null,
-					TwitterUsers.COL_TWITTERUSER_ID + "="
-							+ LoginActivity.getTwitterId(this), null, null);
-			if (c.getCount() != 1)
-				return false;
+			Uri uri = Uri.parse("content://"+TwitterUsers.TWITTERUSERS_AUTHORITY+"/"+TwitterUsers.TWITTERUSERS);
+			Cursor c = getContentResolver().query(uri, null, TwitterUsers.COL_TWITTERUSER_ID+"="+LoginActivity.getTwitterId(this), null, null);
+			if(c.getCount()!=1) return false;
 			c.moveToFirst();
 			int rowId = c.getInt(c.getColumnIndex("_id"));
 
@@ -214,7 +222,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 		case R.id.menu_settings:
 			// Launch PrefsActivity
-			i = new Intent(this, SettingsActivity.class);
+			i = new Intent(this, PrefsActivity.class);
 			startActivity(i);
 			break;
 
@@ -360,11 +368,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 				instance.runOnUiThread(new Runnable() {
 					public void run() {
-						if (instance.progressBar != null) {
-							instance.progressBar
-									.setVisibility(isLoading ? View.VISIBLE
-											: View.GONE);
-						}
+						instance.setProgressBarIndeterminateVisibility(isLoading);
 					}
 				});
 
@@ -413,24 +417,18 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 	/**
 	 * Updates the bottom status bar. Runs on UI thread and can thus be called
-	 * directly from anywhere. If the current layout has no status bar, nothing
-	 * happ<ens.
+	 * directly from anywhere.
 	 */
 	private void updateStatusBar() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				// update number of neighbors
-				if (tvNeighborCount != null) {
-					tvNeighborCount.setText(String.valueOf(BluetoothStatus
-							.getInstance().getNeighborCount()));
-				}
-
+				tvNeighborCount.setText(String.valueOf(BluetoothStatus
+						.getInstance().getNeighborCount()));
 				// update state description
-				if (tvStatus != null) {
-					tvStatus.setText(BluetoothStatus.getInstance()
-							.getStatusDescription());
-				}
+				tvStatus.setText(BluetoothStatus.getInstance()
+						.getStatusDescription());
 			}
 		});
 	}

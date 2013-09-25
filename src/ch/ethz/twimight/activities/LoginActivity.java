@@ -161,7 +161,9 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 		private void removeLoginInterface(){
 			buttonLogin = (Button) findViewById(R.id.buttonLogin);
+			showLoginLayout = (LinearLayout) findViewById(R.id.showLoginLogo);
 			buttonLogin.setVisibility(Button.GONE);
+			showLoginLayout.setVisibility(LinearLayout.GONE);
 		}
 		
 		private void setupLoginButton() {
@@ -395,7 +397,7 @@ public class LoginActivity extends Activity implements OnClickListener{
 		
 
 		private void startTimeline(Context context) {		
-			Intent i = new Intent(context, TweetListActivity.class);
+			Intent i = new Intent(context, ShowTweetListActivity.class);
 			
 			i.putExtra("login", true);		
 			startActivity(i);		

@@ -100,14 +100,14 @@ public class TwitterUserAdapter extends SimpleCursorAdapter {
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					holder.picture.setImageBitmap(bm);	
 				} else
-					holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+					holder.picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
 				//Log.e(TAG,"error opening input stream");
-				holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+				holder.picture.setImageResource(R.drawable.default_profile);
 			}	
 
 		} else {
-			holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+			holder.picture.setImageResource(R.drawable.default_profile);
 		}
 		
 		holder.rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);

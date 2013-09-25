@@ -119,13 +119,13 @@ public class DMAdapter extends SimpleCursorAdapter {
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					picture.setImageBitmap(bm);	
 				} else
-					picture.setImageResource(R.drawable.profile_image_placeholder);
+					picture.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG,"error opening input stream",e);
-				picture.setImageResource(R.drawable.profile_image_placeholder);
+				picture.setImageResource(R.drawable.default_profile);
 			}	
 		} else {
-			picture.setImageResource(R.drawable.profile_image_placeholder);
+			picture.setImageResource(R.drawable.default_profile);
 		}
 		
 		// any transactional flags?

@@ -14,7 +14,7 @@
 		android:protectionLevel="dangerous" />
 	
 
-	<application android:icon="@drawable/ic_launcher"
+	<application android:icon="@drawable/ic_launcher_twimight"
 		android:theme="@style/Twimight" android:hardwareAccelerated="true" android:debuggable="true" android:label="@string/app_label">
 		
 	    <activity android:name=".activities.ConditionsActivity"
@@ -49,7 +49,7 @@
 				android:resource="@xml/searchable" />			
 		</activity>
 
-		<activity android:name=".activities.TweetListActivity"
+		<activity android:name=".activities.ShowTweetListActivity"
 			android:label="@string/app_name" android:launchMode="singleTop">
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
@@ -166,8 +166,6 @@
 
 		<provider android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
 			android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
-		<activity android:name=".activities.TipsActivity" android:theme="@style/Twimight.NoActionBar" android:label="Twimight" android:launchMode="singleTop" android:noHistory="false"></activity>
-		<activity android:name=".activities.SettingsActivity"></activity>
 
 
 
