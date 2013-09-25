@@ -122,6 +122,7 @@
 				<action android:name="twimight_synch" />
 			</intent-filter>
 		</service>
+		<service android:enabled="true" android:name=".net.OMF.OmfService"/>
 
 		<receiver android:name=".util.CommunicationReceiver"
 			android:enabled="true" android:priority="0">
@@ -140,12 +141,12 @@
 			</intent-filter>
 		</receiver>
 		
-		<receiver android:name=".util.OMFReceiver"			
+		<!-- <receiver android:name=".util.OMFReceiver"			
 			android:enabled="true">
 			<intent-filter>
 				<action android:name="autom_enable_disaster_mode" />				
 			</intent-filter>
-		</receiver>
+		</receiver> -->
 
 		<receiver android:name=".net.opportunistic.ScanningAlarm"
 			android:enabled="true" />
