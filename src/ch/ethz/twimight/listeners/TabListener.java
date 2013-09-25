@@ -59,5 +59,6 @@ import android.util.Log;
         // corresponding page in the ViewPager.
 		Log.d("TabListener", "inside onTabSelecred, position = " + tab.getPosition());
         vPager.setCurrentItem(tab.getPosition());
+		
 	}
 }

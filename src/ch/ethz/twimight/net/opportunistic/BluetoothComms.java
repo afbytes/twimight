@@ -27,11 +27,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import ch.ethz.twimight.R;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -43,7 +41,6 @@ import ch.ethz.twimight.util.Constants;
 public class BluetoothComms{
     // Debugging
     private static final String TAG = "BluetoothComms";
-    private static final String T = "btdebug";
     private static final boolean D = true;
 
     // Name for the SDP record when creating server socket
@@ -60,7 +57,6 @@ public class BluetoothComms{
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-    private final Context mContext;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -76,8 +72,7 @@ public class BluetoothComms{
      * @param context  The UI Activity Context
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothComms( Context context, Handler handler) {
-    	mContext = context;
+    public BluetoothComms( Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
@@ -104,7 +99,7 @@ public class BluetoothComms{
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
     public synchronized void start() {
-        Log.d(T, "BluetoothComms.start()");
+        if (D) Log.d(TAG, "start");
 
         // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -123,10 +118,10 @@ public class BluetoothComms{
         	
         	setState(STATE_LISTEN);
         } catch (IOException e) {
-        	Log.e(T,"listen() failed", e);
+        	Log.e(TAG,"listen() failed");
         	Message msg = mHandler.obtainMessage(Constants.BLUETOOTH_RESTART, -1, -1, null);
         	mHandler.sendMessage(msg);
-        	Log.d("btdebug", "restarting bluetooth");
+        	
         }
            
         
@@ -141,7 +136,6 @@ public class BluetoothComms{
      */
     public synchronized void connect(String mac) {
         
-    	Log.d(T, "BluetoothComms.connect() " + mac);
         
         // Which device??
         BluetoothDevice device = mAdapter.getRemoteDevice(mac);
@@ -170,7 +164,7 @@ public class BluetoothComms{
      */
     private synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device) {
-        Log.d(T, "connected() " + device.getName() + " (" + device.getAddress() + ")");
+        if (D) Log.i(TAG, "connected" );
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -247,7 +241,6 @@ public class BluetoothComms{
         // Send a failure message back to the Activity
        
     	// Send a failure message back to the Activity
-    	Log.d("btdebug", "connectionFailed() " + mac);
         Message msg = mHandler.obtainMessage(Constants.MESSAGE_CONNECTION_FAILED, -1 ,-1, mac);
         mHandler.sendMessage(msg);
 
@@ -287,7 +280,7 @@ public class BluetoothComms{
         }
 
         public void run() {
-            Log.d(T, "BEGIN mAcceptThread" + this);
+            if (D) Log.d(TAG, "BEGIN mAcceptThread" + this);
             setName("AcceptThread");
 
             BluetoothSocket socket = null;
@@ -298,9 +291,8 @@ public class BluetoothComms{
                     try {
                         // This is a blocking call and will only return on a
                         // successful connection or an exception
-                    	BluetoothStatus.getInstance().setStatusDescription(mContext.getString(R.string.btstatus_listening));
                         socket = mmServerSocket.accept();
-                        Log.i(T,"connection received, socket created");
+                        Log.i(TAG,"connection received, socket created");
                     } catch (IOException e) {
                         // Log.e(TAG, "accept() failed");
                         break;
@@ -358,7 +350,7 @@ public class BluetoothComms{
         public ConnectThread(BluetoothDevice device) {
             mmDevice = device;
             BluetoothSocket tmp = null;           
-            Log.d(T, "ConnectThread()");
+
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
@@ -367,13 +359,12 @@ public class BluetoothComms{
                 
             } catch (IOException e) {
                 Log.e(TAG, "create() failed", e);
-                Log.e("btdebug", "create() failed");
             }
             mmSocket = tmp;
         }
 
         public void run() {
-            Log.d(T, "BEGIN mConnectThread " + mmDevice.getName() + " (" + mmDevice.getAddress() + ")");
+            Log.i(TAG, "BEGIN mConnectThread " );
             setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
@@ -383,10 +374,6 @@ public class BluetoothComms{
             try {
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
-            	Log.d("btdebug", "discovering: " +mAdapter.isDiscovering());
-            	String remoteDeviceName = mmDevice.getName()!=null ? mmDevice.getName() : "?";
-            	String statusDescription = String.format(mContext.getString(R.string.btstatus_connecting_to), remoteDeviceName);
-            	BluetoothStatus.getInstance().setStatusDescription(statusDescription);
                 mmSocket.connect();
             } catch (IOException e) {
                 // Close the socket
@@ -395,7 +382,6 @@ public class BluetoothComms{
                 } catch (IOException e2) {
                     Log.e(TAG, "unable to close() ", e2);
                 }
-                Log.e(T, "connect() failed", e);
                 connectionFailed(mmDevice.getAddress());
                 return;
             }
@@ -428,7 +414,7 @@ public class BluetoothComms{
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket) {
-            Log.d(T, "create ConnectedThread" );
+            Log.d(TAG, "create ConnectedThread: " );
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -446,10 +432,8 @@ public class BluetoothComms{
         }
 
         public void run() {
-            Log.d(T, "BEGIN mConnectedThread");
-            String remoteDeviceName = mmSocket.getRemoteDevice().getName()!=null ? mmSocket.getRemoteDevice().getName() : "?"; 
-            String statusDescription = String.format(mContext.getString(R.string.btstatus_connected_to), remoteDeviceName);
-            BluetoothStatus.getInstance().setStatusDescription(statusDescription);
+            Log.i(TAG, "BEGIN mConnectedThread");            
+
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
@@ -471,7 +455,6 @@ public class BluetoothComms{
 					e.printStackTrace();
 				}
             }
-            Log.d(T, "ConnectedThread finished");
         }
 
         /**
@@ -487,21 +470,15 @@ public class BluetoothComms{
                 out.flush(); 
                 
             } catch (IOException e) {
-                Log.e(T, "Exception during write", e);
+                Log.e(TAG, "Exception during write");
             }
         }
 
-        public void cancel() {
+        public synchronized void cancel() {
             try {
-            	Log.d("btdebug", "closing inputStream");
-            	mmInStream.close();
-            	Log.d("btdebug", "closing outputStream");
-            	mmOutStream.close();
-            	Log.d("btdebug", "closing socket");
                 mmSocket.close();
-                Log.d("btdebug", "closing socket ConnectedThread");
-            } catch (IOException e) {
-                Log.e("btdebug", "close() of connect socket failed");
+            } catch (Exception e) {
+                Log.e(TAG, "close() of connect socket failed");
             }
         }
     }

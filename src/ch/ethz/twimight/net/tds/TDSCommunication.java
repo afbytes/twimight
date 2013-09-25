@@ -57,6 +57,7 @@ public class TDSCommunication {
 	private static final String DISASTER_TWEETS = "disaster_tweets";	
 	private static final String NOTIFICATION = "notification";
 	
+	
 	private static final String TAG = "TDSCommunication";
 	private TDSRequestMessage tdsRequest;
 	private TDSResponseMessage tdsResponse;

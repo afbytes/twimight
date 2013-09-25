@@ -504,7 +504,7 @@ public class TDSService extends Service {
 	private void notifyUser(int type, String tickerText, String url){
 		
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_notification;
+		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;

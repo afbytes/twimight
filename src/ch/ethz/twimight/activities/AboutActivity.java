@@ -51,9 +51,9 @@ public class AboutActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.about);
+		setContentView(R.layout.showabout);
 		
-		keyOk = (TextView) findViewById(R.id.textKeys);
+		keyOk = (TextView) findViewById(R.id.showAboutKeys);
 		revokeButton = (Button) findViewById(R.id.showAboutRevoke);
 		CertificateManager cm = new CertificateManager(this);
 		if(cm.hasCertificate()){
@@ -70,7 +70,7 @@ public class AboutActivity extends Activity{
 		}
 		
 		updateButton = (Button) findViewById(R.id.showAboutUpdate);
-		lastUpdate = (TextView) findViewById(R.id.textTdsUpdate);
+		lastUpdate = (TextView) findViewById(R.id.showAboutLastUpdate);
 		long lastTimestamp = TDSService.getLastUpdate(this);
 		if(lastTimestamp == 0){
 			lastUpdate.setText(R.string.no_update);
@@ -93,7 +93,7 @@ public class AboutActivity extends Activity{
 		});
 		
 		
-		versionName = (TextView) findViewById(R.id.textVersion);
+		versionName = (TextView) findViewById(R.id.showAboutVersion);
 		try
 		{
 		    String appVer = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;

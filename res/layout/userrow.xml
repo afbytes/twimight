@@ -9,7 +9,7 @@
 		android:layout_height="45dp" android:layout_width="45dp"
 		android:layout_marginRight="5dp" android:layout_marginLeft="5dp"
 		android:layout_marginTop="10dp"
-		android:src="@drawable/profile_image_placeholder"
+		android:src="@drawable/default_profile"
 		android:background="@drawable/image_border" />
 
 	<ImageView android:id="@+id/imageAlert" android:layout_width="wrap_content"

@@ -36,11 +36,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.NewTweetActivity;
-import ch.ethz.twimight.activities.TweetListActivity;
+import ch.ethz.twimight.activities.ShowTweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
+import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.security.CertificateManager;
@@ -829,11 +829,10 @@ public class TweetsContentProvider extends ContentProvider {
 			// second to insert the tweet and then schedule a scanning operation
 			if(PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefDisasterMode", false) == true){			
 					//new ScanningAlarm(getContext(),0,true);    
-//					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
-//					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);
-//					getContext().getApplicationContext().startService(i);
-					Intent i = new Intent(getContext().getApplicationContext(), ScanningService.class);
+					Intent i = new Intent(getContext().getApplicationContext(),ScanningService.class);
+					i.putExtra(ScanningService.FORCED_BLUE_SCAN, true);
 					getContext().getApplicationContext().startService(i);
+				
 	    							
 				
 			}
@@ -842,7 +841,7 @@ public class TweetsContentProvider extends ContentProvider {
 			
 			verifySignature(cm,km,values);		
 			
-			if (TweetListActivity.running==false && 
+			if (ShowTweetListActivity.running==false && 
 					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true) {
 				// notify user 
 				notifyUser(NOTIFY_DISASTER, values.getAsString(Tweets.COL_TEXT));
@@ -853,11 +852,6 @@ public class TweetsContentProvider extends ContentProvider {
 		//getContext().getContentResolver().notifyChange(uri, null);
 		// delete everything that now falls out of the buffer
 		purgeTweets(values);
-		
-		// trigger upload to Twimight Disaster Server
-		Intent synchIntent = new Intent(getContext(), TDSService.class);
-		synchIntent.putExtra("synch_request", TDSService.SYNCH_ALL_FORCE);
-		getContext().startService(synchIntent);
 		
 		return insertUri;
 	}
@@ -980,7 +974,7 @@ public class TweetsContentProvider extends ContentProvider {
 		// if none of the before was true, this is a proper new tweet which we now insert
 		try {
 			Uri insertUri = insertTweet(values);
-			if (TweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
+			if (ShowTweetListActivity.running==false && ( (values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0) &&
 					PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyTweets", false) == true ) {
 				// notify user 				
 				notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
@@ -1175,7 +1169,7 @@ public class TweetsContentProvider extends ContentProvider {
 						values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
 					}
 					
-					if (TweetListActivity.running==false && 
+					if (ShowTweetListActivity.running==false && 
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions", true) == true 
 							&& hasBeenExecuted()  ) {
 						// notify user						
@@ -1195,15 +1189,6 @@ public class TweetsContentProvider extends ContentProvider {
 				long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);						
 				if(rowId >= 0){							
 					Uri insertUri = ContentUris.withAppendedId(Tweets.ALL_TWEETS_URI, rowId);
-					
-					// trigger twitter upload
-					// --> deactivated for now. is done in NewTweetActivity
-					
-//					Intent i = new Intent(getContext(), TwitterService.class);
-//					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-//					i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
-//					getContext().startService(i);
-					
 					return insertUri;
 				} else {
 					 return null; 
@@ -1245,7 +1230,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private void notifyUser(int type, String tickerText){
 		
 		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_notification;
+		int icon = R.drawable.ic_launcher_twimight;
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
@@ -1254,21 +1239,21 @@ public class TweetsContentProvider extends ContentProvider {
 		
 		CharSequence contentTitle = getContext().getString(R.string.tweet_content_title);
 		CharSequence contentText = "New Tweets!";
-		Intent notificationIntent = new Intent(getContext(), TweetListActivity.class);
+		Intent notificationIntent = new Intent(getContext(), ShowTweetListActivity.class);
 		PendingIntent contentIntent;
 		
 		switch(type){
 		case(NOTIFY_MENTION):
 			contentText = getContext().getString(R.string.mention_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);			
 			break;
 		case(NOTIFY_DISASTER):
 			contentText = getContext().getString(R.string.dis_tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
 			break;
 		case(NOTIFY_TWEET):
 			contentText = getContext().getString(R.string.tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
+			notificationIntent.putExtra(ShowTweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
 			break;
 		default:
 			break;

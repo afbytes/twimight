@@ -23,7 +23,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
-import ch.ethz.twimight.fragments.SettingsFragment;
+import android.util.Log;
+import ch.ethz.twimight.activities.PrefsActivity;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -90,7 +91,7 @@ public class StatisticsDBHelper {
 		public boolean insertRow(Location loc, String network, String event, String link, Long timestamp ) {
 			
 			ContentValues update;
-			boolean isDisaster =  SettingsFragment.isDisModeActive(context);
+			boolean isDisaster =  PrefsActivity.isDisModeActive(context);
 			
 			if(loc != null){
 				

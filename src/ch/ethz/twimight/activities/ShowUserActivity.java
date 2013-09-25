@@ -244,10 +244,10 @@ public class ShowUserActivity extends TwimightBaseActivity{
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					profileImage.setImageBitmap(bm);	
 				} else
-					profileImage.setImageResource(R.drawable.profile_image_placeholder);
+					profileImage.setImageResource(R.drawable.default_profile);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG,"error opening input stream",e);
-				profileImage.setImageResource(R.drawable.profile_image_placeholder);
+				profileImage.setImageResource(R.drawable.default_profile);
 			}	
 		}
 		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)); 
