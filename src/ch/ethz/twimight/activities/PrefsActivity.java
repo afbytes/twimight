@@ -25,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.Html.HtmlPage;
+import ch.ethz.twimight.net.OMF.OmfService;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
@@ -63,12 +64,14 @@ public class PrefsActivity extends PreferenceActivity{
 					if(preferences.getBoolean(getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON) == true){
 						
 						if (LoginActivity.getTwitterId(getBaseContext())!= null && LoginActivity.getTwitterScreenname(getBaseContext()) != null) {
+							startOmfService();
 							enableDisasterMode(); 							
 							// Are we in disaster mode?		
 								
 						} 
 						
-					} else {						
+					} else {	
+						stopOmfService();
 						disableDisasterMode(getApplicationContext());						
 						finish();
 					}
@@ -175,9 +178,18 @@ public class PrefsActivity extends PreferenceActivity{
 		} else {
 			new ScanningAlarm(getApplicationContext(),true);
 			finish();
-		}
-				 
+		}			 
 		
+	}
+	
+	private void startOmfService() {
+		Intent intent = new Intent(getApplicationContext(), OmfService.class);
+		startService(intent);
+	}
+	
+	private void stopOmfService() {
+		Intent intent = new Intent(getApplicationContext(), OmfService.class);
+		stopService(intent);
 	}
 	
 	private void setDisasterModeUsed() {
