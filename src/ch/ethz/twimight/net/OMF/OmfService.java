@@ -48,23 +48,21 @@ public class OmfService extends Service {
 				createActivity(getApplicationContext());
 				break;
 			case MSG_START_DIS_MODE:
-				enableDisMode();
+				enableDisMode();				
 				sendMessageToTarget(MSG_TEST_BIDIRECTIONAL);
 				break;
 			case MSG_STOP_DIS_MODE:
 				disableDisMode();
 				break;
-			case MSG_REGISTER_CLIENT:
+			case MSG_REGISTER_CLIENT:								
 				clientMessenger = msg.replyTo;
 				break;
 			case MSG_UNREGISTER_CLIENT:
+				Log.i(TAG,"setting client messenger to null");
 				clientMessenger = null;
 				break;
-
 			}
-		}
-
-		
+		}		
 	}
 
 	private void createActivity(Context context) {
@@ -102,12 +100,14 @@ public class OmfService extends Service {
 	}
 	
 	   public void sendMessageToTarget(int message) {
-	    	if (clientMessenger != null) return;        
+	    	if (clientMessenger == null) {	    		
+	    		return;  
+	    	}	    	
 	    	Message msg = Message.obtain(null, message, 0, 0);
 	    	try {
-	    		clientMessenger.send(msg);
-	    		Log.i(TAG,"Message sent to the RC");
-	    	} catch (RemoteException e) {    		
+	    		clientMessenger.send(msg);	    		
+	    	} catch (RemoteException e) {    
+	    		Log.e(TAG,"remote exception",e);
 	    	}
 	    }
 	
@@ -120,6 +120,14 @@ public class OmfService extends Service {
         Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
         return localMessenger.getBinder();
     }
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		// TODO Auto-generated method stub
+		return START_STICKY;
+	}
+    
+    
 	
 
 }
