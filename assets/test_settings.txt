@@ -1,0 +1,65 @@
+#Core.classpaths = /Users/teemuk/workspace/SCAMPIJDNSDiscovery/dist/jmdnsdiscovery.jar, /Users/teemuk/workspace/jmdns/dist/jmdns.jar
+
+# Set up node ID
+uniqueID.class = fi.tkk.netlab.dtn.scampi.core.RSASHA1Identity
+uniqueID.autogenerate = true
+#uniqueID.path = scampi.id
+uniqueID.path = test_node_id.rsasha1id
+Core.nodeID = uniqueID
+
+Discovery.announcers = fastPeerAnnouncer, fastPeerAnnouncer2
+Discovery.discoverers = fastPeerDiscoverer
+
+fastPeerAnnouncer.class = fi.tkk.netlab.dtn.scampi.discovery.FastPeerAnnouncer
+fastPeerAnnouncer.destinationPort = 4466
+#fastPeerAnnouncer.destinationAddress = ff02::8:1
+fastPeerAnnouncer.destinationAddress = 224.0.10.1
+#fastPeerAnnouncer.destinationAddress = 192.168.0.10
+fastPeerAnnouncer.bundleServiceTypes = tcpcl
+fastPeerAnnouncer.bundleServicePorts = 7894
+fastPeerAnnouncer.interval = 1000
+#fastPeerAnnouncer.interface = en1
+
+fastPeerAnnouncer2.class = fi.tkk.netlab.dtn.scampi.discovery.FastPeerAnnouncer
+fastPeerAnnouncer2.destinationPort = 4466
+fastPeerAnnouncer2.destinationAddress = ff02::8:1
+#fastPeerAnnouncer2.destinationAddress = 224.0.10.1
+#fastPeerAnnouncer2.destinationAddress = 192.168.0.10
+fastPeerAnnouncer2.bundleServiceTypes = FOOBAR
+fastPeerAnnouncer2.bundleServicePorts = 9999
+fastPeerAnnouncer2.interval = 1000
+fastPeerAnnouncer2.interface = en0
+
+fastPeerDiscoverer.class = fi.tkk.netlab.dtn.scampi.discovery.FastPeerDiscoverer
+#fastPeerDiscoverer.address = ff02::8:1
+fastPeerDiscoverer.address = 224.0.10.1
+#fastPeerDiscoverer.address = 192.168.0.10
+fastPeerDiscoverer.port = 4466
+fastPeerDiscoverer.period = 5000
+#fastPeerDiscoverer.interface = en1
+
+
+defaultAPI.port = 7744
+Core.APIs = defaultAPI
+
+localCache.class = fi.tkk.netlab.dtn.scampi.core.FIFOCacheManager
+localCache.cacheSize = 10M
+localCache.path = local_cache
+
+localPersistentCache.class = fi.tkk.netlab.dtn.scampi.core.FIFOCacheManager
+localPersistentCache.path = persistent_cache
+
+peerCache.class = fi.tkk.netlab.dtn.scampi.core.FIFOCacheManager
+peerCache.cacheSize = 10M
+peerCache.path = peer_cache
+
+Core.localCache = localCache
+Core.peerCache = peerCache
+Core.persistentCache = localPersistentCache
+
+defaultConsole.port = 5050
+Core.consoles = defaultConsole
+
+tcpclBundleService.class = fi.tkk.netlab.dtn.scampi.core.TCPCLBundleService
+tcpclBundleService.port = 7894
+Core.bundleServices = tcpclBundleService

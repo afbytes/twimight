@@ -40,9 +40,7 @@ import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
-import ch.ethz.twimight.net.opportunistic.BluetoothStatus;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.LogCollector;
@@ -117,7 +115,6 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 				bottomStatusBar.setVisibility(View.VISIBLE);
 				updateStatusBar();
 				// register for bluetooth status updates
-				BluetoothStatus.getInstance().addObserver(this);
 			}
 		} else {
 			actionBar.setBackgroundDrawable(dn);
@@ -136,7 +133,6 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	@Override
 	protected void onPause() {
 		// unregister from bluetooth status updates
-		BluetoothStatus.getInstance().deleteObserver(this);
 		super.onPause();
 	}
 	/*
@@ -424,11 +420,6 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 			@Override
 			public void run() {
 				// update number of neighbors
-				tvNeighborCount.setText(String.valueOf(BluetoothStatus
-						.getInstance().getNeighborCount()));
-				// update state description
-				tvStatus.setText(BluetoothStatus.getInstance()
-						.getStatusDescription());
 			}
 		});
 	}
