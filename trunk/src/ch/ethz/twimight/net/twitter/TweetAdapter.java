@@ -240,7 +240,7 @@ public class TweetAdapter extends CursorAdapter {
 
 		// disaster/normal? -> select accent color / set verified icon
 		int accentColor;
-		if ((buffer & Tweets.BUFFER_DISASTER) != 0) {
+		if ((buffer & Tweets.BUFFER_DISASTER) != 0 || (buffer & Tweets.BUFFER_MYDISASTER) != 0) {
 			// set pressed state background color
 			row.setBackgroundResource(R.drawable.pressable_background_disastermode);
 			// select accent color
