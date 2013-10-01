@@ -21,23 +21,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.Date;
-import java.util.Random;
 
 import org.apache.http.util.ByteArrayBuffer;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlarmManager;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -45,13 +41,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.preference.PreferenceManager;
+import android.os.RemoteException;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
-import ch.ethz.twimight.R;
+import android.widget.Toast;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
@@ -61,6 +56,12 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.InternalStorageHelper;
 import ch.ethz.twimight.util.SDCardHelper;
+import fi.tkk.netlab.dtn.scampi.android.SCAMPIApplication;
+import fi.tkk.netlab.dtn.scampi.android.SCAMPIServiceListener;
+import fi.tkk.netlab.dtn.scampi.applib.AppLib;
+import fi.tkk.netlab.dtn.scampi.applib.AppLibListener;
+import fi.tkk.netlab.dtn.scampi.applib.HostDiscoveryCallback;
+import fi.tkk.netlab.dtn.scampi.applib.SCAMPIMessage;
 
 /**
  * This is the thread for scanning for Bluetooth peers.
@@ -69,12 +70,10 @@ import ch.ethz.twimight.util.SDCardHelper;
  * @author pcarta
  */
 
-public class ScanningService extends Service implements
-		DevicesReceiver.ScanningFinished,
-		StateChangedReceiver.BtSwitchingFinished {
+public class ScanningService extends Service implements AppLibListener,
+		SCAMPIServiceListener, HostDiscoveryCallback {
 
 	private static ScanningService instance;
-	private static final String T = "btdebug";
 	private static final String TAG = "ScanningService";
 	/** For Debugging */
 	private static final String WAKE_LOCK = "ScanningServiceWakeLock";
@@ -82,17 +81,12 @@ public class ScanningService extends Service implements
 	public Handler handler;
 	/** Handler for delayed execution of the thread */
 
-	// manage bluetooth communication
-	public BluetoothComms bluetoothHelper = null;
-
 	// private Date lastScan;
 
 	private MacsDBHelper dbHelper;
 	StateChangedReceiver stateReceiver;
 	private Cursor cursor;
 
-	ConnectionAttemptTimeout connTimeout;
-	EstablishedConnectionTimeout connectionTimeout;
 	WakeLock wakeLock;
 	public boolean closing_request_sent = false;
 
@@ -112,6 +106,7 @@ public class ScanningService extends Service implements
 	// photo
 	private String photoPath;
 	private static final String PHOTO_PATH = "twimight_photos";
+	private static final String MSG_KEY_TWEETS = "tweets";
 
 	// html
 	private HtmlPagesDbHelper htmlDbHelper;
@@ -123,25 +118,30 @@ public class ScanningService extends Service implements
 	boolean isSDWritable = false;
 	File SDcardPath = null;
 
-	DevicesReceiver receiver;
-	BluetoothAdapter mBtAdapter;
 	volatile boolean restartingBlue = false;
 
 	// has a scan been skipped because the adapter was restarting?
 	private boolean mScanPending = false;
 
+	// SCAMPI
+	private SCAMPIApplication scampiApp = null;
+	private static final int APPLIB_RETRY_MS = 500;
+	private static final String TWIMIGHT_SERVICE_NAME = "twimight";
+	private AppLib scampiAppLib = null;
+
 	@Override
 	public void onCreate() {
+		// set up scampi
+		if (scampiApp == null) {
+			scampiApp = (SCAMPIApplication) getApplication();
+		}
+		scampiApp.startSCAMPIService();
+		scampiApp.startAppLib(this);
+		Log.d(TAG, "onCreate() scampiApp.startSCAMPIService()");
 		// TODO Auto-generated method stub
 		super.onCreate();
 		instance = this;
 		handler = new Handler();
-		// set up Bluetooth
-
-		bluetoothHelper = new BluetoothComms(this, mHandler);
-		bluetoothHelper.start();
-		dbHelper = new MacsDBHelper(getApplicationContext());
-		dbHelper.open();
 
 		// sdCard helper
 		sdCardHelper = new SDCardHelper();
@@ -149,69 +149,23 @@ public class ScanningService extends Service implements
 		htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 		htmlDbHelper.open();
 
-		mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-	}
-
-	private void registerDevicesReceiver() {
-		unregisterDevReceiver();
-		receiver = new DevicesReceiver(getApplicationContext());
-		receiver.setListener(this);
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		registerReceiver(receiver, filter);
-		filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-		registerReceiver(receiver, filter);
-
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
 		super.onStartCommand(intent, flags, startId);
-		Log.d(T, "onStartCommand()");
+		Log.d(TAG, "onStartCommand()");
 		// Thread.setDefaultUncaughtExceptionHandler(new
-		// CustomExceptionHandler());
-		ScanningAlarm.releaseWakeLock();
+
 		getWakeLock(this);
-		// Register for broadcasts when discovery has finished
-		registerDevicesReceiver();
 
-		float probability;
-
-		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, true))
-			probability = 0;
-		else {
-			// get a random number
-			Random r = new Random(System.currentTimeMillis());
-			probability = r.nextFloat();
+		if (intent != null && intent.getBooleanExtra(FORCED_BLUE_SCAN, true)) {
+			Log.d(TAG, "force send disaster tweets");
+			sendDisasterTweets(0L);
 		}
-		initiateScanningRound(probability);
 
 		return START_STICKY;
-	}
-
-	private void initiateScanningRound(float probability) {
-		if (mBtAdapter != null && !restartingBlue) {
-			if (probability <= 1) {
-				// If we're already discovering, stop it
-				if (mBtAdapter.isDiscovering()) {
-					mBtAdapter.cancelDiscovery();
-				}
-				// Request discover from BluetoothAdapter
-				dbHelper.updateMacsDeActive();
-				bluetoothHelper.stop();
-				boolean ret = mBtAdapter.startDiscovery();
-				BluetoothStatus.getInstance().setStatusDescription(
-						getString(R.string.btstatus_searching));
-				Log.d(T, "started discovery (ret=" + ret + ")");
-				Log.d(T, "discovery running: " + mBtAdapter.isDiscovering());
-			}
-			mScanPending = false;
-		} else {
-			Log.d(T, "skipping scan (mBtAdapter=" + mBtAdapter
-					+ ", restartingBlue=" + restartingBlue + ")");
-			mScanPending = true;
-			stopSelf();
-		}
 	}
 
 	public class CustomExceptionHandler implements UncaughtExceptionHandler {
@@ -264,177 +218,10 @@ public class ScanningService extends Service implements
 		mHandler.removeMessages(Constants.MESSAGE_CONNECTION_SUCCEEDED);
 		mHandler.removeMessages(Constants.BLUETOOTH_RESTART);
 		releaseWakeLock();
-		bluetoothHelper.stop();
 		// Make sure we're not doing discovery anymore
-		if (mBtAdapter != null) {
-			mBtAdapter.cancelDiscovery();
-		}
-		if (receiver != null)
-			Log.i(TAG, "receiver not null");
-		unregisterDevReceiver();
-		unregisterStateReceiver();
+		scampiApp.stopAppLib();
+		scampiApp.stopSCAMPIService();
 		super.onDestroy();
-	}
-
-	/**
-	 * Start the scanning.
-	 * 
-	 * @return true if the connection with the TDS was successful, false
-	 *         otherwise.
-	 */
-	private boolean startScanning() {
-
-		// Get a cursor over all "active" MACs in the DB
-		cursor = dbHelper.fetchActiveMacs();
-		Log.i(T, "active macs: " + cursor.getCount());
-
-		if (cursor.moveToFirst()) {
-			// Get the field values
-			String mac = cursor.getString(cursor
-					.getColumnIndex(MacsDBHelper.KEY_MAC));
-			Log.i(T,
-					"Connection Attempt to: " + mac + " ("
-							+ dbHelper.fetchMacSuccessful(mac) + "/"
-							+ dbHelper.fetchMacAttempts(mac) + ")");
-
-			// if (bluetoothHelper.getState() == bluetoothHelper.STATE_LISTEN) {
-
-			// if ( (System.currentTimeMillis() -
-			// dbHelper.getLastSuccessful(mac) ) >
-			// Constants.MEETINGS_INTERVAL) {
-			// If we're already discovering, stop it
-			if (mBtAdapter.isDiscovering()) {
-				mBtAdapter.cancelDiscovery();
-			}
-			bluetoothHelper.connect(mac);
-			connTimeout = new ConnectionAttemptTimeout();
-			handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); // timeout
-																	// for
-																	// the
-																	// conn
-																	// attempt
-			// } else {
-			// Log.i(TAG,"skipping connection, last meeting was too recent");
-			// nextScanning();
-			// }
-			// } else if (bluetoothHelper.getState() !=
-			// bluetoothHelper.STATE_CONNECTED) {
-			// bluetoothHelper.start();
-			//
-			// }
-
-		} else
-			stopScanning();
-
-		return false;
-	}
-
-	private class ConnectionAttemptTimeout implements Runnable {
-		@Override
-		public void run() {
-			if (bluetoothHelper != null) {
-				if (bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTING) {
-					bluetoothHelper.start();
-				}
-				connTimeout = null;
-			}
-		}
-	}
-
-	private class EstablishedConnectionTimeout implements Runnable {
-		@Override
-		public void run() {
-			if (bluetoothHelper != null) {
-				if (bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTED) {
-					bluetoothHelper.start();
-				}
-				connectionTimeout = null;
-			}
-		}
-	}
-
-	/**
-	 * Proceed to the next MAC address
-	 */
-	private void nextScanning() {
-		if (cursor == null
-				|| bluetoothHelper.getState() == BluetoothComms.STATE_CONNECTED)
-			stopScanning();
-		else {
-			// do we have another MAC in the cursor?
-			if (cursor.moveToNext()) {
-
-				Log.i(TAG, "scanning for the next peer");
-				String mac = cursor.getString(cursor
-						.getColumnIndex(MacsDBHelper.KEY_MAC));
-				Log.i(T,
-						"Connection Attempt to: " + mac + " ("
-								+ dbHelper.fetchMacSuccessful(mac) + "/"
-								+ dbHelper.fetchMacAttempts(mac) + ")");
-				// if ( (System.currentTimeMillis() -
-				// dbHelper.getLastSuccessful(mac) ) >
-				// Constants.MEETINGS_INTERVAL) {
-
-				Log.i(TAG,
-						"Connection attempt to: " + mac + " ("
-								+ dbHelper.fetchMacSuccessful(mac) + "/"
-								+ dbHelper.fetchMacAttempts(mac) + ")");
-				// If we're already discovering, stop it
-				if (mBtAdapter.isDiscovering()) {
-					mBtAdapter.cancelDiscovery();
-				}
-				bluetoothHelper.connect(mac);
-				connTimeout = new ConnectionAttemptTimeout();
-				handler.postDelayed(connTimeout, CONNECTING_TIMEOUT); // timeout
-																		// for
-																		// the
-																		// conn
-																		// attempt
-				// } else {
-				// Log.i(TAG,"skipping connection, last meeting was too recent");
-				// nextScanning();
-				// }
-			} else
-				stopScanning();
-
-		}
-
-	}
-
-	/**
-	 * Terminates one round of scanning: cleans up and reschedules next scan
-	 */
-	private void stopScanning() {
-
-		if (cursor != null) {
-			cursor.close();
-			cursor = null;
-		}
-		removeConnectionAttemptTimeout();
-
-		// restart bluetooth because it MIGHT help to keep in it a good state
-		Message msg = mHandler.obtainMessage(Constants.BLUETOOTH_RESTART, -1,
-				-1, null);
-		mHandler.sendMessage(msg);
-
-	}
-
-	private void removeConnectionAttemptTimeout() {
-		if (connTimeout != null) { // I need to remove the timeout started at
-									// the beginning
-			handler.removeCallbacks(connTimeout);
-			connTimeout = null;
-		}
-
-	}
-
-	private void removeEstablishedConnectionTimeout() {
-		if (connectionTimeout != null) { // I need to remove the timeout started
-											// at the beginning
-			handler.removeCallbacks(connectionTimeout);
-			connectionTimeout = null;
-		}
-
 	}
 
 	/**
@@ -447,92 +234,6 @@ public class ScanningService extends Service implements
 			switch (msg.what) {
 
 			case Constants.MESSAGE_READ:
-				if (msg.obj.toString().equals("<closing_request>")) {
-					bluetoothHelper.write("<ack_closing_request>");
-
-				} else if (msg.obj.toString().equals("<ack_closing_request>")) {
-					if (TwimightBaseActivity.D)
-						Log.i(TAG,
-								"ack closing request received, connection shutdown");
-					bluetoothHelper.start();
-				} else
-					new ProcessDataReceived().execute(msg.obj.toString()); // not
-																			// String,
-																			// object
-																			// instead
-
-				break;
-
-			case Constants.MESSAGE_CONNECTION_SUCCEEDED:
-				if (TwimightBaseActivity.D)
-					Log.d(TAG, "connection succeeded");
-
-				removeConnectionAttemptTimeout();
-				connectionTimeout = new EstablishedConnectionTimeout();
-				handler.postDelayed(connectionTimeout, CONNECTION_TIMEOUT); // timeout
-																			// for
-																			// the
-																			// conn
-																			// attempt
-
-				// Insert successful connection into DB
-				dbHelper.updateMacSuccessful(msg.obj.toString(), 1);
-
-				// Here starts the protocol for Tweet exchange.
-				Long last = dbHelper.getLastSuccessful(msg.obj.toString());
-				// new SendDisasterData(msg.obj.toString()).execute(last);
-				sendDisasterTweets(last);
-				sendDisasterDM(last);
-				if (bluetoothHelper != null) {
-					bluetoothHelper.write("<closing_request>");
-					dbHelper.setLastSuccessful(msg.obj.toString(), new Date());
-				}
-
-				break;
-			case Constants.MESSAGE_CONNECTION_FAILED:
-				if (TwimightBaseActivity.D)
-					Log.i(TAG, "connection failed");
-
-				// Insert failed connection into DB
-				dbHelper.updateMacAttempts(msg.obj.toString(), 1);
-				removeConnectionAttemptTimeout();
-				// Next scan
-				if (bluetoothHelper != null)
-					nextScanning();
-				break;
-
-			case Constants.MESSAGE_CONNECTION_LOST:
-				if (TwimightBaseActivity.D)
-					Log.i(TAG, "connection lost");
-				// Next scan
-				removeEstablishedConnectionTimeout();
-				if (bluetoothHelper != null)
-					nextScanning();
-				break;
-
-			case Constants.BLUETOOTH_RESTART:
-				if (TwimightBaseActivity.D)
-					Log.i(T, "restarting Bluetooth");
-				unregisterStateReceiver();
-				stateReceiver = new StateChangedReceiver();
-				IntentFilter filter = new IntentFilter(
-						BluetoothAdapter.ACTION_STATE_CHANGED);
-				stateReceiver.setListener(ScanningService.this);
-				registerReceiver(stateReceiver, filter);
-
-				if (mBtAdapter != null) {
-					if (mBtAdapter.isEnabled()) {
-						Log.d(T, "disbling bt");
-						mBtAdapter.disable();
-					} else {
-						Log.d(T, "bt disabled. enabling now...");
-						mBtAdapter.enable();
-					}
-				}
-				BluetoothStatus.getInstance().setStatusDescription(
-						getString(R.string.btstatus_resetting));
-				restartingBlue = true;
-				break;
 
 			}
 		}
@@ -547,10 +248,14 @@ public class ScanningService extends Service implements
 
 		@Override
 		protected Void doInBackground(String... s) {
+//			JSONArray jarray;
 			JSONObject o;
 			try {
 				// if input parameter is String, then cast it to String
+				// jarray = new JSONArray(s[0]);
+				// for (int i = 0; i < jarray.length(); i++) {
 				o = new JSONObject(s[0]);
+				// o = jarray.getJSONObject(i);
 				if (o.getInt(TYPE) == TWEET) {
 					Log.d("disaster", "receive a tweet");
 					processTweet(o);
@@ -564,10 +269,12 @@ public class ScanningService extends Service implements
 					Log.d("disaster", "receive a dm");
 					processDM(o);
 				}
+
 				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI,
 						null);
 				// if input parameter is a photo, then extract the photo and
 				// save it locally
+				// }
 
 			} catch (JSONException e) {
 				Log.e(TAG, "error", e);
@@ -725,7 +432,6 @@ public class ScanningService extends Service implements
 						if (dmToSend != null) {
 							Log.i(TAG, "sending dm");
 
-							bluetoothHelper.write(dmToSend.toString());
 						}
 
 					} catch (JSONException ex) {
@@ -739,82 +445,40 @@ public class ScanningService extends Service implements
 	}
 
 	private void sendDisasterTweets(Long last) {
-		// get disaster tweets
-
+		Log.i(TAG, "inside sendDisasterTweets");
 		Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 				+ Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_TIMELINE + "/"
 				+ Tweets.TWEETS_SOURCE_DISASTER);
-
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);
-		Log.d(TAG, "count:" + String.valueOf(c.getCount()));
-		boolean prefWebShare = PreferenceManager.getDefaultSharedPreferences(
-				this).getBoolean("prefWebShare", false);
-		Log.d(TAG, "web share:" + String.valueOf(prefWebShare));
+		Log.d(TAG, "sendDisasterTweets: " + c.getCount() + " tweets");
 		if (c.getCount() > 0) {
 			c.moveToFirst();
 			while (!c.isAfterLast()) {
 
-				try {
-					if (prefWebShare) {
-						if (c.getInt(c.getColumnIndex(Tweets.COL_HTML_PAGES)) == 1) {
-
-							if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 10 * 60 * 1000L)) {
-								JSONObject toSend;
-
-								toSend = getJSON(c);
-								if (toSend != null) {
-									Log.i(TAG, "sending tweet");
-									Log.d(TAG, toSend.toString(5));
-									bluetoothHelper.write(toSend.toString());
-									// if there is a photo related to this
-									// tweet, send it
-									if (c.getString(c
-											.getColumnIndex(Tweets.COL_MEDIA)) != null)
-										sendDisasterPhoto(c);
-								}
-								sendDisasterHtmls(c);
+				if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 5000)) {
+					JSONObject toSend;
+					try {
+						toSend = getJSON(c);
+						if (toSend != null) {
+							if (scampiAppLib != null) {
+								SCAMPIMessage msg = new SCAMPIMessage();
+								msg.put(MSG_KEY_TWEETS, toSend.toString());
+								scampiAppLib
+										.publish(msg, TWIMIGHT_SERVICE_NAME);
+								Log.d(TAG, "Publish msg");
 							}
 						}
 
-					} else {
-						if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA)) != null) {
-							if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 5 * 60 * 1000L)) {
-								JSONObject toSend;
-
-								toSend = getJSON(c);
-								if (toSend != null) {
-									Log.i(TAG, "sending tweet");
-									Log.d(TAG, toSend.toString(5));
-									bluetoothHelper.write(toSend.toString());
-									// if there is a photo related to this
-									// tweet, send it
-									if (c.getString(c
-											.getColumnIndex(Tweets.COL_MEDIA)) != null)
-										sendDisasterPhoto(c);
-								}
-							}
-						} else if (c.getLong(c
-								.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 1 * 30 * 1000L)) {
-							JSONObject toSend;
-
-							toSend = getJSON(c);
-							if (toSend != null) {
-								Log.i(TAG, "sending tweet");
-								Log.d(TAG, toSend.toString(5));
-								bluetoothHelper.write(toSend.toString());
-							}
-						}
+					} catch (JSONException e) {
+						Log.e(TAG, "exception ", e);
 					}
-
-				} catch (JSONException e) {
-					Log.e(TAG, "exception ", e);
 				}
-
 				c.moveToNext();
 			}
+			// send data here
+
 		}
-		// else
-		// bluetoothHelper.write("####CLOSING_REQUEST####");
+
 		c.close();
 	}
 
@@ -828,12 +492,13 @@ public class ScanningService extends Service implements
 		photoPath = Tweets.PHOTO_PATH + "/" + userID;
 
 		try {
-			String base64Photo = sdCardHelper.getAsBas64Jpeg(photoPath, photoFileName, 500);
+			String base64Photo = sdCardHelper.getAsBas64Jpeg(photoPath,
+					photoFileName, 500);
 			toSendPhoto = new JSONObject("{\"image\":\"" + base64Photo + "\"}");
 			toSendPhoto.put(TYPE, PHOTO);
 			toSendPhoto.put("userID", userID);
 			toSendPhoto.put("photoName", photoFileName);
-			bluetoothHelper.write(toSendPhoto.toString());
+			// bluetoothHelper.write(toSendPhoto.toString());
 			return true;
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "Can't open file. Not sending photo.", e);
@@ -889,7 +554,7 @@ public class ScanningService extends Service implements
 								toSendXml.put(HtmlPage.COL_DISASTERID, tweetId);
 								Log.d(TAG, "sending htmls");
 								Log.d(TAG, toSendXml.toString(5));
-								bluetoothHelper.write(toSendXml.toString());
+								// bluetoothHelper.write(toSendXml.toString());
 
 							}
 
@@ -1226,54 +891,59 @@ public class ScanningService extends Service implements
 	}
 
 	@Override
-	public void onScanningFinished() {
-		Log.i(TAG, "onScanningFinished");
-		unregisterDevReceiver();
-		receiver = null;
-		startScanning();
+	public IBinder asBinder() {
+		return null;
 	}
 
-	private void unregisterDevReceiver() {
-		if (receiver != null) {
-			receiver.setListener(null);
-			try {
-				unregisterReceiver(receiver);
-				receiver = null;
-			} catch (IllegalArgumentException ex) {
-			}
-
-		}
-	}
-
-	private void unregisterStateReceiver() {
-		if (stateReceiver != null) {
-			stateReceiver.setListener(null);
-			try {
-				unregisterReceiver(stateReceiver);
-				stateReceiver = null;
-			} catch (IllegalArgumentException ex) {
-			}
-
+	@Override
+	public void scampiCoreRunning(boolean running) throws RemoteException {
+		Log.d(TAG, "scampiCoreRunning()");
+		if (!running) {
+			Log.e(TAG, "could not start SCAMPI Router");
+			// "BackgroundService notified error in starting the router");
+			Toast.makeText(this, "Could not start SCAMPI Router",
+					Toast.LENGTH_LONG).show();
+			;
 		}
 	}
 
 	@Override
-	public void onSwitchingFinished() {
-		if (bluetoothHelper != null) {
-			unregisterStateReceiver();
-			restartingBlue = false;
-			Log.i(T, "switching finished");
-			// if a scan was postponed due to the adapter being restarted, do it
-			// now, otherwise start listening
-			if (mScanPending) {
-				Log.d(T, "executing pending scan");
-				initiateScanningRound(1);
-			} else {
-				Log.d(T, "no pending scan -> listen");
-				bluetoothHelper.start();
-			}
-		}
-
+	public void connected(AppLib appLib) {
+		Log.d(TAG, "Connected to the applib");
+		scampiAppLib = appLib;
+		scampiAppLib.subscribe(TWIMIGHT_SERVICE_NAME);
+		scampiAppLib.startHostDiscovery(this);
 	}
 
-};
+	@Override
+	public void error(AppLib appLib, Exception e) {
+		Log.d(TAG, "error()");
+		Log.e(TAG, Log.getStackTraceString(e));
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				scampiApp.startAppLib(ScanningService.this);
+				// scampiApp.connectAppLib();
+			}
+		}, APPLIB_RETRY_MS);
+	}
+
+	@Override
+	public void messageReceived(AppLib appLib, String service,
+			SCAMPIMessage message) {
+		Log.d(TAG, "messageReceived(), service=" + service);
+		if (TWIMIGHT_SERVICE_NAME.equals(service)) {
+			String tweets = message.getAsString(MSG_KEY_TWEETS);
+			new ProcessDataReceived().execute(tweets);
+		}
+	}
+
+	@Override
+	public void hostDiscovered(AppLib appLib, String host, int hopCount,
+			long timestamp, double longitude, double latitude,
+			double locationError) {
+		Log.d(TAG, "host discovered: " + host);
+		sendDisasterTweets(0L);
+	}
+
+}
