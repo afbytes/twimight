@@ -26,7 +26,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="@dimen/activity_padding" >
+        android:padding="@dimen/unit_step" >
 
         <TextView
             android:id="@+id/twimightTitle"

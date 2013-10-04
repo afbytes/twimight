@@ -1,227 +1,311 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
+<!--
+     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
 	the accompanying materials are made available under the terms of the GNU 
 	Public License v2.0 which accompanies this distribution, and is available 
 	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
-	- Message specification -->
+	- Message specification
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent" android:layout_height="wrap_content"
-	android:id="@+id/showTweetRoot">
-	<LinearLayout android:id="@+id/showTweetLayout"
-		android:layout_width="match_parent" android:layout_height="wrap_content"
-		android:orientation="vertical" android:paddingTop="10dp">
+    android:id="@+id/showTweetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true" >
 
+    <LinearLayout
+        android:id="@+id/showTweetLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
-		<LinearLayout android:id="@+id/showTweetUserInfo"
-			android:layout_width="match_parent" android:layout_height="wrap_content"
-			android:orientation="horizontal" android:clickable="true"
-			android:focusable="true" android:background="@drawable/content_box"
-			android:paddingLeft="10dp" android:paddingTop="20dp"
-			android:paddingBottom="20dp" android:paddingRight="10dp">
-			<ImageView android:id="@+id/showTweetProfileImage"
-				android:layout_height="45dp" android:layout_width="45dp"
-				android:src="@drawable/profile_image_placeholder" android:background="@drawable/image_border"
-				android:layout_marginRight="10dp" />
-			<LinearLayout android:id="@+id/linearLayout1"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:orientation="vertical" android:paddingLeft="20dp">
-				<TextView android:id="@+id/showTweetRealName"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="TextView" android:textColor="@color/twimightTextDark"
-					android:textSize="18sp" android:textStyle="bold" />
-				<TextView android:id="@+id/showTweetScreenName"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="TextView" android:textColor="@color/twimightTextDark"
-					android:textSize="18sp" />
-			</LinearLayout>
-			<LinearLayout android:layout_width="fill_parent"
-				android:layout_height="match_parent" android:orientation="horizontal"
-				android:gravity="right">
+        <LinearLayout
+            android:id="@+id/showTweetUserInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/double_step"
+            android:paddingLeft="@dimen/unit_step"
+            android:paddingRight="@dimen/unit_step"
+            android:paddingTop="@dimen/double_step" 
+            android:background="@drawable/borderless_button_background">
 
-				<ImageView android:id="@+id/showTweetInfoImage"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:src="@drawable/ic_twimight_info_large" />
-			</LinearLayout>
-		</LinearLayout>
+            <ImageView
+                android:id="@+id/showTweetProfileImage"
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
 
-		<LinearLayout android:id="@+id/tweetLayout"
-			android:paddingTop="10dp" android:paddingLeft="10dp"
-			android:paddingRight="10dp" android:paddingBottom="20dp"
-			android:orientation="vertical" android:layout_width="match_parent"
-			android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/unit_step" >
 
-			<LinearLayout android:id="@+id/tweetMetaData"
-				android:orientation="horizontal" android:layout_height="wrap_content"
-				android:layout_width="wrap_content">
-				<TextView android:id="@+id/showTweetCreatedAt"
-					android:text="Created at.." android:layout_width="wrap_content"
-					android:layout_height="wrap_content" android:textColor="@color/twimightTextLight"
-					android:textSize="16sp" android:singleLine="true" />
-				<TextView android:id="@+id/showTweetCreatedVia"
-					android:text=" via " android:layout_width="wrap_content"
-					android:textColor="@color/twimightTextLight" android:layout_height="wrap_content"
-					android:textSize="16sp" android:singleLine="true" />
+                <TextView
+                    android:id="@+id/showTweetRealName"
+                    style="@style/MediumTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placeholder_short" />
 
-				<TextView android:id="@+id/showTweetCreatedWith"
-					android:text="Created with.." android:layout_width="wrap_content"
-					android:textColor="@color/twimightTextLight" android:layout_height="wrap_content"
-					android:textSize="16sp" android:singleLine="true"
-					android:textColorLink="@color/twimightTextLight" />
-			</LinearLayout>
+                <TextView
+                    android:id="@+id/showTweetScreenName"
+                    style="@style/TinyTitleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placeholder_short" />
+            </LinearLayout>
+        </LinearLayout>
 
-			<TextView android:id="@+id/showTweetText"
-				android:layout_width="match_parent" android:layout_height="wrap_content"
-				android:text="Tweet.." android:textSize="20sp" android:layout_marginTop="10dp"
-				android:layout_marginBottom="10dp" android:textColor="@color/twimightTextDark"
-				android:autoLink="web" android:textColorLink="@color/twimightTextLight" />
+        <!-- "shadow" divider -->
 
-			<TextView android:id="@+id/showTweetRetweeted_by"
-				android:text="Retweeted by " android:layout_width="match_parent"
-				android:textColor="@color/twimightTextLight" android:layout_height="wrap_content"
-				android:textSize="16sp" android:textStyle="italic"
-				android:layout_marginTop="5dp" android:layout_marginBottom="5dp"
-				android:visibility="gone" />
-			
-			<ImageView android:id="@+id/showPhotoAttached"
-			    android:contentDescription="Photo attached with this tweet"
-			    android:layout_width="wrap_content" android:layout_height="wrap_content"
-			    android:layout_marginBottom="2dp" android:layout_gravity="center"
-			    android:background="@drawable/image_border"
-			    />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/double_step"
+            android:background="@drawable/gradient_divider_down" />
 
-		</LinearLayout>
+        <!-- Container for Tweet and additional info -->
 
-		<LinearLayout android:id="@+id/showTweetUnverified"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/content_box"
-			android:visibility="gone">
-			<ImageView android:id="@+id/showTweetInfo0"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
-			<TextView android:id="@+id/showTweetInfoText0"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:text="The digital signature of this Tweet could not be verified!" 
-				style="@style/twimightDefaultTextAppearance" />
-		</LinearLayout>
+        <LinearLayout
+            android:id="@+id/tweetLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/double_step"
+            android:paddingLeft="@dimen/unit_step"
+            android:paddingRight="@dimen/unit_step"
+            android:paddingTop="@dimen/unit_step" >
 
-		<LinearLayout android:id="@+id/showTweetTosend"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="10dp"
-			android:background="@drawable/content_box" android:padding="10dp">
-			<ImageView android:id="@+id/showTweetInfo1"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
+            <TextView
+                android:id="@+id/tvTweetCreationDetails"
+                style="@style/LightText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="@string/placeholder_short" />
 
-			<TextView
-			    android:id="@+id/showTweetInfoText1"
-			    style="@style/twimightDefaultTextAppearance"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:text="This tweet will be posted soon (when Internet connection available)." />
+            <TextView
+                android:id="@+id/showTweetText"
+                style="@style/BigText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step"
+                android:autoLink="web"
+                android:text="@string/placeholder_long"/>
 
-		</LinearLayout>
+            <TextView
+                android:id="@+id/showTweetRetweeted_by"
+                style="@style/LightText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step"
+                android:text="@string/placeholder_short"
+                android:visibility="visible" />
 
-		<LinearLayout android:id="@+id/showTweetTodelete"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/content_box">
-			<ImageView android:id="@+id/showTweetInfo2"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
+            <ImageView
+                android:id="@+id/showPhotoAttached"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/unit_step"
+                android:visibility="gone"
+                android:contentDescription="Photo attached with this tweet" />
 
-			<TextView
-			    android:id="@+id/showTweetInfoText2"
-			    style="@style/twimightDefaultTextAppearance"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:text="This tweet will be deleted soon (when Internet connection available). 
+            <!-- special info -->
+
+            <LinearLayout
+                android:id="@+id/showTweetUnverified"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/showTweetInfo0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_unverified" />
+
+                <TextView
+                    android:id="@+id/showTweetInfoText0"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="The digital signature of this Tweet could not be verified!" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/showTweetTosend"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/showTweetInfo1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
+
+                <TextView
+                    android:id="@+id/showTweetInfoText1"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This tweet will be posted soon (when Internet connection available)." />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/showTweetTodelete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/showTweetInfo2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
+
+                <TextView
+                    android:id="@+id/showTweetInfoText2"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This tweet will be deleted soon (when Internet connection available). 
 				Press to abort operation" />
+            </LinearLayout>
 
-		</LinearLayout>
+            <LinearLayout
+                android:id="@+id/showTweetTofavorite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
 
-		<LinearLayout android:id="@+id/showTweetTofavorite"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/content_box">
-			<ImageView android:id="@+id/showTweetInfo3"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
+                <ImageView
+                    android:id="@+id/showTweetInfo3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
 
-			<TextView
-			    android:id="@+id/showTweetInfoText3"
-			    style="@style/twimightDefaultTextAppearance"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:text="This tweet will be marked as favorite soon (when Internet connection available)." />
+                <TextView
+                    android:id="@+id/showTweetInfoText3"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This tweet will be marked as favorite soon (when Internet connection available)." />
+            </LinearLayout>
 
-		</LinearLayout>
+            <LinearLayout
+                android:id="@+id/showTweetTounfavorite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
 
-		<LinearLayout android:id="@+id/showTweetTounfavorite"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/content_box">
-			<ImageView android:id="@+id/showTweetInfo4"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
+                <ImageView
+                    android:id="@+id/showTweetInfo4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
 
-			<TextView
-			    android:id="@+id/showTweetInfoText4"
-			    style="@style/twimightDefaultTextAppearance"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:text="This tweet will be un-favorited soon (when Internet connection available)." />
+                <TextView
+                    android:id="@+id/showTweetInfoText4"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This tweet will be un-favorited soon (when Internet connection available)." />
+            </LinearLayout>
 
-		</LinearLayout>
+            <LinearLayout
+                android:id="@+id/showTweetToretweet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
 
-		<LinearLayout android:id="@+id/showTweetToretweet"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:padding="10dp"
-			android:layout_marginTop="10dp" android:background="@drawable/content_box">
-			<ImageView android:id="@+id/showTweetInfo5"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@android:drawable/ic_dialog_alert"
-				android:layout_marginRight="10dp" />
+                <ImageView
+                    android:id="@+id/showTweetInfo5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
 
-			<TextView
-			    android:id="@+id/showTweetInfoText5"
-			    style="@style/twimightDefaultTextAppearance"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-			    android:text="This retweet will be posted soon (when Internet connection available)." />
+                <TextView
+                    android:id="@+id/showTweetInfoText5"
+                    style="@style/LightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This retweet will be posted soon (when Internet connection available)." />
+            </LinearLayout>
+        </LinearLayout>
 
-		</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/double_step"
+            android:background="@drawable/gradient_divider_up" />
 
-		<LinearLayout android:id="@+id/showTweetButtons"
-			android:orientation="horizontal" android:layout_width="match_parent"
-			android:layout_height="wrap_content" android:layout_marginTop="20dp"
-			android:background="@drawable/content_box" android:padding="10dp">
-			<ImageButton android:id="@+id/showTweetRetweet"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@drawable/btn_twimight_retweet" android:layout_marginRight="28dp" />
-			<ImageButton android:id="@+id/showTweetFavorite"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:src="@drawable/btn_twimight_favorite" android:background="@color/transparent"
-				android:layout_marginRight="28dp" />
-			<ImageButton android:id="@+id/showTweetReply" android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:src="@drawable/btn_twimight_reply"
-				android:layout_marginRight="28dp" />
-			<ImageButton android:id="@+id/showTweetDelete"
-				android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/btn_twimight_delete"
-				android:background="@color/transparent" android:layout_marginRight="28dp"
-				 android:visibility="visible" />
-			<ImageButton android:id="@+id/showTweetOfflineview"
-				android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/btn_twimight_archive"
-				android:background="@color/transparent" android:layout_marginRight="28dp"
-				 android:visibility="visible" />
-			
-		</LinearLayout>
+        <LinearLayout
+            android:id="@+id/showTweetButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
-	</LinearLayout>
+            <ImageButton
+                android:id="@+id/showTweetRetweet"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/borderless_button_background"
+                android:src="@drawable/ic_retweet" />
+
+            <ImageButton
+                android:id="@+id/showTweetFavorite"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/borderless_button_background"
+                android:src="@drawable/ic_favorite_off" />
+
+            <ImageButton
+                android:id="@+id/showTweetReply"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/borderless_button_background"
+                android:src="@drawable/ic_reply" />
+
+            <ImageButton
+                android:id="@+id/showTweetDelete"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/borderless_button_background"
+                android:src="@drawable/ic_delete" />
+
+            <ImageButton
+                android:id="@+id/showTweetOfflineview"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/borderless_button_background"
+                android:src="@drawable/ic_download" />
+        </LinearLayout>
+    </LinearLayout>
+
 </ScrollView>
