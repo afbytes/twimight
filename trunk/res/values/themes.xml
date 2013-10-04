@@ -43,6 +43,7 @@
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_twimightholo</item>
         <item name="android:actionBarTabBarStyle">@style/ActionBarTabBarStyle.TwimightHolo</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_ab_back_holo_dark</item>
+        <item name="android:windowBackground">@color/white</item>
     </style>
 
     <style name="TwimightHolo.DisasterMode">

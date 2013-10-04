@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/activity_padding" >
+        android:padding="@dimen/unit_step" >
 
         <TextView
             android:id="@+id/twimightTitle"
@@ -40,7 +40,7 @@
 
         <TextView
             android:id="@+id/textCopyright"
-            style="@style/SmallTitleText"
+            style="@style/TinyTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -49,15 +49,16 @@
 
         <TextView
             android:id="@+id/titleAuthors"
-            style="@style/SmallTitleText"
+            style="@style/TinyTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/double_step"
             android:gravity="center"
             android:text="@string/authors_title" />
 
         <TextView
             android:id="@+id/textAuthors"
-            style="@style/BigText"
+            style="@style/HugeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -65,15 +66,16 @@
 
         <TextView
             android:id="@+id/titleVersion"
-            style="@style/SmallTitleText"
+            style="@style/TinyTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/unit_step"
             android:gravity="center"
             android:text="@string/version_title" />
 
         <TextView
             android:id="@+id/textVersion"
-            style="@style/BigText"
+            style="@style/HugeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -81,15 +83,16 @@
 
         <TextView
             android:id="@+id/titleKeys"
-            style="@style/SmallTitleText"
+            style="@style/TinyTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/unit_step"
             android:gravity="center"
             android:text="@string/keys_title" />
 
         <TextView
             android:id="@+id/textKeys"
-            style="@style/BigText"
+            style="@style/HugeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -113,15 +116,16 @@
 
         <TextView
             android:id="@+id/titleTdsUpdate"
-            style="@style/SmallTitleText"
+            style="@style/TinyTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/unit_step"
             android:gravity="center"
             android:text="@string/tds_update_title" />
 
         <TextView
             android:id="@+id/textTdsUpdate"
-            style="@style/BigText"
+            style="@style/HugeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

@@ -46,6 +46,14 @@ public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDe
 			
 	}
 
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		String title = getString(R.string.tweet);
+		getActionBar().setTitle(title);
+	}
+	
 	private ArrayList<Long> getRowIds(int type) {
 		Cursor c ;
 		ArrayList<Long> list=null;

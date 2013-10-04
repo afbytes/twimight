@@ -218,5 +218,8 @@
     <string name="release_to_refresh_label">Release to refresh…</string>
     <string name="pull_to_load_more_label">Pull to load more…</string>
     <string name="release_to_load_more_label">Release to load more…</string>
+    
+    <!-- Tweet -->
+    <string name="via">" via "</string>
 
 </resources>

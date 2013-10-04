@@ -63,7 +63,7 @@
     <!-- Holo redesign -->
 
     <style name="ListView.TwimightHolo" parent="@android:style/Widget.ListView">
-        <item name="android:divider">@color/lightGray</item>
+        <item name="android:divider">@color/light_gray</item>
         <!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
         <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
     </style>
@@ -86,16 +86,25 @@
     <style name="MediumTitleText">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textStyle">italic</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">24sp</item>
         <item name="android:textColor">@color/darkText</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 
     <style name="SmallTitleText">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textStyle">italic</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/darkText</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TinyTitleText">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textStyle">italic</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/mediumGray</item>
-        <item name="android:paddingTop">30dp</item>
+        <item name="android:textColor">@color/medium_gray</item>
+<!--         <item name="android:includeFontPadding">false</item> -->
     </style>
 
     <style name="NormalText">
@@ -104,13 +113,21 @@
         <item name="android:textColor">@color/darkText</item>
     </style>
 
+    <style name="BigText">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/darkText</item>
+        <item name="android:textColorLink">@color/medium_gray</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
     <style name="LightText">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/mediumGray</item>
+        <item name="android:textColor">@color/medium_gray</item>
     </style>
 
-    <style name="BigText">
+    <style name="HugeText">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/darkText</item>
