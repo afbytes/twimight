@@ -74,7 +74,7 @@ public class PullToRefreshListView extends LinearLayout {
 	private static final int ANIMATION_DURATION_MS = 100;
 	private static final float MAX_ABS_PULL_DISTANCE_STAGE_1 = STAGE_1_LENGTH
 			* FRICTION_STAGE_1;
-	
+
 	private final Set<PullToRefreshListener> mListeners = new HashSet<PullToRefreshListener>();
 
 	public PullToRefreshListView(Context context) {
@@ -154,37 +154,41 @@ public class PullToRefreshListView extends LinearLayout {
 				0);
 	}
 
-	public void registerListener(PullToRefreshListener listener){
+	public void registerListener(PullToRefreshListener listener) {
 		mListeners.add(listener);
 	}
-	
-	public void unregisterListener(PullToRefreshListener listener){
+
+	public void unregisterListener(PullToRefreshListener listener) {
 		mListeners.remove(listener);
 	}
-	
-	private void topRefresh(){
-		for(PullToRefreshListener listener : mListeners){
+
+	private void topRefresh() {
+		for (PullToRefreshListener listener : mListeners) {
 			listener.onTopRefresh();
 		}
 	}
-	
-	private void bottomRefresh(){
-		for(PullToRefreshListener listener : mListeners){
+
+	private void bottomRefresh() {
+		for (PullToRefreshListener listener : mListeners) {
 			listener.onBottomRefresh();
 		}
 	}
 
 	/**
 	 * Forwards call to internal ListView.
-	 * @param adapter the adapter
+	 * 
+	 * @param adapter
+	 *            the adapter
 	 */
 	public void setAdapter(ListAdapter adapter) {
 		mListView.setAdapter(adapter);
 	}
-	
+
 	/**
 	 * Forwards call to internal ListView.
-	 * @param listener the listener
+	 * 
+	 * @param listener
+	 *            the listener
 	 */
 	public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
 		mListView.setOnItemClickListener(listener);
@@ -260,9 +264,9 @@ public class PullToRefreshListView extends LinearLayout {
 			}
 			break;
 		case SCROLL_LIST:
-			if(mState == State.PULL_TOP_STAGE_2){
+			if (mState == State.PULL_TOP_STAGE_2) {
 				topRefresh();
-			} else if (mState ==State.PULL_BOTTOM_STAGE_2){
+			} else if (mState == State.PULL_BOTTOM_STAGE_2) {
 				bottomRefresh();
 			}
 			mTopRefreshViewIcon.clearAnimation();
@@ -331,20 +335,24 @@ public class PullToRefreshListView extends LinearLayout {
 
 	/**
 	 * Determines if the list is scrolled to the top.
+	 * 
 	 * @return true if the list is scrolled all the way up
 	 */
 	private boolean isListAtTop() {
 		if (mListView.getFirstVisiblePosition() == 0) {
-			int firstItemTop = mListView.getChildAt(0).getTop();
-			int listTop = mListView.getTop();
-			return firstItemTop >= listTop;
-		} else {
-			return false;
+			View firstItem = mListView.getChildAt(0);
+			if (firstItem != null) {
+				int firstItemTop = firstItem.getTop();
+				int listTop = mListView.getTop();
+				return firstItemTop >= listTop;
+			}
 		}
+		return false;
 	}
 
 	/**
 	 * Determines if the list is scrolled to the bottom.
+	 * 
 	 * @return true if the list is scrolled all the way down
 	 */
 	private boolean isListAtBottom() {
