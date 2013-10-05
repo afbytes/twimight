@@ -39,6 +39,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -58,6 +59,7 @@ import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
+import ch.ethz.twimight.net.OMF.OmfService;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -109,10 +111,32 @@ public class TwitterService extends Service {
 	public static final boolean D = true;
 
 
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return null;
-	}
+	// Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    OmfService service = null;
+    
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        public TwitterService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return TwitterService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+    
+    
+    public void setOmfService(OmfService service) {
+    	synchronized(service) {
+    		this.service = service;
+    	}
+    }
 
 	/**
 	 * Executed when the service is started. We return START_STICKY to not be stopped immediately.
@@ -1740,7 +1764,7 @@ public class TwitterService extends Service {
 	 */
 	private class InsertTimelineTask extends AsyncTask<List<winterwell.jtwitter.Status>, Void, Void> {
 		
-		boolean setTimelineSinceId;
+		boolean setTimelineSinceId;		
 		
 		public InsertTimelineTask(int overscrollType) {
 			if (overscrollType == OVERSCROLL_TOP) 
@@ -1753,10 +1777,14 @@ public class TwitterService extends Service {
 		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 			
 			Thread.currentThread().setName("InsertTimelineTask");			
-			
+		
 			ShowTweetListActivity.setLoading(true);
 			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
+			synchronized(service) {
+				if (service != null)
+					service.updateTweetCounter(tweetList.size());
+			}	
 			
 			if(tweetList!=null && !tweetList.isEmpty()){
 				BigInteger lastId = null; 
@@ -1821,8 +1849,7 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(false);	
 			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 			
-			StartServiceHelper.startService(TwitterService.this);
-
+			StartServiceHelper.startService(TwitterService.this);			
 			Log.i(TAG,"Insert onPost Execute");
 		}
 
