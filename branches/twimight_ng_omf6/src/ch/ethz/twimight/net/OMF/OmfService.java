@@ -83,8 +83,7 @@ public class OmfService extends Service {
 			mBound = true;
 			LocalBinder locBinder = (LocalBinder) binder;
 			service = locBinder.getService();
-			service.setOmfService(OmfService.this);
-			
+			service.setOmfService(OmfService.this);			
 		}
 
         public void onServiceDisconnected(ComponentName className) {              	
@@ -95,10 +94,10 @@ public class OmfService extends Service {
     
     public void updateTweetCounter(int value) {
     	tweetCounter += value;
-    	sendMessageToTarget(MESSAGE_COUNTER_UPDATE, tweetCounter);
-    	
+    	sendMessageToTarget(MESSAGE_COUNTER_UPDATE, tweetCounter);    	
     }
-	
+    
+    	
 	private void bindToTwitterService() {
 		Intent intent = new Intent(getApplicationContext(), TwitterService.class);
     	bindService(intent, mConnection, BIND_AUTO_CREATE);
@@ -161,29 +160,22 @@ public class OmfService extends Service {
         return localMessenger.getBinder();
     }
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO Auto-generated method stub
-		return START_STICKY;
-	}
 	
-	private void unbindService() {
+	public void unbindService() {
 		if (mBound) {
+			if (service != null)
+				service.setOmfService(null);		
 			unbindService(mConnection);
 		}		
 	}
 
 	@Override
 	public void onDestroy() {
+		Log.i(TAG,"Destroying omf service");
 		// TODO Auto-generated method stub
-		super.onDestroy();		
-		if (service != null)
-			service.setOmfService(null);		
+		super.onDestroy();			
 		unbindService();
-	}
-	
-	
-    
+	}   
     
 	
 

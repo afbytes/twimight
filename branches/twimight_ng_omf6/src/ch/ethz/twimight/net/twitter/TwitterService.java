@@ -129,14 +129,24 @@ public class TwitterService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
-    }
-    
+    }    
     
     public void setOmfService(OmfService service) {
-    	synchronized(service) {
+    	synchronized(mBinder) {
     		this.service = service;
     	}
-    }
+    }    
+
+	@Override
+	public void onDestroy() {
+		Log.i(TAG,"destroying twitter service");
+		super.onDestroy();
+		synchronized(mBinder) {
+    		if (service != null) {
+    			service.unbindService();
+    		}
+    	}
+	}
 
 	/**
 	 * Executed when the service is started. We return START_STICKY to not be stopped immediately.
@@ -1781,8 +1791,8 @@ public class TwitterService extends Service {
 			ShowTweetListActivity.setLoading(true);
 			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
-			synchronized(service) {
-				if (service != null)
+			synchronized(mBinder) {
+				if (service != null && tweetList.size() > 0)
 					service.updateTweetCounter(tweetList.size());
 			}	
 			
