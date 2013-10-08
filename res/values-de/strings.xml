@@ -92,7 +92,7 @@
     <string name="will_stop_following">Du wirst dem Benutzer bald nicht mehr folgen (sobald Internetverbindung besteht).</string>
     <string name="will_start_following">Du wirst dem Benutzer bald folgen (sobald Internetverbindung besteht).</string>
     <string name="follow">Folgen</string>
-    <string name="unfollow">Nicht mehr folgen</string>
+    <string name="unfollow">Entfolgen</string>
     <string name="no_users">Keine Benutzer verfügbar.</string>
 
     <!-- Searching -->

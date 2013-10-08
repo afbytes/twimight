@@ -4,5 +4,6 @@
     <dimen name="half_step">6dp</dimen>
     <dimen name="unit_step">12dp</dimen>
     <dimen name="double_step">24dp</dimen>
+    <dimen name="profile_image_size">48dp</dimen>
 
 </resources>

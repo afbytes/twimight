@@ -59,7 +59,7 @@ import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.NewTweetActivity;
-import ch.ethz.twimight.activities.ShowUserActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
@@ -170,7 +170,7 @@ public class ShowTweetFragment extends Fragment {
 		// TODO Auto-generated method stub
 		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for activity fragment
-		view = inflater.inflate(R.layout.showtweet, container, false);
+		view = inflater.inflate(R.layout.show_tweet, container, false);
 		screenNameView = (TextView) view.findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) view.findViewById(R.id.showTweetRealName);
 
@@ -695,7 +695,7 @@ public class ShowTweetFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(activity, ShowUserActivity.class);
+				Intent i = new Intent(activity, UserProfileActivity.class);
 				i.putExtra("rowId", userRowId);
 				i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(i);

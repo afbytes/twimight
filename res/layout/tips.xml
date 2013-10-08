@@ -27,17 +27,21 @@
 
             <TextView
                 android:id="@+id/tipsTitle"
-                style="@style/TitleText.Normal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="32sp"
+                android:textStyle="italic"
+                android:textColor="?attr/accentColor1"
                 android:text="@string/tips_title" />
 
             <TextView
                 android:id="@+id/tipsText"
-                style="@style/NormalText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1.0"
+                android:layout_marginTop="@dimen/double_step"
+                android:textSize="16sp"
+                android:textColor="@color/dark_text"
                 android:text="@string/dis_mode_description" />
 
             <Button

@@ -25,7 +25,7 @@ import android.text.style.ClickableSpan;
 import android.view.View;
 import android.widget.Toast;
 import ch.ethz.twimight.activities.SearchableActivity;
-import ch.ethz.twimight.activities.ShowUserActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 
 public class TweetTagHandler implements TagHandler {
 
@@ -159,7 +159,7 @@ public class TweetTagHandler implements TagHandler {
 			 if(screenname==null)
 				 Toast.makeText(context, "There was an error, please try again.", Toast.LENGTH_SHORT).show();
 			 else{
-				 Intent i = new Intent(context, ShowUserActivity.class);
+				 Intent i = new Intent(context, UserProfileActivity.class);
 				 i.putExtra("screenname", screenname);
 				 context.startActivity(i);
 			 }

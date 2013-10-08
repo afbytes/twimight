@@ -41,7 +41,7 @@
     <color name="accent_disastermode_2">#FF4444</color>
     <color name="accent_disastermode_3">#FFA1A1</color>
     <color name="list_background">#F0F0F0</color>
-    <color name="darkText">#303030</color>
+    <color name="dark_text">#303030</color>
     <color name="light_gray">#eaeaea</color>
     <color name="lighter_gray">#f0f0f0</color>
     <color name="medium_gray">#a0a0a0</color>
