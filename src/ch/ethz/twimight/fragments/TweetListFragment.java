@@ -17,10 +17,10 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowTweetActivity;
-import ch.ethz.twimight.net.twitter.PullToRefreshListView;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.ui.PullToRefreshListView;
 
 @SuppressLint("ValidFragment")
 public class TweetListFragment extends ListFragment {

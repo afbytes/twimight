@@ -1,4 +1,4 @@
-package ch.ethz.twimight.net.twitter;
+package ch.ethz.twimight.ui;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
@@ -75,6 +76,8 @@ public class PullToRefreshListView extends LinearLayout {
 	private static final float MAX_ABS_PULL_DISTANCE_STAGE_1 = STAGE_1_LENGTH
 			* FRICTION_STAGE_1;
 
+	private int mTouchSlop;
+
 	private final Set<PullToRefreshListener> mListeners = new HashSet<PullToRefreshListener>();
 
 	public PullToRefreshListView(Context context) {
@@ -96,6 +99,7 @@ public class PullToRefreshListView extends LinearLayout {
 	private void initialize() {
 		setOrientation(VERTICAL);
 		setBackgroundColor(getResources().getColor(R.color.list_background));
+		mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 		// animations
 		mHalfRotationCcw = new RotateAnimation(0, -180,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
@@ -123,7 +127,7 @@ public class PullToRefreshListView extends LinearLayout {
 		mHalfRotationCwReverse.setFillAfter(true);
 		// list view
 		mListView = new ListView(getContext());
-		mListView.setBackground(null);
+		mListView.setBackgroundDrawable(null);
 
 		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
@@ -204,15 +208,19 @@ public class PullToRefreshListView extends LinearLayout {
 		float y = event.getY();
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_MOVE:
-			if (isListAtTop() && y > mLastTouchY) {
-				updateState(State.PULL_TOP_STAGE_1);
-			} else if (isListAtBottom() && y < mLastTouchY) {
-				updateState(State.PULL_BOTTOM_STAGE_1);
-			} else {
-				updateState(State.SCROLL_LIST);
+			float pullDistance = Math.abs(y - mLastTouchY);
+			if (pullDistance > mTouchSlop) {
+				if (isListAtTop() && y > mLastTouchY) {
+					updateState(State.PULL_TOP_STAGE_1);
+				} else if (isListAtBottom() && y < mLastTouchY) {
+					updateState(State.PULL_BOTTOM_STAGE_1);
+				} else {
+					updateState(State.SCROLL_LIST);
+				}
+
+				mPullStartY = y;
+				break;
 			}
-			mPullStartY = y;
-			break;
 		case MotionEvent.ACTION_DOWN:
 			mLastTouchY = y;
 			updateState(State.SCROLL_LIST);

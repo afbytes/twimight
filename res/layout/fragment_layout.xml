@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-       <ch.ethz.twimight.net.twitter.PullToRefreshListView  xmlns:android="http://schemas.android.com/apk/res/android"
+       <ch.ethz.twimight.ui.PullToRefreshListView  xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_height="match_parent"
             android:layout_width="match_parent" 
             android:id="@+id/tweetListView"
