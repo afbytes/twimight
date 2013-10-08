@@ -11,9 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.PullToRefreshListView;
 import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.net.twitter.PullToRefreshListView.PullToRefreshListener;
+import ch.ethz.twimight.ui.PullToRefreshListView;
+import ch.ethz.twimight.ui.PullToRefreshListView.PullToRefreshListener;
 import ch.ethz.twimight.util.Constants;
 
 public abstract class ListFragment extends Fragment implements
