@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
+	the accompanying materials are made available under the terms of the GNU 
+	Public License v2.0 which accompanies this distribution, and is available 
+	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
+	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
+	- Message specification
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showUserRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/showUserLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/double_step"
+            android:paddingLeft="@dimen/unit_step"
+            android:paddingRight="@dimen/unit_step"
+            android:paddingTop="@dimen/double_step" >
+
+            <ImageView
+                android:id="@+id/showUserProfileImage"
+                android:layout_width="@dimen/profile_image_size"
+                android:layout_height="@dimen/profile_image_size"
+                android:src="@drawable/profile_image_placeholder" />
+
+            <TextView
+                android:id="@+id/showUserRealName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step"
+                android:gravity="center_horizontal"
+                android:text="@string/placeholder_short"
+                android:textColor="@color/dark_text"
+                android:textSize="30sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/showUserScreenName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/placeholder_short"
+                android:textColor="@color/medium_gray"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/showUserLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/placeholder_short"
+                android:textColor="@color/medium_gray"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/showUserDescription"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/double_step"
+                android:layout_weight="1"
+                android:autoLink="web"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="@string/placeholder_long"
+                android:textColor="@color/dark_text"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:id="@+id/statsTweetsContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/statsTweetsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/half_step"
+                        android:text="@string/tweets"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/statsTweets"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/dark_text"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/statsFavoritesContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/statsFavoritsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/half_step"
+                        android:text="@string/favorites"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/statsFavorits"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/dark_text"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/statsFollowersContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/statsFollowersText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/half_step"
+                        android:text="@string/followers"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/statsFollowers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/dark_text"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/statsFriendsContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/statsFriendsText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/half_step"
+                        android:text="@string/friends"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/statsFriends"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/dark_text"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/showUserToUnfollow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
+
+                <TextView
+                    android:id="@+id/showUserInfoText2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/will_stop_following"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/showUserToFollow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/double_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/unit_step"
+                    android:src="@drawable/ic_small_pending" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/will_start_following"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- Divider and bottom button bar -->
+
+
+        <!--
+            <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/unit_step"
+            android:background="@drawable/gradient_divider_up" />
+        -->
+
+        <View style="@style/VerticalDivider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/showUserTweetsButton"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/tweets" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <!-- buttons specific to local user -->
+
+            <Button
+                android:id="@+id/showUserFollowers"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/followers" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <Button
+                android:id="@+id/showUserFriends"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/friends" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <Button
+                android:id="@+id/showUserDisasterPeers"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/peers" />
+
+            <!-- buttons specific to other users -->
+
+            <Button
+                android:id="@+id/showUserFollow"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/follow" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <Button
+                android:id="@+id/showUserMention"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/action_mention" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <Button
+                android:id="@+id/showUserMessage"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/message" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

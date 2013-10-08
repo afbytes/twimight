@@ -11,55 +11,59 @@
     android:id="@+id/showConditionsRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    >
+    android:fillViewport="true" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" 
-        android:padding="@dimen/unit_step">
+        android:orientation="vertical"
+        android:padding="@dimen/unit_step" >
 
         <TextView
             android:id="@+id/textConditionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/TitleText.Normal"
-            android:text="@string/terms_and_conditions"/>
+            android:text="@string/terms_and_conditions"
+            android:textColor="?attr/accentColor1"
+            android:textSize="32sp"
+            android:textStyle="italic" />
 
+        <!-- 0dp height trick to push the buttons to the bottom of the view -->
         <TextView
             android:id="@+id/textConditions"
+            style="@style/NormalText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.0"
-            android:text="@string/conditions"
-            style="@style/NormalText"
-            />
+            android:layout_marginTop="@dimen/double_step"
+            android:textSize="16sp"
+            android:textColor="@color/dark_text"
+            android:text="@string/conditions" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/buttonAgree"
+                style="@style/Button.Solid.Normal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="6dp"
-                style="@style/Button.Solid.Normal"
-                android:text="@string/agree" 
                 android:layout_weight="1.0"
-                android:onClick="agreeToTerms"/>
+                android:onClick="agreeToTerms"
+                android:text="@string/agree" />
 
             <Button
                 android:id="@+id/buttonDecline"
+                style="@style/Button.Outline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                style="@style/Button.Outline"
-                android:text="@string/decline" 
-                android:layout_weight="1.0"/>
+                android:layout_weight="1.0"
+                android:text="@string/decline" />
         </LinearLayout>
     </LinearLayout>
 

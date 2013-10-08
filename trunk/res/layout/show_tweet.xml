@@ -23,19 +23,19 @@
             android:id="@+id/showTweetUserInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/borderless_button_background"
             android:clickable="true"
             android:focusable="true"
             android:orientation="horizontal"
             android:paddingBottom="@dimen/double_step"
             android:paddingLeft="@dimen/unit_step"
             android:paddingRight="@dimen/unit_step"
-            android:paddingTop="@dimen/double_step" 
-            android:background="@drawable/borderless_button_background">
+            android:paddingTop="@dimen/double_step" >
 
             <ImageView
                 android:id="@+id/showTweetProfileImage"
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
+                android:layout_width="@dimen/profile_image_size"
+                android:layout_height="@dimen/profile_image_size" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -45,26 +45,27 @@
 
                 <TextView
                     android:id="@+id/showTweetRealName"
-                    style="@style/MediumTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder_short" />
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/dark_text"
+                    android:textSize="24sp"
+                    android:textStyle="italic" />
 
                 <TextView
                     android:id="@+id/showTweetScreenName"
-                    style="@style/TinyTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder_short" />
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="16sp"
+                    android:textStyle="italic" />
             </LinearLayout>
         </LinearLayout>
 
         <!-- "shadow" divider -->
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/double_step"
-            android:background="@drawable/gradient_divider_down" />
+        <View style="@style/VerticalDivider" />
 
         <!-- Container for Tweet and additional info -->
 
@@ -77,32 +78,37 @@
             android:paddingBottom="@dimen/double_step"
             android:paddingLeft="@dimen/unit_step"
             android:paddingRight="@dimen/unit_step"
-            android:paddingTop="@dimen/unit_step" >
+            android:paddingTop="@dimen/double_step" >
 
             <TextView
                 android:id="@+id/tvTweetCreationDetails"
-                style="@style/LightText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="@string/placeholder_short" />
+                android:text="@string/placeholder_short"
+                android:textColor="@color/medium_gray"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/showTweetText"
-                style="@style/BigText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step"
                 android:autoLink="web"
-                android:text="@string/placeholder_long"/>
+                android:lineSpacingMultiplier="1.2"
+                android:text="@string/placeholder_long"
+                android:textColor="@color/dark_text"
+                android:textColorLink="@color/medium_gray"
+                android:textSize="22sp" />
 
             <TextView
                 android:id="@+id/showTweetRetweeted_by"
-                style="@style/LightText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step"
                 android:text="@string/placeholder_short"
+                android:textColor="@color/medium_gray"
+                android:textSize="14sp"
                 android:visibility="visible" />
 
             <ImageView
@@ -111,8 +117,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/unit_step"
-                android:visibility="gone"
-                android:contentDescription="Photo attached with this tweet" />
+                android:contentDescription="Photo attached with this tweet"
+                android:visibility="gone" />
 
             <!-- special info -->
 
@@ -132,10 +138,11 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText0"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="The digital signature of this Tweet could not be verified!" />
+                    android:text="The digital signature of this Tweet could not be verified!"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -154,10 +161,11 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText1"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be posted soon (when Internet connection available)." />
+                    android:text="This tweet will be posted soon (when Internet connection available)."
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -176,11 +184,12 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText2"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="This tweet will be deleted soon (when Internet connection available). 
-				Press to abort operation" />
+				Press to abort operation"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -199,10 +208,11 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText3"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be marked as favorite soon (when Internet connection available)." />
+                    android:text="This tweet will be marked as favorite soon (when Internet connection available)."
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -221,10 +231,11 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText4"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be un-favorited soon (when Internet connection available)." />
+                    android:text="This tweet will be un-favorited soon (when Internet connection available)."
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -243,17 +254,17 @@
 
                 <TextView
                     android:id="@+id/showTweetInfoText5"
-                    style="@style/LightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This retweet will be posted soon (when Internet connection available)." />
+                    android:text="This retweet will be posted soon (when Internet connection available)."
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/double_step"
-            android:background="@drawable/gradient_divider_up" />
+        <!-- Divider and bottom button bar -->
+
+        <View style="@style/VerticalDivider" />
 
         <LinearLayout
             android:id="@+id/showTweetButtons"
@@ -263,47 +274,50 @@
 
             <ImageButton
                 android:id="@+id/showTweetRetweet"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/borderless_button_background"
                 android:src="@drawable/ic_retweet" />
+
+            <View style="@style/ButtonBarDivider" />
 
             <ImageButton
                 android:id="@+id/showTweetFavorite"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/borderless_button_background"
                 android:src="@drawable/ic_favorite_off" />
+
+            <View style="@style/ButtonBarDivider" />
 
             <ImageButton
                 android:id="@+id/showTweetReply"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/borderless_button_background"
                 android:src="@drawable/ic_reply" />
+
+            <View style="@style/ButtonBarDivider" />
 
             <ImageButton
                 android:id="@+id/showTweetDelete"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/borderless_button_background"
                 android:src="@drawable/ic_delete" />
+
+            <View style="@style/ButtonBarDivider" />
 
             <ImageButton
                 android:id="@+id/showTweetOfflineview"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/borderless_button_background"
                 android:src="@drawable/ic_download" />
         </LinearLayout>
     </LinearLayout>

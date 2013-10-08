@@ -30,21 +30,24 @@
 
         <TextView
             android:id="@+id/twimightTitle"
-            style="@style/TitleText.Normal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginBottom="0dp"
             android:gravity="center"
+            android:textSize="32sp"
+            android:textStyle="italic"
+            android:textColor="?attr/accentColor1"
             android:text="@string/welcome" />
 
         <TextView
             android:id="@+id/twimightSlogan"
-            style="@style/NormalText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/twimightTitle"
             android:gravity="center"
+            android:textSize="16sp"
+            android:textColor="@color/dark_text"
             android:text="@string/mighty" />
 
         <Button

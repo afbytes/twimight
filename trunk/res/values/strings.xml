@@ -23,6 +23,7 @@
     <string name="users">Users</string>
     <string name="user">User</string>
     <string name="message">Message</string>
+    <string name="action_mention">Mention</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="yes">Yes</string>

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rootView"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" 
+    android:background="@drawable/borderless_button_background">
 
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="horizontal"
-        android:padding="@dimen/unit_step">
+        android:padding="@dimen/unit_step" >
 
         <ImageView
             android:id="@+id/ivProfileImage"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/profile_image_size"
+            android:layout_height="@dimen/profile_image_size"
             android:background="@color/white" />
 
         <!-- container for the all the text and icons of the tweet -->
@@ -36,43 +37,48 @@
 
                 <TextView
                     android:id="@+id/tvUsername"
-                    style="@style/SmallTitleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minLines="1"
                     android:singleLine="true"
-                    android:text="@string/placeholder_short" />
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/dark_text"
+                    android:textSize="20sp"
+                    android:textStyle="italic" />
 
                 <TextView
                     android:id="@+id/tvCreatedAt"
-                    style="@style/LightText"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:gravity="right"
                     android:singleLine="true"
-                    android:text="@string/placeholder_short" />
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <!-- tweet text -->
 
             <TextView
                 android:id="@+id/tvTweetText"
-                style="@style/NormalText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="@string/placeholder_long" />
+                android:text="@string/placeholder_long"
+                android:textColor="@color/dark_text"
+                android:textSize="16sp" />
 
             <!-- "retweeted by" text -->
 
             <TextView
                 android:id="@+id/tvRetweetedBy"
-                style="@style/LightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="@string/placeholder_short" />
+                android:text="@string/placeholder_short"
+                android:textColor="@color/medium_gray"
+                android:textSize="14sp" />
             <!-- row status icons -->
 
             <LinearLayout
@@ -117,6 +123,6 @@
     <View
         android:id="@+id/modeStripe"
         android:layout_width="6dp"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

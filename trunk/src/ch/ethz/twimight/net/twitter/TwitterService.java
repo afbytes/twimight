@@ -53,7 +53,7 @@ import ch.ethz.twimight.activities.NewDMActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
-import ch.ethz.twimight.activities.ShowUserActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.ShowUserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
@@ -3278,7 +3278,7 @@ public class TwitterService extends Service {
 		protected User doInBackground(Long... rowId) {
 			if (D) Log.d(TAG, "AsynchTask: FollowUserTask");
 
-			ShowUserActivity.setLoading(true);
+			UserProfileActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
 
@@ -3314,7 +3314,7 @@ public class TwitterService extends Service {
 		 */
 		@Override
 		protected void onPostExecute(User result) {
-			ShowUserActivity.setLoading(false);
+			UserProfileActivity.setLoading(false);
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.E401){
@@ -3505,7 +3505,7 @@ public class TwitterService extends Service {
 		@Override
 		protected User doInBackground(Long... rowId) {
 			Log.i(TAG, "AsynchTask: UpdateUserTask");
-			ShowUserActivity.setLoading(true);
+			UserProfileActivity.setLoading(true);
 			
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
@@ -3550,7 +3550,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(User result) {
 			
-			ShowUserActivity.setLoading(false);
+			UserProfileActivity.setLoading(false);
 			if (ex!= null) {
 				
 				if(ex instanceof TwitterException.E401){
@@ -3603,7 +3603,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected Void doInBackground(ContentValues... params) {
-			ShowUserActivity.setLoading(true);
+			UserProfileActivity.setLoading(true);
 
 			ContentValues cv = params[0];
 			Log.i(TAG, "AsynchTask: InsertUserTask");
@@ -3624,7 +3624,7 @@ public class TwitterService extends Service {
 			getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 			getContentResolver().notifyChange(DirectMessages.CONTENT_URI, null);
 			
-			ShowUserActivity.setLoading(false);
+			UserProfileActivity.setLoading(false);
 
 		}
 
@@ -3916,7 +3916,7 @@ public class TwitterService extends Service {
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}  else if (ex instanceof TwitterException.E403) {
-					if (ShowUserActivity.running || ShowDMUsersListActivity.running && notify==1)
+					if (UserProfileActivity.running || ShowDMUsersListActivity.running && notify==1)
 						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you ?", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while sending DM: " + ex);
 					Intent i = new Intent(getBaseContext(), NewDMActivity.class);

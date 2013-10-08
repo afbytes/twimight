@@ -199,7 +199,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 
 			if (rowId > 0) {
 				// show the local user
-				i = new Intent(this, ShowUserActivity.class);
+				i = new Intent(this, UserProfileActivity.class);
 				i.putExtra("rowId", rowId);
 				startActivity(i);
 			}

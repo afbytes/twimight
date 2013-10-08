@@ -7,5 +7,10 @@
         <!-- Completely hidden, as if the view had not been added. -->
         <enum name="gone" value="2" />
     </attr>
+    
+    <attr name="accentColor1" format="color"/>
+    <attr name="accentColor2" format="color"/>
+    <attr name="accentColor3" format="color"/>
+        
 
 </resources>
