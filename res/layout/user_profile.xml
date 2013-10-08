@@ -233,15 +233,8 @@
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
+
         <!-- Divider and bottom button bar -->
-
-
-        <!--
-            <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/unit_step"
-            android:background="@drawable/gradient_divider_up" />
-        -->
 
         <View style="@style/VerticalDivider" />
 
@@ -255,6 +248,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/tweets" />
 
@@ -267,6 +261,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/followers" />
 
@@ -277,6 +272,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/friends" />
 
@@ -287,6 +283,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/peers" />
 
@@ -297,6 +294,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/follow" />
 
@@ -307,6 +305,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/action_mention" />
 
@@ -317,6 +316,7 @@
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/message" />
         </LinearLayout>
