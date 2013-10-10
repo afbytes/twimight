@@ -24,6 +24,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
@@ -33,161 +34,156 @@ import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.util.Constants;
 
-
-
 /**
  * The main Twimight view showing the Timeline, favorites and mentions
+ * 
  * @author thossmann
  * 
  */
-public class TweetListActivity extends TwimightBaseActivity implements OnPageChangeListener {
+public class TweetListActivity extends TwimightBaseActivity implements
+		OnPageChangeListener {
 
-	private static final String TAG = "ShowTweetListActivity";	
-	
-	public static boolean running= false;
+	private static final String TAG = "ShowTweetListActivity";
+
+	public static boolean running = false;
 	// handler
 	static Handler handler;
 
-
-	//LOGS
-	LocationHelper locHelper ;
-	long timestamp;	
+	// LOGS
+	LocationHelper locHelper;
+	long timestamp;
 	ConnectivityManager cm;
-	StatisticsDBHelper locDBHelper;	
+	StatisticsDBHelper locDBHelper;
 	CheckLocation checkLocation;
-	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";	
-	
+	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
+
 	ActionBar actionBar;
 	public static final String FILTER_REQUEST = "filter_request";
 
 	ViewPager viewPager;
 	ListViewPageAdapter pagAdapter;
-	
-	/** 
-	 * Called when the activity is first created. 
+
+	/**
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(null);				
+		Log.d("asdf", "TweetListActivity onCreate");
+		super.onCreate(null);
 		setContentView(R.layout.main);
-					
-		//statistics
+		Log.d("asdf", "TweetListActivity after setContentView");
+		// statistics
 		locDBHelper = new StatisticsDBHelper(getApplicationContext());
 		locDBHelper.open();
-		
-		cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
-		
+
 		locHelper = LocationHelper.getInstance(this);
 		locHelper.registerLocationListener();
-		
+
 		handler = new Handler();
 		checkLocation = new CheckLocation();
-		handler.postDelayed(checkLocation, 1*60*1000L);	
-		
+		handler.postDelayed(checkLocation, 1 * 60 * 1000L);
+
 		Bundle bundle = new Bundle();
-		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
-		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);		
-        
-		viewPager = (ViewPager) findViewById(R.id.viewpager);	
-		
+		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE,
+				ListViewPageAdapter.BUNDLE_TYPE_TWEETS);
+		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
+
+		viewPager = (ViewPager) findViewById(R.id.viewpager);
+
 		viewPager.setAdapter(pagAdapter);
 		viewPager.setOffscreenPageLimit(2);
-		viewPager.setOnPageChangeListener(
-	            new ViewPager.SimpleOnPageChangeListener() {
-	                @Override
-	                public void onPageSelected(int position) {
-	                    // When swiping between pages, select the
-	                    // corresponding tab.	                	
-	                    getActionBar().setSelectedNavigationItem(position);
-	                }
-	            });
+		viewPager
+				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+					@Override
+					public void onPageSelected(int position) {
+						// When swiping between pages, select the
+						// corresponding tab.
+						getActionBar().setSelectedNavigationItem(position);
+					}
+				});
 
-		//action bar
-		actionBar = getActionBar();	
+		// action bar
+		actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		Tab tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_timeline)
+		Tab tab = actionBar.newTab().setIcon(R.drawable.ic_timeline)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_favorites)
+		tab = actionBar.newTab().setIcon(R.drawable.ic_favorites)
 				.setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab()
-				.setIcon(R.drawable.ic_mentions)
-				.setTabListener(new TabListener(viewPager ));
-		actionBar.addTab(tab);		
+		tab = actionBar.newTab().setIcon(R.drawable.ic_mentions)
+				.setTabListener(new TabListener(viewPager));
+		actionBar.addTab(tab);
 
 	}
-		
-
 
 	private class CheckLocation implements Runnable {
 
 		@Override
 		public void run() {
 
-			if (locHelper != null && locHelper.getCount() > 0 && locDBHelper != null && cm.getActiveNetworkInfo() != null) {	
-				Log.i(TAG,"writing log");
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_STARTED, null, timestamp);
+			if (locHelper != null && locHelper.getCount() > 0
+					&& locDBHelper != null && cm.getActiveNetworkInfo() != null) {
+				Log.i(TAG, "writing log");
+				locDBHelper.insertRow(locHelper.getLocation(), cm
+						.getActiveNetworkInfo().getTypeName(),
+						StatisticsDBHelper.APP_STARTED, null, timestamp);
 				locHelper.unRegisterLocationListener();
 
-			} else {}
-			
+			} else {
+			}
+
 		}
-		
+
 	}
-	
 
 	@Override
-	protected void onNewIntent(Intent intent) {		
-		setIntent(intent);	
+	protected void onNewIntent(Intent intent) {
+		setIntent(intent);
 	}
-
-
 
 	/**
 	 * On resume
 	 */
 	@Override
-	public void onResume(){
-
+	public void onResume() {
+		Log.d("asdf", "TweetListActivity onResume");
 		super.onResume();
 		running = true;
 
 		Intent intent = getIntent();
 
-		if(intent.hasExtra(FILTER_REQUEST)) {
-			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST, TweetListFragment.TIMELINE_KEY));
+		if (intent.hasExtra(FILTER_REQUEST)) {
+			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST,
+					TweetListFragment.TIMELINE_KEY));
 			intent.removeExtra(FILTER_REQUEST);
 
 		}
 
-		Long pauseTimestamp =  getOnPauseTimestamp(this);
-		if (pauseTimestamp != 0 &&  (System.currentTimeMillis()-pauseTimestamp) > 10 * 60 * 1000L ) {
-			handler = new Handler();			
+		Long pauseTimestamp = getOnPauseTimestamp(this);
+		if (pauseTimestamp != 0
+				&& (System.currentTimeMillis() - pauseTimestamp) > 10 * 60 * 1000L) {
+			handler = new Handler();
 			handler.post(new CheckLocation());
 
-		}		
-
+		}
 
 	}
-    
-
 
 	@Override
 	protected void onPause() {
-		
+
 		super.onPause();
 		setOnPauseTimestamp(System.currentTimeMillis(), this);
 	}
-
 
 	/**
 	 * 
@@ -195,131 +191,121 @@ public class TweetListActivity extends TwimightBaseActivity implements OnPageCha
 	 * @param context
 	 */
 	private static void setOnPauseTimestamp(long timestamp, Context context) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putLong(ON_PAUSE_TIMESTAMP, timestamp);
 		prefEditor.commit();
 	}
-	
+
 	/**
 	 * Gets the Twitter ID from shared preferences
+	 * 
 	 * @param context
 	 * @return
 	 */
 	public static Long getOnPauseTimestamp(Context context) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
 		return prefs.getLong(ON_PAUSE_TIMESTAMP, 0);
 	}
 
-
 	@Override
 	protected void onStop() {
-		running=false;
+		running = false;
 		locHelper.unRegisterLocationListener();
 		super.onStop();
-	
-		
+
 	}
-	
 
 	/**
 	 * Called at the end of the Activity lifecycle
 	 */
 	@Override
-	public void onDestroy(){
+	public void onDestroy() {
 		super.onDestroy();
 		running = false;
-		
+
 		pagAdapter = null;
 		viewPager = null;
-		
+
 		actionBar = null;
-		
-		Log.i(TAG,"destroying main activity");
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)&& locHelper!=null && locDBHelper != null && 
-				cm.getActiveNetworkInfo() != null) {
-			
-			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null ) {				
-				handler.removeCallbacks(checkLocation);				
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_STARTED , null, timestamp);
-			} else {}
+
+		Log.i(TAG, "destroying main activity");
+		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L)
+				&& locHelper != null && locDBHelper != null
+				&& cm.getActiveNetworkInfo() != null) {
+
+			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null) {
+				handler.removeCallbacks(checkLocation);
+				locDBHelper.insertRow(locHelper.getLocation(), cm
+						.getActiveNetworkInfo().getTypeName(),
+						StatisticsDBHelper.APP_STARTED, null, timestamp);
+			} else {
+			}
 		}
-		
-		if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {				
-			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(), StatisticsDBHelper.APP_CLOSED , null, System.currentTimeMillis());
-		} else {}
 
-		TwimightBaseActivity.unbindDrawables(findViewById(R.id.rootRelativeLayout));	
-		
-		if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
-			Toast.makeText(this, getString(R.string.disastermode_running), Toast.LENGTH_LONG).show();
+		if ((locHelper != null && locHelper.getCount() > 0)
+				&& locDBHelper != null && cm.getActiveNetworkInfo() != null) {
+			locDBHelper.insertRow(locHelper.getLocation(), cm
+					.getActiveNetworkInfo().getTypeName(),
+					StatisticsDBHelper.APP_CLOSED, null, System
+							.currentTimeMillis());
+		} else {
+		}
 
+		TwimightBaseActivity
+				.unbindDrawables(findViewById(R.id.rootRelativeLayout));
+
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				"prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true)
+			Toast.makeText(this, getString(R.string.disastermode_running),
+					Toast.LENGTH_LONG).show();
 
 	}
-
-
 
 	@Override
 	public void onPageScrollStateChanged(int arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	@Override
 	public void onPageScrolled(int arg0, float arg1, int arg2) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	@Override
 	public void onPageSelected(int position) {
 		Log.d(TAG, "position: " + position);
 	}
 
-	
-	
 	/**
 	 * Saves the current selection
-	 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
+	 * 
+	 * @Override public void onSaveInstanceState(Bundle savedInstanceState) {
+	 * 
+	 *           savedInstanceState.putInt("currentFilter", currentFilter);
+	 *           positionIndex = timelineListView.getFirstVisiblePosition();
+	 *           View v = timelineListView.getChildAt(0); positionTop = (v ==
+	 *           null) ? 0 : v.getTop();
+	 *           savedInstanceState.putInt("positionIndex", positionIndex);
+	 *           savedInstanceState.putInt("positionTop", positionTop);
+	 * 
+	 *           Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+	 * 
+	 *           super.onSaveInstanceState(savedInstanceState); }
+	 * 
+	 *           /** Loads the current user selection
+	 * @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+	 *           super.onRestoreInstanceState(savedInstanceState);
+	 * 
+	 * 
+	 *           positionIndex = savedInstanceState.getInt("positionIndex");
+	 *           positionTop = savedInstanceState.getInt("positionTop");
+	 * 
+	 *           Log.i(TAG, "restoring " + positionIndex + " " + positionTop); }
+	 */
 
-	  savedInstanceState.putInt("currentFilter", currentFilter);
-	  positionIndex = timelineListView.getFirstVisiblePosition();
-	  View v = timelineListView.getChildAt(0);
-	  positionTop = (v == null) ? 0 : v.getTop();
-	  savedInstanceState.putInt("positionIndex", positionIndex);
-	  savedInstanceState.putInt("positionTop", positionTop);
-	  
-	  Log.i(TAG, "saving" + positionIndex + " " + positionTop);
-	  
-	  super.onSaveInstanceState(savedInstanceState);
-	}
-	
-	/**
-	 * Loads the current user selection
-	
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-	  super.onRestoreInstanceState(savedInstanceState);
-	  
-	
-	  positionIndex = savedInstanceState.getInt("positionIndex");
-	  positionTop = savedInstanceState.getInt("positionTop");
-	  
-	  Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
-	}
-	
-	*/
-	
-	
-	
-	
-	
-	
-	
 }

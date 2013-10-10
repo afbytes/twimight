@@ -19,84 +19,112 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/unit_step" >
+        android:paddingBottom="@dimen/double_step"
+        android:paddingLeft="@dimen/unit_step"
+        android:paddingRight="@dimen/unit_step"
+        android:paddingTop="@dimen/double_step" >
 
         <TextView
             android:id="@+id/twimightTitle"
-            style="@style/TitleText.Normal"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
             android:gravity="center"
-            android:text="@string/app_name" />
+            android:text="@string/app_name"
+            android:textColor="@color/accent_normalmode_1"
+            android:textSize="36sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/twimightSlogan"
-            style="@style/NormalText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:text="@string/mighty" />
+            android:text="@string/mighty"
+            android:textColor="@color/dark_text"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/textCopyright"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:paddingTop="4dp"
-            android:text="@string/copyright" />
+            android:text="@string/copyright"
+            android:textColor="@color/medium_gray"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/titleAuthors"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/double_step"
             android:gravity="center"
-            android:text="@string/authors_title" />
+            android:text="@string/authors_title"
+            android:textColor="@color/medium_gray"
+            android:textSize="16sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/textAuthors"
-            style="@style/HugeText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:text="@string/authors" />
+            android:text="@string/authors"
+            android:textColor="@color/dark_text"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/titleVersion"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/unit_step"
+            android:layout_marginTop="@dimen/double_step"
             android:gravity="center"
-            android:text="@string/version_title" />
+            android:text="@string/version_title"
+            android:textColor="@color/medium_gray"
+            android:textSize="16sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/textVersion"
-            style="@style/HugeText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:text="@string/placeholder_short" />
+            android:text="@string/placeholder_short"
+            android:textColor="@color/dark_text"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/titleKeys"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/unit_step"
+            android:layout_marginTop="@dimen/double_step"
             android:gravity="center"
-            android:text="@string/keys_title" />
+            android:text="@string/keys_title"
+            android:textColor="@color/medium_gray"
+            android:textSize="16sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/textKeys"
-            style="@style/HugeText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:text="@string/placeholder_short" />
+            android:text="@string/placeholder_short"
+            android:textColor="@color/dark_text"
+            android:textSize="20sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -107,29 +135,36 @@
 
             <Button
                 android:id="@+id/showAboutRevoke"
-                style="@style/Button.Solid.Normal"
+                style="@style/Button.Solid.NormalMode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/half_step"
                 android:layout_weight="0.5"
                 android:text="@string/revoke" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/titleTdsUpdate"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/unit_step"
+            android:layout_marginTop="@dimen/double_step"
             android:gravity="center"
-            android:text="@string/tds_update_title" />
+            android:text="@string/tds_update_title"
+            android:textColor="@color/medium_gray"
+            android:textSize="16sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/textTdsUpdate"
-            style="@style/HugeText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
             android:gravity="center"
-            android:text="@string/placeholder_short" />
+            android:text="@string/placeholder_short"
+            android:textColor="@color/dark_text"
+            android:textSize="20sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -140,9 +175,10 @@
 
             <Button
                 android:id="@+id/showAboutUpdate"
-                style="@style/Button.Solid.Normal"
+                style="@style/Button.Solid.NormalMode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/half_step"
                 android:layout_weight="0.5"
                 android:text="@string/update_button" />
         </LinearLayout>

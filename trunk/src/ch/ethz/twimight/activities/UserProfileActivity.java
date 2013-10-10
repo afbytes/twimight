@@ -492,7 +492,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		mentionButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(getBaseContext(), NewTweetActivity.class);
+				Intent i = new Intent(getBaseContext(), ComposeTweetActivity.class);
 				i.putExtra("text", "@" + userScreenName + " ");
 				startActivity(i);
 			}

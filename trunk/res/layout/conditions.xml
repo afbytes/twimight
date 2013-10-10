@@ -21,6 +21,7 @@
 
         <TextView
             android:id="@+id/textConditionTitle"
+            style="@style/RobotoLightText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/terms_and_conditions"
@@ -31,7 +32,7 @@
         <!-- 0dp height trick to push the buttons to the bottom of the view -->
         <TextView
             android:id="@+id/textConditions"
-            style="@style/NormalText"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.0"
@@ -48,10 +49,10 @@
 
             <Button
                 android:id="@+id/buttonAgree"
-                style="@style/Button.Solid.Normal"
+                style="@style/Button.Solid.NormalMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="6dp"
+                android:layout_marginRight="@dimen/half_step"
                 android:layout_weight="1.0"
                 android:onClick="agreeToTerms"
                 android:text="@string/agree" />
@@ -61,7 +62,7 @@
                 style="@style/Button.Outline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="6dp"
+                android:layout_marginLeft="@dimen/half_step"
                 android:layout_weight="1.0"
                 android:text="@string/decline" />
         </LinearLayout>

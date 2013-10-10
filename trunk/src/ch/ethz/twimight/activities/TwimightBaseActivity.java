@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,7 +48,7 @@ import ch.ethz.twimight.util.LogCollector;
  * @author thossmann
  * 
  */
-public abstract class TwimightBaseActivity extends FragmentActivity implements
+public abstract class TwimightBaseActivity extends ThemeSelectorActivity implements
 		Observer {
 
 	static TwimightBaseActivity instance;
@@ -69,7 +68,6 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		updateTheme();
 		super.onCreate(savedInstanceState);
 
 		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -82,13 +80,24 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		// actionBar.setDisplayShowTitleEnabled(true);
 
 	}
+	
+	@Override
+	protected void setDisasterTheme() {
+		Log.d("asdf", "TwimightBaseActivity setDisasterTheme");
+		setTheme(R.style.TwimightHolo_DisasterMode);
+	}
+
+	@Override
+	protected void setNormalTheme() {
+		Log.d("asdf", "TwimightBaseActivity setNormalTheme");
+		setTheme(R.style.TwimightHolo_NormalMode);
+	}
 
 	/**
 	 * on Resume
 	 */
 	@Override
 	public void onResume() {
-		checkTheme();
 		super.onResume();
 		instance = this;
 
@@ -105,37 +114,6 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 			updateStatusBar();
 			// register for bluetooth status updates
 			BluetoothStatus.getInstance().addObserver(this);
-		}
-	}
-
-	private boolean isDisasterModeEnabled() {
-		return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"prefDisasterMode", false);
-	}
-
-	/**
-	 * Checks if the correct theme is currently set and if necessary restarts
-	 * the activity so that a different them can be applied.
-	 */
-	private void checkTheme() {
-		if (isDisasterModeEnabled() != isDisasterThemeSet) {
-			recreate();
-		}
-	}
-
-	private void updateTheme() {
-		if (isDisasterModeEnabled()) {
-			setTheme(R.style.TwimightHolo_DisasterMode);
-			if (bottomStatusBar != null) {
-				bottomStatusBar.setVisibility(View.VISIBLE);
-			}
-			isDisasterThemeSet = true;
-		} else {
-			setTheme(R.style.TwimightHolo_NormalMode);
-			if (bottomStatusBar != null) {
-				bottomStatusBar.setVisibility(View.GONE);
-			}
-			isDisasterThemeSet = false;
 		}
 	}
 
@@ -169,7 +147,7 @@ public abstract class TwimightBaseActivity extends FragmentActivity implements
 		switch (item.getItemId()) {
 
 		case R.id.menu_write_tweet:
-			startActivity(new Intent(getBaseContext(), NewTweetActivity.class));
+			startActivity(new Intent(getBaseContext(), ComposeTweetActivity.class));
 			break;
 
 		case R.id.menu_search:

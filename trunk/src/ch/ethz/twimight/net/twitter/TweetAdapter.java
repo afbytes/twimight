@@ -242,7 +242,6 @@ public class TweetAdapter extends CursorAdapter {
 		int accentColor;
 		if ((buffer & Tweets.BUFFER_DISASTER) != 0 || (buffer & Tweets.BUFFER_MYDISASTER) != 0) {
 			// set pressed state background color
-//			row.setBackgroundResource(R.drawable.pressable_background_disastermode);
 			// select accent color
 			accentColor = context.getResources().getColor(
 					R.color.accent_disastermode_2);
@@ -257,7 +256,6 @@ public class TweetAdapter extends CursorAdapter {
 			}
 		} else {
 			// set pressed state background color
-//			row.setBackgroundResource(R.drawable.pressable_background_normalmode);
 			// select accent color
 			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
 			accentColor = context.getResources().getColor(

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and
+        the accompanying materials are made available under the terms of the GNU
+        Public License v2.0 which accompanies this distribution, and is available
+        at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo
+        Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann
+        - Message specification
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true" >
+
+        <LinearLayout
+            android:id="@+id/composeTweetRoot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:padding="@dimen/unit_step" >
+
+            <LinearLayout
+                android:id="@+id/tweetContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/ivProfileImage"
+                    android:layout_width="@dimen/profile_image_size"
+                    android:layout_height="@dimen/profile_image_size"
+                    android:background="@color/white" />
+
+                <LinearLayout
+                    android:id="@+id/tweetContainerRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/unit_step"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:id="@+id/topRowContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <LinearLayout
+                            android:id="@+id/userNamesContainer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/tvName"
+                                style="@style/RobotoLightText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minLines="1"
+                                android:singleLine="true"
+                                android:text="@string/placeholder_short"
+                                android:textColor="?attr/accentColor1"
+                                android:textSize="20sp"
+                                android:textStyle="italic" />
+
+                            <TextView
+                                android:id="@+id/tvScreenname"
+                                style="@style/RobotoLightText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:text="@string/placeholder_short"
+                                android:textColor="@color/medium_gray"
+                                android:textSize="14sp"
+                                android:textStyle="italic" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tweet_characters"
+                            style="@style/RobotoLightText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="right"
+                            android:text="@string/tweet_length"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="20sp" />
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/tweetText"
+                        style="@style/RobotoLightText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:textColor="@color/dark_text"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/photoPreviewContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step" >
+
+                <ImageView
+                    android:id="@+id/ivPhotoPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:onClick="previewPhoto"
+                    android:scaleType="centerCrop" />
+
+                <ImageButton
+                    android:id="@+id/delete_photo"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_alignParentRight="true"
+                    android:background="@drawable/image_overlay_button_background"
+                    android:onClick="deletePhoto"
+                    android:src="@drawable/ic_cancel" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/upload_from_gallery"
+                    style="@style/Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="uploadFromGallery"
+                    android:src="@drawable/ic_photo" />
+
+                <View style="@style/ButtonBarDivider" />
+
+                <ImageButton
+                    android:id="@+id/upload_from_camera"
+                    style="@style/Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="uploadFromCamera"
+                    android:src="@drawable/ic_camera" />
+
+                <View style="@style/ButtonBarDivider" />
+
+                <ImageButton
+                    android:id="@+id/tweet_location"
+                    style="@style/Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Location"
+                    android:onClick="toggleLocation"
+                    android:src="@drawable/ic_location_on" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step" >
+
+                <Button
+                    android:id="@+id/tweet_send"
+                    style="?attr/solidButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/half_step"
+                    android:layout_weight="1.0"
+                    android:onClick="sendTweet"
+                    android:text="@string/tweet" />
+
+                <Button
+                    android:id="@+id/tweet_cancel"
+                    style="@style/Button.Outline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_weight="1.0"
+                    android:onClick="cancel"
+                    android:text="@string/cancel" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

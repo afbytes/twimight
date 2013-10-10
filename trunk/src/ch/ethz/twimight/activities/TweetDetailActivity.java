@@ -14,7 +14,7 @@ import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.adapters.ShowTweetPageAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 
-public class ShowTweetActivity extends TwimightBaseActivity implements OnTweetDeletedListener {
+public class TweetDetailActivity extends TwimightBaseActivity implements OnTweetDeletedListener {
 	
 	
 	ContentResolver resolver;
