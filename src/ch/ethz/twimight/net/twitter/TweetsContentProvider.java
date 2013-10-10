@@ -36,7 +36,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.NewTweetActivity;
+import ch.ethz.twimight.activities.ComposeTweetActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;

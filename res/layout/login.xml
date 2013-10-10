@@ -30,6 +30,7 @@
 
         <TextView
             android:id="@+id/twimightTitle"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -42,6 +43,7 @@
 
         <TextView
             android:id="@+id/twimightSlogan"
+            style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/twimightTitle"
@@ -52,7 +54,7 @@
 
         <Button
             android:id="@+id/buttonLogin"
-            style="@style/Button.Solid.Normal"
+            style="@style/Button.Solid.NormalMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

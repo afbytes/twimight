@@ -2,17 +2,17 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item 
 		android:state_enabled="false"
-        android:drawable="@drawable/button_solid_normal_disabled" 
+        android:drawable="@drawable/button_solid_disastermode_disabled" 
         />
     <item 
     	android:state_pressed="true" 
     	android:state_enabled="true"
-        android:drawable="@drawable/button_solid_normal_pressed" />
+        android:drawable="@drawable/button_solid_disastermode_pressed" />
     <item 
     	android:state_focused="true" 
     	android:state_enabled="true"
-        android:drawable="@drawable/button_solid_normal_focused" />
+        android:drawable="@drawable/button_solid_disastermode_focused" />
     <item 
     	android:state_enabled="true"
-        android:drawable="@drawable/button_solid_normal_enabled" />
+        android:drawable="@drawable/button_solid_disastermode_enabled" />
 </selector>

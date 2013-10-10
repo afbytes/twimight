@@ -11,6 +11,7 @@
     <attr name="accentColor1" format="color"/>
     <attr name="accentColor2" format="color"/>
     <attr name="accentColor3" format="color"/>
+    <attr name="solidButtonStyle" format="string"/>
         
 
 </resources>

@@ -9,7 +9,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:background="@color/tweet_background"
-        android:padding="5dp" android:id="@+id/showNewTweetRoot">
+        android:padding="5dp" android:id="@+id/composeTweetRoot">
         
         <TextView
             android:id="@+id/textView1"

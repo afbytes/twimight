@@ -26,8 +26,7 @@
         android:debuggable="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_label"
-        android:theme="@style/TwimightHolo" >
+        android:label="@string/app_label">
         <activity
             android:name=".activities.ConditionsActivity"
             android:label="Twimight"
@@ -105,7 +104,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ShowTweetActivity"
+            android:name=".activities.TweetDetailActivity"
             android:label="Twimight"
             android:launchMode="singleTop" >
             <meta-data
@@ -144,20 +143,19 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.NewTweetActivity"
+            android:name=".activities.ComposeTweetActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.Transparent"
-            android:windowSoftInputMode="stateAlwaysVisible" />
+            android:windowSoftInputMode="adjustResize" 
+            android:theme="@style/TranslucentTheme"/>
         <activity
             android:name=".activities.NewDMActivity"
             android:label="Twimight"
             android:theme="@style/Theme.Transparent"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
-            android:name=".activities.PrefsActivity"
-            android:label="Settings"
-            android:theme="@style/TwimightHolo" />
+            android:name=".activities.SettingsActivity"
+            android:label="Settings"/>
         <activity
             android:name=".activities.AboutActivity"
             android:label="About Twimight"
@@ -239,8 +237,6 @@
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
             android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
 
-        <activity android:name=".activities.SettingsActivity" >
-        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

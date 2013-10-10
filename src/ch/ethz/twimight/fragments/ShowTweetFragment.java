@@ -58,7 +58,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.NewTweetActivity;
+import ch.ethz.twimight.activities.ComposeTweetActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
@@ -170,7 +170,7 @@ public class ShowTweetFragment extends Fragment {
 		// TODO Auto-generated method stub
 		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for activity fragment
-		view = inflater.inflate(R.layout.show_tweet, container, false);
+		view = inflater.inflate(R.layout.tweet_detail, container, false);
 		screenNameView = (TextView) view.findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) view.findViewById(R.id.showTweetRealName);
 
@@ -569,7 +569,7 @@ public class ShowTweetFragment extends Fragment {
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent i = new Intent(activity, NewTweetActivity.class);
+					Intent i = new Intent(activity, ComposeTweetActivity.class);
 					if (!c.isNull(c.getColumnIndex(Tweets.COL_TID)))
 						i.putExtra("isReplyTo",
 								c.getLong(c.getColumnIndex(Tweets.COL_TID)));
@@ -1127,7 +1127,7 @@ public class ShowTweetFragment extends Fragment {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								Intent i = new Intent(activity,
-										NewTweetActivity.class);
+										ComposeTweetActivity.class);
 								i.putExtra("text", "RT @" + screenName + " "
 										+ text);
 								i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

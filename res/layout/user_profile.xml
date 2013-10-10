@@ -38,6 +38,7 @@
 
             <TextView
                 android:id="@+id/showUserRealName"
+                style="@style/RobotoLightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step"
@@ -49,6 +50,7 @@
 
             <TextView
                 android:id="@+id/showUserScreenName"
+                style="@style/RobotoLightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
@@ -59,6 +61,7 @@
 
             <TextView
                 android:id="@+id/showUserLocation"
+                style="@style/RobotoLightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
@@ -69,6 +72,7 @@
 
             <TextView
                 android:id="@+id/showUserDescription"
+                style="@style/RobotoLightText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="@dimen/double_step"
@@ -77,6 +81,7 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/placeholder_long"
                 android:textColor="@color/dark_text"
+                android:textColorLink="@color/hyperlink_text_color"
                 android:textSize="18sp" />
 
             <LinearLayout
@@ -95,6 +100,7 @@
 
                     <TextView
                         android:id="@+id/statsTweetsText"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/half_step"
@@ -104,6 +110,7 @@
 
                     <TextView
                         android:id="@+id/statsTweets"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/placeholder_short"
@@ -121,6 +128,7 @@
 
                     <TextView
                         android:id="@+id/statsFavoritsText"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/half_step"
@@ -130,6 +138,7 @@
 
                     <TextView
                         android:id="@+id/statsFavorits"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/placeholder_short"
@@ -147,6 +156,7 @@
 
                     <TextView
                         android:id="@+id/statsFollowersText"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/half_step"
@@ -156,6 +166,7 @@
 
                     <TextView
                         android:id="@+id/statsFollowers"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/placeholder_short"
@@ -173,6 +184,7 @@
 
                     <TextView
                         android:id="@+id/statsFriendsText"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/half_step"
@@ -182,6 +194,7 @@
 
                     <TextView
                         android:id="@+id/statsFriends"
+                        style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/placeholder_short"
@@ -205,6 +218,7 @@
 
                 <TextView
                     android:id="@+id/showUserInfoText2"
+                    style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/will_stop_following"
@@ -226,6 +240,7 @@
                     android:src="@drawable/ic_small_pending" />
 
                 <TextView
+                    style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/will_start_following"

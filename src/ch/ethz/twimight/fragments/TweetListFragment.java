@@ -16,7 +16,7 @@ import android.widget.ListAdapter;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
-import ch.ethz.twimight.activities.ShowTweetActivity;
+import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
@@ -131,7 +131,7 @@ public class TweetListFragment extends ListFragment {
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int position, long id) {
 				Cursor c = (Cursor) arg0.getItemAtPosition(position);
-				Intent i = new Intent(getActivity(), ShowTweetActivity.class);
+				Intent i = new Intent(getActivity(), TweetDetailActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				i.putExtra("type", type);
 				startActivity(i);
