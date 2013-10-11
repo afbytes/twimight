@@ -47,7 +47,7 @@ public class PullToRefreshListView extends LinearLayout {
 			return mDirectionFactor;
 		}
 	}
-
+	
 	// private static final String TAG = "PullToRefreshListView2";
 
 	private ListView mListView;
@@ -128,6 +128,7 @@ public class PullToRefreshListView extends LinearLayout {
 		// list view
 		mListView = new ListView(getContext());
 		mListView.setBackgroundDrawable(null);
+		mListView.setFastScrollEnabled(true);
 
 		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
@@ -178,6 +179,10 @@ public class PullToRefreshListView extends LinearLayout {
 		}
 	}
 
+	public void setFastScrollEnabled(boolean fastScrollEnabled){
+		mListView.setFastScrollEnabled(fastScrollEnabled);
+	}
+	
 	/**
 	 * Forwards call to internal ListView.
 	 * 
