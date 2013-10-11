@@ -148,8 +148,8 @@
         <item name="android:background">@drawable/button_solid_normalmode</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
-        <style name="Button.Solid.DisasterMode">
+
+    <style name="Button.Solid.DisasterMode">
         <item name="android:background">@drawable/button_solid_disastermode</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -200,6 +200,10 @@
 
     <style name="ActionBarTabBarStyle.TwimightHolo" parent="@android:style/Widget.Holo.ActionBar.TabBar">
         <item name="android:divider">@drawable/tab_bar_divider</item>
+    </style>
+
+    <style name="ActionBarTabBarStyle.TwimightHolo.TabText" parent="@android:style/Widget.Holo.ActionBar.TabText">
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <!--

@@ -31,7 +31,7 @@ public class UserAdapter extends SimpleCursorAdapter {
 
 	/** Constructor */
 	public UserAdapter(Context context, Cursor c) {
-		super(context, R.layout.userrow, c, from, to);  
+		super(context, R.layout.user_row, c, from, to);  
 	}
 
 	/** This is where data is mapped to its view */
