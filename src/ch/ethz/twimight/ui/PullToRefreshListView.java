@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -55,6 +54,7 @@ public class PullToRefreshListView extends LinearLayout {
 	private State mState = State.SCROLL_LIST;
 	private float mPullStartY;
 	private float mLastTouchY;
+	private boolean mIsOverscrollEnabled = true;
 
 	private RotateAnimation mHalfRotationCcw;
 	private RotateAnimation mHalfRotationCcwReverse;
@@ -209,7 +209,7 @@ public class PullToRefreshListView extends LinearLayout {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_MOVE:
 			float pullDistance = Math.abs(y - mLastTouchY);
-			if (pullDistance > mTouchSlop) {
+			if (mIsOverscrollEnabled && pullDistance > mTouchSlop) {
 				if (isListAtTop() && y > mLastTouchY) {
 					updateState(State.PULL_TOP_STAGE_1);
 				} else if (isListAtBottom() && y < mLastTouchY) {
@@ -377,5 +377,9 @@ public class PullToRefreshListView extends LinearLayout {
 		} else {
 			return false;
 		}
+	}
+	
+	public void setOverscrollEnabled(boolean enabled){
+		mIsOverscrollEnabled = enabled;
 	}
 }

@@ -24,97 +24,107 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import ch.ethz.twimight.R;
 
-/** 
+/**
  * Cursor adapter for a cursor containing users.
  */
-public class TwitterUserAdapter extends SimpleCursorAdapter {
-	
+public class TwitterUserAdapter extends CursorAdapter {
+
 	private static final String TAG = "TwitterUserAdapter";
-	
-	static final String[] from = {TwitterUsers.COL_SCREENNAME, TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION};
-	static final int[] to = {R.id.showUserScreenName, R.id.showUserRealName, R.id.showUserLocation};
+
+	static final String[] from = { TwitterUsers.COL_SCREENNAME,
+			TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION };
+	static final int[] to = { R.id.showUserScreenName, R.id.showUserRealName,
+			R.id.showUserLocation };
 
 	/** Constructor */
 	public TwitterUserAdapter(Context context, Cursor c) {
-		super(context, R.layout.userrow, c, from, to);  
+		super(context, c, true);
 	}
-	
+
 	private static class ViewHolder {
-		ImageView picture ;
-		LinearLayout rowLayout ;		
-		 
-		}
-
-	 
-
+		ImageView picture;
+		TextView realName;
+		TextView screenName;
+		TextView location;
+	}
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		// TODO Auto-generated method stub
 
-		LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View view = inflater.inflate(R.layout.userrow, null);		
-		createHolder(view);	
-		
+		LayoutInflater inflater = (LayoutInflater) parent.getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.user_row, null);
+		createHolder(view);
+
 		return view;
 
 	}
 
 	private void createHolder(View view) {
 		ViewHolder holder = new ViewHolder();
-		setHolderFields(view,holder);
+		setHolderFields(view, holder);
 		view.setTag(holder);
 	}
-	
+
 	private void setHolderFields(View userrow, ViewHolder holder) {
-		holder.picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		holder.rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);	
-		
-		
+		holder.picture = (ImageView) userrow
+				.findViewById(R.id.showUserProfileImage);
+		holder.realName = (TextView) userrow
+				.findViewById(R.id.showUserRealName);
+		holder.screenName = (TextView) userrow
+				.findViewById(R.id.showUserScreenName);
+		holder.location = (TextView) userrow
+				.findViewById(R.id.showUserLocation);
+
 	}
 
 	/** This is where data is mapped to its view */
 	@Override
 	public void bindView(View userrow, Context context, Cursor cursor) {
-		super.bindView(userrow, context, cursor);
-			
-		// Profile image
-		
 		ViewHolder holder = (ViewHolder) userrow.getTag();
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))){
-
-			//InternalStorageHelper helper = new InternalStorageHelper(context);
-			//byte[] imageByteArray = helper.readImage(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
+			// set text fields
+			String realName = cursor.getString(cursor
+					.getColumnIndex(TwitterUsers.COL_NAME));
+			holder.realName.setText(realName);
+			String screenName = cursor.getString(cursor
+					.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			holder.screenName.setText("@" + screenName);
+			String location = cursor.getString(cursor
+					.getColumnIndex(TwitterUsers.COL_LOCATION));
+			holder.location.setText(location);
+			// set image
 			int userId = cursor.getInt(cursor.getColumnIndex("_id"));
-			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/" + userId);
+			Uri imageUri = Uri.parse("content://"
+					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS + "/" + userId);
 			InputStream is;
-			
+
 			try {
 				is = context.getContentResolver().openInputStream(imageUri);
-				if (is != null) {						
+				if (is != null) {
 					Bitmap bm = BitmapFactory.decodeStream(is);
-					holder.picture.setImageBitmap(bm);	
+					holder.picture.setImageBitmap(bm);
 				} else
-					holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+					holder.picture
+							.setImageResource(R.drawable.profile_image_placeholder);
 			} catch (FileNotFoundException e) {
-				//Log.e(TAG,"error opening input stream");
-				holder.picture.setImageResource(R.drawable.profile_image_placeholder);
-			}	
+				// Log.e(TAG,"error opening input stream");
+				holder.picture
+						.setImageResource(R.drawable.profile_image_placeholder);
+			}
 
 		} else {
-			holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+			holder.picture
+					.setImageResource(R.drawable.profile_image_placeholder);
 		}
-		
-		holder.rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
+
 	}
 
 }
-
-
-
-			
