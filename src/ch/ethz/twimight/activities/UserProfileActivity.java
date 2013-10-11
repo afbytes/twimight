@@ -356,6 +356,10 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		mentionButton.setVisibility(View.GONE);
 		messageButton.setVisibility(View.GONE);
 
+		// hide info messages
+		followInfo.setVisibility(LinearLayout.GONE);
+		unfollowInfo.setVisibility(LinearLayout.GONE);
+		
 		// the followers Button
 		showFollowersButton.setVisibility(View.VISIBLE);
 		showFollowersButton.setOnClickListener(null);
@@ -364,8 +368,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getBaseContext(),
-						ShowUserListActivity.class);
-				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,
+						UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
 						UserListFragment.FOLLOWERS_KEY);
 				startActivity(i);
 
@@ -381,8 +385,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getBaseContext(),
-						ShowUserListActivity.class);
-				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,
+						UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
 						UserListFragment.FRIENDS_KEY);
 				startActivity(i);
 			}
@@ -395,8 +399,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			public void onClick(View v) {
 
 				Intent i = new Intent(getBaseContext(),
-						ShowUserListActivity.class);
-				i.putExtra(ShowUserListActivity.USER_FILTER_REQUEST,
+						UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
 						UserListFragment.PEERS_KEY);
 				startActivity(i);
 

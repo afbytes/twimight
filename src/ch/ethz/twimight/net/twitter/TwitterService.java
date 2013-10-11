@@ -54,7 +54,7 @@ import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.ShowDMUsersListActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
-import ch.ethz.twimight.activities.ShowUserListActivity;
+import ch.ethz.twimight.activities.UserListActivity;
 import ch.ethz.twimight.activities.ShowUserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
@@ -2114,7 +2114,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<User>... params) {
 
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			
 			List<User> result = params[0];
 
@@ -2151,7 +2151,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(Void params){
 
-			ShowUserListActivity.setLoading(false);
+			UserListActivity.setLoading(false);
 			
 			// trigger the user synch (for updating the profile images)
 			new SynchTransactionalUsersTask(false).execute(false);
@@ -2177,7 +2177,7 @@ public class TwitterService extends Service {
 		@Override
 		protected List<Number> doInBackground(Long... params) {
 			Log.d(TAG, "AsynchTask: UpdateFriendsTask");
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			this.notify= params[0];
 			
 			List<Number> friendsList = null;
@@ -2229,7 +2229,7 @@ public class TwitterService extends Service {
 		@Override
 		protected List<User> doInBackground(List<Number>... params) {
 
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			
 			List<Number> result = params[0];
 			// no friends to insert
@@ -2262,7 +2262,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(List<User> toInsert){
 
-			ShowUserListActivity.setLoading(false);
+			UserListActivity.setLoading(false);
 			
 			if(toInsert == null) return;
 			
@@ -2287,7 +2287,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<User>... params) {
 			Log.i(TAG,"insert friends task");
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			
 			List<User> result = params[0];
 
@@ -2321,7 +2321,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected void onPostExecute(Void params){
-			ShowUserListActivity.setLoading(false);		
+			UserListActivity.setLoading(false);		
 
 		}
 
@@ -2340,7 +2340,7 @@ public class TwitterService extends Service {
 		@Override
 		protected List<Number> doInBackground(Long... params) {
 			Log.d(TAG, "AsynchTask: UpdateFollowersTask");
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			this.notify= params[0];
 			
 			List<Number> followersList = null;
@@ -2392,7 +2392,7 @@ public class TwitterService extends Service {
 		@Override
 		protected List<User> doInBackground(List<Number>... params) {
 
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			
 			List<Number> result = params[0];
 			// no friends to insert
@@ -2428,7 +2428,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(List<User> toInsert){
 
-			ShowUserListActivity.setLoading(false);
+			UserListActivity.setLoading(false);
 			
 			if (toInsert != null) {
 				// save the timestamp of the last update
@@ -2454,7 +2454,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<User>... params) {
 
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			
 			List<User> result = params[0];
 
@@ -2491,7 +2491,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected void onPostExecute(Void params){
-			ShowUserListActivity.setLoading(false);		
+			UserListActivity.setLoading(false);		
 
 		}
 
@@ -3394,7 +3394,7 @@ public class TwitterService extends Service {
 
 			if (D) Log.d(TAG, "AsynchTask: UnfollowUserTask");
 
-			ShowUserListActivity.setLoading(true);
+			UserListActivity.setLoading(true);
 			this.rowId = rowId[0];
 			this.attempts = rowId[1];
 
@@ -3429,7 +3429,7 @@ public class TwitterService extends Service {
 		 */
 		@Override
 		protected void onPostExecute(User result) {
-			ShowUserListActivity.setLoading(false);
+			UserListActivity.setLoading(false);
 			// error handling
 			if(ex != null){
 				if(ex instanceof TwitterException.E401){
@@ -3589,7 +3589,7 @@ public class TwitterService extends Service {
 					new InsertUserTask().execute(cv);					
 				}			
 
-				ShowUserListActivity.setLoading(false);
+				UserListActivity.setLoading(false);
 			}
 		}
 	}

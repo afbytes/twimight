@@ -20,7 +20,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import ch.ethz.twimight.activities.ShowUserListActivity;
+import ch.ethz.twimight.activities.UserListActivity;
 import ch.ethz.twimight.util.InternalStorageHelper;
 
 public class PicturesIntentService extends IntentService {
@@ -40,11 +40,11 @@ public class PicturesIntentService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {		
 		
-		ShowUserListActivity.setLoading(true);
+		UserListActivity.setLoading(true);
 		rowIds = intent.getLongArrayExtra(PicturesIntentService.USERS_IDS);
 		downloadProfilePictures(rowIds);
 		insertPictures();		
-		ShowUserListActivity.setLoading(false);
+		UserListActivity.setLoading(false);
 
 	}	
 	
