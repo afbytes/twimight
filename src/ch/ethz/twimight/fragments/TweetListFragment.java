@@ -134,6 +134,9 @@ public class TweetListFragment extends ListFragment {
 				Intent i = new Intent(getActivity(), TweetDetailActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
 				i.putExtra("type", type);
+				if (type == USER_TWEETS) {
+					i.putExtra(USER_ID, userId);
+				}
 				startActivity(i);
 				// if (type == SEARCH_TWEETS)
 				// i.putExtra(ListFragment.SEARCH_QUERY, query);
