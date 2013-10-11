@@ -120,7 +120,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ShowUserListActivity"
+            android:name=".activities.UserListActivity"
             android:label="Twimight"
             android:launchMode="singleTop" >
             <meta-data
