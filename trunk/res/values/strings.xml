@@ -97,7 +97,7 @@
 
     <!-- Direct Messages -->
     <string name="no_dms">No direct messages available</string>
-    <string name="to">To: </string>
+    <string name="to">To</string>
     <string name="no_connection3">No connectivity, your Message will be sent once we have a connection!</string>
     <string name="dm_content_title">New Direct Messages!</string>
     <string name="dm_content_text">You have new direct message(s)</string>

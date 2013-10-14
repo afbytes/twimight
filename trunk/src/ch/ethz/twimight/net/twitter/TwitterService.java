@@ -49,13 +49,13 @@ import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.NewDMActivity;
+import ch.ethz.twimight.activities.ComposeDmActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
-import ch.ethz.twimight.activities.ShowDMUsersListActivity;
+import ch.ethz.twimight.activities.DmConversationListActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.UserListActivity;
-import ch.ethz.twimight.activities.ShowUserTweetListActivity;
+import ch.ethz.twimight.activities.UserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.util.Constants;
@@ -1855,7 +1855,7 @@ public class TwitterService extends Service {
 		@Override
 		protected List<winterwell.jtwitter.Status> doInBackground(String... params) {
 			
-			ShowUserTweetListActivity.setLoading(true);
+			UserTweetListActivity.setLoading(true);
 			
 			String screenname = params[0];
 
@@ -1876,7 +1876,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(List<winterwell.jtwitter.Status> result) {
 
-			ShowUserTweetListActivity.setLoading(false);
+			UserTweetListActivity.setLoading(false);
 			
 			// error handling
 			if(ex != null){
@@ -1903,7 +1903,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Status>... params) {
 
-			ShowUserTweetListActivity.setLoading(true);
+			UserTweetListActivity.setLoading(true);
 			
 			List<winterwell.jtwitter.Status> tweetList = params[0];
 			
@@ -1943,7 +1943,7 @@ public class TwitterService extends Service {
 				}
 			}			
 					
-			ShowUserTweetListActivity.setLoading(false);
+			UserTweetListActivity.setLoading(false);
 			
 			return null;
 		}
@@ -3644,7 +3644,7 @@ public class TwitterService extends Service {
 		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
 			Log.d(TAG, "AsynchTask: UpdateDMsInTask");
 
-			ShowDMUsersListActivity.setLoading(true);
+			DmConversationListActivity.setLoading(true);
 			attempts = params[0];
 
 			List<winterwell.jtwitter.Message> dms = null;
@@ -3667,7 +3667,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(List<winterwell.jtwitter.Message> result) {
 
-			ShowDMUsersListActivity.setLoading(false);
+			DmConversationListActivity.setLoading(false);
 
 			// error handling
 			if(ex != null){
@@ -3705,7 +3705,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Message>... params) {
 			
-			ShowDMUsersListActivity.setLoading(true);
+			DmConversationListActivity.setLoading(true);
 
 			List<winterwell.jtwitter.Message> result = params[0];
 
@@ -3732,7 +3732,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected void onPostExecute(Void params){
-			ShowDMUsersListActivity.setLoading(false);
+			DmConversationListActivity.setLoading(false);
 
 			// trigger the user synch (for updating the profile images)
 			new SynchTransactionalUsersTask(false).execute(false);
@@ -3755,7 +3755,7 @@ public class TwitterService extends Service {
 		protected List<winterwell.jtwitter.Message> doInBackground(Integer... params) {
 
 			Log.d(TAG, "AsynchTask: UpdateDMsOutTask");
-			ShowDMUsersListActivity.setLoading(true);
+			DmConversationListActivity.setLoading(true);
 
 			attempts = params[0];
 
@@ -3777,7 +3777,7 @@ public class TwitterService extends Service {
 		@Override
 		protected void onPostExecute(List<winterwell.jtwitter.Message> result) {
 
-			ShowDMUsersListActivity.setLoading(false);
+			DmConversationListActivity.setLoading(false);
 			
 			// error handling
 			if(ex != null){
@@ -3813,7 +3813,7 @@ public class TwitterService extends Service {
 		@Override
 		protected Void doInBackground(List<winterwell.jtwitter.Message>... params) {
 
-			ShowDMUsersListActivity.setLoading(true);
+			DmConversationListActivity.setLoading(true);
 			
 			List<winterwell.jtwitter.Message> result = params[0];
 
@@ -3840,7 +3840,7 @@ public class TwitterService extends Service {
 
 		@Override
 		protected void onPostExecute(Void params){
-			ShowDMUsersListActivity.setLoading(false);
+			DmConversationListActivity.setLoading(false);
 
 			// trigger the user synch (for updating the profile images)
 			new SynchTransactionalUsersTask(false).execute(false);
@@ -3916,10 +3916,10 @@ public class TwitterService extends Service {
 					Log.w(TAG, "Error: "+ex);
 					return;
 				}  else if (ex instanceof TwitterException.E403) {
-					if (UserProfileActivity.running || ShowDMUsersListActivity.running && notify==1)
+					if (UserProfileActivity.running || DmConversationListActivity.running && notify==1)
 						Toast.makeText(getBaseContext(), "Could not post message! Maybe the recepient is not following you ?", Toast.LENGTH_LONG).show();
 					Log.e(TAG, "exception while sending DM: " + ex);
-					Intent i = new Intent(getBaseContext(), NewDMActivity.class);
+					Intent i = new Intent(getBaseContext(), ComposeDmActivity.class);
 					i.putExtra("recipient", rec);
 					i.putExtra("text", text);
 					i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

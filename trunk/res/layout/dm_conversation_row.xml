@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showDMUser"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/borderless_button_background"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="horizontal"
+    android:padding="@dimen/unit_step" >
+
+    <ImageView
+        android:id="@+id/showMDUserProfileImage"
+        android:layout_width="@dimen/profile_image_size"
+        android:layout_height="@dimen/profile_image_size"
+        android:background="@color/white" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/unit_step"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/showUserRealName"
+            style="@style/RobotoLightText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minLines="1"
+            android:singleLine="true"
+            android:text="@string/placeholder_short"
+            android:textColor="@color/dark_text"
+            android:textSize="20sp"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/showUserScreenName"
+            style="@style/RobotoLightText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="1"
+            android:singleLine="true"
+            android:text="@string/placeholder_short"
+            android:textColor="@color/medium_gray"
+            android:textSize="16sp"
+            android:layout_marginTop="@dimen/quarter_step"
+            android:textStyle="italic" />
+
+        <TextView
+            android:id="@+id/showDMText"
+            style="@style/RobotoLightText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/half_step"
+            android:text="@string/placeholder_short"
+            android:textColor="@color/dark_text"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

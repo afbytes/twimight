@@ -103,7 +103,7 @@
 
     <!-- Direct Messages -->
     <string name="no_dms">Keine Nachrichten verfügbar</string>
-    <string name="to">An: </string>
+    <string name="to">An</string>
     <string name="no_connection3">Deine Nachricht wird bald verschickt (sobald Internetverbindung besteht).</string>
     <string name="dm_content_title">Neue Nachricht(en)!</string>
     <string name="dm_content_text">Du hast neue Nachricht(en)</string>

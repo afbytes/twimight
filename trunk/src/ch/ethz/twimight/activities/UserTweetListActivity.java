@@ -24,7 +24,7 @@ import ch.ethz.twimight.fragments.TweetListFragment;
  * @author thossmann
  *
  */
-public class ShowUserTweetListActivity extends TwimightBaseActivity{
+public class UserTweetListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowUserTweetListActivity";	
 	

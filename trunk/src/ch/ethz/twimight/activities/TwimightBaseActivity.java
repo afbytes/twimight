@@ -186,7 +186,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 
 		case R.id.menu_messages:
 			// Launch User Messages
-			i = new Intent(this, ShowDMUsersListActivity.class);
+			i = new Intent(this, DmConversationListActivity.class);
 			startActivity(i);
 			break;
 

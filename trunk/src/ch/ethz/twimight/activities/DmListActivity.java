@@ -22,7 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DMAdapter;
+import ch.ethz.twimight.net.twitter.DmAdapter;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 
 /**
@@ -31,14 +31,14 @@ import ch.ethz.twimight.net.twitter.DirectMessages;
  * @author thossmann
  *
  */
-public class ShowDMListActivity extends TwimightBaseActivity{
+public class DmListActivity extends TwimightBaseActivity{
 
 	private static final String TAG = "ShowDMListActivity";
 	
 	// Views
 	private ListView dmUserListView;
 
-	private DMAdapter adapter;
+	private DmAdapter adapter;
 	private Cursor c;
 	
 	private int rowId;
@@ -58,7 +58,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 			
-		setContentView(R.layout.show_dm_user);
+		setContentView(R.layout.dm_list);
 		
 		rowId = getIntent().getIntExtra("rowId", 0);
 		screenname = getIntent().getStringExtra("screenname");
@@ -71,7 +71,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 		dmUserListView = (ListView) findViewById(R.id.dmUserList);
 		c = getContentResolver().query(Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/" + DirectMessages.DMS_USER + "/" + rowId), null, null, null, null);
 				
-		adapter = new DMAdapter(this, c);		
+		adapter = new DmAdapter(this, c);		
 		dmUserListView.setAdapter(adapter);
 		dmUserListView.setEmptyView(findViewById(R.id.dmListEmpty));
 		// Click listener when the user clicks on a user
@@ -123,7 +123,7 @@ public class ShowDMListActivity extends TwimightBaseActivity{
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
 		if(item.getItemId() == R.id.menu_write_tweet){		
-			Intent i = new Intent(getBaseContext(), NewDMActivity.class);
+			Intent i = new Intent(getBaseContext(), ComposeDmActivity.class);
 			i.putExtra("recipient", screenname);
 			startActivity(i);
 			

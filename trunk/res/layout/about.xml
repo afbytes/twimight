@@ -32,7 +32,7 @@
             android:gravity="center"
             android:text="@string/app_name"
             android:textColor="@color/accent_normalmode_1"
-            android:textSize="36sp"
+            android:textSize="40sp"
             android:textStyle="italic" />
 
         <TextView
@@ -40,7 +40,7 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/mighty"
             android:textColor="@color/dark_text"
@@ -51,10 +51,11 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/copyright"
             android:textColor="@color/medium_gray"
+            android:textSize="16sp"
             android:textStyle="italic" />
 
         <TextView
@@ -74,7 +75,7 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/authors"
             android:textColor="@color/dark_text"
@@ -97,7 +98,7 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/placeholder_short"
             android:textColor="@color/dark_text"
@@ -120,7 +121,7 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/placeholder_short"
             android:textColor="@color/dark_text"
@@ -160,7 +161,7 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/half_step"
+            android:layout_marginTop="@dimen/quarter_step"
             android:gravity="center"
             android:text="@string/placeholder_short"
             android:textColor="@color/dark_text"

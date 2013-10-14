@@ -40,7 +40,7 @@ import ch.ethz.twimight.util.InternalStorageHelper;
 /** 
  * Cursor adapter for a cursor containing users.
  */
-public class DMAdapter extends SimpleCursorAdapter {
+public class DmAdapter extends SimpleCursorAdapter {
 	
 	Context context;
 	 int flags;	
@@ -50,7 +50,7 @@ public class DMAdapter extends SimpleCursorAdapter {
 	public static final String TAG = "DMAdapter";
 
 	/** Constructor */
-	public DMAdapter(Context context, Cursor c) {
+	public DmAdapter(Context context, Cursor c) {
 		super(context, R.layout.dmrow, c, from, to);  
 		this.context=context;
 	}

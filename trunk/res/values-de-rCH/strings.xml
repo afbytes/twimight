@@ -101,7 +101,7 @@
 
     <!-- Direct Messages -->
     <string name="no_dms">Kener Nachrichte verfüegbar</string>
-    <string name="to">A: </string>
+    <string name="to">A</string>
     <string name="no_connection3">Dini Nachricht wird gli verschickt (sobau Internetverbindung besteit).</string>
     <string name="dm_content_title">Nöi Nachricht(e)!</string>
     <string name="dm_content_text">Du hesch nöi Nachricht(e)</string>
