@@ -36,10 +36,13 @@
 
         <TextView
             android:id="@+id/pull_to_refresh_text"
-            style="@style/TinyTitleText"
+            style="@style/RobotoLightText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:textStyle="italic"
+            android:textSize="16sp"
+            android:textColor="@color/medium_gray"
             android:padding="0dp"
             android:text="@string/pull_to_refresh_label" />
     </RelativeLayout>

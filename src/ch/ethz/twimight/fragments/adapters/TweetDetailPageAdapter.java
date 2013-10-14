@@ -7,14 +7,14 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.util.Log;
-import ch.ethz.twimight.fragments.ShowTweetFragment;
+import ch.ethz.twimight.fragments.TweetDetailFragment;
 
-public class ShowTweetPageAdapter extends FragmentPagerAdapter {
+public class TweetDetailPageAdapter extends FragmentPagerAdapter {
     
 	ArrayList<Long> list;
 	private static final String TAG = "ShowTweetPageAdapter";
 	
-	public ShowTweetPageAdapter(FragmentManager fm, ArrayList<Long> list){
+	public TweetDetailPageAdapter(FragmentManager fm, ArrayList<Long> list){
 		super(fm);
 		this.list = list;
 	}
@@ -23,7 +23,7 @@ public class ShowTweetPageAdapter extends FragmentPagerAdapter {
 	public Fragment getItem(int pos) {
 		long rowId = list.get(pos);
 		Log.i(TAG, "rowId: " + rowId);
-		return ShowTweetFragment.newInstance(rowId);
+		return TweetDetailFragment.newInstance(rowId);
 	}
 
 	@Override

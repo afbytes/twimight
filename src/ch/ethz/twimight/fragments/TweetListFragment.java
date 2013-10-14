@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,7 +50,7 @@ public class TweetListFragment extends ListFragment {
 			userId = getArguments().getLong(USER_ID);
 			Log.i("TEST", "userId: " + userId);
 		}
-		adapter = getData(type);
+		mlistAdapter = getData(type);
 	}
 
 	@Override

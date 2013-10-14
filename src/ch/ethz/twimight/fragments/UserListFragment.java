@@ -43,7 +43,7 @@ public class UserListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		adapter = getData(type);
+		mlistAdapter = getData(type);
 	}
 
 	@Override

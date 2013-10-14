@@ -26,8 +26,6 @@ import ch.ethz.twimight.fragments.TweetListFragment;
  */
 public class UserTweetListActivity extends TwimightBaseActivity{
 
-	private static final String TAG = "ShowUserTweetListActivity";	
-	
 	/** 
 	 * Called when the activity is first created. 
 	 */

@@ -34,8 +34,6 @@ import ch.ethz.twimight.R;
  */
 public class TwitterUserAdapter extends CursorAdapter {
 
-	private static final String TAG = "TwitterUserAdapter";
-
 	static final String[] from = { TwitterUsers.COL_SCREENNAME,
 			TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION };
 	static final int[] to = { R.id.showUserScreenName, R.id.showUserRealName,
