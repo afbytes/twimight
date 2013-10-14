@@ -3,7 +3,6 @@ package ch.ethz.twimight.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public abstract class ThemeSelectorActivity extends Activity {
 
@@ -11,14 +10,12 @@ public abstract class ThemeSelectorActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d("asdf", "ThemeSelectorActivity onCreate");
 		updateTheme();
 		super.onCreate(savedInstanceState);
 	}
-	
+
 	@Override
 	public void onResume() {
-		Log.d("asdf", "ThemeSelectorActivity onResume");
 		checkTheme();
 		super.onResume();
 	}

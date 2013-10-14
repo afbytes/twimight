@@ -328,7 +328,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getBaseContext(),
-							ShowUserTweetListActivity.class);
+							UserTweetListActivity.class);
 					c.moveToFirst();
 					int index = c
 							.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID);
@@ -509,7 +509,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		messageButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(getBaseContext(), NewDMActivity.class);
+				Intent i = new Intent(getBaseContext(), ComposeDmActivity.class);
 				i.putExtra("recipient", userScreenName);
 				startActivity(i);
 			}

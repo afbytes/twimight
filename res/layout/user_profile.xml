@@ -11,7 +11,8 @@
     android:id="@+id/showUserRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true" >
+    android:fillViewport="true"
+    android:background="@color/white" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -81,6 +82,7 @@
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/placeholder_long"
                 android:textColor="@color/dark_text"
+                android:textColorHighlight="@color/white"
                 android:textColorLink="@color/hyperlink_text_color"
                 android:textSize="18sp" />
 

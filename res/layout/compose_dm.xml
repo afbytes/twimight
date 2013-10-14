@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
+	the accompanying materials are made available under the terms of the GNU 
+	Public License v2.0 which accompanies this distribution, and is available 
+	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
+	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
+	- Message specification
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showNewDMRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:padding="@dimen/unit_step" >
+
+            <EditText
+                android:id="@+id/dmRecipient"
+                style="@style/RobotoLightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/dm_characters"
+                android:hint="@string/to"
+                android:singleLine="true"
+                android:textColor="@color/dark_text"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/dmText"
+                style="@style/RobotoLightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dmRecipient"
+                android:layout_marginTop="@dimen/unit_step"
+                android:hint="@string/message"
+                android:textColor="@color/dark_text"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@id/dm_characters"
+                style="@style/RobotoLightText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="@dimen/unit_step"
+                android:gravity="right"
+                android:text="@string/tweet_length"
+                android:textColor="@color/medium_gray"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dmText"
+                android:layout_marginTop="@dimen/unit_step" >
+
+                <Button
+                    android:id="@+id/dm_send"
+                    style="?attr/solidButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/half_step"
+                    android:layout_weight="1.0"
+                    android:text="@string/send" />
+
+                <Button
+                    android:id="@+id/dm_cancel"
+                    style="@style/Button.Outline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_weight="1.0"
+                    android:text="@string/cancel" />
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

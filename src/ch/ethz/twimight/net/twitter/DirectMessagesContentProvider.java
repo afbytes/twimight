@@ -30,8 +30,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ShowDMListActivity;
-import ch.ethz.twimight.activities.ShowDMUsersListActivity;
+import ch.ethz.twimight.activities.DmListActivity;
+import ch.ethz.twimight.activities.DmConversationListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -593,7 +593,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				// are we the receiver?
 				if(values.containsKey(DirectMessages.COL_RECEIVER) && Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(LoginActivity.getTwitterId(getContext()))){
 					
-					if ( (!ShowDMUsersListActivity.running && !ShowDMListActivity.running) && hasBeenExecuted()  &&
+					if ( (!DmConversationListActivity.running && !DmListActivity.running) && hasBeenExecuted()  &&
 							PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyDirectMessages", true) == true ) {
 						// notify user
 						notifyUser(NOTIFY_DM, values.getAsString(DirectMessages.COL_SENDER)+": "+values.getAsString(DirectMessages.COL_TEXT));
@@ -639,7 +639,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		
 		CharSequence contentTitle = getContext().getString(R.string.dm_content_title);
 		CharSequence contentText = "New DirectMessages!";
-		Intent notificationIntent = new Intent(getContext(), ShowDMUsersListActivity.class);
+		Intent notificationIntent = new Intent(getContext(), DmConversationListActivity.class);
 		PendingIntent contentIntent;
 		switch(type){
 		case(NOTIFY_DM):

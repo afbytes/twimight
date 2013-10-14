@@ -96,7 +96,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ShowUserTweetListActivity"
+            android:name=".activities.UserTweetListActivity"
             android:label="User Tweets"
             android:launchMode="singleTop" >
             <meta-data
@@ -128,7 +128,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ShowDMUsersListActivity"
+            android:name=".activities.DmConversationListActivity"
             android:label="Direct Messages"
             android:launchMode="singleTop" >
             <meta-data
@@ -136,7 +136,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ShowDMListActivity"
+            android:name=".activities.DmListActivity"
             android:label="Direct Messages" >
             <meta-data
                 android:name="android.app.default_searchable"
@@ -149,10 +149,11 @@
             android:windowSoftInputMode="adjustResize" 
             android:theme="@style/TranslucentTheme"/>
         <activity
-            android:name=".activities.NewDMActivity"
+            android:name=".activities.ComposeDmActivity"
             android:label="Twimight"
-            android:theme="@style/Theme.Transparent"
-            android:windowSoftInputMode="stateAlwaysVisible" />
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" 
+            android:theme="@style/TranslucentTheme" />
         <activity
             android:name=".activities.SettingsActivity"
             android:label="Settings"/>
