@@ -1,39 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="grey">#999999</color>
-    <color name="red">#ff0000</color>
-    <color name="title">#ffffff</color>
     <color name="transparent">#00000000</color>
-    <color name="tweet_background">#dddddd</color>
-    <color name="text">#000000</color>
-    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="titlenormalbackgroundcolor">#939393</color>
-    <color name="titledisasterbackgroundcolor">#ff0000</color>
-    <color name="general_background_end">#61421F</color>
-    <color name="general_background_start">#272010</color>
-    <color name="dm_background_disaster_start">#FD8566</color>
-    <color name="dm_background_disaster_end">#FD6466</color>
-
-    <!-- new UI colors -->
-    <color name="twimightBackgroundLight">#dbe4f3</color>
-    <color name="twimightBackgroundDark">#cad4e4</color>
-    <color name="twimightTextDark">#353f50</color>
-    <color name="twimightTextLight">#838e9e</color>
-    <color name="twimightHeaderBackground">#627595</color>
-    <color name="twimightSeparator">#88FFFFFF</color>
-    <color name="twimightButtonBackground">#838e9e</color>
-    <color name="twimightButtonBackgroundShadow">#404a5b</color>
-    <color name="twimightBackgroundOwn">#e4dbf3</color>
-    <color name="twimightBackgroundMention">#dbf3e4</color>
-    <color name="twimightBackgroundDisaster">#ffe4db</color>
-    <color name="twimightHeaderBackgroundDisaster">#bb5454</color>
-    <color name="twimightImageBorder">#747474</color>
-
-    <!-- new colors -->
-
-    <color name="activityBackground">#ffffff</color>
+    <color name="white">#FFFFFF</color>
     <color name="accent_normalmode_1">#0099cc</color>
     <color name="accent_normalmode_2">#33b5e5</color>
     <color name="accent_normalmode_3">#85d3ef</color>
@@ -45,7 +15,6 @@
     <color name="list_background">#f0f0f0</color>
     <color name="dark_text">#303030</color>
     <color name="light_gray">#eaeaea</color>
-    <color name="list_item_disabled_background">#e0e0e0</color>
     <color name="lighter_gray">#f0f0f0</color>
     <color name="lightest_gray">#f4f4f4</color>
     <color name="medium_gray">#a0a0a0</color>

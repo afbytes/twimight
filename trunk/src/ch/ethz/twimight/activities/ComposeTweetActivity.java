@@ -462,7 +462,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 				Intent i = new Intent(ComposeTweetActivity.this,
 						TwitterService.class);
 				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-				i.putExtra("rowId", new Long(insertUri.getLastPathSegment()));
+				i.putExtra("rowId", Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
 			}
 			finish();

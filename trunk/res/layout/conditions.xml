@@ -30,16 +30,17 @@
             android:textStyle="italic" />
 
         <!-- 0dp height trick to push the buttons to the bottom of the view -->
+
         <TextView
             android:id="@+id/textConditions"
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.0"
             android:layout_marginTop="@dimen/double_step"
-            android:textSize="16sp"
+            android:layout_weight="1.0"
+            android:text="@string/conditions"
             android:textColor="@color/dark_text"
-            android:text="@string/conditions" />
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,23 +49,23 @@
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/buttonAgree"
-                style="@style/Button.Solid.NormalMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/half_step"
-                android:layout_weight="1.0"
-                android:onClick="agreeToTerms"
-                android:text="@string/agree" />
-
-            <Button
                 android:id="@+id/buttonDecline"
                 style="@style/Button.Outline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/half_step"
+                android:layout_marginRight="@dimen/half_step"
                 android:layout_weight="1.0"
                 android:text="@string/decline" />
+
+            <Button
+                android:id="@+id/buttonAgree"
+                style="@style/Button.Solid.NormalMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/half_step"
+                android:layout_weight="1.0"
+                android:onClick="agreeToTerms"
+                android:text="@string/agree" />
         </LinearLayout>
     </LinearLayout>
 

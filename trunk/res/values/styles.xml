@@ -1,123 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
-    <!--
-    <style name="Button" parent="@android:style/Widget.Button">
-        <item name="android:gravity">center_vertical|center_horizontal</item>
-        <item name="android:textColor">#FFFFFFFF</item>
-        <item name="android:textSize">16dip</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:background">@drawable/button_custom</item>
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:paddingTop">7dp</item>
-        <item name="android:paddingBottom">7dp</item>
-    </style>
-    -->
-    <style name="ImageButton" parent="@android:style/Widget.ImageButton">
-        <item name="android:gravity">center_vertical|center_horizontal</item>
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:paddingTop">7dp</item>
-        <item name="android:paddingBottom">7dp</item>
-    </style>
-
-    <style name="title">
-        <item name="android:textSize">40sp</item>
-        <item name="android:textColor">@color/title</item>
-        <item name="android:gravity">center</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:padding">10px</item>
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-
-    <style name="twimightDefaultTextAppearance" parent="@android:style/TextAppearance">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/twimightTextDark</item>
-    </style>
-
-    <style name="MyActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@drawable/top_bar_background</item>
-        <item name="android:backgroundStacked">@color/twimightBackgroundLight</item>
-        <item name="android:displayOptions">showHome</item>
-        <item name="android:homeAsUpIndicator">@drawable/action_button</item>
-        <item name="android:icon">@drawable/mightybird02</item>
-        <item name="android:titleTextStyle">@style/TitleTextStyle</item>
-        <item name="android:indeterminateProgressStyle">@style/IndeterminateProgress</item>
-    </style>
-
-    <style name="IndeterminateProgress" parent="@android:style/Widget.ProgressBar.Small">
-        <item name="android:indeterminateDrawable">@drawable/progress_spinner_actionbar</item>
-    </style>
-
-    <style name="TitleTextStyle" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <style name="ActionBarTabStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_bar_background</item>
-    </style>
-
-    <!-- Holo redesign -->
-
-
     <!-- TextView restyling with the most commonly used values. -->
     <style name="RobotoLightText" parent="android:Widget.TextView">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:includeFontPadding">false</item>
-    </style>
-
-    <style name="TitleText">
-        <item name="android:textSize">32sp</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="TitleText.Normal">
-        <item name="android:textColor">@color/accent_normalmode_1</item>
-    </style>
-
-    <style name="TitleText.Disaster" parent="TitleText">
-        <item name="android:textColor">@color/accent_disastermode_1</item>
-    </style>
-
-    <style name="MediumTitleText">
-        <item name="android:textStyle">italic</item>
-        <item name="android:textSize">24sp</item>
-        <item name="android:textColor">@color/dark_text</item>
-        <item name="android:includeFontPadding">false</item>
-    </style>
-
-    <style name="SmallTitleText">
-        <item name="android:textStyle">italic</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:textColor">@color/dark_text</item>
-        <item name="android:includeFontPadding">false</item>
-    </style>
-
-    <style name="TinyTitleText">
-        <item name="android:textStyle">italic</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/medium_gray</item>
-        <!-- <item name="android:includeFontPadding">false</item> -->
-    </style>
-
-    <style name="NormalText">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/dark_text</item>
-    </style>
-
-    <style name="BigText">
-        <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/dark_text</item>
-        <item name="android:textColorLink">@color/medium_gray</item>
-        <item name="android:lineSpacingMultiplier">1.2</item>
-    </style>
-
-    <style name="LightText">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/medium_gray</item>
     </style>
 
     <style name="HugeText">
@@ -271,10 +158,9 @@
         <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
         <item name="android:listSelector">@drawable/list_selector_background_normalmode</item>
     </style>
-    
+
     <style name="ActionViewStyle" parent="@android:style/Theme.Holo">
         <item name="android:background">@color/black</item>
-        
     </style>
     <!--
     ******************* 

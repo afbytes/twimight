@@ -23,7 +23,6 @@
         android:protectionLevel="dangerous" />
 
     <application
-        android:debuggable="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_label" >

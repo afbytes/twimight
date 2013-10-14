@@ -10,9 +10,9 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.ShowTweetFragment.OnTweetDeletedListener;
+import ch.ethz.twimight.fragments.TweetDetailFragment.OnTweetDeletedListener;
 import ch.ethz.twimight.fragments.TweetListFragment;
-import ch.ethz.twimight.fragments.adapters.ShowTweetPageAdapter;
+import ch.ethz.twimight.fragments.adapters.TweetDetailPageAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 
 public class TweetDetailActivity extends TwimightBaseActivity implements
@@ -44,7 +44,7 @@ public class TweetDetailActivity extends TwimightBaseActivity implements
 
 		ArrayList<Long> rowIdList = getRowIds(type);
 		if (rowIdList != null) {
-			ShowTweetPageAdapter pageAdapter = new ShowTweetPageAdapter(
+			TweetDetailPageAdapter pageAdapter = new TweetDetailPageAdapter(
 					getFragmentManager(), rowIdList);
 			viewPager = (ViewPager) findViewById(R.id.viewpager);
 			viewPager.setAdapter(pageAdapter);

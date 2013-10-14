@@ -171,24 +171,24 @@
                 android:layout_marginTop="@dimen/unit_step" >
 
                 <Button
-                    android:id="@+id/tweet_send"
-                    style="?attr/solidButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/half_step"
-                    android:layout_weight="1.0"
-                    android:onClick="sendTweet"
-                    android:text="@string/tweet" />
-
-                <Button
                     android:id="@+id/tweet_cancel"
                     style="@style/Button.Outline"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_marginRight="@dimen/half_step"
                     android:layout_weight="1.0"
                     android:onClick="cancel"
                     android:text="@string/cancel" />
+
+                <Button
+                    android:id="@+id/tweet_send"
+                    style="?attr/solidButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_weight="1.0"
+                    android:onClick="sendTweet"
+                    android:text="@string/tweet" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

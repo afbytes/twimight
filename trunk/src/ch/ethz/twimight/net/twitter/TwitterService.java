@@ -1170,7 +1170,6 @@ public class TwitterService extends Service {
 	 * @param tweet
 	 * @return The tweet text with the spans
 	 */	
-	@SuppressWarnings("unchecked")
 	private SpanResult createSpans(Status tweet){
 
 		if(tweet==null) return null;

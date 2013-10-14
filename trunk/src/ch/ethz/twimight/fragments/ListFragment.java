@@ -23,7 +23,7 @@ public abstract class ListFragment extends Fragment implements
 	Intent overscrollIntent;
 	int type;
 	ContentResolver resolver;
-	ListAdapter adapter;
+	ListAdapter mlistAdapter;
 	// String query;
 	PullToRefreshListView list;
 	protected static final String TAG = "ListFragment";
@@ -49,7 +49,7 @@ public abstract class ListFragment extends Fragment implements
 				.inflate(R.layout.fragment_layout, container, false);
 		list = (PullToRefreshListView) view.findViewById(R.id.tweetListView);
 
-		list.setAdapter(adapter);
+		list.setAdapter(mlistAdapter);
 		list.registerListener(this);
 
 		return list;
@@ -67,8 +67,8 @@ public abstract class ListFragment extends Fragment implements
 		// the search filter
 		// query = newText;
 
-		adapter = getData(type);
-		list.setAdapter(adapter);
+		mlistAdapter = getData(type);
+		list.setAdapter(mlistAdapter);
 	}
 
 	/**

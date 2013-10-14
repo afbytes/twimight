@@ -81,7 +81,7 @@ import ch.ethz.twimight.util.TweetTagHandler;
  * @author pcarta
  */
 @SuppressLint("ValidFragment")
-public class ShowTweetFragment extends Fragment {
+public class TweetDetailFragment extends Fragment {
 
 	private static final String ARG_KEY_ROWID = "rowId";
 
@@ -155,8 +155,8 @@ public class ShowTweetFragment extends Fragment {
 		}
 	}
 
-	public static ShowTweetFragment newInstance(long rowId) {
-		ShowTweetFragment instance = new ShowTweetFragment();
+	public static TweetDetailFragment newInstance(long rowId) {
+		TweetDetailFragment instance = new TweetDetailFragment();
 		Bundle args = new Bundle();
 		args.putLong(ARG_KEY_ROWID, rowId);
 		instance.setArguments(args);
@@ -222,8 +222,6 @@ public class ShowTweetFragment extends Fragment {
 						unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 					}
 				}
-				
-				
 
 				handleTweetFlags();
 				setupButtons();
@@ -235,7 +233,7 @@ public class ShowTweetFragment extends Fragment {
 					Log.i(TAG, "requesting tweet update to twitter");
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-					i.putExtra("rowId", new Long(uri.getLastPathSegment()));
+					i.putExtra("rowId", Long.valueOf(uri.getLastPathSegment()));
 					activity.startService(i);
 				}
 			}
@@ -418,8 +416,7 @@ public class ShowTweetFragment extends Fragment {
 	}
 
 	/**
-	 * method to handle tweet's flags
-	 * 
+	 * Sets the visibility of the info icons according to the tweet's flags.
 	 */
 	private void handleTweetFlags() {
 		LinearLayout toSendNotification = (LinearLayout) view
@@ -594,8 +591,7 @@ public class ShowTweetFragment extends Fragment {
 		favoriteButton = (ImageButton) view
 				.findViewById(R.id.showTweetFavorite);
 		if (favorited && !((flags & Tweets.FLAG_TO_UNFAVORITE) > 0)) {
-			favoriteButton
-					.setImageResource(R.drawable.ic_favorite_on);
+			favoriteButton.setImageResource(R.drawable.ic_favorite_on);
 		}
 		favoriteButton.setOnClickListener(new OnClickListener() {
 
@@ -641,8 +637,9 @@ public class ShowTweetFragment extends Fragment {
 				public void onClick(View v) {
 
 					downloadAndInsert();
-					offlineButton
-							.setImageResource(R.drawable.btn_twimight_archive_on);
+					// TODO: Fix download functionality and apply appropriate icon
+//					offlineButton
+//							.setImageResource(R.drawable.btn_twimight_archive_on);
 
 				}
 
@@ -971,8 +968,8 @@ public class ShowTweetFragment extends Fragment {
 		String retweeted_by = c.getString(c
 				.getColumnIndex(Tweets.COL_RETWEETED_BY));
 		if (retweeted_by != null) {
-			tvRetweetedBy.setText(getString(R.string.retweeted_by)
-					+ " @" + retweeted_by);
+			tvRetweetedBy.setText(getString(R.string.retweeted_by) + " @"
+					+ retweeted_by);
 			tvRetweetedBy.setVisibility(View.VISIBLE);
 		} else {
 			tvRetweetedBy.setVisibility(View.GONE);
@@ -1262,7 +1259,6 @@ public class ShowTweetFragment extends Fragment {
 
 		@Override
 		public boolean deliverSelfNotifications() {
-
 			return true;
 		}
 
