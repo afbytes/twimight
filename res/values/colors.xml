@@ -33,25 +33,26 @@
 
     <!-- new colors -->
 
-    <color name="activityBackground">#FFFFFF</color>
-    <color name="accent_normalmode_1">#0099CC</color>
-    <color name="accent_normalmode_2">#33B5E5</color>
+    <color name="activityBackground">#ffffff</color>
+    <color name="accent_normalmode_1">#0099cc</color>
+    <color name="accent_normalmode_2">#33b5e5</color>
     <color name="accent_normalmode_3">#85d3ef</color>
-    <color name="accent_normalmode_4">#99DAF2</color>
-    <color name="accent_disastermode_1">#CC0000</color>
-    <color name="accent_disastermode_2">#FF4444</color>
+    <color name="accent_normalmode_4">#99daf2</color>
+    <color name="accent_disastermode_1">#cc0000</color>
+    <color name="accent_disastermode_2">#ff4444</color>
     <color name="accent_disastermode_3">#f08686</color>
-    <color name="accent_disastermode_4">#FFA1A1</color>
-    <color name="list_background">#F0F0F0</color>
+    <color name="accent_disastermode_4">#ffa1a1</color>
+    <color name="list_background">#f0f0f0</color>
     <color name="dark_text">#303030</color>
     <color name="light_gray">#eaeaea</color>
     <color name="list_item_disabled_background">#e0e0e0</color>
     <color name="lighter_gray">#f0f0f0</color>
+    <color name="lightest_gray">#f4f4f4</color>
     <color name="medium_gray">#a0a0a0</color>
     <color name="image_overlay_button_bg_default">#88000000</color>
     <color name="image_overlay_button_bg_pressed">#44000000</color>
-    <color name="pressed_normalmode">#CC33B5E5</color>
-    <color name="pressed_disastermode">#CCFF4444</color>
-    <color name="white_semi_transparent">#88FFFFFF</color>
+    <color name="pressed_normalmode">#cc33b5e5</color>
+    <color name="pressed_disastermode">#ccff4444</color>
+    <color name="white_semi_transparent">#88ffffff</color>
 
 </resources>

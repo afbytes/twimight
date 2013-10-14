@@ -102,6 +102,9 @@
     <string name="dm_content_title">New Direct Messages!</string>
     <string name="dm_content_text">You have new direct message(s)</string>
     <string name="send">Send</string>
+    <string name="with">with</string>
+    <string name="direct_messages">Direct Messages</string>
+    <string name="delete_dm">Delete Direct Message</string>
 
     <!-- Tweet Notification -->
     <string name="tweet_content_title">New Tweet(s)!</string>
