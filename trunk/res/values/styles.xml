@@ -271,6 +271,11 @@
         <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
         <item name="android:listSelector">@drawable/list_selector_background_normalmode</item>
     </style>
+    
+    <style name="ActionViewStyle" parent="@android:style/Theme.Holo">
+        <item name="android:background">@color/black</item>
+        
+    </style>
     <!--
     ******************* 
     DisasterMode styles

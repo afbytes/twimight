@@ -26,7 +26,7 @@
         android:debuggable="true"
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_label">
+        android:label="@string/app_label" >
         <activity
             android:name=".activities.ConditionsActivity"
             android:label="Twimight"
@@ -137,7 +137,7 @@
         </activity>
         <activity
             android:name=".activities.DmListActivity"
-            android:label="Direct Messages" >
+            android:label="Direct Messages">
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
@@ -146,17 +146,17 @@
             android:name=".activities.ComposeTweetActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize" 
-            android:theme="@style/TranslucentTheme"/>
+            android:theme="@style/TranslucentTheme"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.ComposeDmActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize" 
-            android:theme="@style/TranslucentTheme" />
+            android:theme="@style/TranslucentTheme"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="Settings"/>
+            android:label="Settings" />
         <activity
             android:name=".activities.AboutActivity"
             android:label="About Twimight"
@@ -237,7 +237,6 @@
         <provider
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
             android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
-
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

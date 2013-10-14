@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/showDM"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/borderless_button_background"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:padding="@dimen/unit_step" >
+
+        <ImageView
+            android:id="@+id/showDMProfileImage"
+            android:layout_width="@dimen/profile_image_size"
+            android:layout_height="@dimen/profile_image_size"
+            android:background="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/unit_step"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/showDMScreenName"
+                    style="@style/RobotoLightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_toLeftOf="@+id/tvCreatedAt"
+                    android:minLines="1"
+                    android:singleLine="true"
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/dark_text"
+                    android:textSize="20sp"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:id="@+id/dmCreatedAt"
+                    style="@style/RobotoLightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/showDMScreenName"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="right"
+                    android:layout_marginLeft="5dp"
+                    android:singleLine="true"
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/showDMText"
+                style="@style/RobotoLightText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/placeholder_long"
+                android:textColor="@color/dark_text"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/dmToPost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_small_pending" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/modeStripe"
+        android:layout_width="6dp"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
