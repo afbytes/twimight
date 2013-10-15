@@ -113,7 +113,7 @@ public class TweetDetailFragment extends Fragment {
 	String text;
 	String screenName;
 
-	protected String TAG = "ShowTweetFragment";
+	protected String TAG = "TweetDetailFragment";
 
 	// LOGS
 	LocationHelper locHelper;
@@ -167,7 +167,6 @@ public class TweetDetailFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		// TODO Auto-generated method stub
 		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for activity fragment
 		view = inflater.inflate(R.layout.tweet_detail, container, false);
@@ -196,9 +195,7 @@ public class TweetDetailFragment extends Fragment {
 			if (c.getCount() == 0) {
 				activity.getFragmentManager().beginTransaction().remove(this)
 						.commit();
-			}
-
-			else {
+			} else {
 				// register content observer to refresh when user was updated
 				handler = new Handler();
 
@@ -398,8 +395,9 @@ public class TweetDetailFragment extends Fragment {
 
 	private void queryContentProvider() {
 		// get data from local DB and mark for update
-		if (c != null && !c.isClosed())
+		if (c != null && !c.isClosed()) {
 			c.close();
+		}
 
 		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 				+ Tweets.TWEETS + "/" + rowId);
@@ -410,8 +408,9 @@ public class TweetDetailFragment extends Fragment {
 			c.moveToFirst();
 			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
 			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-		} else
+		} else {
 			Log.i(TAG, "cursor not ok");
+		}
 
 	}
 
@@ -637,9 +636,10 @@ public class TweetDetailFragment extends Fragment {
 				public void onClick(View v) {
 
 					downloadAndInsert();
-					// TODO: Fix download functionality and apply appropriate icon
-//					offlineButton
-//							.setImageResource(R.drawable.btn_twimight_archive_on);
+					// TODO: Fix download functionality and apply appropriate
+					// icon
+					// offlineButton
+					// .setImageResource(R.drawable.btn_twimight_archive_on);
 
 				}
 

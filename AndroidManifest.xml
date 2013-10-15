@@ -10,7 +10,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
     android:versionCode="1700021"
-    android:versionName="1.0.0" >
+    android:versionName="1.1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -163,7 +163,7 @@
         <activity
             android:name=".activities.WebViewActivity"
             android:label="WebView"
-            android:theme="@android:style/Theme.NoTitleBar" />
+            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
 
         <service
             android:name=".net.tds.TDSService"
