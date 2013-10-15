@@ -9,7 +9,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
-    android:versionCode="1700021"
+    android:versionCode="1700022"
     android:versionName="1.1.0" >
 
     <uses-sdk
