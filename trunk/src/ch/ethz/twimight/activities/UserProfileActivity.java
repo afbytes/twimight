@@ -29,7 +29,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -107,12 +106,17 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		showDisPeersButton = (Button) findViewById(R.id.showUserDisasterPeers);
 		showUserTweetsButton = (Button) findViewById(R.id.showUserTweetsButton);
 
-		if (getIntent().hasExtra("rowId")) {
-			rowId = (long) getIntent().getIntExtra("rowId", 0);
+		initialize(getIntent());
+
+	}
+
+	private void initialize(Intent intent) {
+		if (intent.hasExtra("rowId")) {
+			rowId = (long) intent.getIntExtra("rowId", 0);
 
 			// get data from local DB
-			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY
-					+ "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/"
+					+ rowId);
 			c = getContentResolver().query(uri, null, null, null, null);
 
 			if (c.getCount() == 0)
@@ -120,24 +124,17 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 			c.moveToFirst();
 
-		} else if (getIntent().hasExtra("screenname")) {
+		} else if (intent.hasExtra("screenname")) {
 
-			Log.e(TAG, getIntent().getStringExtra("screenname"));
+			Log.e(TAG, intent.getStringExtra("screenname"));
 
 			// get data from local DB
-			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY
-					+ "/" + TwitterUsers.TWITTERUSERS);
-			c = getContentResolver().query(
-					uri,
-					null,
-					TwitterUsers.COL_SCREENNAME + " LIKE '"
-							+ getIntent().getStringExtra("screenname") + "'",
-					null, null);
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+			c = getContentResolver().query(uri, null,
+					TwitterUsers.COL_SCREENNAME + " LIKE '" + intent.getStringExtra("screenname") + "'", null, null);
 
 			if (c.getCount() == 0) {
-				Log.w(TAG,
-						"USER NOT FOUND "
-								+ getIntent().getStringExtra("screenname"));
+				Log.w(TAG, "USER NOT FOUND " + intent.getStringExtra("screenname"));
 				finish();
 				return;
 			}
@@ -153,8 +150,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		}
 
 		// mark the user for updating
-		uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY
-				+ "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+		uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/"
+				+ rowId);
 		ContentValues cv = new ContentValues();
 		cv.put(TwitterUsers.COL_FLAGS,
 				TwitterUsers.FLAG_TO_UPDATEIMAGE | TwitterUsers.FLAG_TO_UPDATE
@@ -172,7 +169,21 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 		// show the views
 		showUserInfo();
+	}
 
+	/**
+	 * Recreates this activity when it is launched from itself. This is needed
+	 * so that we can go from another user's profile to our own while using the
+	 * singleTop launch mode. Standard launch mode is not suitable because then
+	 * the user could create an infinite stack of own profile activities.
+	 */
+	@Override
+	protected void onNewIntent(Intent intent) {
+		// TODO Auto-generated method stub
+		super.onNewIntent(intent);
+		unregisterObserver();
+		removeOnClickListeners();
+		initialize(intent);
 	}
 
 	/**
@@ -192,6 +203,10 @@ public class UserProfileActivity extends TwimightBaseActivity {
 	@Override
 	public void onPause() {
 		super.onPause();
+		unregisterObserver();
+	}
+
+	private void unregisterObserver() {
 		if (c != null) {
 			if (observer != null)
 				try {
@@ -208,6 +223,16 @@ public class UserProfileActivity extends TwimightBaseActivity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		removeOnClickListeners();
+
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showUserRoot));
+
+		observer = null;
+		handler = null;
+
+	}
+
+	private void removeOnClickListeners() {
 		if (followButton != null)
 			followButton.setOnClickListener(null);
 		if (mentionButton != null)
@@ -220,12 +245,6 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			showFriendsButton.setOnClickListener(null);
 		if (showUserTweetsButton != null)
 			showUserTweetsButton.setOnClickListener(null);
-
-		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showUserRoot));
-
-		observer = null;
-		handler = null;
-
 	}
 
 	@Override
@@ -257,8 +276,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		// do we have a profile image?
 		if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
 			int userId = c.getInt(c.getColumnIndex("_id"));
-			Uri imageUri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);
 			InputStream is;
 
@@ -268,30 +286,25 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					profileImage.setImageBitmap(bm);
 				} else
-					profileImage
-							.setImageResource(R.drawable.profile_image_placeholder);
+					profileImage.setImageResource(R.drawable.profile_image_placeholder);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, "error opening input stream", e);
-				profileImage
-						.setImageResource(R.drawable.profile_image_placeholder);
+				profileImage.setImageResource(R.drawable.profile_image_placeholder);
 			}
 		}
-		userScreenName = c.getString(c
-				.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 		screenName.setText("@" + userScreenName);
 		realName.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_NAME)));
 
 		if (c.getColumnIndex(TwitterUsers.COL_LOCATION) >= 0) {
-			location.setText(c.getString(c
-					.getColumnIndex(TwitterUsers.COL_LOCATION)));
+			location.setText(c.getString(c.getColumnIndex(TwitterUsers.COL_LOCATION)));
 			location.setVisibility(TextView.VISIBLE);
 		} else {
 			location.setVisibility(TextView.GONE);
 		}
 
 		if (c.getColumnIndex(TwitterUsers.COL_DESCRIPTION) >= 0) {
-			String tmp = c.getString(c
-					.getColumnIndex(TwitterUsers.COL_DESCRIPTION));
+			String tmp = c.getString(c.getColumnIndex(TwitterUsers.COL_DESCRIPTION));
 			if (tmp != null) {
 				description.setText(tmp);
 				description.setVisibility(TextView.VISIBLE);
@@ -314,8 +327,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		statsFollowers.setText(numberFormat.format(followed));
 
 		// if the user we show is the local user, disable the follow button
-		if (isLocalUser(Long.toString(c.getLong(c
-				.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))))) {
+		if (isLocalUser(Long.toString(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))))) {
 			showLocalUser();
 		} else {
 			showRemoteUser();
@@ -327,11 +339,9 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 				@Override
 				public void onClick(View v) {
-					Intent i = new Intent(getBaseContext(),
-							UserTweetListActivity.class);
+					Intent i = new Intent(getBaseContext(), UserTweetListActivity.class);
 					c.moveToFirst();
-					int index = c
-							.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID);
+					int index = c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID);
 					if (index != -1) {
 						i.putExtra("userId", c.getLong(index));
 						startActivity(i);
@@ -359,7 +369,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		// hide info messages
 		followInfo.setVisibility(LinearLayout.GONE);
 		unfollowInfo.setVisibility(LinearLayout.GONE);
-		
+
 		// the followers Button
 		showFollowersButton.setVisibility(View.VISIBLE);
 		showFollowersButton.setOnClickListener(null);
@@ -367,10 +377,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(getBaseContext(),
-						UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
-						UserListFragment.FOLLOWERS_KEY);
+				Intent i = new Intent(getBaseContext(), UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.FOLLOWERS_KEY);
 				startActivity(i);
 
 			}
@@ -384,10 +392,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(getBaseContext(),
-						UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
-						UserListFragment.FRIENDS_KEY);
+				Intent i = new Intent(getBaseContext(), UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.FRIENDS_KEY);
 				startActivity(i);
 			}
 
@@ -398,10 +404,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 
-				Intent i = new Intent(getBaseContext(),
-						UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST,
-						UserListFragment.PEERS_KEY);
+				Intent i = new Intent(getBaseContext(), UserListActivity.class);
+				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.PEERS_KEY);
 				startActivity(i);
 
 			}
@@ -417,7 +421,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		showFollowersButton.setVisibility(View.GONE);
 		showFriendsButton.setVisibility(View.GONE);
 		showDisPeersButton.setVisibility(View.GONE);
-		
+
 		flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		Log.i(TAG, "showRemoteUser");
 		/*
@@ -438,14 +442,12 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 				if (following) {
-					getContentResolver().update(uri, setUnfollowFlag(flags),
-							null, null);
+					getContentResolver().update(uri, setUnfollowFlag(flags), null, null);
 					followButton.setVisibility(Button.GONE);
 					unfollowInfo.setVisibility(LinearLayout.VISIBLE);
 					following = false;
 				} else {
-					getContentResolver().update(uri, setFollowFlag(flags),
-							null, null);
+					getContentResolver().update(uri, setFollowFlag(flags), null, null);
 					followButton.setVisibility(Button.GONE);
 					followInfo.setVisibility(LinearLayout.VISIBLE);
 					following = true;
@@ -567,8 +569,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			super.onChange(selfChange);
 
 			// and get a new one
-			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY
-					+ "/" + TwitterUsers.TWITTERUSERS + "/" + rowId);
+			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/"
+					+ rowId);
 			c = getContentResolver().query(uri, null, null, null, null);
 			if (c.getCount() == 0)
 				finish();
