@@ -133,7 +133,7 @@
 
     <!-- About -->
     <string name="authors_title">Authors</string>
-    <string name="authors">Paolo Carta and Theus Hossmann</string>
+    <string name="authors">Paolo Carta\nTheus Hossmann\nSteven Meliopoulos</string>
     <string name="version_title">Version</string>
     <string name="keys_title">Keys</string>
     <string name="no_certificate">No valid certificate.</string>

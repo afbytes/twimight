@@ -128,7 +128,6 @@
 
     <!-- About -->
     <string name="authors_title">Autori</string>
-    <string name="authors">Paolo Carta e Theus Hossmann</string>
     <string name="version_title">Versione</string>
     <string name="keys_title">Chiavi</string>
     <string name="no_certificate">Nessun Certificato valido.</string>

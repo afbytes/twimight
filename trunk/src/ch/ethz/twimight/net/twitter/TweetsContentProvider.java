@@ -36,7 +36,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.ComposeTweetActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
@@ -266,7 +265,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_FLAGS + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_MEDIA + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_HTML_PAGES + ", "				
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_HTML_PAGES + ", "		
+					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_ISVERIFIED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." +Tweets.COL_RETWEETED_BY + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "

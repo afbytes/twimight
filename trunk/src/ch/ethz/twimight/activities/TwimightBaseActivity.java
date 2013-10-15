@@ -54,11 +54,9 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = true;
-	private boolean isDisasterThemeSet = false;
 
 	ActionBar actionBar;
 
-	private View bottomStatusBar;
 	private View progressBar;
 	private TextView tvNeighborCount;
 	private TextView tvStatus;
@@ -103,7 +101,6 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 
 		// bottom status bar (can't get it in onCreate because layout is not set
 		// yet)
-		bottomStatusBar = findViewById(R.id.bottomStatusBar);
 		progressBar = findViewById(R.id.progressBar);
 		tvNeighborCount = (TextView) findViewById(R.id.tvNeighborCount);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);

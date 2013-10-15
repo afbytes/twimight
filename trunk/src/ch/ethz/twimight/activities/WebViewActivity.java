@@ -77,6 +77,9 @@ public class WebViewActivity extends Activity {
 									c.getInt(c.getColumnIndex(HtmlPage.COL_ATTEMPTS)));
 			getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);		
 			Toast.makeText(getBaseContext(), getString(R.string.faulty_page), Toast.LENGTH_LONG).show();
+			if(progressBar.isShowing()){
+				progressBar.dismiss();
+			}
 			finish();
 			
 		}
