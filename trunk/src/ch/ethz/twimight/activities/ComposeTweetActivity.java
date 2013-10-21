@@ -114,9 +114,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mBtnSend = (Button) findViewById(R.id.tweet_send);
 		// User settings: do we use location or not?
 
-		useLocation = PreferenceManager
-				.getDefaultSharedPreferences(this)
-				.getBoolean("prefUseLocation", Constants.TWEET_DEFAULT_LOCATION);
+		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation",
+				Constants.TWEET_DEFAULT_LOCATION);
 
 		locationButton = (ImageButton) findViewById(R.id.tweet_location);
 		locationChecked = false;
@@ -126,19 +125,14 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			locationChecked = true;
 		}
 		// get username and picture
-		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY
-				+ "/" + TwitterUsers.TWITTERUSERS);
-		Cursor c = getContentResolver().query(
-				uri,
-				null,
-				TwitterUsers.COL_TWITTERUSER_ID + "="
-						+ LoginActivity.getTwitterId(this), null, null);
+		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+		Cursor c = getContentResolver().query(uri, null,
+				TwitterUsers.COL_TWITTERUSER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
 		c.moveToFirst();
 
 		if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
 			int userId = c.getInt(c.getColumnIndex("_id"));
-			Uri imageUri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);
 			InputStream is;
 			ImageView ivProfileImage = (ImageView) findViewById(R.id.ivProfileImage);
@@ -148,12 +142,10 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 					Bitmap bm = BitmapFactory.decodeStream(is);
 					ivProfileImage.setImageBitmap(bm);
 				} else
-					ivProfileImage
-							.setImageResource(R.drawable.profile_image_placeholder);
+					ivProfileImage.setImageResource(R.drawable.profile_image_placeholder);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, "error opening input stream", e);
-				ivProfileImage
-						.setImageResource(R.drawable.profile_image_placeholder);
+				ivProfileImage.setImageResource(R.drawable.profile_image_placeholder);
 			}
 		}
 		TextView tvName = (TextView) findViewById(R.id.tvName);
@@ -161,8 +153,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		tvName.setText(userName);
 
 		TextView tvScreenName = (TextView) findViewById(R.id.tvScreenname);
-		String userScreenName = c.getString(c
-				.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		String userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 		tvScreenName.setText("@" + userScreenName);
 
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -174,8 +165,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		// prepare image saving
 
 		tmpPhotoPath = Tweets.PHOTO_PATH + "/" + "tmp";
-		finalPhotoPath = Tweets.PHOTO_PATH + "/"
-				+ LoginActivity.getTwitterId(this);
+		finalPhotoPath = Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this);
 		String[] filePaths = { tmpPhotoPath, finalPhotoPath };
 		if (sdCardHelper.checkSDState(filePaths)) {
 
@@ -187,22 +177,19 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		Intent i = getIntent();
 		mEtTweetText = (EditText) findViewById(R.id.tweetText);
 		if (i.hasExtra("text")) {
-			mEtTweetText.setText(Html.fromHtml("<i>" + i.getStringExtra("text")
-					+ "</i>"));
+			mEtTweetText.setText(Html.fromHtml("<i>" + i.getStringExtra("text") + "</i>"));
 		}
 		if (mEtTweetText.getText().length() == 0) {
 			mBtnSend.setEnabled(false);
 		}
 
 		if (mEtTweetText.getText().length() > Constants.TWEET_LENGTH) {
-			mEtTweetText.setText(mEtTweetText.getText().subSequence(0,
-					Constants.TWEET_LENGTH));
+			mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH));
 			mEtTweetText.setSelection(mEtTweetText.getText().length());
 			mTvCharacterCounter.setTextColor(Color.RED);
 		}
 		mTvCharacterCounter = (TextView) findViewById(R.id.tweet_characters);
-		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH
-				- mEtTweetText.getText().length()));
+		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH - mEtTweetText.getText().length()));
 
 		if (i.hasExtra("isReplyTo")) {
 			isReplyTo = i.getLongExtra("isReplyTo", 0);
@@ -213,22 +200,18 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH));
 		textWatcher = new TextWatcher() {
 			public void afterTextChanged(Editable s) {
-				int nrCharacters = Constants.TWEET_LENGTH
-						- mEtTweetText.getText().length();
+				int nrCharacters = Constants.TWEET_LENGTH - mEtTweetText.getText().length();
 
 				if (nrCharacters < 0) {
-					mEtTweetText.setText(mEtTweetText.getText().subSequence(0,
-							Constants.TWEET_LENGTH));
+					mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH));
 					mEtTweetText.setSelection(mEtTweetText.getText().length());
-					nrCharacters = Constants.TWEET_LENGTH
-							- mEtTweetText.getText().length();
+					nrCharacters = Constants.TWEET_LENGTH - mEtTweetText.getText().length();
 				}
 
 				if (nrCharacters <= 0) {
 					mTvCharacterCounter.setTextColor(Color.RED);
 				} else {
-					mTvCharacterCounter.setTextColor(getResources().getColor(
-							R.color.medium_gray));
+					mTvCharacterCounter.setTextColor(getResources().getColor(R.color.medium_gray));
 				}
 
 				if (nrCharacters == Constants.TWEET_LENGTH) {
@@ -241,12 +224,10 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
 
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 			}
 		};
 		mEtTweetText.addTextChangedListener(textWatcher);
@@ -267,11 +248,9 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	public void previewPhoto(View unused) {
 		mImageView = new ImageView(ComposeTweetActivity.this);
 		mImageView.setImageBitmap(photo);
-		AlertDialog.Builder photoPreviewDialog = new AlertDialog.Builder(
-				ComposeTweetActivity.this);
-		photoPreviewDialog.setView(mImageView);
-		photoPreviewDialog.setNegativeButton("close", null);
-		photoPreviewDialog.show();
+		Intent intent = new Intent(this, PhotoViewActivity.class);
+		intent.putExtra(PhotoViewActivity.PHOTO_PATH_EXTRA, tmpPhotoUri.getPath());
+		startActivity(intent);
 	}
 
 	public void cancel(View unused) {
@@ -292,17 +271,14 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		if (!locationChecked) {
 
 			locHelper.registerLocationListener();
-			Toast.makeText(ComposeTweetActivity.this,
-					getString(R.string.location_on), Toast.LENGTH_SHORT).show();
+			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
 			locationButton.setImageResource(R.drawable.ic_location_on);
 			locationChecked = true;
 
 		} else {
 
 			locHelper.unRegisterLocationListener();
-			Toast.makeText(ComposeTweetActivity.this,
-					getString(R.string.location_off), Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_off), Toast.LENGTH_SHORT).show();
 			locationButton.setImageResource(R.drawable.ic_location_off);
 			locationChecked = false;
 		}
@@ -345,8 +321,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mEtTweetText.removeTextChangedListener(textWatcher);
 		textWatcher = null;
 
-		TwimightBaseActivity
-				.unbindDrawables(findViewById(R.id.composeTweetRoot));
+		TwimightBaseActivity.unbindDrawables(findViewById(R.id.composeTweetRoot));
 	}
 
 	/**
@@ -372,11 +347,9 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 			if (hasMedia) {
 				try {
-					finalPhotoName = "twimight" + String.valueOf(timestamp)
-							+ ".jpg";
-					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(
-							finalPhotoPath, finalPhotoName));// photoFileParent,
-																// photoFilename));
+					finalPhotoName = "twimight" + String.valueOf(timestamp) + ".jpg";
+					photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(finalPhotoPath, finalPhotoName));// photoFileParent,
+																											// photoFilename));
 					String fromFile = tmpPhotoUri.getPath();
 					String toFile = photoUri.getPath();
 					if (TwimightBaseActivity.D)
@@ -400,21 +373,16 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 			ContentValues cv = createContentValues();
 
-			if (PreferenceManager.getDefaultSharedPreferences(
-					ComposeTweetActivity.this).getBoolean("prefDisasterMode",
+			if (PreferenceManager.getDefaultSharedPreferences(ComposeTweetActivity.this).getBoolean("prefDisasterMode",
 					false) == true) {
 
 				// our own tweets go into the my disaster tweets buffer
-				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE
-						| Tweets.BUFFER_MYDISASTER);
+				cv.put(Tweets.COL_BUFFER, Tweets.BUFFER_TIMELINE | Tweets.BUFFER_MYDISASTER);
 
 				insertUri = getContentResolver().insert(
-						Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-								+ Tweets.TWEETS + "/"
-								+ Tweets.TWEETS_TABLE_TIMELINE + "/"
-								+ Tweets.TWEETS_SOURCE_DISASTER), cv);
-				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI,
-						null);
+						Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+								+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER), cv);
+				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 			} else {
 
 				// our own tweets go into the timeline buffer
@@ -423,24 +391,19 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 				cv.put(Tweets.COL_FLAGS, Tweets.FLAG_TO_INSERT);
 
 				insertUri = getContentResolver().insert(
-						Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-								+ Tweets.TWEETS + "/"
-								+ Tweets.TWEETS_TABLE_TIMELINE + "/"
-								+ Tweets.TWEETS_SOURCE_NORMAL), cv);
-				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI,
-						null);
+						Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+								+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), cv);
+				getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 				// getContentResolver().notifyChange(insertUri, null);
 				ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				if (cm.getActiveNetworkInfo() == null
-						|| !cm.getActiveNetworkInfo().isConnected()) {
+				if (cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnected()) {
 					result = true;
 				}
 			}
 			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null) {
 
 				Log.i(TAG, "writing log");
-				statsDBHelper.insertRow(locHelper.getLocation(), cm
-						.getActiveNetworkInfo().getTypeName(),
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
 						StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
 				Log.i(TAG, String.valueOf(hasMedia));
@@ -453,14 +416,12 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result)
-				Toast.makeText(ComposeTweetActivity.this,
-						getString(R.string.no_connection4), Toast.LENGTH_SHORT)
+				Toast.makeText(ComposeTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT)
 						.show();
 
 			if (insertUri != null) {
 				// schedule the tweet for uploading to twitter
-				Intent i = new Intent(ComposeTweetActivity.this,
-						TwitterService.class);
+				Intent i = new Intent(ComposeTweetActivity.this, TwitterService.class);
 				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
 				i.putExtra("rowId", Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
@@ -477,15 +438,11 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	private ContentValues createContentValues() {
 		ContentValues tweetContentValues = new ContentValues();
 
-		tweetContentValues.put(Tweets.COL_TEXT, mEtTweetText.getText()
-				.toString());
+		tweetContentValues.put(Tweets.COL_TEXT, mEtTweetText.getText().toString());
 
-		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, mEtTweetText.getText()
-				.toString());
-		tweetContentValues.put(Tweets.COL_TWITTERUSER,
-				LoginActivity.getTwitterId(this));
-		tweetContentValues.put(Tweets.COL_SCREENNAME,
-				LoginActivity.getTwitterScreenname(this));
+		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, mEtTweetText.getText().toString());
+		tweetContentValues.put(Tweets.COL_TWITTERUSER, LoginActivity.getTwitterId(this));
+		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
 		if (isReplyTo > 0) {
 			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
 		}
@@ -541,9 +498,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			Intent intent = new Intent();
 			intent.setType("image/*");
 			intent.setAction(Intent.ACTION_GET_CONTENT);
-			startActivityForResult(
-					Intent.createChooser(intent, getString(R.string.picker)),
-					PICK_FROM_FILE);
+			startActivityForResult(Intent.createChooser(intent, getString(R.string.picker)), PICK_FROM_FILE);
 		} else {
 			Log.i(TAG, "path for storing photos cannot be created!");
 			mPhotoPreviewContainer.setVisibility(View.GONE);
@@ -572,8 +527,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			Uri mImageGalleryUri = data.getData();
 
 			// get the real path for chosen photo
-			mImageGalleryUri = Uri.parse(sdCardHelper.getRealPathFromUri(
-					(Activity) ComposeTweetActivity.this, mImageGalleryUri));
+			mImageGalleryUri = Uri.parse(sdCardHelper.getRealPathFromUri((Activity) ComposeTweetActivity.this,
+					mImageGalleryUri));
 
 			// copy the photo from gallery to tmp directory
 

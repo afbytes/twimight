@@ -59,7 +59,7 @@ public class WebViewActivity extends Activity {
 				try {
 					wr.loadToWebView(web);
 				} catch (Exception e) {	
-					//Log.e(TAG,"faulty page",e);
+					Log.e(TAG,"faulty page",e);
 					markFaultyPage();					
 				}
 
