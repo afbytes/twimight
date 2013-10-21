@@ -17,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
@@ -75,7 +74,6 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	// the following are all to deal with location
 	private ImageButton locationButton;
 
-	private boolean locationChecked;
 	private TextWatcher textWatcher;
 
 	// uploading photos
@@ -118,11 +116,11 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 				Constants.TWEET_DEFAULT_LOCATION);
 
 		locationButton = (ImageButton) findViewById(R.id.tweet_location);
-		locationChecked = false;
 
 		if (useLocation) {
 			locationButton.setImageResource(R.drawable.ic_location_on);
-			locationChecked = true;
+		} else {
+			locationButton.setImageResource(R.drawable.ic_location_off);
 		}
 		// get username and picture
 		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
@@ -268,19 +266,16 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	}
 
 	public void toggleLocation(View unused) {
-		if (!locationChecked) {
-
-			locHelper.registerLocationListener();
-			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
-			locationButton.setImageResource(R.drawable.ic_location_on);
-			locationChecked = true;
-
-		} else {
-
+		if (useLocation) {
 			locHelper.unRegisterLocationListener();
 			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_off), Toast.LENGTH_SHORT).show();
 			locationButton.setImageResource(R.drawable.ic_location_off);
-			locationChecked = false;
+			useLocation = false;
+		} else {
+			locHelper.registerLocationListener();
+			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
+			locationButton.setImageResource(R.drawable.ic_location_on);
+			useLocation = true;
 		}
 	}
 
