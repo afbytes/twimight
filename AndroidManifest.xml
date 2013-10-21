@@ -136,7 +136,7 @@
         </activity>
         <activity
             android:name=".activities.DmListActivity"
-            android:label="Direct Messages">
+            android:label="Direct Messages" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
@@ -236,6 +236,11 @@
         <provider
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
             android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
+
+        <activity
+            android:name=".activities.PhotoViewActivity"
+            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

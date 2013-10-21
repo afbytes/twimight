@@ -57,10 +57,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ComposeTweetActivity;
-import ch.ethz.twimight.activities.UserProfileActivity;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.PhotoViewActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
@@ -94,6 +95,8 @@ public class TweetDetailFragment extends Fragment {
 	private TextView tvTweetCreationDetails;
 	private TextView tvRetweetedBy;
 
+	private String mPhotoPath;
+	
 	private LinearLayout userInfoView;
 	ImageButton retweetButton;
 	ImageButton deleteButton;
@@ -285,13 +288,26 @@ public class TweetDetailFragment extends Fragment {
 				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(
 						photoPath, photoFileName));// photoFileParent,
 													// photoFilename));
+				mPhotoPath = photoUri.getPath();
 				Bitmap photo = sdCardHelper
-						.decodeBitmapFile(photoUri.getPath());
+						.decodeBitmapFile(mPhotoPath);
 				photoView.setImageBitmap(photo);
 				photoView.setVisibility(View.VISIBLE);
+				photoView.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						viewPhoto();
+					}
+				});
 			}
 		}
-
+	}
+	
+	public void viewPhoto(){
+		Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
+		intent.putExtra(PhotoViewActivity.PHOTO_PATH_EXTRA, mPhotoPath);
+		startActivity(intent);
 	}
 
 	private void setHtml() {
