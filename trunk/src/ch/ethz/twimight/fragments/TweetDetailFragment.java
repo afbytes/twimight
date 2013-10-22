@@ -112,7 +112,7 @@ public class TweetDetailFragment extends Fragment {
 	int flags;
 	int buffer;
 	int userRowId;
-	long rowId;
+	long mRowId;
 	String text;
 	String screenName;
 
@@ -185,13 +185,13 @@ public class TweetDetailFragment extends Fragment {
 		// if we are creating a new instance, get row id from arguments,
 		// otherwise from saved instance state
 		if (savedInstanceState == null) {
-			rowId = getArguments().getLong(ARG_KEY_ROWID);
+			mRowId = getArguments().getLong(ARG_KEY_ROWID);
 		} else {
-			rowId = savedInstanceState.getLong(ARG_KEY_ROWID);
+			mRowId = savedInstanceState.getLong(ARG_KEY_ROWID);
 		}
 
 		// If we don't know which tweet to show, we stop the activity
-		if (rowId != 0) {
+		if (mRowId != 0) {
 
 			queryContentProvider();
 
@@ -416,7 +416,7 @@ public class TweetDetailFragment extends Fragment {
 		}
 
 		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-				+ Tweets.TWEETS + "/" + rowId);
+				+ Tweets.TWEETS + "/" + mRowId);
 		c = resolver.query(uri, null, null, null, null);
 
 		if (c != null && c.getCount() > 0) {
@@ -1289,7 +1289,7 @@ public class TweetDetailFragment extends Fragment {
 
 			// and get a new one
 			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-					+ Tweets.TWEETS + "/" + rowId);
+					+ Tweets.TWEETS + "/" + mRowId);
 			c = resolver.query(uri, null, null, null, null);
 			if (c.getCount() == 1) {
 
