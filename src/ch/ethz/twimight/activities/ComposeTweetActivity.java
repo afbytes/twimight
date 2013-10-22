@@ -16,6 +16,8 @@ package ch.ethz.twimight.activities;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import winterwell.jtwitter.Twitter;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
@@ -74,7 +76,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	// the following are all to deal with location
 	private ImageButton locationButton;
 
-	private TextWatcher textWatcher;
+	private TextWatcher mTextWatcher;
 
 	// uploading photos
 	private static final int PICK_FROM_CAMERA = 1;
@@ -196,29 +198,32 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		// This makes sure we do not enter more than 140 characters
 
 		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH));
-		textWatcher = new TextWatcher() {
+		mTextWatcher = new TextWatcher() {
 			public void afterTextChanged(Editable s) {
-				int nrCharacters = Constants.TWEET_LENGTH - mEtTweetText.getText().length();
+				int usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+				int usedMediaChars = hasMedia ? 23 : 0;
+				int numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
 
-				if (nrCharacters < 0) {
-					mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH));
+				if (numCharsLeft < 0) {
+					mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH - usedMediaChars));
 					mEtTweetText.setSelection(mEtTweetText.getText().length());
-					nrCharacters = Constants.TWEET_LENGTH - mEtTweetText.getText().length();
+					usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+					numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
 				}
 
-				if (nrCharacters <= 0) {
+				if (numCharsLeft <= 0) {
 					mTvCharacterCounter.setTextColor(Color.RED);
 				} else {
 					mTvCharacterCounter.setTextColor(getResources().getColor(R.color.medium_gray));
 				}
 
-				if (nrCharacters == Constants.TWEET_LENGTH) {
+				if (numCharsLeft == Constants.TWEET_LENGTH) {
 					mBtnSend.setEnabled(false);
 				} else {
 					mBtnSend.setEnabled(true);
 				}
 
-				mTvCharacterCounter.setText(Integer.toString(nrCharacters));
+				mTvCharacterCounter.setText(Integer.toString(numCharsLeft));
 
 			}
 
@@ -228,7 +233,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 			}
 		};
-		mEtTweetText.addTextChangedListener(textWatcher);
+		mEtTweetText.addTextChangedListener(mTextWatcher);
 		mEtTweetText.setSelection(mEtTweetText.getText().length());
 
 	}
@@ -259,8 +264,13 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		sdCardHelper.deleteFile(tmpPhotoUri.getPath());
 		hasMedia = false;
 		mPhotoPreviewContainer.setVisibility(View.GONE);
+		triggerCharacterCounter();
 	}
 
+	private void triggerCharacterCounter(){
+		mEtTweetText.setText(mEtTweetText.getText());
+	}
+	
 	public void sendTweet(View unused) {
 		new SendTweetTask().execute();
 	}
@@ -313,8 +323,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		if (locHelper != null)
 			locHelper.unRegisterLocationListener();
 
-		mEtTweetText.removeTextChangedListener(textWatcher);
-		textWatcher = null;
+		mEtTweetText.removeTextChangedListener(mTextWatcher);
+		mTextWatcher = null;
 
 		TwimightBaseActivity.unbindDrawables(findViewById(R.id.composeTweetRoot));
 	}
@@ -541,5 +551,6 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	private void enablePreview() {
 		mPhotoPreview.setImageBitmap(photo);
 		mPhotoPreviewContainer.setVisibility(View.VISIBLE);
+		triggerCharacterCounter();
 	}
 }
