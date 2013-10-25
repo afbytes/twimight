@@ -8,7 +8,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
@@ -20,6 +19,8 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 
 public class PullToRefreshListView extends LinearLayout {
+
+//	private static final String TAG = PullToRefreshListView.class.getName();
 
 	/**
 	 * Interface to be implemented by refresh event receivers.
@@ -34,8 +35,7 @@ public class PullToRefreshListView extends LinearLayout {
 	}
 
 	private enum State {
-		SCROLL_LIST(0), PULL_TOP_STAGE_1(1), PULL_TOP_STAGE_2(1), PULL_BOTTOM_STAGE_1(
-				-1), PULL_BOTTOM_STAGE_2(-1);
+		SCROLL_LIST(0), PULL_TOP_STAGE_1(1), PULL_TOP_STAGE_2(1), PULL_BOTTOM_STAGE_1(-1), PULL_BOTTOM_STAGE_2(-1);
 
 		private final int mDirectionFactor;
 
@@ -47,7 +47,7 @@ public class PullToRefreshListView extends LinearLayout {
 			return mDirectionFactor;
 		}
 	}
-	
+
 	// private static final String TAG = "PullToRefreshListView2";
 
 	private ListView mListView;
@@ -73,10 +73,7 @@ public class PullToRefreshListView extends LinearLayout {
 	private static final float FRICTION_STAGE_2 = 8f;
 	private static final float STAGE_1_LENGTH = 200;
 	private static final int ANIMATION_DURATION_MS = 100;
-	private static final float MAX_ABS_PULL_DISTANCE_STAGE_1 = STAGE_1_LENGTH
-			* FRICTION_STAGE_1;
-
-	private int mTouchSlop;
+	private static final float MAX_ABS_PULL_DISTANCE_STAGE_1 = STAGE_1_LENGTH * FRICTION_STAGE_1;
 
 	private final Set<PullToRefreshListener> mListeners = new HashSet<PullToRefreshListener>();
 
@@ -90,8 +87,7 @@ public class PullToRefreshListView extends LinearLayout {
 		initialize();
 	}
 
-	public PullToRefreshListView(Context context, AttributeSet attrs,
-			int defStyle) {
+	public PullToRefreshListView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		initialize();
 	}
@@ -99,28 +95,23 @@ public class PullToRefreshListView extends LinearLayout {
 	private void initialize() {
 		setOrientation(VERTICAL);
 		setBackgroundColor(getResources().getColor(R.color.list_background));
-		mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 		// animations
-		mHalfRotationCcw = new RotateAnimation(0, -180,
-				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+		mHalfRotationCcw = new RotateAnimation(0, -180, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		mHalfRotationCcw.setInterpolator(new LinearInterpolator());
 		mHalfRotationCcw.setDuration(ANIMATION_DURATION_MS);
 		mHalfRotationCcw.setFillAfter(true);
-		mHalfRotationCcwReverse = new RotateAnimation(-180, 0,
-				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+		mHalfRotationCcwReverse = new RotateAnimation(-180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		mHalfRotationCcwReverse.setInterpolator(new LinearInterpolator());
 		mHalfRotationCcwReverse.setDuration(ANIMATION_DURATION_MS);
 		mHalfRotationCcwReverse.setFillAfter(true);
-		mHalfRotationCw = new RotateAnimation(0, 180,
-				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+		mHalfRotationCw = new RotateAnimation(0, 180, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		mHalfRotationCw.setInterpolator(new LinearInterpolator());
 		mHalfRotationCw.setDuration(ANIMATION_DURATION_MS);
 		mHalfRotationCw.setFillAfter(true);
-		mHalfRotationCwReverse = new RotateAnimation(180, 0,
-				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+		mHalfRotationCwReverse = new RotateAnimation(180, 0, RotateAnimation.RELATIVE_TO_SELF, 0.5f,
 				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
 		mHalfRotationCwReverse.setInterpolator(new LinearInterpolator());
 		mHalfRotationCwReverse.setDuration(ANIMATION_DURATION_MS);
@@ -130,33 +121,22 @@ public class PullToRefreshListView extends LinearLayout {
 		mListView.setBackgroundDrawable(null);
 		mListView.setFastScrollEnabled(true);
 
-		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
+		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		// top refresh view
-		LayoutInflater inflater = (LayoutInflater) getContext()
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mTopRefreshView = inflater.inflate(R.layout.pull_to_refresh_header,
-				this, false);
-		mTopRefreshViewText = (TextView) mTopRefreshView
-				.findViewById(R.id.pull_to_refresh_text);
-		mTopRefreshViewIcon = (ImageView) mTopRefreshView
-				.findViewById(R.id.pull_to_refresh_image);
+		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mTopRefreshView = inflater.inflate(R.layout.pull_to_refresh_header, this, false);
+		mTopRefreshViewText = (TextView) mTopRefreshView.findViewById(R.id.pull_to_refresh_text);
+		mTopRefreshViewIcon = (ImageView) mTopRefreshView.findViewById(R.id.pull_to_refresh_image);
 		mTopRefreshViewIcon.setImageResource(R.drawable.ic_pull_down);
-		addView(mTopRefreshView, 0, new LayoutParams(LayoutParams.MATCH_PARENT,
-				(int) STAGE_1_LENGTH));
+		addView(mTopRefreshView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, (int) STAGE_1_LENGTH));
 		// bottom refresh view
-		mBottomRefreshView = inflater.inflate(R.layout.pull_to_refresh_header,
-				this, false);
-		mBottomRefreshViewText = (TextView) mBottomRefreshView
-				.findViewById(R.id.pull_to_refresh_text);
-		mBottomRefreshViewIcon = (ImageView) mBottomRefreshView
-				.findViewById(R.id.pull_to_refresh_image);
+		mBottomRefreshView = inflater.inflate(R.layout.pull_to_refresh_header, this, false);
+		mBottomRefreshViewText = (TextView) mBottomRefreshView.findViewById(R.id.pull_to_refresh_text);
+		mBottomRefreshViewIcon = (ImageView) mBottomRefreshView.findViewById(R.id.pull_to_refresh_image);
 		mBottomRefreshViewIcon.setImageResource(R.drawable.ic_pull_up);
-		addView(mBottomRefreshView, new LayoutParams(LayoutParams.MATCH_PARENT,
-				(int) STAGE_1_LENGTH));
+		addView(mBottomRefreshView, new LayoutParams(LayoutParams.MATCH_PARENT, (int) STAGE_1_LENGTH));
 		// push header and footer out of sight
-		setPadding(getPaddingLeft(), -(int) STAGE_1_LENGTH, getPaddingRight(),
-				0);
+		setPadding(getPaddingLeft(), -(int) STAGE_1_LENGTH, getPaddingRight(), 0);
 	}
 
 	public void registerListener(PullToRefreshListener listener) {
@@ -179,10 +159,10 @@ public class PullToRefreshListView extends LinearLayout {
 		}
 	}
 
-	public void setFastScrollEnabled(boolean fastScrollEnabled){
+	public void setFastScrollEnabled(boolean fastScrollEnabled) {
 		mListView.setFastScrollEnabled(fastScrollEnabled);
 	}
-	
+
 	/**
 	 * Forwards call to internal ListView.
 	 * 
@@ -214,7 +194,7 @@ public class PullToRefreshListView extends LinearLayout {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_MOVE:
 			float pullDistance = Math.abs(y - mLastTouchY);
-			if (mIsOverscrollEnabled && pullDistance > mTouchSlop) {
+			if (mIsOverscrollEnabled && pullDistance > 0/*mTouchSlop*/) {
 				if (isListAtTop() && y > mLastTouchY) {
 					updateState(State.PULL_TOP_STAGE_1);
 				} else if (isListAtBottom() && y < mLastTouchY) {
@@ -227,11 +207,46 @@ public class PullToRefreshListView extends LinearLayout {
 				break;
 			}
 		case MotionEvent.ACTION_DOWN:
-			mLastTouchY = y;
-			updateState(State.SCROLL_LIST);
+			if (isListAtTop() || isListAtBottom()) {
+				mLastTouchY = y;
+				updateState(State.SCROLL_LIST);
+			}
 			break;
 		}
 		return mState != State.SCROLL_LIST;
+	}
+
+	/**
+	 * Updates the state and overscroll length based on the length of the
+	 * current pull gesture.
+	 */
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		float y = event.getY();
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_MOVE:
+			float pullDistance = y - mPullStartY;
+			float absScrollDistance = calculateAbsScrollDistance(pullDistance);
+			if (absScrollDistance > STAGE_1_LENGTH) {
+				if (mState == State.PULL_TOP_STAGE_1) {
+					updateState(State.PULL_TOP_STAGE_2);
+				} else if (mState == State.PULL_BOTTOM_STAGE_1) {
+					updateState(State.PULL_BOTTOM_STAGE_2);
+				}
+			} else {
+				if (mState == State.PULL_TOP_STAGE_2) {
+					updateState(State.PULL_TOP_STAGE_1);
+				} else if (mState == State.PULL_BOTTOM_STAGE_2) {
+					updateState(State.PULL_BOTTOM_STAGE_1);
+				}
+			}
+			scrollTo(0, (int) (-absScrollDistance * mState.getDirectionFactor()));
+			return true;
+		case MotionEvent.ACTION_UP:
+			updateState(State.SCROLL_LIST);
+			break;
+		}
+		return false;
 	}
 
 	/**
@@ -293,39 +308,6 @@ public class PullToRefreshListView extends LinearLayout {
 	}
 
 	/**
-	 * Updates the state and overscroll length based on the length of the
-	 * current pull gesture.
-	 */
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		float y = event.getY();
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_MOVE:
-			float pullDistance = y - mPullStartY;
-			float absScrollDistance = calculateAbsScrollDistance(pullDistance);
-			if (absScrollDistance > STAGE_1_LENGTH) {
-				if (mState == State.PULL_TOP_STAGE_1) {
-					updateState(State.PULL_TOP_STAGE_2);
-				} else if (mState == State.PULL_BOTTOM_STAGE_1) {
-					updateState(State.PULL_BOTTOM_STAGE_2);
-				}
-			} else {
-				if (mState == State.PULL_TOP_STAGE_2) {
-					updateState(State.PULL_TOP_STAGE_1);
-				} else if (mState == State.PULL_BOTTOM_STAGE_2) {
-					updateState(State.PULL_BOTTOM_STAGE_1);
-				}
-			}
-			scrollTo(0,
-					(int) (-absScrollDistance * mState.getDirectionFactor()));
-			return true;
-		case MotionEvent.ACTION_UP:
-			updateState(State.SCROLL_LIST);
-		}
-		return false;
-	}
-
-	/**
 	 * Aligns the listview back to the top/bottom of the parent view.
 	 */
 	private void resetScroll() {
@@ -334,15 +316,12 @@ public class PullToRefreshListView extends LinearLayout {
 
 	private float calculateAbsScrollDistance(float pullDistance) {
 		// first clamp according to state
-		float absClampedPullDistance = Math.max(0,
-				pullDistance * mState.getDirectionFactor());
+		float absClampedPullDistance = Math.max(0, pullDistance * mState.getDirectionFactor());
 
 		if (absClampedPullDistance <= MAX_ABS_PULL_DISTANCE_STAGE_1) {
 			return absClampedPullDistance / FRICTION_STAGE_1;
 		} else {
-			return STAGE_1_LENGTH
-					+ (absClampedPullDistance - MAX_ABS_PULL_DISTANCE_STAGE_1)
-					/ FRICTION_STAGE_2;
+			return STAGE_1_LENGTH + (absClampedPullDistance - MAX_ABS_PULL_DISTANCE_STAGE_1) / FRICTION_STAGE_2;
 		}
 	}
 
@@ -375,16 +354,15 @@ public class PullToRefreshListView extends LinearLayout {
 		}
 		if (mListView.getLastVisiblePosition() == mListView.getCount() - 1) {
 			int lastItemBottom = mListView.getChildAt(
-					mListView.getLastVisiblePosition()
-							- mListView.getFirstVisiblePosition()).getBottom();
+					mListView.getLastVisiblePosition() - mListView.getFirstVisiblePosition()).getBottom();
 			int listBottom = mListView.getBottom();
 			return lastItemBottom <= listBottom;
 		} else {
 			return false;
 		}
 	}
-	
-	public void setOverscrollEnabled(boolean enabled){
+
+	public void setOverscrollEnabled(boolean enabled) {
 		mIsOverscrollEnabled = enabled;
 	}
 }
