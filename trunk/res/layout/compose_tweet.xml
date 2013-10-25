@@ -95,7 +95,7 @@
                         style="@style/RobotoLightText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textMultiLine"
+                        android:inputType="textMultiLine|textCapSentences"
                         android:textColor="@color/dark_text"
                         android:textSize="16sp" />
                 </LinearLayout>

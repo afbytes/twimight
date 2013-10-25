@@ -44,6 +44,7 @@
                 android:layout_below="@id/dmRecipient"
                 android:layout_marginTop="@dimen/unit_step"
                 android:hint="@string/message"
+                android:inputType="textMultiLine|textCapSentences"
                 android:textColor="@color/dark_text"
                 android:textSize="16sp" />
 
