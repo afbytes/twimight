@@ -15,6 +15,8 @@ package ch.ethz.twimight.net.twitter;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +51,8 @@ public class TweetAdapter extends CursorAdapter {
 
 	static final String[] from = { TwitterUsers.COL_NAME };
 	private HtmlPagesDbHelper htmlDbHelper;
+
+	private final Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
 
 	private static class ViewHolder {
 		View modeStripe;
@@ -94,17 +98,12 @@ public class TweetAdapter extends CursorAdapter {
 		holder.tvTweetText = (TextView) row.findViewById(R.id.tvTweetText);
 		holder.tvRetweetedBy = (TextView) row.findViewById(R.id.tvRetweetedBy);
 		row.findViewById(R.id.tvRetweetedBy);
-		holder.ivProfileImage = (ImageView) row
-				.findViewById(R.id.ivProfileImage);
+		holder.ivProfileImage = (ImageView) row.findViewById(R.id.ivProfileImage);
 		holder.ivPendingIcon = (ImageView) row.findViewById(R.id.ivPendingIcon);
-		holder.ivVerifiedIcon = (ImageView) row
-				.findViewById(R.id.ivVerifiedIcon);
-		holder.ivRetweetedIcon = (ImageView) row
-				.findViewById(R.id.ivRetweetedIcon);
-		holder.ivFavoriteIcon = (ImageView) row
-				.findViewById(R.id.ivFavoriteIcon);
-		holder.ivDownloadIcon = (ImageView) row
-				.findViewById(R.id.ivDownloadIcon);
+		holder.ivVerifiedIcon = (ImageView) row.findViewById(R.id.ivVerifiedIcon);
+		holder.ivRetweetedIcon = (ImageView) row.findViewById(R.id.ivRetweetedIcon);
+		holder.ivFavoriteIcon = (ImageView) row.findViewById(R.id.ivFavoriteIcon);
+		holder.ivDownloadIcon = (ImageView) row.findViewById(R.id.ivDownloadIcon);
 
 	}
 
@@ -118,49 +117,38 @@ public class TweetAdapter extends CursorAdapter {
 		htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
 		htmlDbHelper.open();
 
-		long disId = cursor.getLong(cursor
-				.getColumnIndex(Tweets.COL_DISASTERID));
+		long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));
 
 		// set profile image
-		if (!cursor.isNull(cursor
-				.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
 
 			if (holder.disId == -1 || holder.disId != disId) {
 				holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 				holder.disId = disId;
-				int userRowId = cursor.getInt(cursor
-						.getColumnIndex("userRowId"));
-				Uri imageUri = Uri.parse("content://"
-						+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+				int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
+				Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 						+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
 				loadBitmap(imageUri, holder.ivProfileImage, context);
 			}
 
 		} else {
-			holder.ivProfileImage
-					.setImageResource(R.drawable.profile_image_placeholder);
+			holder.ivProfileImage.setImageResource(R.drawable.profile_image_placeholder);
 		}
 
 		// if we don't have a real name, we use the screen name
 		if (cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)) == null) {
-			holder.tvUsername.setText("@"
-					+ cursor.getString(cursor
-							.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+			holder.tvUsername.setText("@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 		} else {
-			holder.tvUsername.setText(cursor.getString(cursor
-					.getColumnIndex(TwitterUsers.COL_NAME)));
+			holder.tvUsername.setText(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)));
 		}
 
 		// set tweet text
-		holder.tvTweetText.setText(cursor.getString(cursor
-				.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
+		holder.tvTweetText.setText(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
 
 		// set "created at"
-		long createdAt = cursor.getLong(cursor
-				.getColumnIndex(Tweets.COL_CREATED));
+		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
 
-		holder.tvCreatedAt.setText(DateUtils
-				.getRelativeTimeSpanString(createdAt));
+		holder.tvCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 
 		// set "retweeted by"
 		int col = cursor.getColumnIndex(Tweets.COL_RETWEETED_BY);
@@ -168,9 +156,7 @@ public class TweetAdapter extends CursorAdapter {
 			String retweeted_by = cursor.getString(col);
 
 			if (retweeted_by != null) {
-				holder.tvRetweetedBy
-						.setText(context.getString(R.string.retweeted_by)
-								+ " @" + retweeted_by);
+				holder.tvRetweetedBy.setText(context.getString(R.string.retweeted_by) + " @" + retweeted_by);
 				holder.tvRetweetedBy.setVisibility(View.VISIBLE);
 			} else {
 				holder.tvRetweetedBy.setVisibility(View.GONE);
@@ -193,12 +179,10 @@ public class TweetAdapter extends CursorAdapter {
 
 					if (!htmlDbHelper.allPagesStored(curHtml)) {
 						// downloading
-						holder.ivDownloadIcon
-								.setImageResource(R.drawable.ic_small_downloading);
+						holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloading);
 					} else {
 						// downloaded
-						holder.ivDownloadIcon
-								.setImageResource(R.drawable.ic_small_downloaded);
+						holder.ivDownloadIcon.setImageResource(R.drawable.ic_small_downloaded);
 					}
 				}
 
@@ -217,8 +201,7 @@ public class TweetAdapter extends CursorAdapter {
 		}
 
 		// retweeted?
-		boolean retweeted = cursor.getInt(cursor
-				.getColumnIndex(Tweets.COL_RETWEETED)) > 0;
+		boolean retweeted = cursor.getInt(cursor.getColumnIndex(Tweets.COL_RETWEETED)) > 0;
 		if (retweeted) {
 			holder.ivRetweetedIcon.setVisibility(View.VISIBLE);
 		} else {
@@ -240,39 +223,33 @@ public class TweetAdapter extends CursorAdapter {
 		if ((buffer & Tweets.BUFFER_DISASTER) != 0 || (buffer & Tweets.BUFFER_MYDISASTER) != 0) {
 			// set pressed state background color
 			// select accent color
-			accentColor = context.getResources().getColor(
-					R.color.accent_disastermode_2);
+			accentColor = context.getResources().getColor(R.color.accent_disastermode_2);
 			// set verified icon for disaster tweets
 			holder.ivVerifiedIcon.setVisibility(ImageView.VISIBLE);
 			if (cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISVERIFIED)) > 0) {
-				holder.ivVerifiedIcon
-						.setImageResource(R.drawable.ic_small_verified);
+				holder.ivVerifiedIcon.setImageResource(R.drawable.ic_small_verified);
 			} else {
-				holder.ivVerifiedIcon
-						.setImageResource(R.drawable.ic_small_unverified);
+				holder.ivVerifiedIcon.setImageResource(R.drawable.ic_small_unverified);
 			}
 		} else {
 			// set pressed state background color
 			// select accent color
 			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
-			accentColor = context.getResources().getColor(
-					R.color.accent_normalmode_2);
+			accentColor = context.getResources().getColor(R.color.accent_normalmode_2);
 		}
 
 		// set side stripe color
 		holder.modeStripe.setBackgroundColor(accentColor);
 
 		// highlight own tweet
-		boolean ownTweet = Long.toString(
-				cursor.getLong(cursor.getColumnIndex(Tweets.COL_TWITTERUSER)))
-				.equals(LoginActivity.getTwitterId(context));
+		boolean ownTweet = Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_TWITTERUSER))).equals(
+				LoginActivity.getTwitterId(context));
 		if (ownTweet) {
 			holder.tvUsername.setTextColor(accentColor);
 			// no verified icon for own tweets
 			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
 		} else {
-			holder.tvUsername.setTextColor(context.getResources().getColor(
-					R.color.dark_text));
+			holder.tvUsername.setTextColor(context.getResources().getColor(R.color.dark_text));
 		}
 
 		// higlight mentions
@@ -282,8 +259,7 @@ public class TweetAdapter extends CursorAdapter {
 		Matcher matcher = pattern.matcher(tweetText);
 		Spannable tweetSpannable = new SpannableString(tweetText);
 		while (matcher.find()) {
-			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor),
-					matcher.start(), matcher.end(),
+			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor), matcher.start(), matcher.end(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		holder.tvTweetText.setText(tweetSpannable);
@@ -292,16 +268,20 @@ public class TweetAdapter extends CursorAdapter {
 
 	public void loadBitmap(Uri uri, ImageView imageView, Context context) {
 		if (cancelPotentialWork(uri, imageView)) {
-			final BitmapWorkerTask task = new BitmapWorkerTask(imageView,
-					context, uri);
-			final AsyncDrawable asyncDrawable = new AsyncDrawable(
-					context.getResources(), task);
-			imageView.setImageDrawable(asyncDrawable);
-			task.execute();
+			if (!mBitmapCache.containsKey(uri.toString())) {
+				final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context, uri);
+				final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), task);
+				imageView.setImageDrawable(asyncDrawable);
+				task.execute();
+			} else {
+				Bitmap bitmap = mBitmapCache.get(uri.toString());
+				imageView.setImageBitmap(bitmap);
+				imageView.setBackgroundColor(Color.TRANSPARENT);
+			}
 		}
 	}
 
-	class BitmapWorkerTask extends AsyncTask<AsyncDrawable, Void, Bitmap> {
+	class BitmapWorkerTask extends AsyncTask<AsyncDrawable, Void, Void> {
 		private final WeakReference<ImageView> imageViewReference;
 		Context context;
 		public Uri uri;
@@ -317,27 +297,28 @@ public class TweetAdapter extends CursorAdapter {
 
 		// Decode image in background.
 		@Override
-		protected Bitmap doInBackground(AsyncDrawable... params) {
+		protected Void doInBackground(AsyncDrawable... params) {
 			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 			// this.asyncDrawable = params[0];
 			InputStream is;
 			try {
 				is = context.getContentResolver().openInputStream(uri);
-				if (is != null)
-					return BitmapFactory.decodeStream(is);
-				else
-					return null;
+				if (is != null) {
+					Bitmap bitmap = BitmapFactory.decodeStream(is);
+					TweetAdapter.this.mBitmapCache.put(uri.toString(), bitmap);
+				}
 			} catch (Exception e) {
-				return null;
-
+				e.printStackTrace();
 			}
+			return null;
 		}
 
 		// Once complete, see if ImageView is still around and set bitmap.
 		@Override
-		protected void onPostExecute(Bitmap bitmap) {
-			if (isCancelled()) {
-				bitmap = null;
+		protected void onPostExecute(Void unused) {
+			Bitmap bitmap = null;
+			if (!isCancelled()) {
+				bitmap = TweetAdapter.this.mBitmapCache.get(uri.toString());
 			}
 
 			if (imageViewReference != null) {
@@ -347,8 +328,8 @@ public class TweetAdapter extends CursorAdapter {
 
 				if (bitmap != null) {
 					if (this == bitmapWorkerTask && imageView != null) {
-						imageView.setBackgroundColor(Color.TRANSPARENT);
 						imageView.setImageBitmap(bitmap);
+						imageView.setBackgroundColor(Color.TRANSPARENT);
 					}
 				}
 
@@ -361,8 +342,7 @@ public class TweetAdapter extends CursorAdapter {
 
 		public AsyncDrawable(Resources res, BitmapWorkerTask bitmapWorkerTask) {
 			super(res);
-			bitmapWorkerTaskReference = new WeakReference<BitmapWorkerTask>(
-					bitmapWorkerTask);
+			bitmapWorkerTaskReference = new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
 		}
 
 		public BitmapWorkerTask getBitmapWorkerTask() {
