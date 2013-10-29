@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -48,7 +49,6 @@ public class TweetAdapter extends CursorAdapter {
 
 	static final String[] from = { TwitterUsers.COL_NAME };
 	private HtmlPagesDbHelper htmlDbHelper;
-	private final Drawable mProfileImagePlaceholder;
 
 	private static class ViewHolder {
 		View modeStripe;
@@ -69,9 +69,6 @@ public class TweetAdapter extends CursorAdapter {
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
 		super(context, c, true);
-//		super(context, c);
-		mProfileImagePlaceholder = context.getResources().getDrawable(
-				R.drawable.profile_image_placeholder);
 	}
 
 	@Override
@@ -129,7 +126,7 @@ public class TweetAdapter extends CursorAdapter {
 				.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
 
 			if (holder.disId == -1 || holder.disId != disId) {
-				holder.ivProfileImage.setBackground(mProfileImagePlaceholder);
+				holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 				holder.disId = disId;
 				int userRowId = cursor.getInt(cursor
 						.getColumnIndex("userRowId"));
@@ -350,7 +347,7 @@ public class TweetAdapter extends CursorAdapter {
 
 				if (bitmap != null) {
 					if (this == bitmapWorkerTask && imageView != null) {
-						imageView.setBackground(null);
+						imageView.setBackgroundColor(Color.TRANSPARENT);
 						imageView.setImageBitmap(bitmap);
 					}
 				}
