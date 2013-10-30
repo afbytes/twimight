@@ -3,10 +3,6 @@ package ch.ethz.twimight.net.twitter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -20,7 +16,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import ch.ethz.twimight.activities.UserListActivity;
 import ch.ethz.twimight.util.InternalStorageHelper;
@@ -74,7 +69,7 @@ public class PicturesIntentService extends IntentService {
 		}
 
 		// insert pictures into DB
-		InsertProfileImagesParameters(cv);
+		insertProfileImagesParameters(cv);
 		// here, we have to notify almost everyone
 		// Log.i(TAG,"notifying group of pictures");
 		// getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
@@ -90,7 +85,7 @@ public class PicturesIntentService extends IntentService {
 
 	}
 
-	private void InsertProfileImagesParameters(ContentValues[] params) {
+	private void insertProfileImagesParameters(ContentValues[] params) {
 		if (params.length == 1) {
 			ContentValues cv = params[0];
 			try {
@@ -157,9 +152,7 @@ public class PicturesIntentService extends IntentService {
 			try {
 				mHttpResponse = mHttpClient.execute(mHttpGet);
 				if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
 					try {
-
 						pictures.add(EntityUtils.toByteArray(mHttpResponse.getEntity()));
 						screenNames.add(cursorArray[i].getString(cursorArray[i]
 								.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
@@ -168,39 +161,13 @@ public class PicturesIntentService extends IntentService {
 					}
 				}
 			} catch (ClientProtocolException e) {
+				e.printStackTrace();
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 
 		}
 	}
 
-	/**
-	 * Represents the four profile image sizes served by Twitter.
-	 * @author msteven
-	 *
-	 */
-	private static enum ProfileImageVariant {
-		NORMAL("normal"), BIGGER("bigger"), MINI("mini"), ORIGINAL("original");
-
-		private final String mSuffix;
-		private static final Pattern SUFFIX_PATTERN = Pattern.compile("^(.*_)[a-z]+(\\.[a-z]+)$");
-
-		private ProfileImageVariant(String suffix) {
-			mSuffix = suffix;
-		}
-
-		/**
-		 * Transforms a Twitter profile image URL into the URL of the desired size variant.
-		 * @param imageUrl a Twitter profile image URL of any variant 
-		 * @param desiredVariant the desired variant
-		 * @return the URL of the desired image variant
-		 */
-		public static String getVariantUrl(String imageUrl, ProfileImageVariant desiredVariant) {
-			Matcher matcher = SUFFIX_PATTERN.matcher(imageUrl);
-			String result = matcher.replaceAll("$1"+desiredVariant.mSuffix+"$2");
-
-			return result;
-		}
-	}
 
 }
