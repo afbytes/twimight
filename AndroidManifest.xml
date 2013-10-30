@@ -9,8 +9,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
-    android:versionCode="1700022"
-    android:versionName="1.1.1" >
+    android:versionCode="1700023"
+    android:versionName="1.1.2" >
 
     <uses-sdk
         android:minSdkVersion="14"
