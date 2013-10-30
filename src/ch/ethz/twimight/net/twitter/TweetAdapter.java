@@ -366,7 +366,7 @@ public class TweetAdapter extends CursorAdapter {
 
 		if (bitmapWorkerTask != null) {
 			final Uri bitmapUri = bitmapWorkerTask.uri;
-			if (bitmapUri.equals(uri)) {
+			if (!bitmapUri.equals(uri)) {
 				// Cancel previous task
 				bitmapWorkerTask.cancel(true);
 			} else
