@@ -1342,8 +1342,6 @@ public class TwitterService extends Service {
 					ProfileImageVariant desiredVariant = ProfileImageVariant.BIGGER;
 					String receivedUrl = user.getProfileImageUrl().toString();
 					String desiredUrl = ProfileImageVariant.getVariantUrl(receivedUrl, desiredVariant);
-					Log.d(TAG, "received image url: " + receivedUrl);
-					Log.d(TAG, "desired image url: " + desiredUrl);
 					userContentValues.put(TwitterUsers.COL_IMAGEURL, desiredUrl);
 					// we flag the user for updating their profile image
 					userContentValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATEIMAGE);
