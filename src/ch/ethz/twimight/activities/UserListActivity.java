@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 
@@ -52,54 +53,49 @@ public class UserListActivity extends TwimightBaseActivity {
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 		Bundle bundle = new Bundle();
-		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE,
-				ListViewPageAdapter.BUNDLE_TYPE_USERS);
-		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(
-				getFragmentManager(), bundle);
+		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_USERS);
+		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
 
 		viewPager.setAdapter(pagAdapter);
-		viewPager
-				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-					@Override
-					public void onPageSelected(int position) {
-						// When swiping between pages, select the
-						// corresponding tab.
-						getActionBar().setSelectedNavigationItem(position);
-					}
-				});
+		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				// When swiping between pages, select the
+				// corresponding tab.
+				getActionBar().setSelectedNavigationItem(position);
+			}
+		});
 
-		Tab tab = actionBar.newTab().setText(R.string.friends)
-				.setTabListener(new TabListener(viewPager));
+		Tab tab = actionBar.newTab().setText(R.string.friends).setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab().setText(R.string.followers)
-				.setTabListener(new TabListener(viewPager));
+		tab = actionBar.newTab().setText(R.string.followers).setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab().setText(R.string.peers)
-				.setTabListener(new TabListener(viewPager));
+		tab = actionBar.newTab().setText(R.string.peers).setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		// actionBar.setSelectedNavigationItem(intent.getIntExtra(USER_FILTER_REQUEST,
 		// FRIENDS_KEY));
-		viewPager.setCurrentItem(intent.getIntExtra(USER_FILTER_REQUEST, 0));
+		int selectedItemIndex;
+		switch (intent.getIntExtra(USER_FILTER_REQUEST, 0)) {
 
-	}
-
-	/**
-	 * On resume
-	 */
-	@Override
-	public void onResume() {
-		super.onResume();
-
-		// if we just got logged in, we load the timeline
-		Intent i = getIntent();
-
-		if (positionIndex != 0 | positionTop != 0) {
-			// userListView.setSelectionFromTop(positionIndex, positionTop);
+		case UserListFragment.FRIENDS_KEY:
+			selectedItemIndex = 0;
+			break;
+		case UserListFragment.FOLLOWERS_KEY:
+			selectedItemIndex = 1;
+			break;
+		case UserListFragment.PEERS_KEY:
+			selectedItemIndex = 2;
+			break;
+		default:
+			selectedItemIndex = 0;
 		}
+
+		viewPager.setCurrentItem(selectedItemIndex);
+
 	}
 
 	/**

@@ -9,23 +9,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
+import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.ui.PullToRefreshListView;
 import ch.ethz.twimight.ui.PullToRefreshListView.PullToRefreshListener;
 import ch.ethz.twimight.util.Constants;
 
-public abstract class ListFragment extends Fragment implements
-		PullToRefreshListener {
+public abstract class ListFragment extends Fragment implements PullToRefreshListener {
 
-	Cursor c;
 	Intent overscrollIntent;
-	int type;
-	ContentResolver resolver;
-	ListAdapter mlistAdapter;
-	// String query;
-	PullToRefreshListView list;
+	int mType;
+	ContentResolver mResolver;
+	CursorAdapter mListAdapter;
+	Cursor mCursor;
+
+	PullToRefreshListView mListView;
 	protected static final String TAG = "ListFragment";
 
 	public static final String FRAGMENT_TYPE = "fragment_type";
@@ -33,56 +32,57 @@ public abstract class ListFragment extends Fragment implements
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
-		resolver = getActivity().getContentResolver();
+		mResolver = getActivity().getContentResolver();
+	}
 
+	private void updateList() {
+		mCursor = getCursor(mType);
+		Cursor oldCursor = mListAdapter.swapCursor(mCursor);
+		mListAdapter.notifyDataSetChanged();
+		if (oldCursor != null) {
+			oldCursor.close();
+		}
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-
-		Log.i(TAG, "onCreateView");
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		View view = inflater
-				.inflate(R.layout.fragment_layout, container, false);
-		list = (PullToRefreshListView) view.findViewById(R.id.tweetListView);
+		View view = inflater.inflate(R.layout.fragment_layout, container, false);
+		mListView = (PullToRefreshListView) view.findViewById(R.id.tweetListView);
 
-		list.setAdapter(mlistAdapter);
-		list.registerListener(this);
+		mListView.registerListener(this);
 
-		return list;
-
+		mListAdapter = getListAdapter();
+		mListView.setAdapter(mListAdapter);
+		updateList();
+		return mListView;
 	}
-	
+
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		list.unregisterListener(this);
+		mListView.unregisterListener(this);
 	}
 
 	public void newQueryText() {
 		// Called when the action bar search text has changed. Update
 		// the search filter
 		// query = newText;
-
-		mlistAdapter = getData(type);
-		list.setAdapter(mlistAdapter);
+		updateList();
+		setActionBarTitles();
 	}
 
-	/**
-	 * Which tweets do we show? Timeline, favorites, mentions?
-	 * 
-	 * @param filter
-	 */
-	abstract ListAdapter getData(int filter);
+	abstract Cursor getCursor(int filter);
+	
+	abstract void setActionBarTitles();
 
+	abstract CursorAdapter getListAdapter();
+	
 	@Override
 	public void onTopRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE,
-					TwitterService.OVERSCROLL_TOP);
+			overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_TOP);
 			if (Constants.TIMELINE_BUFFER_SIZE >= 150)
 				Constants.TIMELINE_BUFFER_SIZE -= 50;
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
@@ -94,8 +94,7 @@ public abstract class ListFragment extends Fragment implements
 	@Override
 	public void onBottomRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE,
-					TwitterService.OVERSCROLL_BOTTOM);
+			overscrollIntent.putExtra(TwitterService.OVERSCROLL_TYPE, TwitterService.OVERSCROLL_BOTTOM);
 			if (Constants.TIMELINE_BUFFER_SIZE >= 150)
 				Constants.TIMELINE_BUFFER_SIZE -= 50;
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);

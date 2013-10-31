@@ -56,6 +56,7 @@ import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.InternalStorageHelper;
@@ -1043,9 +1044,9 @@ public class ScanningService extends Service implements
 						c.getLong(c.getColumnIndex(Tweets.COL_TID)));
 
 			if (c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH) >= 0
-					&& c.getColumnIndex("userRowId") >= 0) {
+					&& c.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID) >= 0) {
 				Log.i(TAG, "adding picture");
-				int userId = c.getInt(c.getColumnIndex("userRowId"));
+				int userId = c.getInt(c.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 				Uri imageUri = Uri.parse("content://"
 						+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 						+ TwitterUsers.TWITTERUSERS + "/" + userId);

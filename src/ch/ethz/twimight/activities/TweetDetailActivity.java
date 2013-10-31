@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.TweetDetailFragment.OnTweetDeletedListener;
 import ch.ethz.twimight.fragments.TweetListFragment;
@@ -18,6 +17,9 @@ import ch.ethz.twimight.net.twitter.Tweets;
 public class TweetDetailActivity extends TwimightBaseActivity implements
 		OnTweetDeletedListener {
 
+	public static final String EXTRA_TYPE = "type";
+	public static final String EXTRA_ROW_ID = "rowId";
+	
 	ContentResolver resolver;
 	long userId;
 
@@ -33,8 +35,8 @@ public class TweetDetailActivity extends TwimightBaseActivity implements
 		resolver = getContentResolver();
 		Intent intent = getIntent();
 
-		long rowId = intent.getIntExtra("rowId", 0);
-		int type = intent.getIntExtra("type", TweetListFragment.TIMELINE_KEY);
+		long rowId = intent.getIntExtra(EXTRA_ROW_ID, 0);
+		int type = intent.getIntExtra(EXTRA_TYPE, TweetListFragment.TIMELINE_KEY);
 		// if (type == TweetListFragment.SEARCH_TWEETS)
 		// query = intent.getStringExtra(ListFragment.SEARCH_QUERY);
 		if (type == TweetListFragment.USER_TWEETS) {

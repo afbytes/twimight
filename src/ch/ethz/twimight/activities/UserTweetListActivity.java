@@ -12,7 +12,6 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
@@ -21,40 +20,39 @@ import ch.ethz.twimight.fragments.TweetListFragment;
 
 /**
  * Shows the most recent tweets of a user
+ * 
  * @author thossmann
- *
+ * 
  */
-public class UserTweetListActivity extends TwimightBaseActivity{
+public class UserTweetListActivity extends TwimightBaseActivity {
 
-	/** 
-	 * Called when the activity is first created. 
+	public static final String EXTRA_USER_ID = "userId";
+
+	/**
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		if(!getIntent().hasExtra("userId")) finish();
-		
-		setContentView(R.layout.main);		
-				
+
+		if (!getIntent().hasExtra(EXTRA_USER_ID)) {
+			finish();
+		}
+
+		setContentView(R.layout.main);
+
 		long userId = getIntent().getLongExtra("userId", 0);
 		FragmentManager fragmentManager = getFragmentManager();
-	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        TweetListFragment tlf = new TweetListFragment(TweetListFragment.USER_TWEETS);
-        
-        Bundle bundle =  new Bundle();
-        bundle.putLong(TweetListFragment.USER_ID, userId);
-        tlf.setArguments(bundle);
-        
-        fragmentTransaction.add(R.id.rootRelativeLayout,tlf);
-        fragmentTransaction.commit();
-		
-	}
-	
-	
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		TweetListFragment tlf = new TweetListFragment(TweetListFragment.USER_TWEETS);
 
-	
-	
-	
-	
+		Bundle bundle = new Bundle();
+		bundle.putLong(TweetListFragment.USER_ID, userId);
+		tlf.setArguments(bundle);
+
+		fragmentTransaction.add(R.id.rootRelativeLayout, tlf);
+		fragmentTransaction.commit();
+
+	}
+
 }

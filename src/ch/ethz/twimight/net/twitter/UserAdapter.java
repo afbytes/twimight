@@ -15,41 +15,76 @@ package ch.ethz.twimight.net.twitter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.util.AsyncImageLoader;
 
-/** 
+/**
  * Cursor adapter for a cursor containing users.
  */
-public class UserAdapter extends SimpleCursorAdapter {
-	
-	static final String[] from = {TwitterUsers.COL_SCREENNAME, TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION};
-	static final int[] to = {R.id.showUserScreenName, R.id.showUserRealName, R.id.showUserLocation};
+public class UserAdapter extends CursorAdapter {
+
+	private final AsyncImageLoader mImageLoader;
+
+	private static class ViewHolder {
+		private final TextView tvUserRealName;
+		private final TextView tvUserScreenName;
+		private final TextView tvUserLocation;
+		private final ImageView ivProfileImage;
+
+		private ViewHolder(View row) {
+			tvUserRealName = (TextView) row.findViewById(R.id.showUserRealName);
+			tvUserScreenName = (TextView) row.findViewById(R.id.showUserScreenName);
+			tvUserLocation = (TextView) row.findViewById(R.id.showUserLocation);
+			ivProfileImage = (ImageView) row.findViewById(R.id.showUserProfileImage);
+		}
+	}
 
 	/** Constructor */
 	public UserAdapter(Context context, Cursor c) {
-		super(context, R.layout.user_row, c, from, to);  
+		super(context, c, true);
+		mImageLoader = new AsyncImageLoader(context);
+	}
+
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup parent) {
+		LayoutInflater inflater = (LayoutInflater) parent.getContext()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View row = inflater.inflate(R.layout.user_row, null);
+		ViewHolder viewHolder = new ViewHolder(row);
+		row.setTag(viewHolder);
+		return row;
 	}
 
 	/** This is where data is mapped to its view */
 	@Override
-	public void bindView(View userrow, Context context, Cursor cursor) {
-		super.bindView(userrow, context, cursor);
-			
-		// Profile image
-		ImageView picture = (ImageView) userrow.findViewById(R.id.showUserProfileImage);
-		if(!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
-			byte[] bb = cursor.getBlob(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH));
-			picture.setImageBitmap(BitmapFactory.decodeByteArray(bb, 0, bb.length));
-		} else {
-			picture.setImageResource(R.drawable.profile_image_placeholder);
+	public void bindView(View row, Context context, Cursor cursor) {
+		ViewHolder holder = (ViewHolder) row.getTag();
+		// set real name
+		String realName = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME));
+		holder.tvUserRealName.setText(realName);
+		// set screen name
+		String screenName = "@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		holder.tvUserScreenName.setText(screenName);
+		// set location
+		String location = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_LOCATION));
+		holder.tvUserLocation.setText(location);
+		// profile image
+		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
+		holder.ivProfileImage.setImageDrawable(null);
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+			int userRowId = cursor.getInt(cursor.getColumnIndex(DBOpenHelper.ROW_ID));
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
+			mImageLoader.loadImage(imageUri, holder.ivProfileImage);
 		}
-		//LinearLayout rowLayout = (LinearLayout) userrow.findViewById(R.id.showUserInfo);		
-		//rowLayout.setBackgroundResource(R.drawable.normal_tweet_background);
-		
 	}
-	
+
 }

@@ -24,7 +24,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
-import android.view.Window;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
@@ -155,27 +154,21 @@ public class TweetListActivity extends TwimightBaseActivity implements
 	 */
 	@Override
 	public void onResume() {
-		Log.d("asdf", "TweetListActivity onResume");
 		super.onResume();
 		running = true;
-
 		Intent intent = getIntent();
-
 		if (intent.hasExtra(FILTER_REQUEST)) {
 			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST,
 					TweetListFragment.TIMELINE_KEY));
 			intent.removeExtra(FILTER_REQUEST);
 
 		}
-
 		Long pauseTimestamp = getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0
 				&& (System.currentTimeMillis() - pauseTimestamp) > 10 * 60 * 1000L) {
 			handler = new Handler();
 			handler.post(new CheckLocation());
-
 		}
-
 	}
 
 	@Override

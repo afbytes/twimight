@@ -102,6 +102,9 @@ public class TwitterService extends Service {
 	public static final String TASK_DIRECT_MESSAGES_IN = "direct_messages_in";
 	public static final String OVERSCROLL_TYPE = "overscroll_type";
 	public static final String URL = "url";
+	
+	public static final String EXTRA_SYNCH_REQUEST = "synch_request";
+	public static final String EXTRA_ROW_ID = "rowId";
 
 	Twitter twitter;
 	NetworkInfo currentNetworkInfo;
@@ -153,7 +156,7 @@ public class TwitterService extends Service {
 
 			if (intent != null) {
 				// check what we are asked to synch
-				int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
+				int synchRequest = intent.getIntExtra(EXTRA_SYNCH_REQUEST, SYNCH_ALL);
 
 				switch (synchRequest) {
 
@@ -3088,7 +3091,6 @@ public class TwitterService extends Service {
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + this.rowId);
 			try {
 				getContentResolver().update(updateUri, cv, null, null);
-				getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
 				if (TweetListActivity.running)
 					Toast.makeText(getBaseContext(), "Favorite successful.", Toast.LENGTH_SHORT).show();
 			} catch (Exception ex) {

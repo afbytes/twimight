@@ -69,6 +69,7 @@ import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
@@ -86,7 +87,7 @@ public class TweetDetailFragment extends Fragment {
 
 	private static final String ARG_KEY_ROWID = "rowId";
 
-	Cursor c;
+	private Cursor mCursor;
 
 	// Views
 	private TextView screenNameView;
@@ -109,12 +110,12 @@ public class TweetDetailFragment extends Fragment {
 	Handler handler;
 
 	private boolean favorited;
-	int flags;
-	int buffer;
-	int userRowId;
-	long mRowId;
-	String text;
-	String screenName;
+	private int mFlags;
+	private int mBuffer;
+	private int mUserRowId;
+	private long mRowId;
+	private String mText;
+	private String mScreenName;
 
 	protected String TAG = "TweetDetailFragment";
 
@@ -193,16 +194,16 @@ public class TweetDetailFragment extends Fragment {
 		// If we don't know which tweet to show, we stop the activity
 		if (mRowId != 0) {
 
-			queryContentProvider();
+			loadCursor();
 
-			if (c.getCount() == 0) {
+			if (mCursor.getCount() == 0) {
 				activity.getFragmentManager().beginTransaction().remove(this)
 						.commit();
 			} else {
 				// register content observer to refresh when user was updated
 				handler = new Handler();
 
-				userID = String.valueOf(c.getLong(c
+				userID = String.valueOf(mCursor.getLong(mCursor
 						.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 				// locate the directory where the photos are stored
 				photoPath = Tweets.PHOTO_PATH + "/" + userID;
@@ -216,9 +217,9 @@ public class TweetDetailFragment extends Fragment {
 				LinearLayout unverifiedInfo = (LinearLayout) view
 						.findViewById(R.id.showTweetUnverified);
 				unverifiedInfo.setVisibility(LinearLayout.GONE);
-				if ((buffer & Tweets.BUFFER_DISASTER) != 0) {
+				if ((mBuffer & Tweets.BUFFER_DISASTER) != 0) {
 
-					if (c.getInt(c.getColumnIndex(Tweets.COL_ISVERIFIED)) == 0) {
+					if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_ISVERIFIED)) == 0) {
 						unverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 					}
 				}
@@ -229,7 +230,7 @@ public class TweetDetailFragment extends Fragment {
 				setHtml();
 
 				// If there are any flags, schedule the Tweet for synch
-				if (c.getInt(c.getColumnIndex(Tweets.COL_FLAGS)) > 0) {
+				if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS)) > 0) {
 					Log.i(TAG, "requesting tweet update to twitter");
 					Intent i = new Intent(TwitterService.SYNCH_ACTION);
 					i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
@@ -282,8 +283,8 @@ public class TweetDetailFragment extends Fragment {
 		photoView.setVisibility(View.GONE);
 		String[] filePath = { photoPath };
 		if (sdCardHelper.checkSDState(filePath)) {
-			if (!c.isNull(c.getColumnIndex(Tweets.COL_MEDIA))) {
-				String photoFileName = c.getString(c
+			if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA))) {
+				String photoFileName = mCursor.getString(mCursor
 						.getColumnIndex(Tweets.COL_MEDIA));
 				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(
 						photoPath, photoFileName));// photoFileParent,
@@ -372,7 +373,7 @@ public class TweetDetailFragment extends Fragment {
 				+ LoginActivity.getTwitterId(activity) };
 		if (sdCardHelper.checkSDState(filePath)) {
 
-			Long tweetId = c.getLong(c.getColumnIndex(Tweets.COL_DISASTERID));
+			Long tweetId = mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_DISASTERID));
 			for (int i = 0; i < htmlsToDownload.size(); i++) {
 
 				Cursor cursorInfo = htmlDbHelper.getPageInfo(htmlsToDownload
@@ -386,7 +387,7 @@ public class TweetDetailFragment extends Fragment {
 						String filename = null;
 						if (!cursorInfo.isNull(cursorInfo
 								.getColumnIndex(HtmlPage.COL_FILENAME))) {
-							filename = cursorInfo.getString(c
+							filename = cursorInfo.getString(mCursor
 									.getColumnIndex(HtmlPage.COL_FILENAME));
 							sdCardHelper.deleteFile(filePath[0] + "/"
 									+ filename);
@@ -409,25 +410,24 @@ public class TweetDetailFragment extends Fragment {
 
 	}
 
-	private void queryContentProvider() {
+	private void loadCursor() {
 		// get data from local DB and mark for update
-		if (c != null && !c.isClosed()) {
-			c.close();
+		if (mCursor != null && !mCursor.isClosed()) {
+			mCursor.close();
 		}
 
 		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 				+ Tweets.TWEETS + "/" + mRowId);
-		c = resolver.query(uri, null, null, null, null);
+		mCursor = resolver.query(uri, null, null, null, null);
 
-		if (c != null && c.getCount() > 0) {
+		if (mCursor != null && mCursor.getCount() > 0) {
 			Log.i(TAG, "cursor ok");
-			c.moveToFirst();
-			buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
-			flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			mCursor.moveToFirst();
+			mBuffer = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER));
+			mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
 		} else {
 			Log.i(TAG, "cursor not ok");
 		}
-
 	}
 
 	/**
@@ -445,7 +445,7 @@ public class TweetDetailFragment extends Fragment {
 		LinearLayout toRetweetNotification = (LinearLayout) view
 				.findViewById(R.id.showTweetToretweet);
 		if (toSendNotification != null) {
-			if ((flags & Tweets.FLAG_TO_INSERT) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_INSERT) == 0) {
 				toSendNotification.setVisibility(LinearLayout.GONE);
 			} else
 				toSendNotification.setVisibility(LinearLayout.VISIBLE);
@@ -453,7 +453,7 @@ public class TweetDetailFragment extends Fragment {
 			Log.i(TAG, "toSendNotification");
 
 		if (toDeleteNotification != null) {
-			if ((flags & Tweets.FLAG_TO_DELETE) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_DELETE) == 0) {
 				toDeleteNotification.setVisibility(LinearLayout.GONE);
 
 			} else {
@@ -472,14 +472,14 @@ public class TweetDetailFragment extends Fragment {
 							if (toDeleteNotification != null) {
 
 								int num = resolver.update(uri,
-										removeDeleteFlag(flags), null, null);
+										removeDeleteFlag(mFlags), null, null);
 								toDeleteNotification
 										.setVisibility(LinearLayout.GONE);
 								if (num > 0) {
 
-									queryContentProvider();
-									if (c != null) {
-										flags = c.getInt(c
+									loadCursor();
+									if (mCursor != null) {
+										mFlags = mCursor.getInt(mCursor
 												.getColumnIndex(Tweets.COL_FLAGS));
 										setupButtons();
 									}
@@ -496,7 +496,7 @@ public class TweetDetailFragment extends Fragment {
 			Log.i(TAG, "toDeleteNotification");
 
 		if (toFavoriteNotification != null) {
-			if ((flags & Tweets.FLAG_TO_FAVORITE) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_FAVORITE) == 0) {
 				toFavoriteNotification.setVisibility(LinearLayout.GONE);
 
 			} else
@@ -505,7 +505,7 @@ public class TweetDetailFragment extends Fragment {
 			Log.i(TAG, "toFavoriteNotification");
 
 		if (toUnfavoriteNotification != null) {
-			if ((flags & Tweets.FLAG_TO_UNFAVORITE) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_UNFAVORITE) == 0) {
 				toUnfavoriteNotification.setVisibility(LinearLayout.GONE);
 
 			} else
@@ -514,7 +514,7 @@ public class TweetDetailFragment extends Fragment {
 			Log.i(TAG, "toUnFavoriteNotification");
 
 		if (toRetweetNotification != null) {
-			if ((flags & Tweets.FLAG_TO_RETWEET) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_RETWEET) == 0) {
 				toRetweetNotification.setVisibility(LinearLayout.GONE);
 
 			} else
@@ -527,7 +527,7 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void setupButtons() {
 
-		String userString = Long.toString(c.getLong(c
+		String userString = Long.toString(mCursor.getLong(mCursor
 				.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 		String localUserString = LoginActivity.getTwitterId(activity);
 
@@ -537,8 +537,8 @@ public class TweetDetailFragment extends Fragment {
 		// (2) tweets which have been flagged to retweeted and (3) tweets which
 		// have been marked as retweeted
 		if (userString.equals(localUserString)
-				|| ((flags & Tweets.FLAG_TO_RETWEET) > 0)
-				|| (c.getInt(c.getColumnIndex(Tweets.COL_RETWEETED)) > 0)) {
+				|| ((mFlags & Tweets.FLAG_TO_RETWEET) > 0)
+				|| (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_RETWEETED)) > 0)) {
 			retweetButton.setVisibility(Button.GONE);
 		} else {
 			retweetButton.setOnClickListener(new OnClickListener() {
@@ -557,7 +557,7 @@ public class TweetDetailFragment extends Fragment {
 		if (userString.equals(localUserString)) {
 
 			deleteButton.setVisibility(ImageButton.VISIBLE);
-			if ((flags & Tweets.FLAG_TO_DELETE) == 0) {
+			if ((mFlags & Tweets.FLAG_TO_DELETE) == 0) {
 				deleteButton.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -574,7 +574,7 @@ public class TweetDetailFragment extends Fragment {
 
 		// Reply button: we show it only if we have a Tweet ID!
 		replyButton = (ImageButton) view.findViewById(R.id.showTweetReply);
-		if (!c.isNull(c.getColumnIndex(Tweets.COL_TID))
+		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID))
 				|| PreferenceManager.getDefaultSharedPreferences(activity)
 						.getBoolean("prefDisasterMode",
 								Constants.DISASTER_DEFAULT_ON) == true) {
@@ -582,15 +582,15 @@ public class TweetDetailFragment extends Fragment {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(activity, ComposeTweetActivity.class);
-					if (!c.isNull(c.getColumnIndex(Tweets.COL_TID)))
+					if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID)))
 						i.putExtra("isReplyTo",
-								c.getLong(c.getColumnIndex(Tweets.COL_TID)));
+								mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_TID)));
 					else
 						i.putExtra("isReplyTo", -1);
 					i.putExtra(
 							"text",
 							"@"
-									+ c.getString(c
+									+ mCursor.getString(mCursor
 											.getColumnIndex(TwitterUsers.COL_SCREENNAME))
 									+ " ");
 					startActivity(i);
@@ -601,11 +601,11 @@ public class TweetDetailFragment extends Fragment {
 		}
 
 		// Favorite button
-		favorited = ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
-				|| ((flags & Tweets.FLAG_TO_FAVORITE) > 0);
+		favorited = ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
+				|| ((mFlags & Tweets.FLAG_TO_FAVORITE) > 0);
 		favoriteButton = (ImageButton) view
 				.findViewById(R.id.showTweetFavorite);
-		if (favorited && !((flags & Tweets.FLAG_TO_UNFAVORITE) > 0)) {
+		if (favorited && !((mFlags & Tweets.FLAG_TO_UNFAVORITE) > 0)) {
 			favoriteButton.setImageResource(R.drawable.ic_favorite_on);
 		}
 		favoriteButton.setOnClickListener(new OnClickListener() {
@@ -615,14 +615,14 @@ public class TweetDetailFragment extends Fragment {
 
 				if (favorited) {
 					// unfavorite
-					resolver.update(uri, clearFavoriteFlag(flags), null, null);
+					resolver.update(uri, clearFavoriteFlag(mFlags), null, null);
 					((ImageButton) v)
 							.setImageResource(R.drawable.ic_favorite_off);
 					favorited = false;
 
 				} else {
 					// favorite
-					ContentValues cv = setFavoriteFlag(flags);
+					ContentValues cv = setFavoriteFlag(mFlags);
 					if (cv != null) {
 						resolver.update(uri, cv, null, null);
 						((ImageButton) v)
@@ -638,7 +638,7 @@ public class TweetDetailFragment extends Fragment {
 		// offline view button
 
 		// get the html status of this tweet
-		htmlStatus = c.getInt(c.getColumnIndex(Tweets.COL_HTML_PAGES));
+		htmlStatus = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_HTML_PAGES));
 		offlineButton = (ImageButton) view
 				.findViewById(R.id.showTweetOfflineview);
 
@@ -670,11 +670,11 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void setProfilePicture() {
 		// Profile image
-		if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+		if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
 
 			ImageView picture = (ImageView) view
 					.findViewById(R.id.showTweetProfileImage);
-			int userId = c.getInt(c.getColumnIndex("userRowId"));
+			int userId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 			Uri imageUri = Uri.parse("content://"
 					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);
@@ -701,7 +701,7 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void setUserInfo() {
 
-		userRowId = c.getInt(c.getColumnIndex("userRowId"));
+		mUserRowId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 		userInfoView = (LinearLayout) view.findViewById(R.id.showTweetUserInfo);
 
 		userInfoView.setOnClickListener(new OnClickListener() {
@@ -709,7 +709,7 @@ public class TweetDetailFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(activity, UserProfileActivity.class);
-				i.putExtra("rowId", userRowId);
+				i.putExtra("rowId", mUserRowId);
 				i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(i);
 			}
@@ -925,13 +925,13 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void setTweetInfo() {
 
-		screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-		screenNameView.setText("@" + screenName);
-		realNameView.setText(c.getString(c
+		mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		screenNameView.setText("@" + mScreenName);
+		realNameView.setText(mCursor.getString(mCursor
 				.getColumnIndex(TwitterUsers.COL_NAME)));
-		text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
+		mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT));
 
-		SpannableString str = new SpannableString(Html.fromHtml(text, null,
+		SpannableString str = new SpannableString(Html.fromHtml(mText, null,
 				new TweetTagHandler(activity)));
 
 		try {
@@ -959,7 +959,6 @@ public class TweetDetailFragment extends Fragment {
 
 		} catch (Exception ex) {
 		}
-		Log.i(TAG, "setting tweet text: " + str.toString());
 		tweetTextView.setText(str);
 		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -969,19 +968,19 @@ public class TweetDetailFragment extends Fragment {
 		tweetCreationDetails.append(DateFormat
 				.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 				.format(new Date(
-						c.getLong(c.getColumnIndex(Tweets.COL_CREATED))))
+						mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_CREATED))))
 				.toString());
 
 		// created via (if available)
-		if (c.getString(c.getColumnIndex(Tweets.COL_SOURCE)) != null) {
+		if (mCursor.getString(mCursor.getColumnIndex(Tweets.COL_SOURCE)) != null) {
 			tweetCreationDetails.append(getResources().getString(R.string.via));
-			tweetCreationDetails.append(Html.fromHtml(c.getString(c
+			tweetCreationDetails.append(Html.fromHtml(mCursor.getString(mCursor
 					.getColumnIndex(Tweets.COL_SOURCE))));
 		}
 		tvTweetCreationDetails.setText(tweetCreationDetails);
 
 		// retweeted by
-		String retweeted_by = c.getString(c
+		String retweeted_by = mCursor.getString(mCursor
 				.getColumnIndex(Tweets.COL_RETWEETED_BY));
 		if (retweeted_by != null) {
 			tvRetweetedBy.setText(getString(R.string.retweeted_by) + " @"
@@ -1001,7 +1000,7 @@ public class TweetDetailFragment extends Fragment {
 		super.onResume();
 		locHelper.registerLocationListener();
 		observer = new TweetContentObserver(handler);
-		c.registerContentObserver(observer);
+		mCursor.registerContentObserver(observer);
 
 	}
 
@@ -1014,10 +1013,10 @@ public class TweetDetailFragment extends Fragment {
 		super.onPause();
 		if (locHelper != null)
 			locHelper.unRegisterLocationListener();
-		if (c != null) {
+		if (mCursor != null) {
 			if (observer != null)
 				try {
-					c.unregisterContentObserver(observer);
+					mCursor.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
 					// Log.e(TAG,"error unregistering observer",ex);
 				}
@@ -1043,8 +1042,8 @@ public class TweetDetailFragment extends Fragment {
 		if (favoriteButton != null)
 			favoriteButton.setOnClickListener(null);
 		observer = null;
-		if (c != null)
-			c.close();
+		if (mCursor != null)
+			mCursor.close();
 		TwimightBaseActivity.unbindDrawables(getActivity().findViewById(
 				R.id.showTweetRoot));
 
@@ -1061,9 +1060,9 @@ public class TweetDetailFragment extends Fragment {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 
-								queryContentProvider();
+								loadCursor();
 
-								String delPhotoName = c.getString(c
+								String delPhotoName = mCursor.getString(mCursor
 										.getColumnIndex(Tweets.COL_MEDIA));
 
 								if (delPhotoName != null) {
@@ -1110,8 +1109,8 @@ public class TweetDetailFragment extends Fragment {
 									}
 								}
 
-								if (!c.isNull((c.getColumnIndex(Tweets.COL_TID))))
-									resolver.update(uri, setDeleteFlag(flags),
+								if (!mCursor.isNull((mCursor.getColumnIndex(Tweets.COL_TID))))
+									resolver.update(uri, setDeleteFlag(mFlags),
 											null, null);
 								else {
 									resolver.delete(uri, null, null);
@@ -1141,8 +1140,8 @@ public class TweetDetailFragment extends Fragment {
 							public void onClick(DialogInterface dialog, int id) {
 								Intent i = new Intent(activity,
 										ComposeTweetActivity.class);
-								i.putExtra("text", "RT @" + screenName + " "
-										+ text);
+								i.putExtra("text", "RT @" + mScreenName + " "
+										+ mText);
 								i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 								startActivity(i);
 							}
@@ -1150,9 +1149,9 @@ public class TweetDetailFragment extends Fragment {
 				.setNegativeButton(R.string.no,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								resolver.update(uri, setRetweetFlag(flags),
+								resolver.update(uri, setRetweetFlag(mFlags),
 										null, null);
-								c.requery();
+								loadCursor();
 								dialog.cancel();
 							}
 						});
@@ -1170,7 +1169,7 @@ public class TweetDetailFragment extends Fragment {
 	private ContentValues removeDeleteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags & (~Tweets.FLAG_TO_DELETE));
-		cv.put(Tweets.COL_BUFFER, buffer);
+		cv.put(Tweets.COL_BUFFER, mBuffer);
 		return cv;
 	}
 
@@ -1184,7 +1183,7 @@ public class TweetDetailFragment extends Fragment {
 	private ContentValues setDeleteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_DELETE);
-		cv.put(Tweets.COL_BUFFER, buffer);
+		cv.put(Tweets.COL_BUFFER, mBuffer);
 		return cv;
 	}
 
@@ -1202,9 +1201,9 @@ public class TweetDetailFragment extends Fragment {
 		if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(
 				"prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
 
-			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_DISASTER);
+			cv.put(Tweets.COL_BUFFER, mBuffer | Tweets.BUFFER_DISASTER);
 		} else
-			cv.put(Tweets.COL_BUFFER, buffer);
+			cv.put(Tweets.COL_BUFFER, mBuffer);
 		return cv;
 	}
 
@@ -1218,17 +1217,17 @@ public class TweetDetailFragment extends Fragment {
 	private ContentValues setFavoriteFlag(int flags) {
 		ContentValues cv = new ContentValues();
 
-		queryContentProvider();
+		loadCursor();
 
 		try {
 			// set favorite flag und clear unfavorite flag
-			if ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
+			if ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
 				cv.put(Tweets.COL_FLAGS, (flags & ~Tweets.FLAG_TO_UNFAVORITE));
 			else
 				cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE)
 						& (~Tweets.FLAG_TO_UNFAVORITE));
 			// put in favorites bufer
-			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_FAVORITES);
+			cv.put(Tweets.COL_BUFFER, mBuffer | Tweets.BUFFER_FAVORITES);
 			return cv;
 		} catch (Exception ex) {
 			Log.e(TAG, "error: ", ex);
@@ -1248,16 +1247,16 @@ public class TweetDetailFragment extends Fragment {
 		ContentValues cv = new ContentValues();
 
 		// clear favorite flag and set unfavorite flag
-		if ((c.getInt(c.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
+		if ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
 			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE))
 					| Tweets.FLAG_TO_UNFAVORITE);
 		else
 			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)));
 
-		if (!c.isNull(c.getColumnIndex(Tweets.COL_TID))) {
-			cv.put(Tweets.COL_BUFFER, buffer);
+		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID))) {
+			cv.put(Tweets.COL_BUFFER, mBuffer);
 		} else {
-			cv.put(Tweets.COL_BUFFER, buffer & (~Tweets.BUFFER_FAVORITES));
+			cv.put(Tweets.COL_BUFFER, mBuffer & (~Tweets.BUFFER_FAVORITES));
 		}
 		return cv;
 	}
@@ -1290,12 +1289,12 @@ public class TweetDetailFragment extends Fragment {
 			// and get a new one
 			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 					+ Tweets.TWEETS + "/" + mRowId);
-			c = resolver.query(uri, null, null, null, null);
-			if (c.getCount() == 1) {
+			mCursor = resolver.query(uri, null, null, null, null);
+			if (mCursor.getCount() == 1) {
 
-				c.moveToFirst();
-				if (c.getColumnIndex(Tweets.COL_FLAGS) > -1)
-					flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+				mCursor.moveToFirst();
+				if (mCursor.getColumnIndex(Tweets.COL_FLAGS) > -1)
+					mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
 				// update the views
 				handleTweetFlags();
 			}
