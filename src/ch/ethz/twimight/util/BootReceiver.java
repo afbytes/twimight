@@ -16,7 +16,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
@@ -31,7 +30,7 @@ import ch.ethz.twimight.net.twitter.TwitterAlarm;
  *
  */
 public class BootReceiver extends BroadcastReceiver {
-	private static final String TAG = "BootBroadcastReceiver";
+//	private static final String TAG = "BootReceiver";
 	
 	/**
 	 * Starts the twimight services upon receiving a boot Intent.
