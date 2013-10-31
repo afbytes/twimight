@@ -33,7 +33,6 @@ import ch.ethz.twimight.R;
  * Cursor adapter for a cursor containing users.
  */
 public class TwitterUserAdapter extends CursorAdapter {
-
 	static final String[] from = { TwitterUsers.COL_SCREENNAME,
 			TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION };
 	static final int[] to = { R.id.showUserScreenName, R.id.showUserRealName,

@@ -98,7 +98,7 @@ public class DmAdapter extends CursorAdapter {
 
 		// Profile image
 		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
-			int userId = cursor.getInt(cursor.getColumnIndex("userRowId"));
+			int userId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 			Uri imageUri = Uri.parse("content://"
 					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);

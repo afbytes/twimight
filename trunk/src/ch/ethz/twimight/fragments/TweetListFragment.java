@@ -4,17 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
+import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.SearchableActivity;
@@ -35,6 +33,8 @@ public class TweetListFragment extends ListFragment {
 	public static final int USER_TWEETS = 14;
 
 	public static final String USER_ID = "USER_ID";
+	
+
 
 	// Container Activity must implement this interface
 	public interface OnInitCompletedListener {
@@ -46,11 +46,10 @@ public class TweetListFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (type == USER_TWEETS) {
+		if (mType == USER_TWEETS) {
 			userId = getArguments().getLong(USER_ID);
 			Log.i("TEST", "userId: " + userId);
 		}
-		mlistAdapter = getData(type);
 	}
 
 	@Override
@@ -67,10 +66,12 @@ public class TweetListFragment extends ListFragment {
 	};
 
 	public TweetListFragment(int type) {
-		this.type = type;
+		this.mType = type;
 		Log.i(TAG, "creating instance of tweet list frag");
 	}
 
+
+	
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
@@ -91,10 +92,11 @@ public class TweetListFragment extends ListFragment {
 		}
 	}
 
-	private void setActionBarTitles() {
+	@Override
+	void setActionBarTitles() {
 		String title = null;
 		String subtitle = null;
-		switch (type) {
+		switch (mType) {
 		case TIMELINE_KEY:
 			title = getString(R.string.timeline);
 			subtitle = "@" + LoginActivity.getTwitterScreenname(getActivity());
@@ -134,32 +136,27 @@ public class TweetListFragment extends ListFragment {
 					int position, long id) {
 				Cursor c = (Cursor) arg0.getItemAtPosition(position);
 				Intent i = new Intent(getActivity(), TweetDetailActivity.class);
-				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-				i.putExtra("type", type);
-				if (type == USER_TWEETS) {
+				i.putExtra(TweetDetailActivity.EXTRA_ROW_ID, c.getInt(c.getColumnIndex("_id")));
+				i.putExtra(TweetDetailActivity.EXTRA_TYPE, mType);
+				if (mType == USER_TWEETS) {
 					i.putExtra(USER_ID, userId);
 				}
 				startActivity(i);
-				// if (type == SEARCH_TWEETS)
-				// i.putExtra(ListFragment.SEARCH_QUERY, query);
 			}
 		});
 
-		// if (listener != null)
-		// listener.onInitCompleted();
 		return list;
 	}
-
+	
 	/**
 	 * Which tweets do we show? Timeline, favorites, mentions?
 	 * 
 	 * @param filter
 	 */
-	ListAdapter getData(int filter) {
+	@Override
+	Cursor getCursor(int filter) {
 		// set all header button colors to transparent
-
-		if (c != null)
-			c.close();
+		Cursor c = null;
 		overscrollIntent = new Intent(getActivity(), TwitterService.class);
 
 		switch (filter) {
@@ -168,7 +165,7 @@ public class TweetListFragment extends ListFragment {
 			overscrollIntent.putExtra("synch_request",
 					TwitterService.SYNCH_TIMELINE);
 			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
-			c = resolver
+			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"
 							+ Tweets.TWEETS_TABLE_TIMELINE + "/"
@@ -180,7 +177,7 @@ public class TweetListFragment extends ListFragment {
 			overscrollIntent.putExtra("synch_request",
 					TwitterService.SYNCH_FAVORITES);
 			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
-			c = resolver
+			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"
 							+ Tweets.TWEETS_TABLE_FAVORITES + "/"
@@ -192,7 +189,7 @@ public class TweetListFragment extends ListFragment {
 			overscrollIntent.putExtra("synch_request",
 					TwitterService.SYNCH_MENTIONS);
 			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
-			c = resolver
+			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"
 							+ Tweets.TWEETS_TABLE_MENTIONS + "/"
@@ -200,7 +197,7 @@ public class TweetListFragment extends ListFragment {
 
 			break;
 		case SEARCH_TWEETS:
-			c = resolver.query(
+			c = mResolver.query(
 					Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 							+ Tweets.TWEETS + "/" + Tweets.SEARCH), null,
 					SearchableActivity.query, null, null);
@@ -208,7 +205,7 @@ public class TweetListFragment extends ListFragment {
 			break;
 
 		case USER_TWEETS:
-			c = resolver.query(
+			c = mResolver.query(
 					Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
 							+ Tweets.TWEETS + "/" + Tweets.TWEETS_TABLE_USER
 							+ "/" + userId), null, null, null, null);
@@ -217,8 +214,13 @@ public class TweetListFragment extends ListFragment {
 			break;
 
 		}
-		return new TweetAdapter(getActivity(), c);
+		return c;
 
 	}
-
+	
+	@Override
+	CursorAdapter getListAdapter() {
+		return new TweetAdapter(getActivity(), null);
+	}
+	
 }

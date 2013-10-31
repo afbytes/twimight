@@ -28,101 +28,87 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
  * Shows the most recent tweets of a user
+ * 
  * @author thossmann
  * @author pcarta
  */
-public class SearchableActivity extends TwimightBaseActivity implements OnInitCompletedListener{
+public class SearchableActivity extends TwimightBaseActivity implements OnInitCompletedListener {
 
-	private static final String TAG = "SearchableActivity";
+//	private static final String TAG = "SearchableActivity";
 
-	
-		
-	ViewPager viewPager;	
+	ViewPager viewPager;
 	public static String query;
 	ListViewPageAdapter pagAdapter;
 	Intent intent;
 	ListFragment listFrag;
-	
-	/** 
-	 * Called when the activity is first created. 	
+
+	/**
+	 * Called when the activity is first created.
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		
+
 		super.onCreate(null);
-		setContentView(R.layout.main);	
+		setContentView(R.layout.main);
 
-		viewPager = (ViewPager)  findViewById(R.id.viewpager); 
+		viewPager = (ViewPager) findViewById(R.id.viewpager);
 
-		Bundle bundle = new Bundle();		
+		Bundle bundle = new Bundle();
 		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_SEARCH_RESULTS);
-		
-		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);      
-		viewPager.setAdapter(pagAdapter);	
+
+		pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
+		viewPager.setAdapter(pagAdapter);
 		viewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
-		
-		//action bar
-		actionBar = getActionBar();	
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);	  	
 
-		viewPager.setOnPageChangeListener(
-				new ViewPager.SimpleOnPageChangeListener() {
-					@Override
-					public void onPageSelected(int position) {
-						// When swiping between pages, select the
-						// corresponding tab.	                	
-	                    getActionBar().setSelectedNavigationItem(position);
-	                }
-	            });
+		// action bar
+		actionBar = getActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		
-		Tab tab = actionBar.newTab()
-				.setText("Tweets")
-				.setTabListener(new TabListener(viewPager));
+		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				// When swiping between pages, select the
+				// corresponding tab.
+				getActionBar().setSelectedNavigationItem(position);
+			}
+		});
+
+		Tab tab = actionBar.newTab().setText("Tweets").setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab()
-				.setText("Users")
-				.setTabListener(new TabListener(viewPager));
+		tab = actionBar.newTab().setText("Users").setTabListener(new TabListener(viewPager));
 		actionBar.addTab(tab);
 
 		// Get the intent and get the query
 		intent = getIntent();
-		//processIntent(intent);
-
+		// processIntent(intent);
 
 	}
-
 
 	private void processIntent(Intent intent) {
 		if (intent.hasExtra(SearchManager.QUERY)) {
-			//if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
-			query = intent.getStringExtra(SearchManager.QUERY);	
-			setTitle(getString(R.string.results_for) + query);
-			
+			// if (!intent.getStringExtra(SearchManager.QUERY).equals(query))
+			query = intent.getStringExtra(SearchManager.QUERY);
+
 			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-	                TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
-	        suggestions.saveRecentQuery(query, null); 	     
-		
-		} 
+					TwimightSuggestionProvider.AUTHORITY, TwimightSuggestionProvider.MODE);
+			suggestions.saveRecentQuery(query, null);
+		}
 	}
 
-
-
 	@Override
-	protected void onNewIntent(Intent intent) {		
+	protected void onNewIntent(Intent intent) {
 		setIntent(intent);
 		processIntent(intent);
 		getFragmentByPosition(0).newQueryText();
 		getFragmentByPosition(1).newQueryText();
-				
+
 	}
 
 	public ListFragment getFragmentByPosition(int pos) {
-        String tag = "android:switcher:" + viewPager.getId() + ":" + pos;
-        return (ListFragment) getFragmentManager().findFragmentByTag(tag);
-    }
-
+		String tag = "android:switcher:" + viewPager.getId() + ":" + pos;
+		return (ListFragment) getFragmentManager().findFragmentByTag(tag);
+	}
 
 	@Override
 	protected void onStart() {
@@ -131,15 +117,14 @@ public class SearchableActivity extends TwimightBaseActivity implements OnInitCo
 		processIntent(intent);
 	}
 
-
 	@Override
 	public void onInitCompleted() {
-		 processIntent(intent);
-		// listFrag = getFragmentByPosition(actionBar.getSelectedNavigationIndex());
-	    // listFrag.setQueryText(query);		
-		
-	}
+		processIntent(intent);
+		// listFrag =
+		// getFragmentByPosition(actionBar.getSelectedNavigationIndex());
+		// listFrag.setQueryText(query);
 
+	}
 
 	@Override
 	protected void onDestroy() {
@@ -147,47 +132,33 @@ public class SearchableActivity extends TwimightBaseActivity implements OnInitCo
 		super.onDestroy();
 		pagAdapter = null;
 		viewPager = null;
-		
+
 	}
-	
-	
-	
-	
+
 	/**
 	 * Saves the current selection
-	
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-
-		if(searchListView != null){
-			positionIndex = searchListView.getFirstVisiblePosition();
-			View v = searchListView.getChildAt(0);
-			positionTop = (v == null) ? 0 : v.getTop();
-			savedInstanceState.putInt("positionIndex", positionIndex);
-			savedInstanceState.putInt("positionTop", positionTop);
-
-			Log.i(TAG, "saving" + positionIndex + " " + positionTop);
-		}
-
-		super.onSaveInstanceState(savedInstanceState);
-	}
-
-	/**
-	 * Loads the current user selection
-	
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-
-		positionIndex = savedInstanceState.getInt("positionIndex");
-		positionTop = savedInstanceState.getInt("positionTop");
-
-		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
-	}
-	
-	
+	 * 
+	 * @Override public void onSaveInstanceState(Bundle savedInstanceState) {
+	 * 
+	 *           if(searchListView != null){ positionIndex =
+	 *           searchListView.getFirstVisiblePosition(); View v =
+	 *           searchListView.getChildAt(0); positionTop = (v == null) ? 0 :
+	 *           v.getTop(); savedInstanceState.putInt("positionIndex",
+	 *           positionIndex); savedInstanceState.putInt("positionTop",
+	 *           positionTop);
+	 * 
+	 *           Log.i(TAG, "saving" + positionIndex + " " + positionTop); }
+	 * 
+	 *           super.onSaveInstanceState(savedInstanceState); }
+	 * 
+	 *           /** Loads the current user selection
+	 * @Override public void onRestoreInstanceState(Bundle savedInstanceState) {
+	 *           super.onRestoreInstanceState(savedInstanceState);
+	 * 
+	 *           positionIndex = savedInstanceState.getInt("positionIndex");
+	 *           positionTop = savedInstanceState.getInt("positionTop");
+	 * 
+	 *           Log.i(TAG, "restoring " + positionIndex + " " + positionTop); }
 	 */
-	
-	
 
 }

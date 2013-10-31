@@ -13,23 +13,12 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
@@ -43,68 +32,62 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.util.AsyncImageLoader;
 
 /**
  * Cursor adapter for a cursor containing tweets.
  */
 public class TweetAdapter extends CursorAdapter {
 
-	static final String[] from = { TwitterUsers.COL_NAME };
+	// private static final String TAG = "TweetAdapter";
+
 	private HtmlPagesDbHelper htmlDbHelper;
 
-	private final Map<String, Bitmap> mBitmapCache = new HashMap<String, Bitmap>();
+	private final AsyncImageLoader mImageLoader;
 
 	private static class ViewHolder {
-		View modeStripe;
-		TextView tvUsername;
-		TextView tvCreatedAt;
-		TextView tvTweetText;
-		TextView tvRetweetedBy;
-		ImageView ivProfileImage;
-		ImageView ivPendingIcon;
-		ImageView ivVerifiedIcon;
-		ImageView ivRetweetedIcon;
-		ImageView ivFavoriteIcon;
-		ImageView ivDownloadIcon;
+		private final View modeStripe;
+		private final TextView tvUsername;
+		private final TextView tvCreatedAt;
+		private final TextView tvTweetText;
+		private final TextView tvRetweetedBy;
+		private final ImageView ivProfileImage;
+		private final ImageView ivPendingIcon;
+		private final ImageView ivVerifiedIcon;
+		private final ImageView ivRetweetedIcon;
+		private final ImageView ivFavoriteIcon;
+		private final ImageView ivDownloadIcon;
 
-		long disId = -1;
+		private ViewHolder(View row) {
+			modeStripe = row.findViewById(R.id.modeStripe);
+			tvUsername = (TextView) row.findViewById(R.id.tvUsername);
+			tvCreatedAt = (TextView) row.findViewById(R.id.tvCreatedAt);
+			tvTweetText = (TextView) row.findViewById(R.id.tvTweetText);
+			tvRetweetedBy = (TextView) row.findViewById(R.id.tvRetweetedBy);
+			ivProfileImage = (ImageView) row.findViewById(R.id.ivProfileImage);
+			ivPendingIcon = (ImageView) row.findViewById(R.id.ivPendingIcon);
+			ivVerifiedIcon = (ImageView) row.findViewById(R.id.ivVerifiedIcon);
+			ivRetweetedIcon = (ImageView) row.findViewById(R.id.ivRetweetedIcon);
+			ivFavoriteIcon = (ImageView) row.findViewById(R.id.ivFavoriteIcon);
+			ivDownloadIcon = (ImageView) row.findViewById(R.id.ivDownloadIcon);
+		}
 	}
 
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
 		super(context, c, true);
+		mImageLoader = new AsyncImageLoader(context);
 	}
 
 	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) parent.getContext()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View view = inflater.inflate(R.layout.tweet_row, null);
-		createHolder(view);
+		View row = inflater.inflate(R.layout.tweet_row, null);
+		ViewHolder viewHolder = new ViewHolder(row);
+		row.setTag(viewHolder);
 
-		return view;
-	}
-
-	private void createHolder(View view) {
-		ViewHolder holder = new ViewHolder();
-		setHolderFields(view, holder);
-		view.setTag(holder);
-	}
-
-	private void setHolderFields(View row, ViewHolder holder) {
-		holder.modeStripe = row.findViewById(R.id.modeStripe);
-		holder.tvUsername = (TextView) row.findViewById(R.id.tvUsername);
-		holder.tvCreatedAt = (TextView) row.findViewById(R.id.tvCreatedAt);
-		holder.tvTweetText = (TextView) row.findViewById(R.id.tvTweetText);
-		holder.tvRetweetedBy = (TextView) row.findViewById(R.id.tvRetweetedBy);
-		row.findViewById(R.id.tvRetweetedBy);
-		holder.ivProfileImage = (ImageView) row.findViewById(R.id.ivProfileImage);
-		holder.ivPendingIcon = (ImageView) row.findViewById(R.id.ivPendingIcon);
-		holder.ivVerifiedIcon = (ImageView) row.findViewById(R.id.ivVerifiedIcon);
-		holder.ivRetweetedIcon = (ImageView) row.findViewById(R.id.ivRetweetedIcon);
-		holder.ivFavoriteIcon = (ImageView) row.findViewById(R.id.ivFavoriteIcon);
-		holder.ivDownloadIcon = (ImageView) row.findViewById(R.id.ivDownloadIcon);
-
+		return row;
 	}
 
 	/** This is where data is mapped to its view */
@@ -120,19 +103,13 @@ public class TweetAdapter extends CursorAdapter {
 		long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));
 
 		// set profile image
+		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
+		holder.ivProfileImage.setImageDrawable(null);
 		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-
-			if (holder.disId == -1 || holder.disId != disId) {
-				holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
-				holder.disId = disId;
-				int userRowId = cursor.getInt(cursor.getColumnIndex("userRowId"));
-				Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-						+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-				loadBitmap(imageUri, holder.ivProfileImage, context);
-			}
-
-		} else {
-			holder.ivProfileImage.setImageResource(R.drawable.profile_image_placeholder);
+			int userRowId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
+			mImageLoader.loadImage(imageUri, holder.ivProfileImage);
 		}
 
 		// if we don't have a real name, we use the screen name
@@ -143,7 +120,8 @@ public class TweetAdapter extends CursorAdapter {
 		}
 
 		// set tweet text
-		holder.tvTweetText.setText(cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
+		String tweetText = cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
+		holder.tvTweetText.setText(tweetText);
 
 		// set "created at"
 		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
@@ -192,12 +170,11 @@ public class TweetAdapter extends CursorAdapter {
 
 		// pending?
 		int flags = cursor.getInt(cursor.getColumnIndex(Tweets.COL_FLAGS));
-
 		boolean isPending = (flags > 0);
 		if (isPending) {
-			holder.ivPendingIcon.setVisibility(ImageView.VISIBLE);
+			holder.ivPendingIcon.setVisibility(View.VISIBLE);
 		} else {
-			holder.ivPendingIcon.setVisibility(ImageView.GONE);
+			holder.ivPendingIcon.setVisibility(View.GONE);
 		}
 
 		// retweeted?
@@ -213,9 +190,9 @@ public class TweetAdapter extends CursorAdapter {
 		boolean favorited = (((buffer & Tweets.BUFFER_FAVORITES) != 0) && ((flags & Tweets.FLAG_TO_UNFAVORITE) == 0))
 				|| ((flags & Tweets.FLAG_TO_FAVORITE) > 0);
 		if (favorited) {
-			holder.ivFavoriteIcon.setVisibility(ImageView.VISIBLE);
+			holder.ivFavoriteIcon.setVisibility(View.VISIBLE);
 		} else {
-			holder.ivFavoriteIcon.setVisibility(ImageView.GONE);
+			holder.ivFavoriteIcon.setVisibility(View.GONE);
 		}
 
 		// disaster/normal? -> select accent color / set verified icon
@@ -225,7 +202,7 @@ public class TweetAdapter extends CursorAdapter {
 			// select accent color
 			accentColor = context.getResources().getColor(R.color.accent_disastermode_2);
 			// set verified icon for disaster tweets
-			holder.ivVerifiedIcon.setVisibility(ImageView.VISIBLE);
+			holder.ivVerifiedIcon.setVisibility(View.VISIBLE);
 			if (cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISVERIFIED)) > 0) {
 				holder.ivVerifiedIcon.setImageResource(R.drawable.ic_small_verified);
 			} else {
@@ -234,7 +211,7 @@ public class TweetAdapter extends CursorAdapter {
 		} else {
 			// set pressed state background color
 			// select accent color
-			holder.ivVerifiedIcon.setVisibility(ImageView.GONE);
+			holder.ivVerifiedIcon.setVisibility(View.GONE);
 			accentColor = context.getResources().getColor(R.color.accent_normalmode_2);
 		}
 
@@ -254,7 +231,6 @@ public class TweetAdapter extends CursorAdapter {
 
 		// higlight mentions
 		String ownHandle = "@" + LoginActivity.getTwitterScreenname(context);
-		String tweetText = (String) holder.tvTweetText.getText();
 		Pattern pattern = Pattern.compile(ownHandle, Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(tweetText);
 		Spannable tweetSpannable = new SpannableString(tweetText);
@@ -263,120 +239,6 @@ public class TweetAdapter extends CursorAdapter {
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		holder.tvTweetText.setText(tweetSpannable);
-
-	}
-
-	public void loadBitmap(Uri uri, ImageView imageView, Context context) {
-		if (cancelPotentialWork(uri, imageView)) {
-			if (!mBitmapCache.containsKey(uri.toString())) {
-				final BitmapWorkerTask task = new BitmapWorkerTask(imageView, context, uri);
-				final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), task);
-				imageView.setImageDrawable(asyncDrawable);
-				task.execute();
-			} else {
-				Bitmap bitmap = mBitmapCache.get(uri.toString());
-				imageView.setImageBitmap(bitmap);
-				imageView.setBackgroundColor(Color.TRANSPARENT);
-			}
-		}
-	}
-
-	class BitmapWorkerTask extends AsyncTask<AsyncDrawable, Void, Void> {
-		private final WeakReference<ImageView> imageViewReference;
-		Context context;
-		public Uri uri;
-		AsyncDrawable asyncDrawable;
-
-		public BitmapWorkerTask(ImageView imageView, Context context, Uri uri) {
-			// Use a WeakReference to ensure the ImageView can be garbage
-			// collected
-			imageViewReference = new WeakReference<ImageView>(imageView);
-			this.context = context;
-			this.uri = uri;
-		}
-
-		// Decode image in background.
-		@Override
-		protected Void doInBackground(AsyncDrawable... params) {
-			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-			// this.asyncDrawable = params[0];
-			InputStream is;
-			try {
-				is = context.getContentResolver().openInputStream(uri);
-				if (is != null) {
-					Bitmap bitmap = BitmapFactory.decodeStream(is);
-					TweetAdapter.this.mBitmapCache.put(uri.toString(), bitmap);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		// Once complete, see if ImageView is still around and set bitmap.
-		@Override
-		protected void onPostExecute(Void unused) {
-			Bitmap bitmap = null;
-			if (!isCancelled()) {
-				bitmap = TweetAdapter.this.mBitmapCache.get(uri.toString());
-			}
-
-			if (imageViewReference != null) {
-				final ImageView imageView = imageViewReference.get();
-
-				final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
-
-				if (bitmap != null) {
-					if (this == bitmapWorkerTask && imageView != null) {
-						imageView.setImageBitmap(bitmap);
-						imageView.setBackgroundColor(Color.TRANSPARENT);
-					}
-				}
-
-			}
-		}
-	}
-
-	static class AsyncDrawable extends BitmapDrawable {
-		private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
-
-		public AsyncDrawable(Resources res, BitmapWorkerTask bitmapWorkerTask) {
-			super(res);
-			bitmapWorkerTaskReference = new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
-		}
-
-		public BitmapWorkerTask getBitmapWorkerTask() {
-			return bitmapWorkerTaskReference.get();
-		}
-	}
-
-	private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
-		if (imageView != null) {
-			final Drawable drawable = imageView.getDrawable();
-			if (drawable instanceof AsyncDrawable) {
-				final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
-				return asyncDrawable.getBitmapWorkerTask();
-			}
-		}
-		return null;
-	}
-
-	public static boolean cancelPotentialWork(Uri uri, ImageView imageView) {
-		final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
-
-		if (bitmapWorkerTask != null) {
-			final Uri bitmapUri = bitmapWorkerTask.uri;
-			if (!bitmapUri.equals(uri)) {
-				// Cancel previous task
-				bitmapWorkerTask.cancel(true);
-			} else
-				// The same work is already in progress
-				return false;
-
-		}
-		// No task associated with the ImageView, or an existing task was
-		// cancelled
-		return true;
 	}
 
 }

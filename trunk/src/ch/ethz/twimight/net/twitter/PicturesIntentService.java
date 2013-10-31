@@ -12,6 +12,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -71,12 +72,15 @@ public class PicturesIntentService extends IntentService {
 		// insert pictures into DB
 		insertProfileImagesParameters(cv);
 		// here, we have to notify almost everyone
-		// Log.i(TAG,"notifying group of pictures");
-		// getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
-		getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
-		getContentResolver().notifyChange(Tweets.TABLE_MENTIONS_URI, null);
-		getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
-
+		ContentResolver contentResolver = getContentResolver();
+		contentResolver.notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+		contentResolver.notifyChange(Tweets.TABLE_MENTIONS_URI, null);
+		contentResolver.notifyChange(Tweets.TABLE_FAVORITES_URI, null);
+		contentResolver.notifyChange(Tweets.TABLE_SEARCH_URI, null);
+		contentResolver.notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
+		contentResolver.notifyChange(TwitterUsers.USERS_DISASTER_URI, null);
+		contentResolver.notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
+		contentResolver.notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
 	}
 
 	private void insertProfileImageIntoInternalStorage(byte[] image, String name) {

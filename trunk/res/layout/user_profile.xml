@@ -11,8 +11,8 @@
     android:id="@+id/showUserRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/white" >
+    android:background="@color/white"
+    android:fillViewport="true" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -274,17 +274,6 @@
             <!-- buttons specific to local user -->
 
             <Button
-                android:id="@+id/showUserFollowers"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:text="@string/followers" />
-
-            <View style="@style/ButtonBarDivider" />
-
-            <Button
                 android:id="@+id/showUserFriends"
                 style="@style/Button.Borderless"
                 android:layout_width="match_parent"
@@ -292,6 +281,17 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/friends" />
+
+            <View style="@style/ButtonBarDivider" />
+
+            <Button
+                android:id="@+id/showUserFollowers"
+                style="@style/Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="@string/followers" />
 
             <View style="@style/ButtonBarDivider" />
 
