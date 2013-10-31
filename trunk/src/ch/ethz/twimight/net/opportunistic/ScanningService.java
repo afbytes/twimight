@@ -37,7 +37,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -846,8 +845,8 @@ public class ScanningService extends Service implements
 
 		JSONObject toSendXml;
 
-		String userId = String.valueOf(c.getLong(c
-				.getColumnIndex(Tweets.COL_TWITTERUSER)));
+//		String userId = String.valueOf(c.getLong(c
+//				.getColumnIndex(Tweets.COL_TWITTERUSER)));
 
 		String substr = Html.fromHtml(
 				c.getString(c.getColumnIndex(Tweets.COL_TEXT))).toString();
@@ -904,9 +903,9 @@ public class ScanningService extends Service implements
 		try {
 
 			JSONObject jsonObj = new JSONObject();
-
+			FileInputStream xmlStream = null;
 			try {
-				FileInputStream xmlStream = new FileInputStream(xml);
+				xmlStream = new FileInputStream(xml);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 				byte[] buffer = new byte[1024];
@@ -924,6 +923,14 @@ public class ScanningService extends Service implements
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} finally{
+				if(xmlStream!=null){
+					try{
+						xmlStream.close();
+					} catch (IOException e){
+						e.printStackTrace();
+					}
+				}
 			}
 			jsonObj.put(TYPE, HTML);
 			return jsonObj;
