@@ -12,15 +12,33 @@
     android:versionCode="1700023"
     android:versionName="1.1.2" >
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
 
     <permission
         android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
         android:description="@string/permDescription"
         android:label="Access to Twimight content providers"
         android:protectionLevel="dangerous" />
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="17" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" />
 
     <application
         android:hardwareAccelerated="true"
@@ -242,23 +260,5 @@
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
         </activity>
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
-
-    <uses-feature
-        android:name="android.hardware.bluetooth"
-        android:required="false" />
-    <uses-feature android:name="android.hardware.touchscreen" />
 
 </manifest>
