@@ -48,13 +48,13 @@ import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.ComposeDmActivity;
-import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.DmConversationListActivity;
+import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.TweetListActivity;
-import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.UserListActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.UserTweetListActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
@@ -1351,7 +1351,6 @@ public class TwitterService extends Service {
 				}
 				if (insertAsFriend) {
 					userContentValues.put(TwitterUsers.COL_ISFRIEND, 1);
-
 				}
 
 				return userContentValues;
