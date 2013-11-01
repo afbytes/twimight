@@ -14,6 +14,7 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.FileNotFoundException;
+import java.util.Locale;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -88,12 +89,11 @@ public class TwitterUsersContentProvider extends ContentProvider {
 	public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
 		Log.d(TAG, " inside openFile");
 		// only support read only files
-		if ("r".equals(mode.toLowerCase())) {
+		if ("r".equals(mode.toLowerCase(Locale.getDefault()))) {
 			return openFileHelper(uri, mode);
 		} else {
 			return null;
 		}
-
 	}
 
 	/**
@@ -224,17 +224,15 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 		if (c != null) {
 
-			// we flag the user for updating the profile image if
-			// - the flag is set
-			// - and we do not yet have a profile image
-			// - or if we have a profile image but the URL has changed
-			// - otherwise, we clear the profile image flag
 			if (values.containsKey(TwitterUsers.COL_FLAGS)
-					&& ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) > 0)) {
-				if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-					if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_IMAGEURL))
-							&& c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL)).equals(
-									values.getAsString(TwitterUsers.COL_IMAGEURL))) {
+					&& ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) != 0)) {
+				// if we already have an image
+				if(!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))){
+					String newImageUrl = values.getAsString(TwitterUsers.COL_IMAGEURL);
+					String oldImageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
+					// and it's for the current url
+					if (newImageUrl==null || newImageUrl.equals(oldImageUrl)) {
+						// we clear the flag to download the image
 						values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS)
 								& (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
 						Log.d(TAG, "we already have profile picture, deleting flag");
