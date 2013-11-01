@@ -56,6 +56,7 @@
     <string name="no_valid_audio">No valid application for playing audio files</string>
     <string name="no_valid_video">No valid application for playing video files</string>
     <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
+    <string name="download_toast">Links werden zum offline Betrachten gespeichert.</string>
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight hat Superkräfte!

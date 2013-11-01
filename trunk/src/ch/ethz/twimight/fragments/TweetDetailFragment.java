@@ -652,6 +652,7 @@ public class TweetDetailFragment extends Fragment {
 				public void onClick(View v) {
 
 					downloadAndInsert();
+					Toast.makeText(getActivity(), getResources().getString(R.string.download_toast), Toast.LENGTH_SHORT).show();
 					// TODO: Fix download functionality and apply appropriate
 					// icon
 					// offlineButton
