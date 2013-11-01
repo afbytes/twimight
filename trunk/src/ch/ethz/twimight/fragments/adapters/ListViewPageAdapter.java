@@ -1,6 +1,5 @@
 package ch.ethz.twimight.fragments.adapters;
 
-
 import java.util.HashMap;
 
 import android.app.Fragment;
@@ -19,7 +18,7 @@ public class ListViewPageAdapter extends FragmentPagerAdapter {
 	public static final int BUNDLE_TYPE_USERS = 1;
 	public static final int BUNDLE_TYPE_SEARCH_RESULTS = 2;
 	
-	private static final String TAG = "ListViewPageAdapter";
+//	private static final String TAG = "ListViewPageAdapter";
 
 	Bundle bundle;
 	HashMap<Integer,ListFragment> map;

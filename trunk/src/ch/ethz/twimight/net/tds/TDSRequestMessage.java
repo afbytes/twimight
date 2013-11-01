@@ -13,7 +13,6 @@
 
 package ch.ethz.twimight.net.tds;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.text.SimpleDateFormat;
@@ -26,10 +25,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.util.Base64;
 import android.util.Log;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;

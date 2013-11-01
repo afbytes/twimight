@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -118,7 +119,7 @@ public class PullToRefreshListView extends LinearLayout {
 		mHalfRotationCwReverse.setFillAfter(true);
 		// list view
 		mListView = new ListView(getContext());
-		mListView.setBackgroundDrawable(null);
+		mListView.setBackgroundColor(Color.TRANSPARENT);
 		mListView.setFastScrollEnabled(true);
 
 		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));

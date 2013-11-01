@@ -36,7 +36,7 @@ import ch.ethz.twimight.util.Constants;
 public class TDSAlarm extends BroadcastReceiver {
 
 	private static final String WAKE_LOCK = "TDSLock";
-	private static final String TAG = "TDSAlarm";
+//	private static final String TAG = "TDSAlarm";
 	private static WakeLock wakeLock;
 	
 	/**

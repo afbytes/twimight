@@ -1,7 +1,6 @@
 package ch.ethz.twimight.net.tds;
 
 import java.security.GeneralSecurityException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpVersion;
@@ -40,7 +39,6 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
-import ch.ethz.twimight.data.MacsDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;

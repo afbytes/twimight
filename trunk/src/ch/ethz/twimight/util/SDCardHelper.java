@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,7 +18,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 
 public class SDCardHelper {
-	private final static String TAG = "SDCardHelper";
+//	private final static String TAG = "SDCardHelper";
 	private File SDcardPath;
 
 	private boolean isSDAvail;

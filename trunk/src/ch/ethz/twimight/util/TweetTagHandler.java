@@ -30,7 +30,7 @@ import ch.ethz.twimight.activities.UserProfileActivity;
 public class TweetTagHandler implements TagHandler {
 
 	Context context;
-	private static final String TAG = "TweetTagHandler";
+//	private static final String TAG = "TweetTagHandler";
 
 	public TweetTagHandler(Context context) {
 		this.context = context;
@@ -75,7 +75,7 @@ public class TweetTagHandler implements TagHandler {
 		}
 	}
 
-	private Object getLastHashtag(Editable text, Class kind) {
+	private Object getLastHashtag(Editable text, Class<?> kind) {
 		Object[] objs = text.getSpans(0, text.length(), kind);
 
 		if (objs.length == 0) {
@@ -116,7 +116,7 @@ public class TweetTagHandler implements TagHandler {
 		 }
 	 }
 
-	 private Object getLastMention(Editable text, Class kind) {
+	 private Object getLastMention(Editable text, Class<?> kind) {
 		 Object[] objs = text.getSpans(0, text.length(), kind);
 
 		 if (objs.length == 0) {

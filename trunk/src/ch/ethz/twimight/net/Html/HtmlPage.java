@@ -1,9 +1,8 @@
 package ch.ethz.twimight.net.Html;
 
+import android.provider.BaseColumns;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
-import android.net.Uri;
-import android.provider.BaseColumns;
 
 
 /**
