@@ -1189,9 +1189,9 @@ public class TwitterService extends Service {
 			return text;
 		}
 
-		ArrayList<String> getUrls() {
-			return urls;
-		}
+//		ArrayList<String> getUrls() {
+//			return urls;
+//		}
 	}
 
 	/**

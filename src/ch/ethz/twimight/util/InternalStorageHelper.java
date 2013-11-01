@@ -1,18 +1,15 @@
 package ch.ethz.twimight.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.content.Context;
-import android.util.Log;
 
 public class InternalStorageHelper {
 	
 	Context context;
-	private static final String TAG = "InternalStorageHelper";
+//	private static final String TAG = "InternalStorageHelper";
 	
 	public InternalStorageHelper(Context context) {
 		this.context=context;

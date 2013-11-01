@@ -1,6 +1,5 @@
 package ch.ethz.twimight.util;
 
-import ch.ethz.twimight.R;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +9,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import ch.ethz.twimight.R;
 
 public class AppRater {
 	

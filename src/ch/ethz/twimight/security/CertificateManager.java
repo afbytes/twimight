@@ -73,7 +73,12 @@ public class CertificateManager {
 		} catch (IOException e) {
 			Log.e(TAG, "error reading root key");
 		}
-				
+		try {
+			pem.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 	
 	/**
@@ -91,7 +96,11 @@ public class CertificateManager {
 		} catch (IOException e) {
 			Log.e(TAG, "error reading certificate");
 		}
-		
+		try {
+			pem.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		//Log.i(TAG, "expires: " + cert.getNotAfter().toString());
 		
 		return cert;

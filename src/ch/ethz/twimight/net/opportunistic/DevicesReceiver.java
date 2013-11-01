@@ -3,6 +3,7 @@ package ch.ethz.twimight.net.opportunistic;
 import java.util.ArrayList;
 import java.util.Set;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -14,7 +15,6 @@ import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.data.MacsDBHelper;
 
 public class DevicesReceiver extends BroadcastReceiver {
@@ -41,7 +41,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 	private static final float INIT_PROB = (float) 0.5;
 	private static final float MAX_PROB = (float) 1.0;
 	private static final float MIN_PROB = (float) 0.1;
-	
+
 	private int discoveredSmartphonesCount = 0;
 
 	public DevicesReceiver(Context context) {
@@ -61,8 +61,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 			if (pairedDevices.size() > 0) {
 
 				for (BluetoothDevice device : pairedDevices) {
-					if (!dbHelper.updateMacActive(device.getAddress()
-							.toString(), 1)) {
+					if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
 						dbHelper.createMac(device.getAddress().toString(), 1);
 					}
 
@@ -71,6 +70,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 		}
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d(T, "DevicesReceiver onReceive()");
@@ -80,23 +80,22 @@ public class DevicesReceiver extends BroadcastReceiver {
 		if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
 			// Get the BluetoothDevice object from the Intent
-			BluetoothDevice device = intent
-					.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+			BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
 			// newDeviceList.add(device.getAddress().toString());
 			if (device.getBluetoothClass().getDeviceClass() == BluetoothClass.Device.PHONE_SMART
 					&& device.getBondState() != BluetoothDevice.BOND_BONDED) {
-				Log.d(T, "ACTION_FOUND special: " + device.getName() + " ("
-						+ device.getAddress() + ")");
+				Log.d(T, "ACTION_FOUND special: " + device.getName() + " (" + device.getAddress() + ")");
 				discoveredSmartphonesCount++;
-				ParcelUuid[] uuids = device.getUuids();
-				if (uuids != null) {
-					for (ParcelUuid uuid : uuids) {
-						Log.d(T, uuid.toString());
+				if (android.os.Build.VERSION.SDK_INT >= 15) {
+					ParcelUuid[] uuids = device.getUuids();
+					if (uuids != null) {
+						for (ParcelUuid uuid : uuids) {
+							Log.d(T, uuid.toString());
+						}
 					}
 				}
-				if (!dbHelper
-						.updateMacActive(device.getAddress().toString(), 1)) {
+				if (!dbHelper.updateMacActive(device.getAddress().toString(), 1)) {
 					dbHelper.createMac(device.getAddress().toString(), 1);
 				}
 
@@ -107,10 +106,8 @@ public class DevicesReceiver extends BroadcastReceiver {
 			Log.d(T, "ACTION_DISCOVERY_FINISHED");
 			Log.i(TAG, "received discovery finished");
 
-			if ((System.currentTimeMillis() - sharedPref.getLong(
-					DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
-				setDiscoveryFinishedTimestamp(sharedPref,
-						System.currentTimeMillis());
+			if ((System.currentTimeMillis() - sharedPref.getLong(DISCOVERY_FINISHED_TIMESTAMP, 0)) > 10000) {
+				setDiscoveryFinishedTimestamp(sharedPref, System.currentTimeMillis());
 				// addPairedDevices();
 				if (sf != null)
 					sf.onScanningFinished();
@@ -121,18 +118,15 @@ public class DevicesReceiver extends BroadcastReceiver {
 
 	}
 
-	public static void setDiscoveryFinishedTimestamp(
-			SharedPreferences sharedPref, Long time) {
+	public static void setDiscoveryFinishedTimestamp(SharedPreferences sharedPref, Long time) {
 		SharedPreferences.Editor edit = sharedPref.edit();
-		edit.putLong(DevicesReceiver.DISCOVERY_FINISHED_TIMESTAMP,
-				System.currentTimeMillis());
+		edit.putLong(DevicesReceiver.DISCOVERY_FINISHED_TIMESTAMP, System.currentTimeMillis());
 		edit.commit();
 	}
 
 	private void compareDevice() {
 		Bundle scanInfo = getScanInfo();
-		ArrayList<String> oldDeviceList = scanInfo
-				.getStringArrayList(DEVICE_LIST);
+		ArrayList<String> oldDeviceList = scanInfo.getStringArrayList(DEVICE_LIST);
 		float oldProb = scanInfo.getFloat(SCAN_PROBABILITY);
 		int newDevice = 0;
 		int oldDevice = 0;
@@ -201,8 +195,7 @@ public class DevicesReceiver extends BroadcastReceiver {
 			deviceList.add(device);
 		}
 		Log.i(TAG, "current scan probability is:" + String.valueOf(probability));
-		Log.i(TAG,
-				"devices scanned during last time are:" + deviceList.toString());
+		Log.i(TAG, "devices scanned during last time are:" + deviceList.toString());
 		Bundle mBundle = new Bundle();
 		mBundle.putFloat(SCAN_PROBABILITY, probability);
 		mBundle.putStringArrayList(DEVICE_LIST, deviceList);

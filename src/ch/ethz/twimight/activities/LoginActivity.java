@@ -68,7 +68,7 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
  */
 public class LoginActivity extends Activity implements OnClickListener{
 
-	private static final String TAG = "LoginActivity"; /** For logging */
+//	private static final String TAG = "LoginActivity";
 	
 	// shared preferences
 		public static final String TWITTER_ID = "twitter_id"; /** Name of Twitter ID in shared preferences */

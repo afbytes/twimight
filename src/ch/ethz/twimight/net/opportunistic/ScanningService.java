@@ -73,7 +73,6 @@ public class ScanningService extends Service implements
 		DevicesReceiver.ScanningFinished,
 		StateChangedReceiver.BtSwitchingFinished {
 
-	private static ScanningService instance;
 	private static final String T = "btdebug";
 	private static final String TAG = "ScanningService";
 	/** For Debugging */
@@ -134,7 +133,6 @@ public class ScanningService extends Service implements
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
-		instance = this;
 		handler = new Handler();
 		// set up Bluetooth
 

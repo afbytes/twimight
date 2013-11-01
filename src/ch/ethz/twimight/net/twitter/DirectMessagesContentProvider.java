@@ -344,7 +344,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 						// and set the is_verified flag to show that the tweet is signed
 						values.put(DirectMessages.COL_ISVERIFIED, 1);
 						
-						Long twitterId = getIdFromScreenName(values.getAsString(DirectMessages.COL_RECEIVER_SCREENNAME));
+//						Long twitterId = getIdFromScreenName(values.getAsString(DirectMessages.COL_RECEIVER_SCREENNAME));
 						
 						//TODO: obtain peers public keys and encrypt
 						values.put(DirectMessages.COL_CRYPTEXT,text );	
