@@ -232,10 +232,10 @@ public class TwitterUsersContentProvider extends ContentProvider {
 					String oldImageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
 					// and it's for the current url
 					if (newImageUrl==null || newImageUrl.equals(oldImageUrl)) {
+						Log.d(TAG, "urls match -> clear flag");
 						// we clear the flag to download the image
 						values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS)
 								& (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
-						Log.d(TAG, "we already have profile picture, deleting flag");
 					}
 				}
 			}
