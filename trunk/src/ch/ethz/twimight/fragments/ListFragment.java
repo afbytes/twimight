@@ -68,7 +68,6 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	public void newQueryText() {
 		// Called when the action bar search text has changed. Update
 		// the search filter
-		// query = newText;
 		updateList();
 		setActionBarTitles();
 	}

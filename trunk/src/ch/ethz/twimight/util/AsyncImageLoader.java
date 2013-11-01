@@ -48,7 +48,7 @@ public class AsyncImageLoader {
 				mImageViewsByUri.put(uri, imageViewsforUri);
 				// if no ImageViews have been added for this URI that means
 				// there is also no loader task yet -> start one
-				new BitmapLoadTask(uri).execute();
+				new BitmapLoadTask(uri).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 			imageView.setTag(uri);
 			imageViewsforUri.add(imageView);
@@ -65,7 +65,6 @@ public class AsyncImageLoader {
 
 		@Override
 		protected Bitmap doInBackground(Void... unused) {
-			Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 			InputStream inputStream = null;
 			Bitmap bitmap = null;
 			try {
