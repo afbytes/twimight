@@ -183,13 +183,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			mBtnSend.setEnabled(false);
 		}
 
-		if (mEtTweetText.getText().length() > Constants.TWEET_LENGTH) {
-			mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH));
-			mEtTweetText.setSelection(mEtTweetText.getText().length());
-			mTvCharacterCounter.setTextColor(Color.RED);
-		}
 		mTvCharacterCounter = (TextView) findViewById(R.id.tweet_characters);
-		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH - mEtTweetText.getText().length()));
+		checkTweetLength();
 
 		if (i.hasExtra("isReplyTo")) {
 			isReplyTo = i.getLongExtra("isReplyTo", 0);
@@ -200,31 +195,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mTvCharacterCounter.setText(Integer.toString(Constants.TWEET_LENGTH));
 		mTextWatcher = new TextWatcher() {
 			public void afterTextChanged(Editable s) {
-				int usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
-				int usedMediaChars = hasMedia ? 23 : 0;
-				int numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
-
-				if (numCharsLeft < 0) {
-					mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH - usedMediaChars));
-					mEtTweetText.setSelection(mEtTweetText.getText().length());
-					usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
-					numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
-				}
-
-				if (numCharsLeft <= 0) {
-					mTvCharacterCounter.setTextColor(Color.RED);
-				} else {
-					mTvCharacterCounter.setTextColor(getResources().getColor(R.color.medium_gray));
-				}
-
-				if (numCharsLeft == Constants.TWEET_LENGTH) {
-					mBtnSend.setEnabled(false);
-				} else {
-					mBtnSend.setEnabled(true);
-				}
-
-				mTvCharacterCounter.setText(Integer.toString(numCharsLeft));
-
+				checkTweetLength();
 			}
 
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -236,6 +207,33 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mEtTweetText.addTextChangedListener(mTextWatcher);
 		mEtTweetText.setSelection(mEtTweetText.getText().length());
 
+	}
+
+	private void checkTweetLength() {
+		int usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+		int usedMediaChars = hasMedia ? 23 : 0;
+		int numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
+
+		if (numCharsLeft < 0) {
+			mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH - usedMediaChars));
+			mEtTweetText.setSelection(mEtTweetText.getText().length());
+			usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+			numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
+		}
+
+		if (numCharsLeft <= 0) {
+			mTvCharacterCounter.setTextColor(Color.RED);
+		} else {
+			mTvCharacterCounter.setTextColor(getResources().getColor(R.color.medium_gray));
+		}
+
+		if (numCharsLeft == Constants.TWEET_LENGTH) {
+			mBtnSend.setEnabled(false);
+		} else {
+			mBtnSend.setEnabled(true);
+		}
+
+		mTvCharacterCounter.setText(Integer.toString(numCharsLeft));
 	}
 
 	@Override
@@ -267,10 +265,10 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		triggerCharacterCounter();
 	}
 
-	private void triggerCharacterCounter(){
+	private void triggerCharacterCounter() {
 		mEtTweetText.setText(mEtTweetText.getText());
 	}
-	
+
 	public void sendTweet(View unused) {
 		new SendTweetTask().execute();
 	}
