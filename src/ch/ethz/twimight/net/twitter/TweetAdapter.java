@@ -13,9 +13,6 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -44,6 +41,9 @@ public class TweetAdapter extends CursorAdapter {
 	private HtmlPagesDbHelper htmlDbHelper;
 
 	private final AsyncImageLoader mImageLoader;
+
+	private final String mOwnHandle;
+	private final String mOwnTwitterId;
 
 	private static class ViewHolder {
 		private final View modeStripe;
@@ -77,6 +77,8 @@ public class TweetAdapter extends CursorAdapter {
 	public TweetAdapter(Context context, Cursor c) {
 		super(context, c, true);
 		mImageLoader = new AsyncImageLoader(context);
+		mOwnHandle = "@" + LoginActivity.getTwitterScreenname(context).toLowerCase();
+		mOwnTwitterId = LoginActivity.getTwitterId(context);
 	}
 
 	@Override
@@ -96,11 +98,6 @@ public class TweetAdapter extends CursorAdapter {
 		// super.bindView(row, context, cursor);
 
 		ViewHolder holder = (ViewHolder) row.getTag();
-
-		htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
-		htmlDbHelper.open();
-
-		long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));
 
 		// set profile image
 		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
@@ -150,6 +147,10 @@ public class TweetAdapter extends CursorAdapter {
 
 			if (hasHtml == 1) {
 
+				htmlDbHelper = new HtmlPagesDbHelper(context.getApplicationContext());
+				htmlDbHelper.open();
+
+				long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));
 				Cursor curHtml = htmlDbHelper.getTweetUrls(disId);
 
 				if (curHtml != null && curHtml.getCount() > 0) {
@@ -165,7 +166,6 @@ public class TweetAdapter extends CursorAdapter {
 				}
 
 			}
-
 		}
 
 		// pending?
@@ -220,7 +220,7 @@ public class TweetAdapter extends CursorAdapter {
 
 		// highlight own tweet
 		boolean ownTweet = Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_TWITTERUSER))).equals(
-				LoginActivity.getTwitterId(context));
+				mOwnTwitterId);
 		if (ownTweet) {
 			holder.tvUsername.setTextColor(accentColor);
 			// no verified icon for own tweets
@@ -230,13 +230,15 @@ public class TweetAdapter extends CursorAdapter {
 		}
 
 		// higlight mentions
-		String ownHandle = "@" + LoginActivity.getTwitterScreenname(context);
-		Pattern pattern = Pattern.compile(ownHandle, Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(tweetText);
 		Spannable tweetSpannable = new SpannableString(tweetText);
-		while (matcher.find()) {
-			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor), matcher.start(), matcher.end(),
+		String lowerCaseTweetText = tweetText.toLowerCase();
+		int start = lowerCaseTweetText.indexOf(mOwnHandle);
+		int end;
+		while(start!=-1){
+			end = start + mOwnHandle.length();
+			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor), start, end,
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			start = lowerCaseTweetText.indexOf(mOwnHandle, end);
 		}
 		holder.tvTweetText.setText(tweetSpannable);
 	}
