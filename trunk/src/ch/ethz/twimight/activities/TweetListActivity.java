@@ -70,6 +70,10 @@ public class TweetListActivity extends TwimightBaseActivity implements
 		Log.d("asdf", "TweetListActivity onCreate");
 		super.onCreate(null);
 		setContentView(R.layout.main);
+		
+		// reduces overdraw of whole screen by 1
+		getWindow().getDecorView().setBackgroundDrawable(null);
+		
 		Log.d("asdf", "TweetListActivity after setContentView");
 		// statistics
 		locDBHelper = new StatisticsDBHelper(getApplicationContext());
