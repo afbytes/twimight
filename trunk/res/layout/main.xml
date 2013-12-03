@@ -61,6 +61,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:indeterminate="true"
+        android:visibility="gone"
         app:color="?attr/accentColor2" />
 
 </RelativeLayout>
