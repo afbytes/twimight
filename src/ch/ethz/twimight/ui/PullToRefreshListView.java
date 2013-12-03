@@ -121,9 +121,9 @@ public class PullToRefreshListView extends LinearLayout {
 		mListView = new ListView(getContext());
 		mListView.setBackgroundColor(Color.TRANSPARENT);
 		mListView.setFastScrollEnabled(true);
-		mListView.setAlwaysDrawnWithCacheEnabled(false);
-		mListView.setScrollingCacheEnabled(false);
-		mListView.setSmoothScrollbarEnabled(false);
+//		mListView.setAlwaysDrawnWithCacheEnabled(false);
+//		mListView.setScrollingCacheEnabled(false);
+//		mListView.setSmoothScrollbarEnabled(false);
 		
 		addView(mListView, -1, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		// top refresh view

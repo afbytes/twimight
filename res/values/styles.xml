@@ -130,7 +130,6 @@
 
     <style name="ProgressBar.NormalMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_normalmode</item>
-        <item name="android:indeterminateDrawable">@anim/progress_indeterminate_horizontal_normalmode</item>
     </style>
 
     <style name="ActionButton.CloseMode.NormalMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
@@ -200,7 +199,6 @@
 
     <style name="ProgressBar.DisasterMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_disastermode</item>
-        <item name="android:indeterminateDrawable">@anim/progress_indeterminate_horizontal_disastermode</item>
     </style>
 
     <style name="ActionButton.CloseMode.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">

@@ -2,16 +2,19 @@
 <resources>
 
     <attr name="bottomStatusBarVisibility" format="integer">
+
         <!-- Visible on screen; the default value. -->
         <enum name="visible" value="0" />
         <!-- Completely hidden, as if the view had not been added. -->
         <enum name="gone" value="2" />
     </attr>
-    
-    <attr name="accentColor1" format="color"/>
-    <attr name="accentColor2" format="color"/>
-    <attr name="accentColor3" format="color"/>
-    <attr name="solidButtonStyle" format="string"/>
-        
+    <attr name="accentColor1" format="color" />
+    <attr name="accentColor2" format="color" />
+    <attr name="accentColor3" format="color" />
+    <attr name="solidButtonStyle" format="string" />
+
+    <declare-styleable name="LoadingBar">
+        <attr name="color" format="color" />
+    </declare-styleable>
 
 </resources>
