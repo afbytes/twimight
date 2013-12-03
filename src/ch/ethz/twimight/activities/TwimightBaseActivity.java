@@ -48,8 +48,7 @@ import ch.ethz.twimight.util.LogCollector;
  * @author thossmann
  * 
  */
-public abstract class TwimightBaseActivity extends ThemeSelectorActivity implements
-		Observer {
+public abstract class TwimightBaseActivity extends ThemeSelectorActivity implements Observer {
 
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
@@ -78,7 +77,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 		// actionBar.setDisplayShowTitleEnabled(true);
 
 	}
-	
+
 	@Override
 	protected void setDisasterTheme() {
 		Log.d("asdf", "TwimightBaseActivity setDisasterTheme");
@@ -106,8 +105,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 
 		// setup disaster mode specific stuff
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-				"prefDisasterMode", false) == true) {
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			updateStatusBar();
 			// register for bluetooth status updates
 			BluetoothStatus.getInstance().addObserver(this);
@@ -159,14 +157,9 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			return true;
 
 		case R.id.menu_my_profile:
-			Uri uri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS);
-			Cursor c = getContentResolver().query(
-					uri,
-					null,
-					TwitterUsers.COL_TWITTERUSER_ID + "="
-							+ LoginActivity.getTwitterId(this), null, null);
+			Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
+			Cursor c = getContentResolver().query(uri, null,
+					TwitterUsers.COL_TWITTERUSER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
 			if (c.getCount() != 1)
 				return false;
 			c.moveToFirst();
@@ -195,13 +188,11 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 
 		case R.id.menu_logout:
 			// In disaster mode we don't allow logging out
-			if (PreferenceManager.getDefaultSharedPreferences(
-					getApplicationContext()).getBoolean("prefDisasterMode",
+			if (PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("prefDisasterMode",
 					Constants.DISASTER_DEFAULT_ON) == false) {
 				showLogoutDialog();
 			} else {
-				Toast.makeText(this, R.string.disable_disastermode,
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.disable_disastermode, Toast.LENGTH_LONG).show();
 			}
 			break;
 		case R.id.menu_about:
@@ -218,35 +209,32 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			AlertDialog.Builder confirmDialog = new AlertDialog.Builder(this);
 			confirmDialog.setMessage(R.string.clear_cache_question);
 			confirmDialog.setTitle(R.string.clear_cache_title);
-			confirmDialog.setPositiveButton(R.string.yes,
-					new DialogInterface.OnClickListener() {
+			confirmDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// TODO Auto-generated method stub
-							dialog.dismiss();
-							new DeleteCacheTask().execute();
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+					new DeleteCacheTask().execute();
 
-						}
+				}
 
-					});
-			confirmDialog.setNegativeButton(R.string.no,
-					new DialogInterface.OnClickListener() {
+			});
+			confirmDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// TODO Auto-generated method stub
-							dialog.dismiss();
-						}
-					});
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.dismiss();
+				}
+			});
 			confirmDialog.show();
 
 			break;
 
 		case R.id.menu_feedback:
 			// Launch FeedbacktActivity
-			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL
-					+ "/bugs/new"));
+			i = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.TDS_BASE_URL + "/bugs/new"));
 			startActivity(i);
 			break;
 		default:
@@ -263,16 +251,12 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			// TODO Auto-generated method stub
 			ContentResolver resolver = getContentResolver();
 			Cursor cursor = resolver.query(
-					Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-							+ Tweets.TWEETS + "/"
-							+ Tweets.TWEETS_TABLE_TIMELINE + "/"
-							+ Tweets.TWEETS_SINCE_LAST_UPDATE), null, null,
-					null, null);
-			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(
-					getApplicationContext());
+					Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+							+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SINCE_LAST_UPDATE), null, null, null,
+					null);
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();
-			htmlDbHelper.saveLinksFromCursor(cursor,
-					HtmlPagesDbHelper.DOWNLOAD_FORCED);
+			htmlDbHelper.saveLinksFromCursor(cursor, HtmlPagesDbHelper.DOWNLOAD_FORCED);
 
 			return null;
 		}
@@ -289,8 +273,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 		@Override
 		protected Void doInBackground(Void... params) {
 			Long timeSpan = (long) (0 * 24 * 3600 * 1000);
-			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(
-					getApplicationContext());
+			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();
 			htmlDbHelper.clearHtmlPages(timeSpan);
 			return null;
@@ -303,22 +286,17 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	 */
 	private void showLogoutDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.logout_question)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								LoginActivity.logout(TwimightBaseActivity.this
-										.getApplicationContext());
-								finish();
-							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+		builder.setMessage(R.string.logout_question).setCancelable(false)
+				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						LoginActivity.logout(TwimightBaseActivity.this.getApplicationContext());
+						finish();
+					}
+				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
@@ -336,9 +314,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 				instance.runOnUiThread(new Runnable() {
 					public void run() {
 						if (instance.progressBar != null) {
-							instance.progressBar
-									.setVisibility(isLoading ? View.VISIBLE
-											: View.GONE);
+							instance.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
 						}
 					}
 				});
@@ -397,14 +373,12 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			public void run() {
 				// update number of neighbors
 				if (tvNeighborCount != null) {
-					tvNeighborCount.setText(String.valueOf(BluetoothStatus
-							.getInstance().getNeighborCount()));
+					tvNeighborCount.setText(String.valueOf(BluetoothStatus.getInstance().getNeighborCount()));
 				}
 
 				// update state description
 				if (tvStatus != null) {
-					tvStatus.setText(BluetoothStatus.getInstance()
-							.getStatusDescription());
+					tvStatus.setText(BluetoothStatus.getInstance().getStatusDescription());
 				}
 			}
 		});
