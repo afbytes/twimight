@@ -58,6 +58,7 @@ public class TweetListFragment extends ListFragment {
 		try {
 			listener = (OnInitCompletedListener) activity;
 		} catch (ClassCastException e) {
+			e.printStackTrace();
 		}
 	}
 

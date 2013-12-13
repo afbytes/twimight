@@ -156,6 +156,7 @@ public class TweetDetailFragment extends Fragment {
 		try {
 			listener = (OnTweetDeletedListener) activity;
 		} catch (ClassCastException e) {
+			e.printStackTrace();
 		}
 	}
 
