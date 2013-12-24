@@ -67,14 +67,12 @@ public class TweetListActivity extends TwimightBaseActivity implements
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d("asdf", "TweetListActivity onCreate");
 		super.onCreate(null);
 		setContentView(R.layout.main);
 		
 		// reduces overdraw of whole screen by 1
-		getWindow().getDecorView().setBackgroundDrawable(null);
+		getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.transparent));
 		
-		Log.d("asdf", "TweetListActivity after setContentView");
 		// statistics
 		locDBHelper = new StatisticsDBHelper(getApplicationContext());
 		locDBHelper.open();
@@ -165,7 +163,6 @@ public class TweetListActivity extends TwimightBaseActivity implements
 			viewPager.setCurrentItem(intent.getIntExtra(FILTER_REQUEST,
 					TweetListFragment.TIMELINE_KEY));
 			intent.removeExtra(FILTER_REQUEST);
-
 		}
 		Long pauseTimestamp = getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0

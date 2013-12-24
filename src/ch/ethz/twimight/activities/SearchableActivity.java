@@ -21,7 +21,6 @@ import android.provider.SearchRecentSuggestions;
 import android.support.v4.view.ViewPager;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.ListFragment;
-import ch.ethz.twimight.fragments.TweetListFragment.OnInitCompletedListener;
 import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
@@ -32,7 +31,7 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
  * @author thossmann
  * @author pcarta
  */
-public class SearchableActivity extends TwimightBaseActivity implements OnInitCompletedListener {
+public class SearchableActivity extends TwimightBaseActivity /*implements OnInitCompletedListener*/ {
 
 //	private static final String TAG = "SearchableActivity";
 
@@ -117,14 +116,14 @@ public class SearchableActivity extends TwimightBaseActivity implements OnInitCo
 		processIntent(intent);
 	}
 
-	@Override
-	public void onInitCompleted() {
-		processIntent(intent);
-		// listFrag =
-		// getFragmentByPosition(actionBar.getSelectedNavigationIndex());
-		// listFrag.setQueryText(query);
-
-	}
+//	@Override
+//	public void onInitCompleted() {
+//		processIntent(intent);
+//		// listFrag =
+//		// getFragmentByPosition(actionBar.getSelectedNavigationIndex());
+//		// listFrag.setQueryText(query);
+//
+//	}
 
 	@Override
 	protected void onDestroy() {

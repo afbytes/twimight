@@ -259,6 +259,35 @@
             android:name=".activities.PhotoViewActivity"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
         </activity>
+
+        <service android:name=".net.twitter.TwitterSyncService$LoginService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$FavoritesSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$FollowersSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$FriendsSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$MentionsSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$MessagesSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$TimelineSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$SyncTweetServie" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$SyncUserTweetsService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$TransactionalMessagesSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$TransactionalSyncService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$SearchTweetService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$SearchUserService" >
+        </service>
+        <service android:name=".net.twitter.TwitterSyncService$SyncUserService" >
+        </service>
     </application>
 
 </manifest>

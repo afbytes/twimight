@@ -80,13 +80,11 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 
 	@Override
 	protected void setDisasterTheme() {
-		Log.d("asdf", "TwimightBaseActivity setDisasterTheme");
 		setTheme(R.style.TwimightHolo_DisasterMode);
 	}
 
 	@Override
 	protected void setNormalTheme() {
-		Log.d("asdf", "TwimightBaseActivity setNormalTheme");
 		setTheme(R.style.TwimightHolo_NormalMode);
 	}
 

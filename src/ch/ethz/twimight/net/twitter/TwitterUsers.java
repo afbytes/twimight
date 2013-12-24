@@ -81,6 +81,7 @@ public class TwitterUsers implements BaseColumns {
 	public static final String TWITTERUSERS_PICTURE = "pictures";
 	
 	// here start the column names
+	public static final String COL_ROW_ID = BaseColumns._ID;
 	public static final String COL_SCREENNAME = "user_screenname";
 	public static final String COL_TWITTERUSER_ID = "twitteruser_id";
 	public static final String COL_NAME = "name";

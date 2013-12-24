@@ -20,6 +20,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ import ch.ethz.twimight.util.AsyncImageLoader;
  */
 public class TweetAdapter extends CursorAdapter {
 
-	// private static final String TAG = "TweetAdapter";
+//	 private static final String TAG = "TweetAdapter";
 
 	private HtmlPagesDbHelper htmlDbHelper;
 
@@ -88,15 +89,12 @@ public class TweetAdapter extends CursorAdapter {
 		View row = inflater.inflate(R.layout.tweet_row, null);
 		ViewHolder viewHolder = new ViewHolder(row);
 		row.setTag(viewHolder);
-
 		return row;
 	}
 
 	/** This is where data is mapped to its view */
 	@Override
 	public void bindView(View row, Context context, Cursor cursor) {
-		// super.bindView(row, context, cursor);
-
 		ViewHolder holder = (ViewHolder) row.getTag();
 
 		// set profile image
@@ -117,7 +115,7 @@ public class TweetAdapter extends CursorAdapter {
 		}
 
 		// set tweet text
-		String tweetText = cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
+		String tweetText = cursor.getString(cursor.getColumnIndex(Tweets.COL_TEXT));
 		holder.tvTweetText.setText(tweetText);
 
 		// set "created at"

@@ -80,7 +80,7 @@ public class UserAdapter extends CursorAdapter {
 		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 		holder.ivProfileImage.setImageDrawable(null);
 		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-			int userRowId = cursor.getInt(cursor.getColumnIndex(DBOpenHelper.ROW_ID));
+			int userRowId = cursor.getInt(cursor.getColumnIndex(DBOpenHelper.COL_ROW_ID));
 			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
 			mImageLoader.loadImage(imageUri, holder.ivProfileImage);

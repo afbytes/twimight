@@ -91,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment {
 								.findPreference(
 										getString(R.string.prefUpdateInterval));
 						updatesBackground.setEnabled(true);
-						new TwitterAlarm(getActivity().getBaseContext(), false);
+						new TwitterAlarm(getActivity().getBaseContext());
 
 					} else {
 						ListPreference updatesBackground = (ListPreference) getPreferenceScreen()
@@ -115,7 +115,7 @@ public class SettingsFragment extends PreferenceFragment {
 							getActivity().getBaseContext()).getBoolean(
 							getString(R.string.prefRunAtBoot),
 							Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true) {
-						new TwitterAlarm(getActivity().getBaseContext(), false);
+						new TwitterAlarm(getActivity().getBaseContext());
 					}
 				} else if (key.equals(getString(R.string.pref_offline_mode))) {
 

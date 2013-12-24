@@ -16,8 +16,7 @@ package ch.ethz.twimight.activities;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import winterwell.jtwitter.Twitter;
-
+import twitter4j.util.CharacterUtil;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
@@ -51,6 +50,7 @@ import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetServie;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.SDCardHelper;
 
@@ -210,14 +210,14 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	}
 
 	private void checkTweetLength() {
-		int usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+		int usedTextChars = CharacterUtil.count(mEtTweetText.getText().toString());
 		int usedMediaChars = hasMedia ? 23 : 0;
 		int numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
 
 		if (numCharsLeft < 0) {
 			mEtTweetText.setText(mEtTweetText.getText().subSequence(0, Constants.TWEET_LENGTH - usedMediaChars));
 			mEtTweetText.setSelection(mEtTweetText.getText().length());
-			usedTextChars = Twitter.countCharacters(mEtTweetText.getText().toString());
+			usedTextChars = CharacterUtil.count(mEtTweetText.getText().toString());
 			numCharsLeft = Constants.TWEET_LENGTH - usedTextChars - usedMediaChars;
 		}
 
@@ -424,9 +424,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 			if (insertUri != null) {
 				// schedule the tweet for uploading to twitter
-				Intent i = new Intent(ComposeTweetActivity.this, TwitterService.class);
-				i.putExtra("synch_request", TwitterService.SYNCH_TWEET);
-				i.putExtra("rowId", Long.valueOf(insertUri.getLastPathSegment()));
+				Intent i = new Intent(ComposeTweetActivity.this, SyncTweetServie.class);
+				i.putExtra(SyncTweetServie.EXTRA_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
 			}
 			finish();

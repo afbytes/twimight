@@ -3,6 +3,7 @@ package ch.ethz.twimight.net.twitter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -37,13 +38,12 @@ public class PicturesIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-
 		UserListActivity.setLoading(true);
 		rowIds = intent.getLongArrayExtra(PicturesIntentService.USERS_IDS);
+		Log.d(TAG, "PicturesIntentService " + Arrays.toString(rowIds));
 		downloadProfilePictures(rowIds);
 		insertPictures();
 		UserListActivity.setLoading(false);
-
 	}
 
 	private void insertPictures() {
@@ -161,7 +161,7 @@ public class PicturesIntentService extends IntentService {
 						screenNames.add(cursorArray[i].getString(cursorArray[i]
 								.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
 					} catch (IOException ex) {
-
+						ex.printStackTrace();
 					}
 				}
 			} catch (ClientProtocolException e) {

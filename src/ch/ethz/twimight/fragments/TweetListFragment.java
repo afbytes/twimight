@@ -20,6 +20,10 @@ import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.ui.PullToRefreshListView;
 
 @SuppressLint("ValidFragment")
@@ -36,12 +40,12 @@ public class TweetListFragment extends ListFragment {
 	
 
 
-	// Container Activity must implement this interface
-	public interface OnInitCompletedListener {
-		public void onInitCompleted();
-	}
-
-	OnInitCompletedListener listener;
+//	// Container Activity must implement this interface
+//	public interface OnInitCompletedListener {
+//		public void onInitCompleted();
+//	}
+//
+//	OnInitCompletedListener listener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,15 +56,15 @@ public class TweetListFragment extends ListFragment {
 		}
 	}
 
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		try {
-			listener = (OnInitCompletedListener) activity;
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-		}
-	}
+//	@Override
+//	public void onAttach(Activity activity) {
+//		super.onAttach(activity);
+//		try {
+//			listener = (OnInitCompletedListener) activity;
+//		} catch (ClassCastException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	public TweetListFragment() {
 
@@ -76,7 +80,7 @@ public class TweetListFragment extends ListFragment {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
-		listener = null;
+//		listener = null;
 
 		super.onDestroy();
 	}
@@ -163,9 +167,8 @@ public class TweetListFragment extends ListFragment {
 		switch (filter) {
 		case TIMELINE_KEY:
 
-			overscrollIntent.putExtra("synch_request",
-					TwitterService.SYNCH_TIMELINE);
-			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
+			overscrollIntent = new Intent(getActivity(), TimelineSyncService.class);
+			overscrollIntent.putExtra(TimelineSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"
@@ -175,8 +178,7 @@ public class TweetListFragment extends ListFragment {
 			break;
 		case FAVORITES_KEY:
 
-			overscrollIntent.putExtra("synch_request",
-					TwitterService.SYNCH_FAVORITES);
+			overscrollIntent = new Intent(getActivity(), FavoritesSyncService.class);
 			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
@@ -187,9 +189,8 @@ public class TweetListFragment extends ListFragment {
 			break;
 		case MENTIONS_KEY:
 
-			overscrollIntent.putExtra("synch_request",
-					TwitterService.SYNCH_MENTIONS);
-			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
+			overscrollIntent = new Intent(getActivity(), MentionsSyncService.class);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"

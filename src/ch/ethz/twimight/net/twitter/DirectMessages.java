@@ -61,6 +61,7 @@ public class DirectMessages implements BaseColumns {
 	public static final String DMS_USER = "user";
 
 	// here start the column names
+	public static final String COL_ROW_ID = BaseColumns._ID;
 	/** the dm text */
 	public static final String COL_TEXT = "text";
 	/** the user id of the sender */

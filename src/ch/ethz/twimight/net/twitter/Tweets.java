@@ -78,10 +78,21 @@ public class Tweets implements BaseColumns {
 	public static final String PHOTO_PATH = "twimight_photos";
 
 	// here start the column names
+	public static final String COL_ROW_ID = BaseColumns._ID;
 	/** the tweet text */
 	public static final String COL_TEXT = "text";
-	/** the tweet html text */
-	public static final String COL_TEXT_PLAIN = "text_plain";
+	/** serialized array of hashtag entities */
+	public static final String COL_HASHTAG_ENTITIES = "hashtag_entities";
+	/** serialized array of media entities */
+	public static final String COL_MEDIA_ENTITIES = "media_entities";
+	/** serialized array of url entities */
+	public static final String COL_URL_ENTITIES = "url_entities";
+	/** serialized array of user mention entities */
+	public static final String COL_USER_MENTION_ENTITIES = "user_mention_entities";
+	// LEGACY COLUMN:
+	// not used anymore but might occur in json received from older clients!
+	// /** the tweet html text */
+	public static final String COL_TEXT_PLAIN = "text";
 	/** the user id of the author */
 	public static final String COL_TWITTERUSER = "twitteruser_id";
 	/** the user screenname of the author */
@@ -90,6 +101,10 @@ public class Tweets implements BaseColumns {
 	public static final String COL_TID = "t_id";
 	/** the tweet ID to which this tweet replies */
 	public static final String COL_REPLYTO = "reply_to";
+	/** the user ID to which this tweet repies */
+	public static final String COL_REPLY_TO_USER_ID = "reply_to_user_id";
+	/** the user ID to which this tweet repies */
+	public static final String COL_REPLY_TO_SCREEN_NAME = "reply_to_screen_name";
 	/** did we retweet the tweet? */
 	public static final String COL_RETWEETED = "retweeted";
 	/** how many retweets does twitter report for this tweet */
