@@ -33,6 +33,8 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.DmListActivity;
 import ch.ethz.twimight.activities.DmConversationListActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.MessagesSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.TransactionalMessagesSyncService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -228,8 +230,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
 				
 				// start synch service with a synch DMs request
-				i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_DMS);
+				i = new Intent(getContext(), MessagesSyncService.class);
 				getContext().startService(i);
 				break;
 			case LIST_ALL:
@@ -414,9 +415,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			
 			if(values.containsKey(DirectMessages.COL_FLAGS) && values.getAsInteger(DirectMessages.COL_FLAGS)!=0){
 
-				Intent i = new Intent(TwitterService.SYNCH_ACTION);
-				i.putExtra("synch_request", TwitterService.SYNCH_DM);
-				i.putExtra("rowId", Long.valueOf(uri.getLastPathSegment()));
+				Intent i = new Intent(getContext(), TransactionalMessagesSyncService.class);
 				getContext().startService(i);
 			}
 			
@@ -605,9 +604,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				
 				if(flags>0){
 					// start synch service with a synch tweet request
-					Intent i = new Intent(TwitterService.SYNCH_ACTION);
-					i.putExtra("synch_request", TwitterService.SYNCH_DM);
-					i.putExtra("rowId", rowId);
+					Intent i = new Intent(getContext(), TransactionalMessagesSyncService.class);
 					getContext().startService(i);
 				}
 				
@@ -619,9 +616,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			throw new IllegalArgumentException("Illegal direct message: " + values);
 		}
 	}
-	
-	
-
 
 	
 	/**

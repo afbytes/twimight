@@ -15,6 +15,7 @@ package ch.ethz.twimight.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 import android.util.Log;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
@@ -41,13 +42,13 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	static final String TABLE_STATISTICS = "statistics";
 	//public static final String TABLE_HTML_TRACKERS = "html_trackers";
 	
-	public static final String ROW_ID = "_id";
+	public static final String COL_ROW_ID = BaseColumns._ID;
 
-	private static final int DATABASE_VERSION = 54;
+	private static final int DATABASE_VERSION = 55;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
+			+ COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ MacsDBHelper.KEY_MAC + " string, "
 			+ MacsDBHelper.KEY_ATTEMPTS+ " integer, "
 			+ MacsDBHelper.KEY_SUCCESSFUL +" integer, "
@@ -55,7 +56,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ MacsDBHelper.KEY_LAST +" integer);";
 	
 	private static final String TABLE_STATISTICS_CREATE = "create table "+TABLE_STATISTICS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "			
+			+ COL_ROW_ID + " integer primary key autoincrement not null, "			
 			+ StatisticsDBHelper.KEY_TIMESTAMP + " bigint not null, "
 			+ StatisticsDBHelper.KEY_LOCATION_LAT + " real, "
 			+ StatisticsDBHelper.KEY_LOCATION_LNG + " real, "
@@ -69,47 +70,52 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 
 	private static final String TABLE_REVOCATION_CREATE = "create table "+TABLE_REVOCATIONS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
+			+ COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ "serial string not null, "
 			+ "until integer not null);";
 	
 		
 
 	private static final String TABLE_FRIENDS_KEYS_CREATE = "create table "+TABLE_FRIENDS_KEYS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
+			+ COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ "twitter_id bigint not null, "
 			+ "key text not null);";
 	
 	// Tweets (including disaster tweets)
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
-			+ Tweets.COL_TEXT + " string not null, "
-			+ Tweets.COL_TEXT_PLAIN + " string not null, "
-			+ Tweets.COL_TWITTERUSER + " bigint, "			
-			+ Tweets.COL_SCREENNAME+ " string, "
-			+ Tweets.COL_TID + " bigint unique, "
-			+ Tweets.COL_REPLYTO + " bigint, "			
-			+ Tweets.COL_RETWEETED + " int, "
-			+ Tweets.COL_RETWEETCOUNT + " int, "		
-			+ Tweets.COL_RETWEETED_BY + " string, "
-			+ Tweets.COL_MENTIONS + " int, "
+			+ Tweets.COL_ROW_ID + " integer primary key autoincrement not null, "
+			+ Tweets.COL_TEXT + " text not null, "
+			+ Tweets.COL_HASHTAG_ENTITIES + " blob, "
+			+ Tweets.COL_MEDIA_ENTITIES + " blob, "
+			+ Tweets.COL_URL_ENTITIES + " blob, "
+			+ Tweets.COL_USER_MENTION_ENTITIES + " blob, "
+			+ Tweets.COL_TWITTERUSER + " text, "
+			+ Tweets.COL_SCREENNAME+ " text, "
+			+ Tweets.COL_TID + " integer unique, "
+			+ Tweets.COL_REPLYTO + " integer, "
+			+ Tweets.COL_REPLY_TO_USER_ID + " integer, "
+			+ Tweets.COL_REPLY_TO_SCREEN_NAME + " text, "
+			+ Tweets.COL_RETWEETED + " integer, "
+			+ Tweets.COL_RETWEETCOUNT + " integer, "
+			+ Tweets.COL_RETWEETED_BY + " text, "
+			+ Tweets.COL_MENTIONS + " integer, "
 			+ Tweets.COL_LAT + " real, "
 			+ Tweets.COL_LNG + " real, "
 			+ Tweets.COL_CREATED + " integer, "
 			+ Tweets.COL_RECEIVED + " integer, "
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
-			+ Tweets.COL_BUFFER + " integer default 0, "			
-			+ Tweets.COL_MEDIA + " string, "
-			+ Tweets.COL_HTML_PAGES + " integer default 0, "		
+			+ Tweets.COL_BUFFER + " integer default 0, "
+			+ Tweets.COL_MEDIA + " text, "
+			+ Tweets.COL_HTML_PAGES + " integer default 0, "
 			+ Tweets.COL_DISASTERID + " integer, "
 			+ Tweets.COL_ISVERIFIED + " integer, "
-			+ Tweets.COL_SIGNATURE + " string, "		
-			+ Tweets.COL_CERTIFICATE + " string);";
+			+ Tweets.COL_SIGNATURE + " text, "
+			+ Tweets.COL_CERTIFICATE + " text);";
 
 	// Twitter Users
 	private static final String TABLE_USERS_CREATE = "create table "+TABLE_USERS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
+			+ TwitterUsers.COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ TwitterUsers.COL_SCREENNAME + " string not null, "
 			+ TwitterUsers.COL_TWITTERUSER_ID + " bigint unique, "
 			+ TwitterUsers.COL_NAME + " string, "
@@ -140,7 +146,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
 	// Direct Messages (including disaster messages)
 	private static final String TABLE_DMS_CREATE = "create table "+TABLE_DMS+" ("
-			+ ROW_ID + " integer primary key autoincrement not null, "
+			+ DirectMessages.COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ DirectMessages.COL_TEXT + " string, "
 			+ DirectMessages.COL_SENDER + " bigint, "
 			+ DirectMessages.COL_RECEIVER + " bigint, "

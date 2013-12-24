@@ -56,9 +56,9 @@ public class BootReceiver extends BroadcastReceiver {
 				new ScanningAlarm(context,false);
 			}
 
-						
+
 			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
-				new TwitterAlarm(context,false);
+				new TwitterAlarm(context);
 			}
 		}
 
