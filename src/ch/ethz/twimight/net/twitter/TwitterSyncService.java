@@ -1198,6 +1198,11 @@ public abstract class TwitterSyncService extends IntentService {
 			}
 		}
 
+		public static boolean firstSyncCompleted(Context context){
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+			return prefs.getLong(PREF_LAST_MENTIONS_UPDATE, -1)>0;
+		}
+		
 		private boolean isSyncNeeded() {
 			boolean needed = false;
 			if (mStartIntent.getBooleanExtra(EXTRA_FORCE_SYNC, false)) {
@@ -1642,6 +1647,11 @@ public abstract class TwitterSyncService extends IntentService {
 				insertOutgoingDms(outgoingDms);
 			}
 			syncTransactionalUsers();
+		}
+		
+		public static boolean firstIncomingSyncCompleted(Context context){
+			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+			return prefs.getLong(PREF_LAST_INCOMING_DMS_UPDATE, -1)>0;
 		}
 
 		private boolean isIncomingDmSyncNeeded() {

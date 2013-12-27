@@ -48,9 +48,8 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.SDCardHelper;
 

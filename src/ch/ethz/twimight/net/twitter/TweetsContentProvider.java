@@ -1092,7 +1092,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				if (TweetListActivity.running == false
 						&& PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions",
-								true) == true && hasBeenExecuted()) {
+								true) == true && MentionsSyncService.firstSyncCompleted(getContext())) {
 					// notify user
 					notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 				}
@@ -1131,11 +1131,6 @@ public class TweetsContentProvider extends ContentProvider {
 			return null;
 		}
 
-	}
-
-	private boolean hasBeenExecuted() {
-		return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(TwitterService.TASK_MENTIONS,
-				false);
 	}
 
 	private void writeToLog(String time) {
