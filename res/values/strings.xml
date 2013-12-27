@@ -61,6 +61,20 @@
     <string name="modify_tweet">Would you like to modify the tweet before retweeting?</string>
     <string name="timeline">Timeline</string>
     <string name="mentions">Mentions</string>
+    <string name="tweet_deletion_success">Tweet deleted</string>
+    <string name="tweet_deletion_failure">Deleting tweet failed. We will retry later!</string>
+    <string name="status_update_success">Tweet posted</string>
+    <string name="status_update_failure">Posting tweet failed. We will retry later!</string>
+    <string name="favorite_status_success">Tweet favorited</string>
+    <string name="favorite_status_failure">Favoriting tweet failed. We will retry later!</string>
+    <string name="unfavorite_status_success">Tweet unfavorited</string>
+    <string name="unfavorite_status_failure">Unfavoriting tweet failed. We will retry later!</string>
+    <string name="retweet_success">Status retweeted</string>
+    <string name="retweet_failure">Retweeting failed. We will retry later!</string>
+    <string name="timeline_loading_failure">Something went wrong while loading your timeline. Please try again later!</string>
+    <string name="favorites_loading_failure">Something went wrong while loading your favorites. Please try again later!</string>
+    <string name="mentions_loading_failure">Something went wrong while loading your mentions. Please try again later!</string>
+    <string name="dms_loading_failure">Something went wrong while loading your direct messages. Please try again later!</string>
 
     <!-- web page caching and pictures -->
     <string name="clear_cache_question">Are you sure you want to clear all files and data of saved webpages?</string>
@@ -223,7 +237,7 @@
     <string name="release_to_refresh_label">Release to refresh…</string>
     <string name="pull_to_load_more_label">Pull to load more…</string>
     <string name="release_to_load_more_label">Release to load more…</string>
-    
+
     <!-- Tweet -->
     <string name="via">" via "</string>
 

@@ -274,7 +274,7 @@
         </service>
         <service android:name=".net.twitter.TwitterSyncService$TimelineSyncService" >
         </service>
-        <service android:name=".net.twitter.TwitterSyncService$SyncTweetServie" >
+        <service android:name=".net.twitter.TwitterSyncService$SyncTweetService" >
         </service>
         <service android:name=".net.twitter.TwitterSyncService$SyncUserTweetsService" >
         </service>
