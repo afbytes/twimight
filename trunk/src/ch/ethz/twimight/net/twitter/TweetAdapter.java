@@ -129,7 +129,7 @@ public class TweetAdapter extends CursorAdapter {
 			String retweeted_by = cursor.getString(col);
 
 			if (retweeted_by != null) {
-				holder.tvRetweetedBy.setText(context.getString(R.string.retweeted_by) + " @" + retweeted_by);
+				holder.tvRetweetedBy.setText(context.getString(R.string.retweeted_by) + " " + retweeted_by);
 				holder.tvRetweetedBy.setVisibility(View.VISIBLE);
 			} else {
 				holder.tvRetweetedBy.setVisibility(View.GONE);
