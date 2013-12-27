@@ -52,12 +52,8 @@ import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.LoginService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -454,8 +450,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		context.stopService(new Intent(context, TDSService.class));
 
 		ScanningAlarm.stopScanning(context);
-
-		context.stopService(new Intent(context, TwitterService.class));
 
 		TwitterAlarm.stopTwitterAlarm(context);
 	}

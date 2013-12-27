@@ -15,6 +15,7 @@ package ch.ethz.twimight.util;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
@@ -31,31 +32,32 @@ import ch.ethz.twimight.net.twitter.TwitterSyncService.TransactionalSyncService;
  */
 public class CommunicationReceiver extends BroadcastReceiver {
 
-	private static final String TAG = "CommunicationReceiver";
+	private static final String TAG = CommunicationReceiver.class.getName();
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		// protection against forged intents
+		if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
 
-		Log.i(TAG, "CALLED");
-		// connectivity changed!
-		StartServiceHelper.startService(context);
+			Log.i(TAG, "CommunicationReceiver called");
+			// connectivity changed!
+			StartServiceHelper.startService(context);
 
-		// TDS communication
-		if (TDSAlarm.isTdsEnabled(context)) {
-			// remove currently scheduled updates and schedule an immediate one
-			new TDSAlarm();
+			// TDS communication
+			if (TDSAlarm.isTdsEnabled(context)) {
+				// remove currently scheduled updates and schedule an immediate
+				// one
+				new TDSAlarm();
+			}
+
+			if (!LoginActivity.hasTwitterId(context)) {
+				Intent loginIntent = new Intent(context, LoginService.class);
+				context.startService(loginIntent);
+			} else {
+				Intent syncTransactionalIntent = new Intent(context, TransactionalSyncService.class);
+				context.startService(syncTransactionalIntent);
+			}
 		}
-
-		
-		if (!LoginActivity.hasTwitterId(context)) {
-			Intent loginIntent = new Intent(context, LoginService.class);
-			context.startService(loginIntent);
-		} else {
-			Intent syncTransactionalIntent = new Intent(context, TransactionalSyncService.class);
-			context.startService(syncTransactionalIntent);
-		}
-		
 
 	}
-
 }

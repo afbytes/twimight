@@ -195,13 +195,6 @@
         <service
             android:name=".net.Html.HtmlService"
             android:enabled="true" />
-        <service
-            android:name=".net.twitter.TwitterService"
-            android:enabled="true" >
-            <intent-filter>
-                <action android:name="twimight_synch" />
-            </intent-filter>
-        </service>
 
         <receiver
             android:name=".util.CommunicationReceiver"
@@ -217,13 +210,12 @@
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".util.OMFReceiver"
-            android:enabled="true" >
+            android:enabled="true" 
+            android:exported="false">
             <intent-filter>
                 <action android:name="autom_enable_disaster_mode" />
             </intent-filter>

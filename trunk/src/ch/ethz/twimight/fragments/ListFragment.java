@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.ui.PullToRefreshListView;
 import ch.ethz.twimight.ui.PullToRefreshListView.PullToRefreshListener;

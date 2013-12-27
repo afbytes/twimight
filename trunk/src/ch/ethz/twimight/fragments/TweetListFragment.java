@@ -2,7 +2,6 @@ package ch.ethz.twimight.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,7 +18,6 @@ import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
@@ -162,7 +160,7 @@ public class TweetListFragment extends ListFragment {
 	Cursor getCursor(int filter) {
 		// set all header button colors to transparent
 		Cursor c = null;
-		overscrollIntent = new Intent(getActivity(), TwitterService.class);
+		overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
 
 		switch (filter) {
 		case TIMELINE_KEY:
@@ -179,7 +177,7 @@ public class TweetListFragment extends ListFragment {
 		case FAVORITES_KEY:
 
 			overscrollIntent = new Intent(getActivity(), FavoritesSyncService.class);
-			overscrollIntent.putExtra(TwitterService.FORCE_FLAG, true);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"

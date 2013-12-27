@@ -16,6 +16,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
@@ -25,43 +26,49 @@ import ch.ethz.twimight.net.twitter.TwitterAlarm;
 
 /**
  * Starts the updater service after the boot process.
+ * 
  * @author pcarta
  * @author thossmann
- *
+ * 
  */
 public class BootReceiver extends BroadcastReceiver {
-//	private static final String TAG = "BootReceiver";
-	
+	 private static final String TAG = BootReceiver.class.getName();
+
 	/**
 	 * Starts the twimight services upon receiving a boot Intent.
+	 * 
 	 * @param context
 	 * @param intent
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		// protection against forged intents
+		if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+			Log.i(TAG, "BootReceiver called");
+			
+			// we only start the services if we are logged in (i.e., we have the
+			// tokens from twitter)
+			if (LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)) {
 
-		// we only start the services if we are logged in (i.e., we have the tokens from twitter)
-		if(LoginActivity.hasAccessToken(context) && LoginActivity.hasAccessTokenSecret(context)){
+				StartServiceHelper.startService(context);
 
-			StartServiceHelper.startService(context);
+				// Start the service for communication with the TDS
+				if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+						context.getString(R.string.prefTDSCommunication), Constants.TDS_DEFAULT_ON) == true) {
+					new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
+				}
 
-			// Start the service for communication with the TDS
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefTDSCommunication), 
-					Constants.TDS_DEFAULT_ON)==true){
-				new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
-			}
+				if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+						context.getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON) == true) {
+					new ScanningAlarm(context, false);
+				}
 
-
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON)==true){
-				new ScanningAlarm(context,false);
-			}
-
-
-			if(PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT)==true){
-				new TwitterAlarm(context);
+				if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+						context.getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true) {
+					new TwitterAlarm(context);
+				}
 			}
 		}
-
 	}
-	
+
 }
