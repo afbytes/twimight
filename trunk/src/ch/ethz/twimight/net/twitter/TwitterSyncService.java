@@ -39,12 +39,15 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.TweetListActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
@@ -58,11 +61,22 @@ public abstract class TwitterSyncService extends IntentService {
 
 	public static final String EXTRA_FORCE_SYNC = "force_sync";
 
+	/**
+	 * Main thread handler for posting toasts
+	 */
+	private Handler mHandler;
+
 	Twitter mTwitter;
 	Intent mStartIntent;
 
 	public TwitterSyncService() {
 		super(TwitterSyncService.class.getCanonicalName());
+	}
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		mHandler = new Handler();
 	}
 
 	@Override
@@ -89,6 +103,28 @@ public abstract class TwitterSyncService extends IntentService {
 		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo currentNetworkInfo = connectivityManager.getActiveNetworkInfo();
 		return (currentNetworkInfo == null || !currentNetworkInfo.isConnected());
+	}
+
+	/**
+	 * A runnable for creating toasts on the main thread.
+	 */
+	private class DisplayToast implements Runnable {
+		private final Context mContext;
+		private final String mText;
+
+		private DisplayToast(Context context, String text) {
+			mContext = context;
+			mText = text;
+		}
+
+		@Override
+		public void run() {
+			Toast.makeText(mContext, mText, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	void makeToast(String text) {
+		mHandler.post(new DisplayToast(this, text));
 	}
 
 	/**
@@ -508,7 +544,7 @@ public abstract class TwitterSyncService extends IntentService {
 			// store image in file system
 			String screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 			String profileImagePath = null;
-			if(image!=null){
+			if (image != null) {
 				InternalStorageHelper helper = new InternalStorageHelper(this);
 				helper.writeImage(image, screenName);
 				profileImagePath = new File(getFilesDir(), screenName).getPath();
@@ -594,14 +630,12 @@ public abstract class TwitterSyncService extends IntentService {
 	 */
 	private void destroyDirectMessage(Cursor c) {
 		boolean success = false;
-		TwitterException exception;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			long dmId = c.getLong(c.getColumnIndex(DirectMessages.COL_DMID));
 			try {
 				mTwitter.destroyDirectMessage(dmId);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			success = true;
@@ -612,9 +646,6 @@ public abstract class TwitterSyncService extends IntentService {
 			Uri deleteUri = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
 					+ rowId);
 			getContentResolver().delete(deleteUri, null, null);
-			// TODO: notify
-		} else {
-			// TODO: notify...
 		}
 	}
 
@@ -627,7 +658,6 @@ public abstract class TwitterSyncService extends IntentService {
 	 */
 	private void sendDirectMessage(Cursor c) {
 		boolean success = false;
-		TwitterException exception;
 		DirectMessage directMessage = null;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			String receiverScreenName = c.getString(c.getColumnIndex(DirectMessages.COL_RECEIVER_SCREENNAME));
@@ -636,7 +666,6 @@ public abstract class TwitterSyncService extends IntentService {
 				directMessage = mTwitter.sendDirectMessage(receiverScreenName, text);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			if (directMessage != null) {
@@ -675,25 +704,34 @@ public abstract class TwitterSyncService extends IntentService {
 		Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS);
 		Cursor c = getContentResolver().query(queryUri, null, Tweets.COL_FLAGS + "!=0", null, null);
 		while (c.moveToNext()) {
-			syncTweet(c);
+			syncTweet(c, false);
 		}
 		c.close();
 	}
 
-	void syncTweet(Cursor c) {
+	/**
+	 * Performs the necessary sync actions on the given tweet.
+	 * 
+	 * @param c
+	 *            a cursor pointing to the tweet to be synced
+	 * @param notify
+	 *            if true, a toast will be created to inform the user about the
+	 *            outcome of each action
+	 */
+	void syncTweet(Cursor c, boolean notify) {
 		int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 		if ((flags & Tweets.FLAG_TO_DELETE) > 0) {
-			destroyStatus(c);
+			destroyStatus(c, notify);
 		} else if ((flags & Tweets.FLAG_TO_INSERT) > 0) {
-			updateStatus(c);
+			updateStatus(c, notify);
 		}
 		if ((flags & Tweets.FLAG_TO_FAVORITE) > 0) {
-			favoriteStatus(c);
+			favoriteStatus(c, notify);
 		} else if ((flags & Tweets.FLAG_TO_UNFAVORITE) > 0) {
-			unfavoriteStatus(c);
+			unfavoriteStatus(c, notify);
 		}
 		if ((flags & Tweets.FLAG_TO_RETWEET) > 0) {
-			retweetStatus(c);
+			retweetStatus(c, notify);
 		}
 	}
 
@@ -703,17 +741,18 @@ public abstract class TwitterSyncService extends IntentService {
 	 * @param c
 	 *            a cursor pointing to the status to delete. The cursor will not
 	 *            be modified.
+	 * @param notify
+	 *            if true a toast will be created to notify the user about the
+	 *            outcome
 	 */
-	private void destroyStatus(Cursor c) {
+	private void destroyStatus(Cursor c, boolean notify) {
 		boolean success = false;
-		TwitterException exception;
 		long statusId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				mTwitter.destroyStatus(statusId);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			success = true;
@@ -723,8 +762,13 @@ public abstract class TwitterSyncService extends IntentService {
 			long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
 			Uri deleteUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 			getContentResolver().delete(deleteUri, null, null);
+			if (notify) {
+				makeToast(getString(R.string.tweet_deletion_success));
+			}
 		} else {
-			// TODO
+			if (notify) {
+				makeToast(getString(R.string.tweet_deletion_failure));
+			}
 		}
 	}
 
@@ -734,8 +778,12 @@ public abstract class TwitterSyncService extends IntentService {
 	 * @param c
 	 *            a cursor pointing to the status to publish. The cursor will
 	 *            not be modified.
+	 * 
+	 * @param notify
+	 *            if true a toast will be created to notify the user about the
+	 *            outcome
 	 */
-	private void updateStatus(Cursor c) {
+	private void updateStatus(Cursor c, boolean notify) {
 
 		String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 		StatusUpdate statusUpdate = new StatusUpdate(text);
@@ -760,7 +808,6 @@ public abstract class TwitterSyncService extends IntentService {
 			statusUpdate.setInReplyToStatusId(replyToId);
 		}
 		// update status
-		TwitterException exception;
 		boolean success = false;
 		Status tweet = null;
 		for (int attempt = 0; attempt <= MAX_LOAD_ATTEMPTS; attempt++) {
@@ -768,7 +815,6 @@ public abstract class TwitterSyncService extends IntentService {
 				tweet = mTwitter.updateStatus(statusUpdate);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			if (tweet != null) {
@@ -776,21 +822,26 @@ public abstract class TwitterSyncService extends IntentService {
 				break;
 			}
 		}
-		// update DB
-		ContentValues cv;
-		long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
-		int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
-		int buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+
 		if (success) {
-			cv = getTweetContentValues(tweet, 0);
+			// update DB
+			long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
+			int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
+			int buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
+			ContentValues cv = getTweetContentValues(tweet, 0);
 			cv.put(Tweets.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
+			cv.put(Tweets.COL_BUFFER, buffer);
+			Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
+			getContentResolver().update(queryUri, cv, null, null);
+			if (notify) {
+				makeToast(getString(R.string.status_update_success));
+			}
 		} else {
-			cv = new ContentValues();
+			if (notify) {
+				makeToast(getString(R.string.status_update_failure));
+			}
 		}
-		cv.put(Tweets.COL_FLAGS, flags & ~(Tweets.FLAG_TO_INSERT));
-		cv.put(Tweets.COL_BUFFER, buffer);
-		Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
-		getContentResolver().update(queryUri, cv, null, null);
+
 		// TODO: notify
 	}
 
@@ -800,17 +851,18 @@ public abstract class TwitterSyncService extends IntentService {
 	 * @param c
 	 *            a cursor pointing to the status to favorite. The cursor will
 	 *            not be modified.
+	 * @param notify
+	 *            if true a toast will be created to notify the user about the
+	 *            outcome
 	 */
-	private void favoriteStatus(Cursor c) {
+	private void favoriteStatus(Cursor c, boolean notify) {
 		boolean success = false;
-		TwitterException exception;
 		long favoriteStatusId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				mTwitter.createFavorite(favoriteStatusId);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			success = true;
@@ -826,8 +878,13 @@ public abstract class TwitterSyncService extends IntentService {
 			cv.put(Tweets.COL_BUFFER, buffer | Tweets.BUFFER_FAVORITES);
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 			getContentResolver().update(updateUri, cv, null, null);
+			if (notify) {
+				makeToast(getString(R.string.favorite_status_success));
+			}
 		} else {
-			// TODO: notify
+			if (notify) {
+				makeToast(getString(R.string.favorite_status_failure));
+			}
 		}
 	}
 
@@ -837,17 +894,18 @@ public abstract class TwitterSyncService extends IntentService {
 	 * @param c
 	 *            a cursor pointing to the status to unfavorite. The cursor will
 	 *            not be modified.
+	 * @param notify
+	 *            if true a toast will be created to notify the user about the
+	 *            outcome
 	 */
-	private void unfavoriteStatus(Cursor c) {
+	private void unfavoriteStatus(Cursor c, boolean notify) {
 		long unfavoriteStatusId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		boolean success = false;
-		TwitterException exception;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				mTwitter.destroyFavorite(unfavoriteStatusId);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			success = true;
@@ -864,8 +922,13 @@ public abstract class TwitterSyncService extends IntentService {
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 			getContentResolver().update(updateUri, cv, null, null);
 			getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
+			if (notify) {
+				makeToast(getString(R.string.unfavorite_status_success));
+			}
 		} else {
-			// TODO: notify
+			if (notify) {
+				makeToast(getString(R.string.unfavorite_status_failure));
+			}
 		}
 	}
 
@@ -875,25 +938,24 @@ public abstract class TwitterSyncService extends IntentService {
 	 * @param c
 	 *            a cursor pointing to the status to retweet. The cursor will
 	 *            not be modified.
+	 * @param notify
+	 *            if true a toast will be created to notify the user about the
+	 *            outcome
 	 */
-	private void retweetStatus(Cursor c) {
+	private void retweetStatus(Cursor c, boolean notify) {
 		long retweetStatusId = c.getLong(c.getColumnIndex(Tweets.COL_TID));
 		boolean success = false;
-		TwitterException exception;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				mTwitter.retweetStatus(retweetStatusId);
 			} catch (TwitterException e) {
 				e.printStackTrace();
-				exception = e;
 				continue;
 			}
 			success = true;
 			break;
 		}
 		if (success) {
-
-		} else {
 			long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
 			int flags = c.getInt(c.getColumnIndex(Tweets.COL_FLAGS));
 			int buffer = c.getInt(c.getColumnIndex(Tweets.COL_BUFFER));
@@ -903,6 +965,13 @@ public abstract class TwitterSyncService extends IntentService {
 			cv.put(Tweets.COL_RETWEETED, 1);
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 			getContentResolver().update(updateUri, cv, null, null);
+			if (notify) {
+				makeToast(getString(R.string.retweet_success));
+			}
+		} else {
+			if (notify) {
+				makeToast(getString(R.string.retweet_failure));
+			}
 		}
 	}
 
@@ -1016,14 +1085,11 @@ public abstract class TwitterSyncService extends IntentService {
 				paging.setMaxId(getTimelineUntilId());
 			}
 			boolean success = false;
-			TwitterException exception;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				exception = null;
 				try {
 					timeline = mTwitter.getHomeTimeline(paging);
 				} catch (TwitterException e) {
 					e.printStackTrace();
-					exception = e;
 					continue;
 				}
 				if (timeline != null) {
@@ -1031,12 +1097,10 @@ public abstract class TwitterSyncService extends IntentService {
 					break;
 				}
 			}
-			if (success) {
-				// TODO notify?
-				Log.d(TAG, "loaded timeline with " + timeline.size() + " tweets");
-			} else {
-				// TODO notify?
-				Log.w(TAG, "loading timeline failed");
+			if (!success) {
+				if (TweetListActivity.running) {
+					makeToast(getString(R.string.timeline_loading_failure));
+				}
 			}
 			return timeline;
 		}
@@ -1154,14 +1218,11 @@ public abstract class TwitterSyncService extends IntentService {
 			Paging paging = new Paging(getSinceId(getBaseContext(), PREF_MENTIONS_SINCE_ID));
 			paging.setCount(Constants.NR_MENTIONS);
 			boolean success = false;
-			TwitterException exception;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				exception = null;
 				try {
 					mentions = mTwitter.getMentionsTimeline(paging);
 				} catch (TwitterException e) {
 					e.printStackTrace();
-					exception = e;
 					continue;
 				}
 				if (mentions != null) {
@@ -1169,10 +1230,10 @@ public abstract class TwitterSyncService extends IntentService {
 					break;
 				}
 			}
-			if (success) {
-				// TODO
-			} else {
-				// TODO
+			if (!success) {
+				if (TweetListActivity.running) {
+					makeToast(getString(R.string.mentions_loading_failure));
+				}
 			}
 			return mentions;
 		}
@@ -1242,14 +1303,11 @@ public abstract class TwitterSyncService extends IntentService {
 			Paging paging = new Paging(getSinceId(getBaseContext(), PREF_FAVORITES_SINCE_ID));
 			paging.setCount(Constants.NR_FAVORITES);
 			boolean success = false;
-			TwitterException exception;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				exception = null;
 				try {
 					favorites = mTwitter.getFavorites(paging);
 				} catch (TwitterException e) {
 					e.printStackTrace();
-					exception = e;
 					continue;
 				}
 				if (favorites != null) {
@@ -1257,10 +1315,10 @@ public abstract class TwitterSyncService extends IntentService {
 					break;
 				}
 			}
-			if (success) {
-				// TODO
-			} else {
-				// TODO
+			if (!success) {
+				if (TweetListActivity.running) {
+					makeToast(getString(R.string.favorites_loading_failure));
+				}
 			}
 			return favorites;
 		}
@@ -1549,7 +1607,7 @@ public abstract class TwitterSyncService extends IntentService {
 		}
 	}
 
-	public static class SyncTweetServie extends TwitterSyncService {
+	public static class SyncTweetService extends TwitterSyncService {
 		public static final String EXTRA_ROW_ID = "row_id";
 
 		@Override
@@ -1559,11 +1617,10 @@ public abstract class TwitterSyncService extends IntentService {
 			Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 			if (c != null && c.getCount() > 0) {
 				c.moveToFirst();
-				syncTweet(c);
+				syncTweet(c, true);
 			}
 			c.close();
 		}
-
 	}
 
 	public static class MessagesSyncService extends TwitterSyncService {
@@ -1622,7 +1679,9 @@ public abstract class TwitterSyncService extends IntentService {
 				}
 			}
 			if (!success) {
-				// TODO: notify
+				if (TweetListActivity.running) {
+					makeToast(getString(R.string.dms_loading_failure));
+				}
 			}
 			return incomingDms;
 		}
@@ -1646,7 +1705,9 @@ public abstract class TwitterSyncService extends IntentService {
 				}
 			}
 			if (!success) {
-				// TODO: notify
+				if (TweetListActivity.running) {
+					makeToast(getString(R.string.dms_loading_failure));
+				}
 			}
 			return outgoingDms;
 		}

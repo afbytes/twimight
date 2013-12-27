@@ -261,9 +261,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			} catch (SQLException ex) {
 				return null;
 			}
-
 		}
-
 	}
 
 	/**

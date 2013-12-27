@@ -74,32 +74,36 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	}
 
 	abstract Cursor getCursor(int filter);
-	
+
 	abstract void setActionBarTitles();
 
 	abstract CursorAdapter getListAdapter();
-	
+
 	@Override
 	public void onTopRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION, TimelineSyncService.UPDATE_DIRECTION_UP);
-			if (Constants.TIMELINE_BUFFER_SIZE >= 150)
+			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION,
+					TimelineSyncService.UPDATE_DIRECTION_UP);
+			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
 				Constants.TIMELINE_BUFFER_SIZE -= 50;
+			}
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
 		}
+		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=UP");
 		getActivity().startService(overscrollIntent);
-
 	}
 
 	@Override
 	public void onBottomRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION, TimelineSyncService.UPDATE_DIRECTION_DOWN);
-			if (Constants.TIMELINE_BUFFER_SIZE >= 150){
+			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION,
+					TimelineSyncService.UPDATE_DIRECTION_DOWN);
+			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
 				Constants.TIMELINE_BUFFER_SIZE -= 50;
 			}
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
 		}
+		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=DOWN");
 		getActivity().startService(overscrollIntent);
 	}
 

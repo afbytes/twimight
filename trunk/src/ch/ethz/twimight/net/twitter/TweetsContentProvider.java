@@ -15,6 +15,7 @@ package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Locale;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -46,7 +47,7 @@ import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.SearchTweetService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetServie;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncUserTweetsService;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.security.CertificateManager;
@@ -940,8 +941,8 @@ public class TweetsContentProvider extends ContentProvider {
 			Log.i(TAG, "updated");
 			// Trigger synch if needed
 			if (values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS) != 0) {
-				Intent i = new Intent(getContext(), SyncTweetServie.class);
-				i.putExtra(SyncTweetServie.EXTRA_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
+				Intent i = new Intent(getContext(), SyncTweetService.class);
+				i.putExtra(SyncTweetService.EXTRA_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}
 
@@ -1064,17 +1065,6 @@ public class TweetsContentProvider extends ContentProvider {
 	}
 
 	/**
-	 * Input verification for new tweets
-	 * 
-	 * @param values
-	 * @return
-	 */
-	private boolean checkValues(ContentValues values) {
-		// TODO: Input validation
-		return true;
-	}
-
-	/**
 	 * Inserts a tweet into the DB
 	 */
 	private Uri insertTweet(ContentValues values) {
@@ -1090,7 +1080,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 		if (localUserScreenName != null) {
 			// we convert to lower case to check if it's a mention
-			if (text.toLowerCase().matches(".*@" + localUserScreenName.toLowerCase() + "\\W.*")) {
+			if (text.toLowerCase(Locale.getDefault()).matches(".*@" + localUserScreenName.toLowerCase() + "\\W.*")) {
 
 				values.put(Tweets.COL_MENTIONS, 1);
 				// put into mentions buffer

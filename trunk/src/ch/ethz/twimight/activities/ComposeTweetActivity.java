@@ -50,7 +50,7 @@ import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetServie;
+import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.SDCardHelper;
 
@@ -424,8 +424,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 			if (insertUri != null) {
 				// schedule the tweet for uploading to twitter
-				Intent i = new Intent(ComposeTweetActivity.this, SyncTweetServie.class);
-				i.putExtra(SyncTweetServie.EXTRA_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
+				Intent i = new Intent(ComposeTweetActivity.this, SyncTweetService.class);
+				i.putExtra(SyncTweetService.EXTRA_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
 			}
 			finish();
