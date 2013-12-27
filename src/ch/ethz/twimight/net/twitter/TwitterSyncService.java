@@ -105,30 +105,30 @@ public abstract class TwitterSyncService extends IntentService {
 		return prefs.getLong(preferenceName, 0);
 	}
 
-	public static void clearAllPreferences(Context context){
+	public static void clearAllPreferences(Context context) {
 		setLastUpdate(context, FavoritesSyncService.PREF_FAVORITES_SINCE_ID, null);
 		setSinceId(context, FavoritesSyncService.PREF_FAVORITES_SINCE_ID, null);
-		
+
 		setLastUpdate(context, MentionsSyncService.PREF_LAST_MENTIONS_UPDATE, null);
 		setSinceId(context, MentionsSyncService.PREF_MENTIONS_SINCE_ID, null);
-		
+
 		setLastUpdate(context, TimelineSyncService.PREF_LAST_TIMELINE_UPDATE, null);
 		setSinceId(context, TimelineSyncService.PREF_TIMELINE_SINCE_ID, null);
-		
+
 		setLastUpdate(context, FavoritesSyncService.PREF_LAST_FAVORITES_UPDATE, null);
 		setSinceId(context, FavoritesSyncService.PREF_FAVORITES_SINCE_ID, null);
-		
+
 		setLastUpdate(context, FriendsSyncService.PREF_LAST_FRIENDS_UPDATE, null);
-		
+
 		setLastUpdate(context, FollowersSyncService.PREF_LAST_FOLLOWERS_UPDATE, null);
-		
+
 		setLastUpdate(context, MessagesSyncService.PREF_LAST_INCOMING_DMS_UPDATE, null);
 		setLastUpdate(context, MessagesSyncService.PREF_LAST_OUTGOING_DMS_UPDATE, null);
 		setSinceId(context, MessagesSyncService.PREF_INCOMING_DMS_SINCE_ID, null);
 		setSinceId(context, MessagesSyncService.PREF_OUTGOING_DMS_SINCE_ID, null);
-		
+
 	}
-	
+
 	public static long getSinceId(Context context, String preferenceName) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getLong(preferenceName, 1);
@@ -507,15 +507,19 @@ public abstract class TwitterSyncService extends IntentService {
 			byte[] image = downloadImage(biggerVariantUrl);
 			// store image in file system
 			String screenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			InternalStorageHelper helper = new InternalStorageHelper(this);
-			helper.writeImage(image, screenName);
+			String profileImagePath = null;
+			if(image!=null){
+				InternalStorageHelper helper = new InternalStorageHelper(this);
+				helper.writeImage(image, screenName);
+				profileImagePath = new File(getFilesDir(), screenName).getPath();
+			}
 			// update user entry in DB
 			long rowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 			int flags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 			ContentValues cv = new ContentValues();
 			cv.put(TwitterUsers.COL_ROW_ID, rowId);
 			cv.put(TwitterUsers.COL_FLAGS, flags & ~TwitterUsers.FLAG_TO_UPDATEIMAGE);
-			cv.put(TwitterUsers.COL_PROFILEIMAGE_PATH, new File(getFilesDir(), screenName).getPath());
+			cv.put(TwitterUsers.COL_PROFILEIMAGE_PATH, profileImagePath);
 			cv.put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
 			Uri queryUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + cv.getAsLong("_id"));
@@ -968,7 +972,7 @@ public abstract class TwitterSyncService extends IntentService {
 		public static final String EXTRA_UPDATE_DIRECTION = "update_direction";
 		public static final int UPDATE_DIRECTION_UP = 1;
 		public static final int UPDATE_DIRECTION_DOWN = 2;
-		
+
 		private static final String PREF_LAST_TIMELINE_UPDATE = "last_timeline_update";
 		private static final String PREF_TIMELINE_SINCE_ID = "timeline_since_id";
 
@@ -1028,9 +1032,11 @@ public abstract class TwitterSyncService extends IntentService {
 				}
 			}
 			if (success) {
-				// TODO
+				// TODO notify?
+				Log.d(TAG, "loaded timeline with " + timeline.size() + " tweets");
 			} else {
-				// TODO
+				// TODO notify?
+				Log.w(TAG, "loading timeline failed");
 			}
 			return timeline;
 		}
@@ -1082,7 +1088,7 @@ public abstract class TwitterSyncService extends IntentService {
 		 * @return
 		 */
 		private long getTimelineUntilId() {
-			long timelineUntilId = -1;
+			long timelineUntilId = 1;
 			Cursor c = getContentResolver()
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
 							+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL), null, null, null, null);
@@ -1463,7 +1469,6 @@ public abstract class TwitterSyncService extends IntentService {
 				List<ContentValues> tweetsValues = new ArrayList<ContentValues>();
 				List<ContentValues> usersValues = new ArrayList<ContentValues>();
 				for (Status tweet : searchResults) {
-					tweetsValues.add(getTweetContentValues(tweet, Tweets.BUFFER_TIMELINE));
 					if (tweet.isRetweet()) {
 						tweet = tweet.getRetweetedStatus();
 					}
@@ -1647,11 +1652,11 @@ public abstract class TwitterSyncService extends IntentService {
 		}
 
 		private void insertIncomingDms(List<DirectMessage> messages) {
-			if(messages!=null && !messages.isEmpty()){
+			if (messages != null && !messages.isEmpty()) {
 				Long lastId = null;
-				for(DirectMessage message : messages){
-					if(lastId==null){
-						lastId=message.getId();
+				for (DirectMessage message : messages) {
+					if (lastId == null) {
+						lastId = message.getId();
 					}
 					ContentValues userValues = getUserContentValues(message.getSender());
 					storeUser(userValues);
@@ -1664,11 +1669,11 @@ public abstract class TwitterSyncService extends IntentService {
 		}
 
 		private void insertOutgoingDms(List<DirectMessage> messages) {
-			if(messages!=null && !messages.isEmpty()){
+			if (messages != null && !messages.isEmpty()) {
 				Long lastId = null;
-				for(DirectMessage message : messages){
-					if(lastId==null){
-						lastId=message.getId();
+				for (DirectMessage message : messages) {
+					if (lastId == null) {
+						lastId = message.getId();
 					}
 					ContentValues userValues = getUserContentValues(message.getSender());
 					storeUser(userValues);
@@ -1686,7 +1691,7 @@ public abstract class TwitterSyncService extends IntentService {
 				Uri insertUri = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
 						+ DirectMessages.DMS_LIST + "/" + DirectMessages.DMS_SOURCE_NORMAL);
 				Uri resultUri = getContentResolver().insert(insertUri, messageValues);
-				rowId= Long.valueOf(resultUri.getLastPathSegment());
+				rowId = Long.valueOf(resultUri.getLastPathSegment());
 			}
 			return rowId;
 		}
@@ -1712,41 +1717,41 @@ public abstract class TwitterSyncService extends IntentService {
 		}
 
 	}
-	
+
 	public static class TransactionalMessagesSyncService extends TwitterSyncService {
 		@Override
 		void executeSync() {
 			syncTransactionalMessages();
 		}
 	}
-	
+
 	public static class SyncUserTweetsService extends TwitterSyncService {
 		public static final String EXTRA_SCREEN_NAME = "screen_name";
-		
+
 		@Override
 		void executeSync() {
 			String screenName = mStartIntent.getStringExtra(EXTRA_SCREEN_NAME);
-			if(screenName!=null){
+			if (screenName != null) {
 				List<Status> userTweets = loadUserTweets(screenName);
 				insertUserTweets(userTweets);
 			}
 		}
-		
-		private List<Status> loadUserTweets(String screenName){
+
+		private List<Status> loadUserTweets(String screenName) {
 			List<Status> userTweets = null;
-			try{
+			try {
 				userTweets = mTwitter.getUserTimeline(screenName);
-			} catch(TwitterException e){
+			} catch (TwitterException e) {
 				e.printStackTrace();
 				// TODO: notify
 			}
 			return userTweets;
 		}
-		
-		private void insertUserTweets(List<Status> userTweets){
-			if(userTweets!=null && !userTweets.isEmpty()){
+
+		private void insertUserTweets(List<Status> userTweets) {
+			if (userTweets != null && !userTweets.isEmpty()) {
 				List<ContentValues> tweetsValues = new LinkedList<ContentValues>();
-				for(Status tweet : userTweets){
+				for (Status tweet : userTweets) {
 					ContentValues cv = getTweetContentValues(tweet, Tweets.BUFFER_USERS);
 					tweetsValues.add(cv);
 				}
