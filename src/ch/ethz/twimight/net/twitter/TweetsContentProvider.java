@@ -668,12 +668,15 @@ public class TweetsContentProvider extends ContentProvider {
 		int numInserted = 0;
 		database.beginTransaction();
 		try {
-
+			int affectedBuffers = 0;
 			for (ContentValues value : values) {
-
-				if (insertNormalTweet(value) != null)
+				if (insertNormalTweet(value) != null){
 					numInserted++;
+					affectedBuffers |= value.getAsInteger(Tweets.COL_BUFFER);
+				}
 			}
+			// delete everything that now falls out of the buffer
+			purgeTweets(affectedBuffers);
 			database.setTransactionSuccessful();
 
 		} finally {
@@ -704,7 +707,8 @@ public class TweetsContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
-
+		// delete everything that now falls out of the buffer
+		purgeTweets(values.getAsInteger(Tweets.COL_BUFFER));
 		return insertUri;
 	}
 
@@ -766,9 +770,6 @@ public class TweetsContentProvider extends ContentProvider {
 		}
 
 		insertUri = insertTweet(values);
-		// getContext().getContentResolver().notifyChange(uri, null);
-		// delete everything that now falls out of the buffer
-		purgeTweets(values);
 
 		// trigger upload to Twimight Disaster Server
 		Intent synchIntent = new Intent(getContext(), TDSService.class);
@@ -899,7 +900,6 @@ public class TweetsContentProvider extends ContentProvider {
 				notifyUser(NOTIFY_TWEET, values.getAsString(Tweets.COL_TEXT));
 			}
 			// delete everything that now falls out of the buffer
-			purgeTweets(values);
 			return insertUri;
 
 		} catch (Exception ex) {
@@ -987,20 +987,12 @@ public class TweetsContentProvider extends ContentProvider {
 				+ ");";
 		database.execSQL(sql);
 
-		// now delete
-		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "=0", null);
-		Log.d(TAG, "deleted " + result + " tweets");
-
-		getContext().getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 	}
 
 	/**
 	 * Keeps the tweets table at acceptable size
 	 */
-	private void purgeTweets(ContentValues cv) {
-
-		// in the content values we find which buffer(s) to purge
-		int bufferFlags = cv.getAsInteger(Tweets.COL_BUFFER);
+	private void purgeTweets(int bufferFlags) {
 
 		if ((bufferFlags & Tweets.BUFFER_TIMELINE) != 0) {
 			Log.d(TAG, "Purging timeline buffer " + Constants.TIMELINE_BUFFER_SIZE);
@@ -1037,6 +1029,11 @@ public class TweetsContentProvider extends ContentProvider {
 			purgeBuffer(Tweets.BUFFER_SEARCH, Constants.SEARCHTWEETS_BUFFER_SIZE);
 		}
 
+		// now delete all the tweets that aren't in any buffer anymore
+		int result = database.delete(DBOpenHelper.TABLE_TWEETS, Tweets.COL_BUFFER + "=0", null);
+		Log.d(TAG, "deleted " + result + " tweets");
+
+		getContext().getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 	}
 
 	/**
