@@ -13,10 +13,13 @@
 package ch.ethz.twimight.data;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
