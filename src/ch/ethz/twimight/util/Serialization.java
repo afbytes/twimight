@@ -45,28 +45,31 @@ public class Serialization {
 	}
 
 	public static <T> T deserialize(byte[] bytes) {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInput in = null;
 		T output = null;
-		try {
-			in = new ObjectInputStream(bis);
-			output = (T) in.readObject();
-		} catch (ClassNotFoundException e) {
-			// You chuck it on that one...
-		} catch (IOException e) {
-			// .. you chuck it on this one...
-		} finally {
+		if (bytes != null) {
+			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+			ObjectInput in = null;
+
 			try {
-				bis.close();
+				in = new ObjectInputStream(bis);
+				output = (T) in.readObject();
+			} catch (ClassNotFoundException e) {
+				// You chuck it on that one...
 			} catch (IOException e) {
-				// ...you chuck it on that one...
-			}
-			try {
-				if (in != null) {
-					in.close();
+				// .. you chuck it on this one...
+			} finally {
+				try {
+					bis.close();
+				} catch (IOException e) {
+					// ...you chuck it on that one...
 				}
-			} catch (IOException e) {
-				// ...and you chuck it on me
+				try {
+					if (in != null) {
+						in.close();
+					}
+				} catch (IOException e) {
+					// ...and you chuck it on me
+				}
 			}
 		}
 		return output;
