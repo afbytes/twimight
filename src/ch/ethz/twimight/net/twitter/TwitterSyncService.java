@@ -25,6 +25,7 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
+import twitter4j.UserMentionEntity;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.IntentService;
@@ -263,6 +264,18 @@ public abstract class TwitterSyncService extends IntentService {
 				new CacheUrlTask(tweet).execute();
 			}
 		}
+		// if there are mentions we load the users
+		for(UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()){
+			ContentValues mentionedUserValues = new ContentValues();
+			mentionedUserValues.put(TwitterUsers.COL_NAME, userMentionEntity.getName());
+			mentionedUserValues.put(TwitterUsers.COL_SCREENNAME, userMentionEntity.getScreenName());
+			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE | TwitterUsers.FLAG_TO_UPDATEIMAGE);
+			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS);
+			getContentResolver().insert(insertUri, mentionedUserValues);
+			Log.d(TAG, "mantion: inserted @" + userMentionEntity.getScreenName() + " name: " + userMentionEntity.getName());
+		}
+		
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.getSource());
 
@@ -1388,11 +1401,11 @@ public abstract class TwitterSyncService extends IntentService {
 			List<User> friends = new LinkedList<User>();
 			long cursor = -1;
 			int pagesLoaded = 0;
-			String ownTwitterId = LoginActivity.getTwitterId(this);
+			String ownScreenname = LoginActivity.getTwitterScreenname(this);
 			do {
 				PagableResponseList<User> pagedFriendsList;
 				try {
-					pagedFriendsList = mTwitter.getFriendsList(ownTwitterId, cursor);
+					pagedFriendsList = mTwitter.getFriendsList(ownScreenname, cursor);
 				} catch (TwitterException e) {
 					e.printStackTrace();
 					break;
@@ -1459,15 +1472,17 @@ public abstract class TwitterSyncService extends IntentService {
 			List<User> followers = new LinkedList<User>();
 			long cursor = -1;
 			int pagesLoaded = 0;
-			String ownTwitterId = LoginActivity.getTwitterId(this);
+			String ownScreenname = LoginActivity.getTwitterScreenname(this);
 			do {
 				PagableResponseList<User> pagedFollowersList;
 				try {
-					pagedFollowersList = mTwitter.getFollowersList(ownTwitterId, cursor);
+					pagedFollowersList = mTwitter.getFollowersList(ownScreenname, cursor);
 				} catch (TwitterException e) {
 					e.printStackTrace();
 					break;
 				}
+				Log.d(TAG, "loaded followers page "+ pagesLoaded);
+				Log.d(TAG, "loaded " + pagedFollowersList.size() + " followers");
 				for (User follower : pagedFollowersList) {
 					followers.add(follower);
 				}

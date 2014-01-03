@@ -17,13 +17,22 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.PriorityQueue;
 
+import twitter4j.HashtagEntity;
+import twitter4j.MediaEntity;
+import twitter4j.TweetEntity;
+import twitter4j.URLEntity;
+import twitter4j.UserMentionEntity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.SearchManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -41,15 +50,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.Layout;
+import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -60,6 +74,7 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.ComposeTweetActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.PhotoViewActivity;
+import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.activities.WebViewActivity;
@@ -74,7 +89,7 @@ import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.SDCardHelper;
-import ch.ethz.twimight.util.TweetTagHandler;
+import ch.ethz.twimight.util.Serialization;
 
 /**
  * Display a tweet
@@ -96,8 +111,10 @@ public class TweetDetailFragment extends Fragment {
 	private TextView tvTweetCreationDetails;
 	private TextView tvRetweetedBy;
 
+	private WebView mImageWebView;
+
 	private String mPhotoPath;
-	
+
 	private LinearLayout userInfoView;
 	ImageButton retweetButton;
 	ImageButton deleteButton;
@@ -169,8 +186,7 @@ public class TweetDetailFragment extends Fragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		super.onCreateView(inflater, container, savedInstanceState);
 		// Inflate the layout for activity fragment
@@ -178,11 +194,11 @@ public class TweetDetailFragment extends Fragment {
 		screenNameView = (TextView) view.findViewById(R.id.showTweetScreenName);
 		realNameView = (TextView) view.findViewById(R.id.showTweetRealName);
 
+		mImageWebView = (WebView) view.findViewById(R.id.photoWebView);
+
 		tweetTextView = (TextView) view.findViewById(R.id.showTweetText);
-		tvTweetCreationDetails = (TextView) view
-				.findViewById(R.id.tvTweetCreationDetails);
-		tvRetweetedBy = (TextView) view
-				.findViewById(R.id.showTweetRetweeted_by);
+		tvTweetCreationDetails = (TextView) view.findViewById(R.id.tvTweetCreationDetails);
+		tvRetweetedBy = (TextView) view.findViewById(R.id.showTweetRetweeted_by);
 
 		// if we are creating a new instance, get row id from arguments,
 		// otherwise from saved instance state
@@ -198,14 +214,12 @@ public class TweetDetailFragment extends Fragment {
 			loadCursor();
 
 			if (mCursor.getCount() == 0) {
-				activity.getFragmentManager().beginTransaction().remove(this)
-						.commit();
+				activity.getFragmentManager().beginTransaction().remove(this).commit();
 			} else {
 				// register content observer to refresh when user was updated
 				handler = new Handler();
 
-				userID = String.valueOf(mCursor.getLong(mCursor
-						.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+				userID = String.valueOf(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 				// locate the directory where the photos are stored
 				photoPath = Tweets.PHOTO_PATH + "/" + userID;
 
@@ -215,8 +229,7 @@ public class TweetDetailFragment extends Fragment {
 
 				setPhotoAttached();
 				// disaster info
-				LinearLayout unverifiedInfo = (LinearLayout) view
-						.findViewById(R.id.showTweetUnverified);
+				LinearLayout unverifiedInfo = (LinearLayout) view.findViewById(R.id.showTweetUnverified);
 				unverifiedInfo.setVisibility(LinearLayout.GONE);
 				if ((mBuffer & Tweets.BUFFER_DISASTER) != 0) {
 
@@ -239,8 +252,7 @@ public class TweetDetailFragment extends Fragment {
 				}
 			}
 		} else
-			activity.getFragmentManager().beginTransaction().remove(this)
-					.commit();
+			activity.getFragmentManager().beginTransaction().remove(this).commit();
 
 		return view;
 	}
@@ -265,8 +277,7 @@ public class TweetDetailFragment extends Fragment {
 		htmlDbHelper.open();
 		htmlUrls = new ArrayList<String>();
 
-		cm = (ConnectivityManager) activity
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		cm = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
 		locHelper = LocationHelper.getInstance(activity);
 
 	}
@@ -278,24 +289,20 @@ public class TweetDetailFragment extends Fragment {
 
 	private void setPhotoAttached() {
 		// Profile image
-		ImageView photoView = (ImageView) view
-				.findViewById(R.id.showPhotoAttached);
+		ImageView photoView = (ImageView) view.findViewById(R.id.showPhotoAttached);
 		photoView.setVisibility(View.GONE);
 		String[] filePath = { photoPath };
 		if (sdCardHelper.checkSDState(filePath)) {
 			if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA))) {
-				String photoFileName = mCursor.getString(mCursor
-						.getColumnIndex(Tweets.COL_MEDIA));
-				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(
-						photoPath, photoFileName));// photoFileParent,
-													// photoFilename));
+				String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
+				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));// photoFileParent,
+																										// photoFilename));
 				mPhotoPath = photoUri.getPath();
-				Bitmap photo = sdCardHelper
-						.decodeBitmapFile(mPhotoPath);
+				Bitmap photo = sdCardHelper.decodeBitmapFile(mPhotoPath);
 				photoView.setImageBitmap(photo);
 				photoView.setVisibility(View.VISIBLE);
 				photoView.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
 						viewPhoto();
@@ -304,8 +311,8 @@ public class TweetDetailFragment extends Fragment {
 			}
 		}
 	}
-	
-	public void viewPhoto(){
+
+	public void viewPhoto() {
 		Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
 		intent.putExtra(PhotoViewActivity.PHOTO_PATH_EXTRA, mPhotoPath);
 		startActivity(intent);
@@ -327,18 +334,14 @@ public class TweetDetailFragment extends Fragment {
 				if (cursorInfo != null) {
 
 					// check if file status normal, exists and size
-					String[] filePath = { HtmlPage.HTML_PATH + "/"
-							+ LoginActivity.getTwitterId(activity) };
+					String[] filePath = { HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity) };
 
 					if (sdCardHelper.checkSDState(filePath)) {
 
-						if (!cursorInfo.isNull(cursorInfo
-								.getColumnIndex(HtmlPage.COL_FILENAME))) {
-							filename = cursorInfo.getString(cursorInfo
-									.getColumnIndex(HtmlPage.COL_FILENAME));
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) {
+							filename = cursorInfo.getString(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME));
 
-							if (sdCardHelper.getFileFromSDCard(filePath[0],
-									filename).length() <= 1) {
+							if (sdCardHelper.getFileFromSDCard(filePath[0], filename).length() <= 1) {
 								fileStatusNormal = false;
 							}
 						}
@@ -348,8 +351,7 @@ public class TweetDetailFragment extends Fragment {
 				}
 
 				// if entry does not exist, add the url in to be downloaded list
-				if (cursorInfo == null || (filename == null)
-						|| !fileStatusNormal) {
+				if (cursorInfo == null || (filename == null) || !fileStatusNormal) {
 
 					htmlsToDownload.add(htmlUrl);
 					buttonStatus = true;
@@ -369,37 +371,30 @@ public class TweetDetailFragment extends Fragment {
 	private void downloadAndInsert() {
 
 		// insert database
-		String[] filePath = { HtmlPage.HTML_PATH + "/"
-				+ LoginActivity.getTwitterId(activity) };
+		String[] filePath = { HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity) };
 		if (sdCardHelper.checkSDState(filePath)) {
 
 			Long tweetId = mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_DISASTERID));
 			for (int i = 0; i < htmlsToDownload.size(); i++) {
 
-				Cursor cursorInfo = htmlDbHelper.getPageInfo(htmlsToDownload
-						.get(i));
+				Cursor cursorInfo = htmlDbHelper.getPageInfo(htmlsToDownload.get(i));
 				if (cursorInfo != null) {
 
-					int attempts = cursorInfo.getInt(cursorInfo
-							.getColumnIndex(HtmlPage.COL_ATTEMPTS));
+					int attempts = cursorInfo.getInt(cursorInfo.getColumnIndex(HtmlPage.COL_ATTEMPTS));
 					if (attempts > HtmlPage.DOWNLOAD_LIMIT) {
 
 						String filename = null;
-						if (!cursorInfo.isNull(cursorInfo
-								.getColumnIndex(HtmlPage.COL_FILENAME))) {
-							filename = cursorInfo.getString(mCursor
-									.getColumnIndex(HtmlPage.COL_FILENAME));
-							sdCardHelper.deleteFile(filePath[0] + "/"
-									+ filename);
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) {
+							filename = cursorInfo.getString(mCursor.getColumnIndex(HtmlPage.COL_FILENAME));
+							sdCardHelper.deleteFile(filePath[0] + "/" + filename);
 						}
 
-						htmlDbHelper.updatePage(htmlsToDownload.get(i), null,
-								tweetId, HtmlPagesDbHelper.DOWNLOAD_FORCED, 0);
+						htmlDbHelper.updatePage(htmlsToDownload.get(i), null, tweetId,
+								HtmlPagesDbHelper.DOWNLOAD_FORCED, 0);
 					}
 
 				} else {
-					htmlDbHelper.insertPage(htmlsToDownload.get(i), tweetId,
-							HtmlPagesDbHelper.DOWNLOAD_FORCED);
+					htmlDbHelper.insertPage(htmlsToDownload.get(i), tweetId, HtmlPagesDbHelper.DOWNLOAD_FORCED);
 				}
 			}
 
@@ -416,8 +411,7 @@ public class TweetDetailFragment extends Fragment {
 			mCursor.close();
 		}
 
-		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-				+ Tweets.TWEETS + "/" + mRowId);
+		uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
 		mCursor = resolver.query(uri, null, null, null, null);
 
 		if (mCursor != null && mCursor.getCount() > 0) {
@@ -434,16 +428,11 @@ public class TweetDetailFragment extends Fragment {
 	 * Sets the visibility of the info icons according to the tweet's flags.
 	 */
 	private void handleTweetFlags() {
-		LinearLayout toSendNotification = (LinearLayout) view
-				.findViewById(R.id.showTweetTosend);
-		LinearLayout toDeleteNotification = (LinearLayout) view
-				.findViewById(R.id.showTweetTodelete);
-		LinearLayout toFavoriteNotification = (LinearLayout) view
-				.findViewById(R.id.showTweetTofavorite);
-		LinearLayout toUnfavoriteNotification = (LinearLayout) view
-				.findViewById(R.id.showTweetTounfavorite);
-		LinearLayout toRetweetNotification = (LinearLayout) view
-				.findViewById(R.id.showTweetToretweet);
+		LinearLayout toSendNotification = (LinearLayout) view.findViewById(R.id.showTweetTosend);
+		LinearLayout toDeleteNotification = (LinearLayout) view.findViewById(R.id.showTweetTodelete);
+		LinearLayout toFavoriteNotification = (LinearLayout) view.findViewById(R.id.showTweetTofavorite);
+		LinearLayout toUnfavoriteNotification = (LinearLayout) view.findViewById(R.id.showTweetTounfavorite);
+		LinearLayout toRetweetNotification = (LinearLayout) view.findViewById(R.id.showTweetToretweet);
 		if (toSendNotification != null) {
 			if ((mFlags & Tweets.FLAG_TO_INSERT) == 0) {
 				toSendNotification.setVisibility(LinearLayout.GONE);
@@ -458,11 +447,9 @@ public class TweetDetailFragment extends Fragment {
 
 			} else {
 				toDeleteNotification.setVisibility(LinearLayout.VISIBLE);
-				TextView toDeleteText = (TextView) view
-						.findViewById(R.id.showTweetInfoText2);
+				TextView toDeleteText = (TextView) view.findViewById(R.id.showTweetInfoText2);
 				if (toDeleteText != null) {
-					toDeleteText
-							.setBackgroundResource(android.R.drawable.list_selector_background);
+					toDeleteText.setBackgroundResource(android.R.drawable.list_selector_background);
 					toDeleteText.setOnClickListener(new OnClickListener() {
 
 						@Override
@@ -471,16 +458,13 @@ public class TweetDetailFragment extends Fragment {
 									.findViewById(R.id.showTweetTodelete);
 							if (toDeleteNotification != null) {
 
-								int num = resolver.update(uri,
-										removeDeleteFlag(mFlags), null, null);
-								toDeleteNotification
-										.setVisibility(LinearLayout.GONE);
+								int num = resolver.update(uri, removeDeleteFlag(mFlags), null, null);
+								toDeleteNotification.setVisibility(LinearLayout.GONE);
 								if (num > 0) {
 
 									loadCursor();
 									if (mCursor != null) {
-										mFlags = mCursor.getInt(mCursor
-												.getColumnIndex(Tweets.COL_FLAGS));
+										mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
 										setupButtons();
 									}
 								}
@@ -527,8 +511,7 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void setupButtons() {
 
-		String userString = Long.toString(mCursor.getLong(mCursor
-				.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		String userString = Long.toString(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 		String localUserString = LoginActivity.getTwitterId(activity);
 
 		// Retweet Button
@@ -536,8 +519,7 @@ public class TweetDetailFragment extends Fragment {
 		// we do not show the retweet button for (1) tweets from the local user,
 		// (2) tweets which have been flagged to retweeted and (3) tweets which
 		// have been marked as retweeted
-		if (userString.equals(localUserString)
-				|| ((mFlags & Tweets.FLAG_TO_RETWEET) > 0)
+		if (userString.equals(localUserString) || ((mFlags & Tweets.FLAG_TO_RETWEET) > 0)
 				|| (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_RETWEETED)) > 0)) {
 			retweetButton.setVisibility(Button.GONE);
 		} else {
@@ -575,24 +557,18 @@ public class TweetDetailFragment extends Fragment {
 		// Reply button: we show it only if we have a Tweet ID!
 		replyButton = (ImageButton) view.findViewById(R.id.showTweetReply);
 		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID))
-				|| PreferenceManager.getDefaultSharedPreferences(activity)
-						.getBoolean("prefDisasterMode",
-								Constants.DISASTER_DEFAULT_ON) == true) {
+				|| PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("prefDisasterMode",
+						Constants.DISASTER_DEFAULT_ON) == true) {
 			replyButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(activity, ComposeTweetActivity.class);
 					if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID)))
-						i.putExtra("isReplyTo",
-								mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_TID)));
+						i.putExtra("isReplyTo", mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_TID)));
 					else
 						i.putExtra("isReplyTo", -1);
-					i.putExtra(
-							"text",
-							"@"
-									+ mCursor.getString(mCursor
-											.getColumnIndex(TwitterUsers.COL_SCREENNAME))
-									+ " ");
+					i.putExtra("text", "@" + mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))
+							+ " ");
 					startActivity(i);
 				}
 			});
@@ -603,8 +579,7 @@ public class TweetDetailFragment extends Fragment {
 		// Favorite button
 		favorited = ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
 				|| ((mFlags & Tweets.FLAG_TO_FAVORITE) > 0);
-		favoriteButton = (ImageButton) view
-				.findViewById(R.id.showTweetFavorite);
+		favoriteButton = (ImageButton) view.findViewById(R.id.showTweetFavorite);
 		if (favorited && !((mFlags & Tweets.FLAG_TO_UNFAVORITE) > 0)) {
 			favoriteButton.setImageResource(R.drawable.ic_favorite_on);
 		}
@@ -616,8 +591,7 @@ public class TweetDetailFragment extends Fragment {
 				if (favorited) {
 					// unfavorite
 					resolver.update(uri, clearFavoriteFlag(mFlags), null, null);
-					((ImageButton) v)
-							.setImageResource(R.drawable.ic_favorite_off);
+					((ImageButton) v).setImageResource(R.drawable.ic_favorite_off);
 					favorited = false;
 
 				} else {
@@ -625,8 +599,7 @@ public class TweetDetailFragment extends Fragment {
 					ContentValues cv = setFavoriteFlag(mFlags);
 					if (cv != null) {
 						resolver.update(uri, cv, null, null);
-						((ImageButton) v)
-								.setImageResource(R.drawable.ic_favorite_on);
+						((ImageButton) v).setImageResource(R.drawable.ic_favorite_on);
 						favorited = true;
 					}
 				}
@@ -639,8 +612,7 @@ public class TweetDetailFragment extends Fragment {
 
 		// get the html status of this tweet
 		htmlStatus = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_HTML_PAGES));
-		offlineButton = (ImageButton) view
-				.findViewById(R.id.showTweetOfflineview);
+		offlineButton = (ImageButton) view.findViewById(R.id.showTweetOfflineview);
 
 		if (htmlStatus == 0) {
 			offlineButton.setVisibility(View.GONE);
@@ -652,7 +624,8 @@ public class TweetDetailFragment extends Fragment {
 				public void onClick(View v) {
 
 					downloadAndInsert();
-					Toast.makeText(getActivity(), getResources().getString(R.string.download_toast), Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), getResources().getString(R.string.download_toast), Toast.LENGTH_SHORT)
+							.show();
 					// TODO: Fix download functionality and apply appropriate
 					// icon
 					// offlineButton
@@ -673,11 +646,9 @@ public class TweetDetailFragment extends Fragment {
 		// Profile image
 		if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
 
-			ImageView picture = (ImageView) view
-					.findViewById(R.id.showTweetProfileImage);
+			ImageView picture = (ImageView) view.findViewById(R.id.showTweetProfileImage);
 			int userId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-			Uri imageUri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);
 			InputStream is;
 
@@ -719,34 +690,30 @@ public class TweetDetailFragment extends Fragment {
 
 	}
 
-	private class InternalURLSpan extends ClickableSpan {
+	private class InternalURLSpan extends TouchableSpan {
 		String url;
 
-		public InternalURLSpan(String url) {
+		public InternalURLSpan(String url, int normalTextColor, int pressedTextColor, int pressedBackgroundColor) {
+			super(normalTextColor, pressedTextColor, pressedBackgroundColor);
 			this.url = url;
 		}
 
 		@Override
 		public void onClick(View widget) {
 
-			if ((locHelper != null && locHelper.getCount() > 0)
-					&& statsDBHelper != null
+			if ((locHelper != null && locHelper.getCount() > 0) && statsDBHelper != null
 					&& cm.getActiveNetworkInfo() != null) {
 				locHelper.unRegisterLocationListener();
-				statsDBHelper.insertRow(locHelper.getLocation(), cm
-						.getActiveNetworkInfo().getTypeName(),
-						StatisticsDBHelper.LINK_CLICKED, url, System
-								.currentTimeMillis());
+				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+						StatisticsDBHelper.LINK_CLICKED, url, System.currentTimeMillis());
 			}
 
-			if (cm.getActiveNetworkInfo() != null
-					&& cm.getActiveNetworkInfo().isConnected()) {
+			if (cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected()) {
 				// if there is active internet access, use normal browser
 				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 				startActivity(intent);
 			} else {
-				String[] filePath = { HtmlPage.HTML_PATH + "/"
-						+ LoginActivity.getTwitterId(activity) };
+				String[] filePath = { HtmlPage.HTML_PATH + "/" + LoginActivity.getTwitterId(activity) };
 				PackageManager pm;
 				Cursor c;
 
@@ -758,38 +725,27 @@ public class TweetDetailFragment extends Fragment {
 					if (cursorInfo != null) {
 
 						String filename = null;
-						if (!cursorInfo.isNull(cursorInfo
-								.getColumnIndex(HtmlPage.COL_FILENAME))) {
-							filename = cursorInfo.getString(cursorInfo
-									.getColumnIndex(HtmlPage.COL_FILENAME));
+						if (!cursorInfo.isNull(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME))) {
+							filename = cursorInfo.getString(cursorInfo.getColumnIndex(HtmlPage.COL_FILENAME));
 
-							Log.i(TAG,
-									"length: "
-											+ sdCardHelper.getFileFromSDCard(
-													filePath[0], filename)
-													.length() + " bytes");
+							Log.i(TAG, "length: " + sdCardHelper.getFileFromSDCard(filePath[0], filename).length()
+									+ " bytes");
 
-							if (sdCardHelper.getFileFromSDCard(filePath[0],
-									filename).length() > 0) {
+							if (sdCardHelper.getFileFromSDCard(filePath[0], filename).length() > 0) {
 
 								// set up our own web view
-								Intent intentToWeb = new Intent(activity,
-										WebViewActivity.class);
+								Intent intentToWeb = new Intent(activity, WebViewActivity.class);
 								intentToWeb.putExtra("url", url);
 								intentToWeb.putExtra("filename", filename);
 								startActivity(intentToWeb);
 
 							} else {
-								Toast.makeText(activity,
-										getString(R.string.faulty_page),
-										Toast.LENGTH_LONG).show();
+								Toast.makeText(activity, getString(R.string.faulty_page), Toast.LENGTH_LONG).show();
 
 							}
 
 						} else
-							Toast.makeText(activity,
-									getString(R.string.file_not_exists),
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(activity, getString(R.string.file_not_exists), Toast.LENGTH_LONG).show();
 
 					} else {
 						Log.i(TAG, "content values null");
@@ -801,22 +757,16 @@ public class TweetDetailFragment extends Fragment {
 					Log.i(TAG, "view pdf");
 					c = htmlDbHelper.getPageInfo(url);
 					if (c != null) {
-						Intent intentToPDF = new Intent(
-								Intent.ACTION_VIEW,
-								Uri.fromFile(sdCardHelper.getFileFromSDCard(
-										filePath[0],
-										c.getString(c
-												.getColumnIndex(HtmlPage.COL_FILENAME)))));
+						Intent intentToPDF = new Intent(Intent.ACTION_VIEW, Uri.fromFile(sdCardHelper
+								.getFileFromSDCard(filePath[0], c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)))));
 						pm = activity.getPackageManager();
-						List<ResolveInfo> activitiesPDF = pm
-								.queryIntentActivities(intentToPDF, 0);
+						List<ResolveInfo> activitiesPDF = pm.queryIntentActivities(intentToPDF, 0);
 						if (activitiesPDF.size() > 0) {
 							startActivity(intentToPDF);
 						} else {
 							// Do something else here. Maybe pop up a Dialog or
 							// Toast
-							Toast.makeText(activity, R.string.no_valid_pdf,
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(activity, R.string.no_valid_pdf, Toast.LENGTH_LONG).show();
 						}
 						c.close();
 					}
@@ -829,25 +779,18 @@ public class TweetDetailFragment extends Fragment {
 					c = htmlDbHelper.getPageInfo(url);
 					if (c != null) {
 
-						File picFile = sdCardHelper
-								.getFileFromSDCard(filePath[0], c.getString(c
-										.getColumnIndex(HtmlPage.COL_FILENAME)));
+						File picFile = sdCardHelper.getFileFromSDCard(filePath[0],
+								c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
 						Intent intentToPic = new Intent(Intent.ACTION_VIEW);
-						intentToPic.setDataAndType(
-								Uri.parse("file://"
-										+ Uri.fromFile(picFile).getPath()),
-								"image/*");
+						intentToPic.setDataAndType(Uri.parse("file://" + Uri.fromFile(picFile).getPath()), "image/*");
 						pm = activity.getPackageManager();
-						List<ResolveInfo> activitiesPic = pm
-								.queryIntentActivities(intentToPic, 0);
+						List<ResolveInfo> activitiesPic = pm.queryIntentActivities(intentToPic, 0);
 						if (activitiesPic.size() > 0) {
 							startActivity(intentToPic);
 						} else {
 							// Do something else here. Maybe pop up a Dialog or
 							// Toast
-							Toast.makeText(activity,
-									R.string.no_valid_pictures,
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(activity, R.string.no_valid_pictures, Toast.LENGTH_LONG).show();
 						}
 						c.close();
 					}
@@ -859,24 +802,18 @@ public class TweetDetailFragment extends Fragment {
 					c = htmlDbHelper.getPageInfo(url);
 					if (c != null) {
 
-						File mp3File = sdCardHelper
-								.getFileFromSDCard(filePath[0], c.getString(c
-										.getColumnIndex(HtmlPage.COL_FILENAME)));
+						File mp3File = sdCardHelper.getFileFromSDCard(filePath[0],
+								c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
 						Intent intentToMp3 = new Intent(Intent.ACTION_VIEW);
-						intentToMp3.setDataAndType(
-								Uri.parse("file://"
-										+ Uri.fromFile(mp3File).getPath()),
-								"audio/mp3");
+						intentToMp3.setDataAndType(Uri.parse("file://" + Uri.fromFile(mp3File).getPath()), "audio/mp3");
 						pm = activity.getPackageManager();
-						List<ResolveInfo> activitiesAudio = pm
-								.queryIntentActivities(intentToMp3, 0);
+						List<ResolveInfo> activitiesAudio = pm.queryIntentActivities(intentToMp3, 0);
 						if (activitiesAudio.size() > 0) {
 							startActivity(intentToMp3);
 						} else {
 							// Do something else here. Maybe pop up a Dialog or
 							// Toast
-							Toast.makeText(activity, R.string.no_valid_audio,
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(activity, R.string.no_valid_audio, Toast.LENGTH_LONG).show();
 						}
 						c.close();
 					}
@@ -890,24 +827,19 @@ public class TweetDetailFragment extends Fragment {
 					c = htmlDbHelper.getPageInfo(url);
 					if (c != null) {
 
-						File videoFile = sdCardHelper
-								.getFileFromSDCard(filePath[0], c.getString(c
-										.getColumnIndex(HtmlPage.COL_FILENAME)));
+						File videoFile = sdCardHelper.getFileFromSDCard(filePath[0],
+								c.getString(c.getColumnIndex(HtmlPage.COL_FILENAME)));
 						Intent intentToVideo = new Intent(Intent.ACTION_VIEW);
-						intentToVideo.setDataAndType(
-								Uri.parse("file://"
-										+ Uri.fromFile(videoFile).getPath()),
+						intentToVideo.setDataAndType(Uri.parse("file://" + Uri.fromFile(videoFile).getPath()),
 								"video/flv");
 						pm = activity.getPackageManager();
-						List<ResolveInfo> activitiesVideo = pm
-								.queryIntentActivities(intentToVideo, 0);
+						List<ResolveInfo> activitiesVideo = pm.queryIntentActivities(intentToVideo, 0);
 						if (activitiesVideo.size() > 0) {
 							startActivity(intentToVideo);
 						} else {
 							// Do something else here. Maybe pop up a Dialog or
 							// Toast
-							Toast.makeText(activity, R.string.no_valid_video,
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(activity, R.string.no_valid_video, Toast.LENGTH_LONG).show();
 						}
 						c.close();
 					}
@@ -928,64 +860,105 @@ public class TweetDetailFragment extends Fragment {
 
 		mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 		screenNameView.setText("@" + mScreenName);
-		realNameView.setText(mCursor.getString(mCursor
-				.getColumnIndex(TwitterUsers.COL_NAME)));
+		realNameView.setText(mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_NAME)));
 		mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT));
 
-		SpannableString str = new SpannableString(Html.fromHtml(mText, null,
-				new TweetTagHandler(activity)));
-
-		try {
-			String substr = str.toString();
-			String[] strarr = substr.split(" ");
-
-			// save the urls of the tweet in a list
-			int passedLen = 0;
-			for (String subStrarr : strarr) {
-
-				if (subStrarr.indexOf("http://") >= 0
-						|| subStrarr.indexOf("https://") >= 0) {
-					int offset = Math.max(subStrarr.indexOf("http://"),
-							subStrarr.indexOf("https://"));
-
-					htmlUrls.add(subStrarr.substring(offset));
-					int startIndex = passedLen + offset;
-					int endIndex = passedLen + subStrarr.length() - 1;
-					str.setSpan(
-							new InternalURLSpan(subStrarr.substring(offset)),
-							startIndex, endIndex, Spannable.SPAN_MARK_MARK);
-				}
-				passedLen = passedLen + subStrarr.length() + 1;
+		// we process the entities in reversed order of appearance in the tweet
+		// so that we can easily make text substitutions without affecting the
+		// start and end indexes of the following entities
+		Comparator<TweetEntity> comparator = new Comparator<TweetEntity>() {
+			@Override
+			public int compare(TweetEntity lhs, TweetEntity rhs) {
+				return rhs.getStart() - lhs.getStart();
 			}
+		};
+		PriorityQueue<TweetEntity> allEntities = new PriorityQueue<TweetEntity>(1, comparator);
 
-		} catch (Exception ex) {
+		byte[] serializedMentionEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_USER_MENTION_ENTITIES));
+		UserMentionEntity[] userMentionEntities = Serialization.deserialize(serializedMentionEntities);
+		allEntities.addAll(Arrays.asList(userMentionEntities));
+
+		byte[] serializedHashtagEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_HASHTAG_ENTITIES));
+		HashtagEntity[] hashtagEntities = Serialization.deserialize(serializedHashtagEntities);
+		allEntities.addAll(Arrays.asList(hashtagEntities));
+
+		byte[] serializedMediaEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
+		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
+		allEntities.addAll(Arrays.asList(mediaEntities));
+
+		byte[] serializedUrlEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
+		URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
+		allEntities.addAll(Arrays.asList(urlEntities));
+
+		Log.d(TAG, "mentions: " + userMentionEntities.length);
+		Log.d(TAG, "hashtags: " + hashtagEntities.length);
+		Log.d(TAG, "media: " + mediaEntities.length);
+		Log.d(TAG, "urls: " + urlEntities.length);
+
+		SpannableStringBuilder tweetTextSpannable = new SpannableStringBuilder(mText);
+
+		int normalLinkColor = getResources().getColor(R.color.medium_gray);
+		int pressedLinkColor = getResources().getColor(R.color.medium_dark_gray);
+		int pressedLinkBackground = getResources().getColor(R.color.lighter_gray);
+
+		while (!allEntities.isEmpty()) {
+			TweetEntity entity = allEntities.remove();
+			if (entity instanceof UserMentionEntity) {
+				UserMentionEntity userMentionEntity = (UserMentionEntity) entity;
+				tweetTextSpannable.setSpan(new MentionClickableSpan(userMentionEntity.getScreenName(), normalLinkColor,
+						pressedLinkColor, pressedLinkBackground), userMentionEntity.getStart(), userMentionEntity
+						.getEnd(), Spannable.SPAN_MARK_MARK);
+
+			} else if (entity instanceof HashtagEntity) {
+				HashtagEntity hashtagEntity = (HashtagEntity) entity;
+				tweetTextSpannable.setSpan(new HashtagClickableSpan(hashtagEntity.getText(), normalLinkColor,
+						pressedLinkColor, pressedLinkBackground), hashtagEntity.getStart(), hashtagEntity.getEnd(),
+						Spannable.SPAN_MARK_MARK);
+			} else if (entity instanceof MediaEntity) {
+				// MediaEntities must come before URLEntities because they are a
+				// specialized version of URLEntities
+				MediaEntity mediaEntity = (MediaEntity) entity;
+				Log.d(TAG, "replacing media url " + mediaEntity.getURL() + " with " + mediaEntity.getDisplayURL());
+				tweetTextSpannable.setSpan(new InternalURLSpan(mediaEntity.getURL(), normalLinkColor, pressedLinkColor,
+						pressedLinkBackground), mediaEntity.getStart(), mediaEntity.getEnd(), Spannable.SPAN_MARK_MARK);
+
+				tweetTextSpannable.replace(mediaEntity.getStart(), mediaEntity.getEnd(), mediaEntity.getDisplayURL());
+
+				htmlUrls.add(mediaEntity.getURL());
+
+				String html = "<html><head><meta name=\"viewport\" content=\"width=device-width, user-scalable=no\"></head><body style=\"margin:0px; padding:0px\"></body><img width=\"100%%\" src=\"%s\"/></body></html>";
+				mImageWebView.setVisibility(View.VISIBLE);
+				mImageWebView.loadData(String.format(html, mediaEntity.getMediaURL()), "text/html", null);
+			} else if (entity instanceof URLEntity) {
+				URLEntity urlEntity = (URLEntity) entity;
+				Log.d(TAG, "replacing url " + urlEntity.getURL() + " with " + urlEntity.getDisplayURL());
+				tweetTextSpannable.setSpan(new InternalURLSpan(urlEntity.getURL(), normalLinkColor, pressedLinkColor,
+						pressedLinkBackground), urlEntity.getStart(), urlEntity.getEnd(), Spannable.SPAN_MARK_MARK);
+				tweetTextSpannable.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
+				htmlUrls.add(urlEntity.getURL());
+			}
 		}
-		tweetTextView.setText(str);
-		tweetTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+		tweetTextView.setText(tweetTextSpannable);
+		tweetTextView.setMovementMethod(new LinkTouchMovementMethod());
 
 		StringBuffer tweetCreationDetails = new StringBuffer();
 
 		// created at
-		tweetCreationDetails.append(DateFormat
-				.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-				.format(new Date(
-						mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_CREATED))))
-				.toString());
+		tweetCreationDetails.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+				.format(new Date(mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_CREATED)))).toString());
 
 		// created via (if available)
 		if (mCursor.getString(mCursor.getColumnIndex(Tweets.COL_SOURCE)) != null) {
 			tweetCreationDetails.append(getResources().getString(R.string.via));
-			tweetCreationDetails.append(Html.fromHtml(mCursor.getString(mCursor
-					.getColumnIndex(Tweets.COL_SOURCE))));
+			tweetCreationDetails.append(Html.fromHtml(mCursor.getString(mCursor.getColumnIndex(Tweets.COL_SOURCE))));
 		}
 		tvTweetCreationDetails.setText(tweetCreationDetails);
 
 		// retweeted by
-		String retweeted_by = mCursor.getString(mCursor
-				.getColumnIndex(Tweets.COL_RETWEETED_BY));
+		String retweeted_by = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_RETWEETED_BY));
 		if (retweeted_by != null) {
-			tvRetweetedBy.setText(getString(R.string.retweeted_by) + " @"
-					+ retweeted_by);
+			tvRetweetedBy.setText(getString(R.string.retweeted_by) + " " + retweeted_by);
 			tvRetweetedBy.setVisibility(View.VISIBLE);
 		} else {
 			tvRetweetedBy.setVisibility(View.GONE);
@@ -1019,7 +992,7 @@ public class TweetDetailFragment extends Fragment {
 				try {
 					mCursor.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
-					// Log.e(TAG,"error unregistering observer",ex);
+					ex.printStackTrace();
 				}
 		}
 
@@ -1045,8 +1018,7 @@ public class TweetDetailFragment extends Fragment {
 		observer = null;
 		if (mCursor != null)
 			mCursor.close();
-		TwimightBaseActivity.unbindDrawables(getActivity().findViewById(
-				R.id.showTweetRoot));
+		TwimightBaseActivity.unbindDrawables(getActivity().findViewById(R.id.showTweetRoot));
 
 	}
 
@@ -1055,76 +1027,58 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void showDeleteDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(R.string.delete_tweet)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
+		builder.setMessage(R.string.delete_tweet).setCancelable(false)
+				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
 
-								loadCursor();
+						loadCursor();
 
-								String delPhotoName = mCursor.getString(mCursor
-										.getColumnIndex(Tweets.COL_MEDIA));
+						String delPhotoName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
 
-								if (delPhotoName != null) {
-									photoPath = Tweets.PHOTO_PATH + "/"
-											+ userID;
-									String[] filePath = { photoPath };
+						if (delPhotoName != null) {
+							photoPath = Tweets.PHOTO_PATH + "/" + userID;
+							String[] filePath = { photoPath };
+							if (sdCardHelper.checkSDState(filePath)) {
+								File photoFile = sdCardHelper.getFileFromSDCard(photoPath, delPhotoName);// photoFileParent,
+																											// photoFilename));
+								photoFile.delete();
+							}
+
+						}
+
+						// delete html pages
+						if (!htmlUrls.isEmpty()) {
+							for (String htmlUrl : htmlUrls) {
+								Cursor cursorHtml = htmlDbHelper.getPageInfo(htmlUrl);
+								if (cursorHtml != null) {
+									String[] filePath = { HtmlPage.HTML_PATH + "/"
+											+ LoginActivity.getTwitterId(activity) };
 									if (sdCardHelper.checkSDState(filePath)) {
-										File photoFile = sdCardHelper
-												.getFileFromSDCard(photoPath,
-														delPhotoName);// photoFileParent,
-																		// photoFilename));
-										photoFile.delete();
+										File htmlFile = sdCardHelper.getFileFromSDCard(filePath[0],
+												cursorHtml.getString(cursorHtml.getColumnIndex(HtmlPage.COL_FILENAME)));// photoFileParent,
+																														// photoFilename));
+										htmlFile.delete();
+										htmlDbHelper.deletePage(htmlUrl);
 									}
 
+									htmlDbHelper.deletePage(htmlUrl);
+
 								}
-
-								// delete html pages
-								if (!htmlUrls.isEmpty()) {
-									for (String htmlUrl : htmlUrls) {
-										Cursor cursorHtml = htmlDbHelper
-												.getPageInfo(htmlUrl);
-										if (cursorHtml != null) {
-											String[] filePath = { HtmlPage.HTML_PATH
-													+ "/"
-													+ LoginActivity
-															.getTwitterId(activity) };
-											if (sdCardHelper
-													.checkSDState(filePath)) {
-												File htmlFile = sdCardHelper
-														.getFileFromSDCard(
-																filePath[0],
-																cursorHtml
-																		.getString(cursorHtml
-																				.getColumnIndex(HtmlPage.COL_FILENAME)));// photoFileParent,
-																															// photoFilename));
-												htmlFile.delete();
-												htmlDbHelper
-														.deletePage(htmlUrl);
-											}
-
-											htmlDbHelper.deletePage(htmlUrl);
-
-										}
-									}
-								}
-
-								if (!mCursor.isNull((mCursor.getColumnIndex(Tweets.COL_TID))))
-									resolver.update(uri, setDeleteFlag(mFlags),
-											null, null);
-								else {
-									resolver.delete(uri, null, null);
-								}
-								listener.onDelete();
 							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
+						}
+
+						if (!mCursor.isNull((mCursor.getColumnIndex(Tweets.COL_TID))))
+							resolver.update(uri, setDeleteFlag(mFlags), null, null);
+						else {
+							resolver.delete(uri, null, null);
+						}
+						listener.onDelete();
+					}
+				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
@@ -1134,28 +1088,21 @@ public class TweetDetailFragment extends Fragment {
 	 */
 	private void showRetweetDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(R.string.modify_tweet)
-				.setCancelable(false)
-				.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								Intent i = new Intent(activity,
-										ComposeTweetActivity.class);
-								i.putExtra("text", "RT @" + mScreenName + " "
-										+ mText);
-								i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-								startActivity(i);
-							}
-						})
-				.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								resolver.update(uri, setRetweetFlag(mFlags),
-										null, null);
-								loadCursor();
-								dialog.cancel();
-							}
-						});
+		builder.setMessage(R.string.modify_tweet).setCancelable(false)
+				.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent i = new Intent(activity, ComposeTweetActivity.class);
+						i.putExtra("text", "RT @" + mScreenName + " " + mText);
+						i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(i);
+					}
+				}).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						resolver.update(uri, setRetweetFlag(mFlags), null, null);
+						loadCursor();
+						dialog.cancel();
+					}
+				});
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
@@ -1199,8 +1146,8 @@ public class TweetDetailFragment extends Fragment {
 		ContentValues cv = new ContentValues();
 		cv.put(Tweets.COL_FLAGS, flags | Tweets.FLAG_TO_RETWEET);
 
-		if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(
-				"prefDisasterMode", Constants.DISASTER_DEFAULT_ON) == true) {
+		if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("prefDisasterMode",
+				Constants.DISASTER_DEFAULT_ON) == true) {
 
 			cv.put(Tweets.COL_BUFFER, mBuffer | Tweets.BUFFER_DISASTER);
 		} else
@@ -1225,8 +1172,7 @@ public class TweetDetailFragment extends Fragment {
 			if ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
 				cv.put(Tweets.COL_FLAGS, (flags & ~Tweets.FLAG_TO_UNFAVORITE));
 			else
-				cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE)
-						& (~Tweets.FLAG_TO_UNFAVORITE));
+				cv.put(Tweets.COL_FLAGS, (flags | Tweets.FLAG_TO_FAVORITE) & (~Tweets.FLAG_TO_UNFAVORITE));
 			// put in favorites bufer
 			cv.put(Tweets.COL_BUFFER, mBuffer | Tweets.BUFFER_FAVORITES);
 			return cv;
@@ -1249,8 +1195,7 @@ public class TweetDetailFragment extends Fragment {
 
 		// clear favorite flag and set unfavorite flag
 		if ((mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER)) & Tweets.BUFFER_FAVORITES) != 0)
-			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE))
-					| Tweets.FLAG_TO_UNFAVORITE);
+			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)) | Tweets.FLAG_TO_UNFAVORITE);
 		else
 			cv.put(Tweets.COL_FLAGS, (flags & (~Tweets.FLAG_TO_FAVORITE)));
 
@@ -1288,8 +1233,7 @@ public class TweetDetailFragment extends Fragment {
 			 */
 
 			// and get a new one
-			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/"
-					+ Tweets.TWEETS + "/" + mRowId);
+			uri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
 			mCursor = resolver.query(uri, null, null, null, null);
 			if (mCursor.getCount() == 1) {
 
@@ -1301,6 +1245,134 @@ public class TweetDetailFragment extends Fragment {
 			}
 
 		}
+	}
+
+	private class HashtagClickableSpan extends TouchableSpan {
+		private final String mHashtag;
+
+		public HashtagClickableSpan(String hashtag, int normalTextColor, int pressedTextColor,
+				int pressedBackgroundColor) {
+			super(normalTextColor, pressedTextColor, pressedBackgroundColor);
+			mHashtag = "#" + hashtag;
+		}
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(view.getContext(), SearchableActivity.class);
+			i.putExtra(SearchManager.QUERY, mHashtag);
+			view.getContext().startActivity(i);
+		}
+	}
+
+	private class MentionClickableSpan extends TouchableSpan {
+		private final String mScreenName;
+
+		public MentionClickableSpan(String screenName, int normalTextColor, int pressedTextColor,
+				int pressedBackgroundColor) {
+			super(normalTextColor, pressedTextColor, pressedBackgroundColor);
+			mScreenName = screenName;
+		}
+
+		@Override
+		public void onClick(View view) {
+			Intent i = new Intent(view.getContext(), UserProfileActivity.class);
+			i.putExtra("screenname", mScreenName);
+			view.getContext().startActivity(i);
+		}
+	}
+
+	/**
+	 * A specialized Clickable span that updates its appearance when it is
+	 * pressed.
+	 * 
+	 * @author msteven
+	 * 
+	 */
+	private abstract class TouchableSpan extends ClickableSpan {
+		private boolean mIsPressed;
+		private int mPressedBackgroundColor;
+		private int mNormalTextColor;
+		private int mPressedTextColor;
+
+		public TouchableSpan(int normalTextColor, int pressedTextColor, int pressedBackgroundColor) {
+			mNormalTextColor = normalTextColor;
+			mPressedTextColor = pressedTextColor;
+			mPressedBackgroundColor = pressedBackgroundColor;
+		}
+
+		public void setPressed(boolean isSelected) {
+			mIsPressed = isSelected;
+		}
+
+		@Override
+		public void updateDrawState(TextPaint ds) {
+			super.updateDrawState(ds);
+			ds.setColor(mIsPressed ? mPressedTextColor : mNormalTextColor);
+			ds.bgColor = mIsPressed ? mPressedBackgroundColor : 0xffffffff;
+			ds.setUnderlineText(false);
+		}
+	}
+
+	/**
+	 * Interprets touch events on a TextView so that the pressed span can be
+	 * highlighted.
+	 * 
+	 * @author msteven
+	 * 
+	 */
+	private class LinkTouchMovementMethod extends LinkMovementMethod {
+		private TouchableSpan mPressedSpan;
+
+		@Override
+		public boolean onTouchEvent(TextView textView, Spannable spannable, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				mPressedSpan = getPressedSpan(textView, spannable, event);
+				if (mPressedSpan != null) {
+					mPressedSpan.setPressed(true);
+					Selection.setSelection(spannable, spannable.getSpanStart(mPressedSpan),
+							spannable.getSpanEnd(mPressedSpan));
+				}
+			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				TouchableSpan touchedSpan = getPressedSpan(textView, spannable, event);
+				if (mPressedSpan != null && touchedSpan != mPressedSpan) {
+					mPressedSpan.setPressed(false);
+					mPressedSpan = null;
+					Selection.removeSelection(spannable);
+				}
+			} else {
+				if (mPressedSpan != null) {
+					mPressedSpan.setPressed(false);
+					super.onTouchEvent(textView, spannable, event);
+				}
+				mPressedSpan = null;
+				Selection.removeSelection(spannable);
+			}
+			return true;
+		}
+
+		private TouchableSpan getPressedSpan(TextView textView, Spannable spannable, MotionEvent event) {
+
+			int x = (int) event.getX();
+			int y = (int) event.getY();
+
+			x -= textView.getTotalPaddingLeft();
+			y -= textView.getTotalPaddingTop();
+
+			x += textView.getScrollX();
+			y += textView.getScrollY();
+
+			Layout layout = textView.getLayout();
+			int line = layout.getLineForVertical(y);
+			int off = layout.getOffsetForHorizontal(line, x);
+
+			TouchableSpan[] link = spannable.getSpans(off, off, TouchableSpan.class);
+			TouchableSpan touchedSpan = null;
+			if (link.length > 0) {
+				touchedSpan = link[0];
+			}
+			return touchedSpan;
+		}
+
 	}
 
 }
