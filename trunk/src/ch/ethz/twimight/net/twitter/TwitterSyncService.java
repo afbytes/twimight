@@ -24,6 +24,7 @@ import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.URLEntity;
 import twitter4j.User;
 import twitter4j.UserMentionEntity;
 import twitter4j.conf.Configuration;
@@ -247,7 +248,16 @@ public abstract class TwitterSyncService extends IntentService {
 			tweet = tweet.getRetweetedStatus();
 		}
 
-		cv.put(Tweets.COL_TEXT, tweet.getText());
+		// prepare a version of the tweet text that has all the urls replaced with their display versions
+		EntityQueue allUrlEntities = new EntityQueue(tweet.getURLEntities(), tweet.getMediaEntities());
+		StringBuilder augmentedTweetText = new StringBuilder(tweet.getText());
+		while(!allUrlEntities.isEmpty()){
+			URLEntity urlEntity = (URLEntity) allUrlEntities.remove();
+			augmentedTweetText.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
+		}
+		cv.put(Tweets.COL_TEXT, augmentedTweetText.toString());
+		// the original version
+		cv.put(Tweets.COL_TEXT_PLAIN, tweet.getText());
 
 		cv.put(Tweets.COL_HASHTAG_ENTITIES, Serialization.serialize(tweet.getHashtagEntities()));
 		cv.put(Tweets.COL_MEDIA_ENTITIES, Serialization.serialize(tweet.getMediaEntities()));
@@ -265,17 +275,19 @@ public abstract class TwitterSyncService extends IntentService {
 			}
 		}
 		// if there are mentions we load the users
-		for(UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()){
+		for (UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()) {
 			ContentValues mentionedUserValues = new ContentValues();
 			mentionedUserValues.put(TwitterUsers.COL_NAME, userMentionEntity.getName());
 			mentionedUserValues.put(TwitterUsers.COL_SCREENNAME, userMentionEntity.getScreenName());
-			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE | TwitterUsers.FLAG_TO_UPDATEIMAGE);
+			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE
+					| TwitterUsers.FLAG_TO_UPDATEIMAGE);
 			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS);
 			getContentResolver().insert(insertUri, mentionedUserValues);
-			Log.d(TAG, "mantion: inserted @" + userMentionEntity.getScreenName() + " name: " + userMentionEntity.getName());
+			Log.d(TAG,
+					"mantion: inserted @" + userMentionEntity.getScreenName() + " name: " + userMentionEntity.getName());
 		}
-		
+
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.getSource());
 
@@ -1211,11 +1223,11 @@ public abstract class TwitterSyncService extends IntentService {
 			}
 		}
 
-		public static boolean firstSyncCompleted(Context context){
+		public static boolean firstSyncCompleted(Context context) {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-			return prefs.getLong(PREF_LAST_MENTIONS_UPDATE, -1)>0;
+			return prefs.getLong(PREF_LAST_MENTIONS_UPDATE, -1) > 0;
 		}
-		
+
 		private boolean isSyncNeeded() {
 			boolean needed = false;
 			if (mStartIntent.getBooleanExtra(EXTRA_FORCE_SYNC, false)) {
@@ -1481,7 +1493,7 @@ public abstract class TwitterSyncService extends IntentService {
 					e.printStackTrace();
 					break;
 				}
-				Log.d(TAG, "loaded followers page "+ pagesLoaded);
+				Log.d(TAG, "loaded followers page " + pagesLoaded);
 				Log.d(TAG, "loaded " + pagedFollowersList.size() + " followers");
 				for (User follower : pagedFollowersList) {
 					followers.add(follower);
@@ -1663,10 +1675,10 @@ public abstract class TwitterSyncService extends IntentService {
 			}
 			syncTransactionalUsers();
 		}
-		
-		public static boolean firstIncomingSyncCompleted(Context context){
+
+		public static boolean firstIncomingSyncCompleted(Context context) {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-			return prefs.getLong(PREF_LAST_INCOMING_DMS_UPDATE, -1)>0;
+			return prefs.getLong(PREF_LAST_INCOMING_DMS_UPDATE, -1) > 0;
 		}
 
 		private boolean isIncomingDmSyncNeeded() {

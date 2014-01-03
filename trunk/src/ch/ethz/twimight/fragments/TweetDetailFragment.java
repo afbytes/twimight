@@ -17,11 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
@@ -83,6 +80,7 @@ import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
+import ch.ethz.twimight.net.twitter.EntityQueue;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
@@ -861,39 +859,21 @@ public class TweetDetailFragment extends Fragment {
 		mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 		screenNameView.setText("@" + mScreenName);
 		realNameView.setText(mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_NAME)));
-		mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT));
-
-		// we process the entities in reversed order of appearance in the tweet
-		// so that we can easily make text substitutions without affecting the
-		// start and end indexes of the following entities
-		Comparator<TweetEntity> comparator = new Comparator<TweetEntity>() {
-			@Override
-			public int compare(TweetEntity lhs, TweetEntity rhs) {
-				return rhs.getStart() - lhs.getStart();
-			}
-		};
-		PriorityQueue<TweetEntity> allEntities = new PriorityQueue<TweetEntity>(1, comparator);
+		mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
 
 		byte[] serializedMentionEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_USER_MENTION_ENTITIES));
 		UserMentionEntity[] userMentionEntities = Serialization.deserialize(serializedMentionEntities);
-		allEntities.addAll(Arrays.asList(userMentionEntities));
 
 		byte[] serializedHashtagEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_HASHTAG_ENTITIES));
 		HashtagEntity[] hashtagEntities = Serialization.deserialize(serializedHashtagEntities);
-		allEntities.addAll(Arrays.asList(hashtagEntities));
 
 		byte[] serializedMediaEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
 		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
-		allEntities.addAll(Arrays.asList(mediaEntities));
 
 		byte[] serializedUrlEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
 		URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
-		allEntities.addAll(Arrays.asList(urlEntities));
 
-		Log.d(TAG, "mentions: " + userMentionEntities.length);
-		Log.d(TAG, "hashtags: " + hashtagEntities.length);
-		Log.d(TAG, "media: " + mediaEntities.length);
-		Log.d(TAG, "urls: " + urlEntities.length);
+		EntityQueue allEntities = new EntityQueue(userMentionEntities, hashtagEntities, mediaEntities, urlEntities);
 
 		SpannableStringBuilder tweetTextSpannable = new SpannableStringBuilder(mText);
 
@@ -918,7 +898,6 @@ public class TweetDetailFragment extends Fragment {
 				// MediaEntities must come before URLEntities because they are a
 				// specialized version of URLEntities
 				MediaEntity mediaEntity = (MediaEntity) entity;
-				Log.d(TAG, "replacing media url " + mediaEntity.getURL() + " with " + mediaEntity.getDisplayURL());
 				tweetTextSpannable.setSpan(new InternalURLSpan(mediaEntity.getURL(), normalLinkColor, pressedLinkColor,
 						pressedLinkBackground), mediaEntity.getStart(), mediaEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 
@@ -931,7 +910,6 @@ public class TweetDetailFragment extends Fragment {
 				mImageWebView.loadData(String.format(html, mediaEntity.getMediaURL()), "text/html", null);
 			} else if (entity instanceof URLEntity) {
 				URLEntity urlEntity = (URLEntity) entity;
-				Log.d(TAG, "replacing url " + urlEntity.getURL() + " with " + urlEntity.getDisplayURL());
 				tweetTextSpannable.setSpan(new InternalURLSpan(urlEntity.getURL(), normalLinkColor, pressedLinkColor,
 						pressedLinkBackground), urlEntity.getStart(), urlEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 				tweetTextSpannable.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());

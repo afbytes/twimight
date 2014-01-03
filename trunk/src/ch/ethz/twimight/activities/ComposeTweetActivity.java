@@ -440,7 +440,6 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		ContentValues tweetContentValues = new ContentValues();
 
 		tweetContentValues.put(Tweets.COL_TEXT, mEtTweetText.getText().toString());
-
 		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, mEtTweetText.getText().toString());
 		tweetContentValues.put(Tweets.COL_TWITTERUSER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
