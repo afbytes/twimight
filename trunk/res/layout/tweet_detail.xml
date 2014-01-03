@@ -11,8 +11,8 @@
     android:id="@+id/showTweetRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/white" >
+    android:background="@color/white"
+    android:fillViewport="true" >
 
     <LinearLayout
         android:id="@+id/showTweetLayout"
@@ -97,15 +97,13 @@
                 android:id="@+id/showTweetText"
                 style="@style/RobotoLightText"
                 android:layout_width="match_parent"
+                android:autoLink="none"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step"
-                android:autoLink="web"
                 android:lineSpacingMultiplier="1.2"
-                android:linksClickable="true"
                 android:text="@string/placeholder_long"
                 android:textColor="@color/dark_text"
-                android:textColorHighlight="@color/white"
-                android:textColorLink="@color/hyperlink_text_color"
+                android:linksClickable="true"
                 android:textSize="22sp" />
 
             <TextView
@@ -126,8 +124,17 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/unit_step"
                 android:contentDescription="Photo attached with this tweet"
-                android:visibility="gone"
-                android:onClick="viewPhoto" />
+                android:onClick="viewPhoto"
+                android:visibility="gone" />
+
+            <WebView
+                android:id="@+id/photoWebView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/unit_step"
+                android:visibility="gone" 
+                />
 
             <!-- special info -->
 

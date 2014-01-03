@@ -19,6 +19,7 @@
     <color name="lighter_gray">#f0f0f0</color>
     <color name="lightest_gray">#f4f4f4</color>
     <color name="medium_gray">#a0a0a0</color>
+    <color name="medium_dark_gray">#606060</color>
     <color name="image_overlay_button_bg_default">#88000000</color>
     <color name="image_overlay_button_bg_pressed">#44000000</color>
     <color name="pressed_normalmode">#cc33b5e5</color>

@@ -26,7 +26,7 @@ public class Serialization {
 			out.writeObject(object);
 			serializedObject = bos.toByteArray();
 		} catch (IOException e) {
-			// IOException, IOException..
+			// IOExceptions, IOExceptions..
 		} finally {
 			try {
 				if (out != null) {

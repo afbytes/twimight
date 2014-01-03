@@ -291,7 +291,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				} else
 					profileImage.setImageResource(R.drawable.profile_image_placeholder);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG, "error opening input stream", e);
+				Log.e(TAG, "error opening input stream for user id " + userId, e);
 				profileImage.setImageResource(R.drawable.profile_image_placeholder);
 			}
 		}
