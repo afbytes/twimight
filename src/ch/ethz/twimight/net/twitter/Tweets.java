@@ -79,8 +79,13 @@ public class Tweets implements BaseColumns {
 
 	// here start the column names
 	public static final String COL_ROW_ID = BaseColumns._ID;
-	/** the tweet text */
+	/**
+	 * the tweet text (uses display version of urls => ready for display without
+	 * further processing but not aligned with entity indexes)
+	 */
 	public static final String COL_TEXT = "text";
+	/** original tweet text with twitter urls **/
+	public static final String COL_TEXT_PLAIN = "text_plain";
 	/** serialized array of hashtag entities */
 	public static final String COL_HASHTAG_ENTITIES = "hashtag_entities";
 	/** serialized array of media entities */
@@ -89,10 +94,7 @@ public class Tweets implements BaseColumns {
 	public static final String COL_URL_ENTITIES = "url_entities";
 	/** serialized array of user mention entities */
 	public static final String COL_USER_MENTION_ENTITIES = "user_mention_entities";
-	// LEGACY COLUMN:
-	// not used anymore but might occur in json received from older clients!
-	// /** the tweet html text */
-	public static final String COL_TEXT_PLAIN = "text";
+
 	/** the user id of the author */
 	public static final String COL_TWITTERUSER = "twitteruser_id";
 	/** the user screenname of the author */

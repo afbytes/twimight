@@ -85,6 +85,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_TWEETS_CREATE = "create table "+TABLE_TWEETS+" ("
 			+ Tweets.COL_ROW_ID + " integer primary key autoincrement not null, "
 			+ Tweets.COL_TEXT + " text not null, "
+			+ Tweets.COL_TEXT_PLAIN + " text not null, "
 			+ Tweets.COL_HASHTAG_ENTITIES + " blob, "
 			+ Tweets.COL_MEDIA_ENTITIES + " blob, "
 			+ Tweets.COL_URL_ENTITIES + " blob, "
