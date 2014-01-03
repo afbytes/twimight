@@ -26,19 +26,19 @@ public class Serialization {
 			out.writeObject(object);
 			serializedObject = bos.toByteArray();
 		} catch (IOException e) {
-			// IOExceptions, IOExceptions..
+			e.printStackTrace();
 		} finally {
 			try {
 				if (out != null) {
 					out.close();
 				}
 			} catch (IOException e) {
-				// .. whatcha gonna do?
+				e.printStackTrace();
 			}
 			try {
 				bos.close();
 			} catch (IOException e) {
-				// ...watcha gonna do when they come for you?
+				e.printStackTrace();
 			}
 		}
 		return serializedObject;
@@ -54,21 +54,21 @@ public class Serialization {
 				in = new ObjectInputStream(bis);
 				output = (T) in.readObject();
 			} catch (ClassNotFoundException e) {
-				// You chuck it on that one...
+				e.printStackTrace();
 			} catch (IOException e) {
-				// .. you chuck it on this one...
+				e.printStackTrace();
 			} finally {
 				try {
 					bis.close();
 				} catch (IOException e) {
-					// ...you chuck it on that one...
+					e.printStackTrace();
 				}
 				try {
 					if (in != null) {
 						in.close();
 					}
 				} catch (IOException e) {
-					// ...and you chuck it on me
+					e.printStackTrace();
 				}
 			}
 		}

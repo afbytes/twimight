@@ -211,7 +211,7 @@ public class TweetDetailFragment extends Fragment {
 
 			loadCursor();
 
-			if (mCursor.getCount() == 0) {
+			if (mCursor == null || mCursor.getCount() == 0) {
 				activity.getFragmentManager().beginTransaction().remove(this).commit();
 			} else {
 				// register content observer to refresh when user was updated
@@ -286,26 +286,28 @@ public class TweetDetailFragment extends Fragment {
 	 */
 
 	private void setPhotoAttached() {
-		// Profile image
-		ImageView photoView = (ImageView) view.findViewById(R.id.showPhotoAttached);
-		photoView.setVisibility(View.GONE);
-		String[] filePath = { photoPath };
-		if (sdCardHelper.checkSDState(filePath)) {
-			if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA))) {
-				String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
-				Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));// photoFileParent,
-																										// photoFilename));
-				mPhotoPath = photoUri.getPath();
-				Bitmap photo = sdCardHelper.decodeBitmapFile(mPhotoPath);
-				photoView.setImageBitmap(photo);
-				photoView.setVisibility(View.VISIBLE);
-				photoView.setOnClickListener(new OnClickListener() {
+		if (mImageWebView.getVisibility() != View.VISIBLE) {
+			// Profile image
+			ImageView photoView = (ImageView) view.findViewById(R.id.showPhotoAttached);
+			photoView.setVisibility(View.GONE);
+			String[] filePath = { photoPath };
+			if (sdCardHelper.checkSDState(filePath)) {
+				if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA))) {
+					String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
+					Uri photoUri = Uri.fromFile(sdCardHelper.getFileFromSDCard(photoPath, photoFileName));// photoFileParent,
+																											// photoFilename));
+					mPhotoPath = photoUri.getPath();
+					Bitmap photo = sdCardHelper.decodeBitmapFile(mPhotoPath);
+					photoView.setImageBitmap(photo);
+					photoView.setVisibility(View.VISIBLE);
+					photoView.setOnClickListener(new OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						viewPhoto();
-					}
-				});
+						@Override
+						public void onClick(View v) {
+							viewPhoto();
+						}
+					});
+				}
 			}
 		}
 	}
@@ -413,12 +415,12 @@ public class TweetDetailFragment extends Fragment {
 		mCursor = resolver.query(uri, null, null, null, null);
 
 		if (mCursor != null && mCursor.getCount() > 0) {
-			Log.i(TAG, "cursor ok");
+			Log.i(TAG, "cursor ok; row id="+mRowId);
 			mCursor.moveToFirst();
 			mBuffer = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER));
 			mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
 		} else {
-			Log.i(TAG, "cursor not ok");
+			Log.w(TAG, "cursor not ok; cursor null? " + (mCursor==null) + " row id="+mRowId);
 		}
 	}
 

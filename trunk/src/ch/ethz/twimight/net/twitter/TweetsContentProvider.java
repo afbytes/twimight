@@ -287,7 +287,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE "
-					+ DBOpenHelper.TABLE_TWEETS + "._id=" + uri.getLastPathSegment() + ";";
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ROW_ID + "=" + uri.getLastPathSegment() + ";";
 			c = database.rawQuery(sql, null);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 
