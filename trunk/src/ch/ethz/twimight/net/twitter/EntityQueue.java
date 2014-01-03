@@ -49,7 +49,11 @@ public class EntityQueue extends PriorityQueue<TweetEntity> {
 	 * @return true if this Collection is modified, false otherwise.
 	 */
 	public boolean addAll(TweetEntity[] entities) {
-		return addAll(Arrays.asList(entities));
+		boolean result = false;
+		if(entities!=null){
+			result = addAll(Arrays.asList(entities));
+		}
+		return result;
 	}
 
 }
