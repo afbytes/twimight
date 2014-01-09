@@ -19,9 +19,6 @@ import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.ui.PullToRefreshListView;
 
 @SuppressLint("ValidFragment")
@@ -165,8 +162,9 @@ public class TweetListFragment extends ListFragment {
 		switch (filter) {
 		case TIMELINE_KEY:
 
-			overscrollIntent = new Intent(getActivity(), TimelineSyncService.class);
-			overscrollIntent.putExtra(TimelineSyncService.EXTRA_FORCE_SYNC, true);
+			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
 							+ "/" + Tweets.TWEETS + "/"
@@ -176,7 +174,8 @@ public class TweetListFragment extends ListFragment {
 			break;
 		case FAVORITES_KEY:
 
-			overscrollIntent = new Intent(getActivity(), FavoritesSyncService.class);
+			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
@@ -187,7 +186,8 @@ public class TweetListFragment extends ListFragment {
 			break;
 		case MENTIONS_KEY:
 
-			overscrollIntent = new Intent(getActivity(), MentionsSyncService.class);
+			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY

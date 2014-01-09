@@ -9,8 +9,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
-    android:versionCode="1700024"
-    android:versionName="1.1.3" >
+    android:versionCode="1700025"
+    android:versionName="1.1.4" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -44,6 +44,9 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_label" >
+
+        <!-- ACTIVITIES -->
+
         <activity
             android:name=".activities.ConditionsActivity"
             android:label="Twimight"
@@ -182,6 +185,12 @@
             android:name=".activities.WebViewActivity"
             android:label="WebView"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
+        <activity
+            android:name=".activities.PhotoViewActivity"
+            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
+        </activity>
+
+        <!-- SERVICES -->
 
         <service
             android:name=".net.tds.TDSService"
@@ -195,6 +204,10 @@
         <service
             android:name=".net.Html.HtmlService"
             android:enabled="true" />
+        <service android:name=".net.twitter.TwitterSyncService" >
+        </service>
+
+        <!-- RECEIVERS -->
 
         <receiver
             android:name=".util.CommunicationReceiver"
@@ -214,8 +227,8 @@
         </receiver>
         <receiver
             android:name=".util.OMFReceiver"
-            android:enabled="true" 
-            android:exported="false">
+            android:enabled="true"
+            android:exported="false" >
             <intent-filter>
                 <action android:name="autom_enable_disaster_mode" />
             </intent-filter>
@@ -230,6 +243,7 @@
             android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
             android:enabled="true" />
 
+        <!-- PROVIDERS -->
         <provider
             android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
             android:authorities="ch.ethz.twimight.Tweets"
@@ -246,40 +260,6 @@
         <provider
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
             android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
-
-        <activity
-            android:name=".activities.PhotoViewActivity"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
-        </activity>
-
-        <service android:name=".net.twitter.TwitterSyncService$LoginService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$FavoritesSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$FollowersSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$FriendsSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$MentionsSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$MessagesSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$TimelineSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$SyncTweetService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$SyncUserTweetsService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$TransactionalMessagesSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$TransactionalSyncService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$SearchTweetService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$SearchUserService" >
-        </service>
-        <service android:name=".net.twitter.TwitterSyncService$SyncUserService" >
-        </service>
     </application>
 
 </manifest>

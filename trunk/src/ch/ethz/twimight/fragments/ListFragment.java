@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.ui.PullToRefreshListView;
 import ch.ethz.twimight.ui.PullToRefreshListView.PullToRefreshListener;
 import ch.ethz.twimight.util.Constants;
@@ -81,11 +81,11 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	@Override
 	public void onTopRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION,
-					TimelineSyncService.UPDATE_DIRECTION_UP);
-			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
-				Constants.TIMELINE_BUFFER_SIZE -= 50;
-			}
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_TIMELINE_UPDATE_DIRECTION,
+					TwitterSyncService.TIMELINE_UPDATE_DIRECTION_UP);
+//			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
+//				Constants.TIMELINE_BUFFER_SIZE -= 50;
+//			}
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
 		}
 		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=UP");
@@ -95,11 +95,11 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	@Override
 	public void onBottomRefresh() {
 		if (overscrollIntent != null) {
-			overscrollIntent.putExtra(TimelineSyncService.EXTRA_UPDATE_DIRECTION,
-					TimelineSyncService.UPDATE_DIRECTION_DOWN);
-			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
-				Constants.TIMELINE_BUFFER_SIZE -= 50;
-			}
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_TIMELINE_UPDATE_DIRECTION,
+					TwitterSyncService.TIMELINE_UPDATE_DIRECTION_DOWN);
+//			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
+//				Constants.TIMELINE_BUFFER_SIZE -= 50;
+//			}
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
 		}
 		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=DOWN");

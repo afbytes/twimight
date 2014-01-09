@@ -20,8 +20,7 @@ import android.util.Log;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.tds.TDSAlarm;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.LoginService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TransactionalSyncService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService;
 
 /**
  * Listends for changes in connectivity and starts the TDSThread if a new
@@ -51,10 +50,12 @@ public class CommunicationReceiver extends BroadcastReceiver {
 			}
 
 			if (!LoginActivity.hasTwitterId(context)) {
-				Intent loginIntent = new Intent(context, LoginService.class);
+				Intent loginIntent = new Intent(context, TwitterSyncService.class);
+				loginIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 				context.startService(loginIntent);
 			} else {
-				Intent syncTransactionalIntent = new Intent(context, TransactionalSyncService.class);
+				Intent syncTransactionalIntent = new Intent(context, TwitterSyncService.class);
+				syncTransactionalIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL);
 				context.startService(syncTransactionalIntent);
 			}
 		}

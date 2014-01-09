@@ -44,12 +44,6 @@ import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FavoritesSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SearchTweetService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncUserTweetsService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -326,8 +320,9 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_SEARCH_URI);
 
 			// start synch service with a synch timeline request
-			i = new Intent(getContext(), SearchTweetService.class);
-			i.putExtra(SearchTweetService.EXTRA_SEARCH_QUERY, where);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_TWEET);
+			i.putExtra(TwitterSyncService.EXTRA_TWEET_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
 
@@ -362,7 +357,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
 
 			// start synch service with a synch timeline request
-			i = new Intent(getContext(), TimelineSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 			getContext().startService(i);
 			break;
 		case TWEETS_TIMELINE_DISASTER:
@@ -433,7 +429,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
 
 			// start synch service with a synch timeline request
-			i = new Intent(getContext(), TimelineSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 			getContext().startService(i);
 			break;
 
@@ -482,8 +479,9 @@ public class TweetsContentProvider extends ContentProvider {
 
 			if (userCursor.getCount() > 0) {
 				// start synch service with a synch user tweets request
-				i = new Intent(getContext(), SyncUserTweetsService.class);
-				i.putExtra(SyncUserTweetsService.EXTRA_SCREEN_NAME, screenName);
+				i = new Intent(getContext(), TwitterSyncService.class);
+				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER_TWEETS);
+				i.putExtra(TwitterSyncService.EXTRA_SCREEN_NAME, screenName);
 				getContext().startService(i);
 			}
 			// userCursor.close();
@@ -520,7 +518,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 
 			// start synch service with a synch favorites request
-			i = new Intent(getContext(), FavoritesSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 
 			break;
@@ -554,7 +553,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 
 			// start synch service with a synch favorites request
-			i = new Intent(getContext(), FavoritesSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 			break;
 
@@ -589,7 +589,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_FAVORITES_URI);
 
 			// start synch service with a synch favorites request
-			i = new Intent(getContext(), FavoritesSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 			break;
 
@@ -624,7 +625,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 
 			// start synch service with a synch mentions request
-			i = new Intent(getContext(), MentionsSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -659,7 +661,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 
 			// start synch service with a synch mentions request
-			i = new Intent(getContext(), MentionsSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -694,7 +697,8 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_MENTIONS_URI);
 
 			// start synch service with a synch mentions request
-			i = new Intent(getContext(), MentionsSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -985,8 +989,9 @@ public class TweetsContentProvider extends ContentProvider {
 			Log.i(TAG, "updated");
 			// Trigger synch if needed
 			if (values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS) != 0) {
-				Intent i = new Intent(getContext(), SyncTweetService.class);
-				i.putExtra(SyncTweetService.EXTRA_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
+				Intent i = new Intent(getContext(), TwitterSyncService.class);
+				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TWEET);
+				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}
 
@@ -1136,7 +1141,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 				if (TweetListActivity.running == false
 						&& PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions",
-								true) == true && MentionsSyncService.firstSyncCompleted(getContext())) {
+								true) == true && TwitterSyncService.firstMentionsSyncCompleted(getContext())) {
 					// notify user
 					notifyUser(NOTIFY_MENTION, values.getAsString(Tweets.COL_TEXT));
 				}

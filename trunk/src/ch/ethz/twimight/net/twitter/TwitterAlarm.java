@@ -23,12 +23,6 @@ import android.content.Intent;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FollowersSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FriendsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.MentionsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.MessagesSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TimelineSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.TransactionalSyncService;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -67,22 +61,28 @@ public class TwitterAlarm extends BroadcastReceiver {
 		// getWakeLock(context);
 		Log.d(TAG, "TwitterAlarm onReceive()");
 		// sync timeline
-		Intent i = new Intent(context, TimelineSyncService.class);
+		Intent i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 		context.startService(i);
 		// sync mentions
-		i = new Intent(context, MentionsSyncService.class);
+		i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 		context.startService(i);
 		// sync messages
-		i = new Intent(context, MessagesSyncService.class);
+		i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
 		context.startService(i);
-		// sync transactional
-		i = new Intent(context, TransactionalSyncService.class);
-		context.startService(i);
+// tentatively removing transactional sync (should be done in every step)
+//		// sync transactional
+//		i = new Intent(context, TransactionalSyncService.class);
+//		context.startService(i);
 		// sync friends
-		i = new Intent(context, FriendsSyncService.class);
+		i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
 		context.startService(i);
 		// sync followers
-		i = new Intent(context, FollowersSyncService.class);
+		i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
 		context.startService(i);
 	}
 
