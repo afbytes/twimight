@@ -53,7 +53,6 @@ import ch.ethz.twimight.net.tds.TDSAlarm;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.LoginService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -139,7 +138,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 		} else if (hasAccessToken(this) && hasAccessTokenSecret(this)) {
 
 			// we verify the tokens and retrieve the twitter ID
-			Intent i = new Intent(this, LoginService.class);
+			Intent i = new Intent(this, TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 			registerLoginReceiver();
 			startService(i);
 			removeLoginInterface();
@@ -397,7 +397,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 				edit.commit();
 
 				// call the twitter service to verify the credentials
-				Intent i = new Intent(LoginActivity.this, LoginService.class);
+				Intent i = new Intent(LoginActivity.this, TwitterSyncService.class);
+				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 				registerLoginReceiver();
 				startService(i);
 			}

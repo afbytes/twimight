@@ -27,9 +27,6 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FollowersSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.FriendsSyncService;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SearchUserService;
 
 /**
  * The content provider for Twitter users
@@ -147,7 +144,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_FOLLOWERS_URI);
 
 			// start synch service with a synch followers request
-			i = new Intent(getContext(), FollowersSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
 			getContext().startService(i);
 
 			break;
@@ -159,7 +157,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_FRIENDS_URI);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 			// start synch service with a synch friends request
-			i = new Intent(getContext(), FriendsSyncService.class);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
 			getContext().startService(i);
 
 			break;
@@ -178,8 +177,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_SEARCH_URI);
 
 			// start synch service with a synch followers request
-			i = new Intent(getContext(), SearchUserService.class);
-			i.putExtra(SearchUserService.EXTRA_SEARCH_QUERY, where);
+			i = new Intent(getContext(), TwitterSyncService.class);
+			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_USER);
+			i.putExtra(TwitterSyncService.EXTRA_USER_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
 		default:
@@ -275,12 +275,13 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		try {
 
 			for (ContentValues value : values) {
-				if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE_PATH)) {
-					updateUser(uri, value);
-
-				} else {
-					if (insertNewUser(value) != null) {
-						numInserted++;
+				if (value != null) {
+					if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE_PATH)) {
+						updateUser(uri, value);
+					} else {
+						if (insertNewUser(value) != null) {
+							numInserted++;
+						}
 					}
 				}
 			}

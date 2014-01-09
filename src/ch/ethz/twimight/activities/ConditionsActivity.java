@@ -38,12 +38,14 @@ public class ConditionsActivity extends Activity {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		// delete preferences if old version
 		int currentVersionCode;
+		// preferences are deleted when previous installed version is less than this:
+		int minVersionCode = 1700024;
 		try {
-			currentVersionCode = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
 			int savedVersionCode = prefs.getInt(PREF_VERSION_CODE, 0);
-			if (currentVersionCode != savedVersionCode) {
+			if (savedVersionCode<minVersionCode) {
 				prefs.edit().clear().commit();
 			}
+			currentVersionCode = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
 			prefs.edit().putInt(PREF_VERSION_CODE, currentVersionCode).commit();
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();

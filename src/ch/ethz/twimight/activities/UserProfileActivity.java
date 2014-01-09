@@ -34,7 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.UserListFragment;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncUserService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -163,8 +163,9 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		getContentResolver().update(uri, cv, null, null);
 
 		// trigger the update
-		Intent i = new Intent(getBaseContext(), SyncUserService.class);
-		i.putExtra(SyncUserService.EXTRA_ROW_ID, rowId);
+		Intent i = new Intent(getBaseContext(), TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
+		i.putExtra(TwitterSyncService.EXTRA_USER_ROW_ID, rowId);
 		startService(i);
 
 		// register content observer to refresh when user was updated
@@ -457,8 +458,9 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				}
 
 				// trigger the update
-				Intent i = new Intent(getBaseContext(), SyncUserService.class);
-				i.putExtra(SyncUserService.EXTRA_ROW_ID, rowId);
+				Intent i = new Intent(getBaseContext(), TwitterSyncService.class);
+				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
+				i.putExtra(TwitterSyncService.EXTRA_USER_ROW_ID, rowId);
 				startService(i);
 			}
 

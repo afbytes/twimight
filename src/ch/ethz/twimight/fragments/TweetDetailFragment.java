@@ -83,7 +83,7 @@ import ch.ethz.twimight.net.Html.StartServiceHelper;
 import ch.ethz.twimight.net.twitter.EntityQueue;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TweetsContentProvider;
-import ch.ethz.twimight.net.twitter.TwitterSyncService.SyncTweetService;
+import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.SDCardHelper;
@@ -244,8 +244,8 @@ public class TweetDetailFragment extends Fragment {
 				// If there are any flags, schedule the Tweet for synch
 				if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS)) > 0) {
 					Log.i(TAG, "requesting tweet update to twitter");
-					Intent i = new Intent(getActivity(), SyncTweetService.class);
-					i.putExtra(SyncTweetService.EXTRA_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
+					Intent i = new Intent(getActivity(), TwitterSyncService.class);
+					i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 					activity.startService(i);
 				}
 			}
