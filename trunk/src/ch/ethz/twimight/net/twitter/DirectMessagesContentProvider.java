@@ -639,7 +639,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				if (flags > 0) {
 					// start synch service with a synch tweet request
 					Intent i = new Intent(getContext(), TwitterSyncService.class);
-					i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
+					i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
 					getContext().startService(i);
 				}
 
