@@ -173,6 +173,8 @@ public class TwitterSyncService extends IntentService {
 			searchUser();
 		} else if (EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL.equals(action)) {
 			syncAllTransactional();
+		} else {
+			Log.e(TAG, "TwitterSyncService started with no valid action!");
 		}
 		TwimightBaseActivity.setLoading(false);
 		Log.d(TAG, "TwitterSyncService onHandleIntent() done");
