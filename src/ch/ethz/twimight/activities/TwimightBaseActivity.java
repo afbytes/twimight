@@ -53,6 +53,8 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	static TwimightBaseActivity instance;
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = true;
+	
+	private static boolean sIsLoading = false;
 
 	ActionBar actionBar;
 
@@ -102,6 +104,8 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 		tvNeighborCount = (TextView) findViewById(R.id.tvNeighborCount);
 		tvStatus = (TextView) findViewById(R.id.tvStatus);
 
+		updateLoadingBarVisibility();
+		
 		// setup disaster mode specific stuff
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefDisasterMode", false) == true) {
 			updateStatusBar();
@@ -305,14 +309,17 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	 * @param isLoading
 	 */
 	public static void setLoading(final boolean isLoading) {
-
+		sIsLoading = isLoading;
+		updateLoadingBarVisibility();
+	}
+	
+	private static void updateLoadingBarVisibility(){
 		if (instance != null) {
 			try {
-
 				instance.runOnUiThread(new Runnable() {
 					public void run() {
 						if (instance.progressBar != null) {
-							instance.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+							instance.progressBar.setVisibility(sIsLoading ? View.VISIBLE : View.GONE);
 						}
 					}
 				});
@@ -320,11 +327,9 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			} catch (Exception ex) {
 				Log.e(TAG, "error: ", ex);
 			}
-
 		} else {
 			Log.v(TAG, "Cannot show loading icon");
 		}
-
 	}
 
 	/**
