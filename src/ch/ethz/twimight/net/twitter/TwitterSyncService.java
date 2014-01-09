@@ -517,6 +517,7 @@ public class TwitterSyncService extends IntentService {
 				Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 						+ TwitterUsers.TWITTERUSERS);
 				getContentResolver().bulkInsert(insertUri, results.toArray(new ContentValues[results.size()]));
+				getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -1752,6 +1753,7 @@ public class TwitterSyncService extends IntentService {
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 							+ TwitterUsers.TWITTERUSERS);
 					getContentResolver().bulkInsert(insertUri, new ContentValues[] { cv });
+					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 					if (userSyncTask instanceof ProfileImageUpdateTask) {
 						notifyProfileImageUpdate();
 					}
