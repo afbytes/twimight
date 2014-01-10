@@ -204,8 +204,8 @@
         <service
             android:name=".net.Html.HtmlService"
             android:enabled="true" />
-        <service android:name=".net.twitter.TwitterSyncService" >
-        </service>
+        <service android:name=".net.twitter.TwitterSyncService" />
+        <service android:name=".net.twitter.TweetActionService" />
 
         <!-- RECEIVERS -->
 

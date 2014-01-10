@@ -321,7 +321,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_TWEET);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_TWEET);
 			i.putExtra(TwitterSyncService.EXTRA_TWEET_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
@@ -358,7 +358,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 			getContext().startService(i);
 			break;
 		case TWEETS_TIMELINE_DISASTER:
@@ -430,7 +430,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 			getContext().startService(i);
 			break;
 
@@ -480,7 +480,7 @@ public class TweetsContentProvider extends ContentProvider {
 			if (userCursor.getCount() > 0) {
 				// start synch service with a synch user tweets request
 				i = new Intent(getContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER_TWEETS);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER_TWEETS);
 				i.putExtra(TwitterSyncService.EXTRA_SCREEN_NAME, screenName);
 				getContext().startService(i);
 			}
@@ -519,7 +519,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch favorites request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 
 			break;
@@ -554,7 +554,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch favorites request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 			break;
 
@@ -590,7 +590,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch favorites request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			getContext().startService(i);
 			break;
 
@@ -626,7 +626,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch mentions request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -662,7 +662,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch mentions request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -698,7 +698,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			// start synch service with a synch mentions request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			getContext().startService(i);
 
 			break;
@@ -990,7 +990,7 @@ public class TweetsContentProvider extends ContentProvider {
 			// Trigger synch if needed
 			if (values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS) != 0) {
 				Intent i = new Intent(getContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TWEET);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TWEET);
 				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}

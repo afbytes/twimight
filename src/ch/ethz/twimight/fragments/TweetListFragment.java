@@ -19,7 +19,7 @@ import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.TweetAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.ui.PullToRefreshListView;
+import ch.ethz.twimight.views.PullToRefreshListView;
 
 @SuppressLint("ValidFragment")
 public class TweetListFragment extends ListFragment {
@@ -163,7 +163,7 @@ public class TweetListFragment extends ListFragment {
 		case TIMELINE_KEY:
 
 			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
-			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
@@ -175,7 +175,7 @@ public class TweetListFragment extends ListFragment {
 		case FAVORITES_KEY:
 
 			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
-			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY
@@ -187,7 +187,7 @@ public class TweetListFragment extends ListFragment {
 		case MENTIONS_KEY:
 
 			overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
-			overscrollIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
+			overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
 			c = mResolver
 					.query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY

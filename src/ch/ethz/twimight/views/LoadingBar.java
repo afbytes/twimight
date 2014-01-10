@@ -1,4 +1,4 @@
-package ch.ethz.twimight.ui;
+package ch.ethz.twimight.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;

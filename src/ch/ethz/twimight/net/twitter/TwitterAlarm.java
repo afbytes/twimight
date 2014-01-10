@@ -62,15 +62,15 @@ public class TwitterAlarm extends BroadcastReceiver {
 		Log.d(TAG, "TwitterAlarm onReceive()");
 		// sync timeline
 		Intent i = new Intent(context, TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 		context.startService(i);
 		// sync mentions
 		i = new Intent(context, TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
 		context.startService(i);
 		// sync messages
 		i = new Intent(context, TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
 		context.startService(i);
 // tentatively removing transactional sync (should be done in every step)
 //		// sync transactional
@@ -78,11 +78,11 @@ public class TwitterAlarm extends BroadcastReceiver {
 //		context.startService(i);
 		// sync friends
 		i = new Intent(context, TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
 		context.startService(i);
 		// sync followers
 		i = new Intent(context, TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
 		context.startService(i);
 	}
 

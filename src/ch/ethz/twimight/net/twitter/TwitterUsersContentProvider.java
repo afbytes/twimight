@@ -145,7 +145,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 			// start synch service with a synch followers request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FOLLOWERS);
 			getContext().startService(i);
 
 			break;
@@ -158,7 +158,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 			// start synch service with a synch friends request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
 			getContext().startService(i);
 
 			break;
@@ -178,7 +178,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 			// start synch service with a synch followers request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_USER);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_USER);
 			i.putExtra(TwitterSyncService.EXTRA_USER_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
