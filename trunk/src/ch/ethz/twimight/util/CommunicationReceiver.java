@@ -51,11 +51,11 @@ public class CommunicationReceiver extends BroadcastReceiver {
 
 			if (!LoginActivity.hasTwitterId(context)) {
 				Intent loginIntent = new Intent(context, TwitterSyncService.class);
-				loginIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
+				loginIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 				context.startService(loginIntent);
 			} else {
 				Intent syncTransactionalIntent = new Intent(context, TwitterSyncService.class);
-				syncTransactionalIntent.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL);
+				syncTransactionalIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL);
 				context.startService(syncTransactionalIntent);
 			}
 		}

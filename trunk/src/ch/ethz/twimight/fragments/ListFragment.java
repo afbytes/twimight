@@ -12,9 +12,9 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.ui.PullToRefreshListView;
-import ch.ethz.twimight.ui.PullToRefreshListView.PullToRefreshListener;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.views.PullToRefreshListView;
+import ch.ethz.twimight.views.PullToRefreshListView.PullToRefreshListener;
 
 public abstract class ListFragment extends Fragment implements PullToRefreshListener {
 

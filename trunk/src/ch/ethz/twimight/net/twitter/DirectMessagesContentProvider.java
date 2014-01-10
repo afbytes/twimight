@@ -236,7 +236,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 			// start synch service with a synch DMs request
 			i = new Intent(getContext(), TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
 			getContext().startService(i);
 			break;
 		case LIST_ALL:
@@ -439,7 +439,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			if (values.containsKey(DirectMessages.COL_FLAGS) && values.getAsInteger(DirectMessages.COL_FLAGS) != 0) {
 
 				Intent i = new Intent(getContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
 				getContext().startService(i);
 			}
 
@@ -639,7 +639,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				if (flags > 0) {
 					// start synch service with a synch tweet request
 					Intent i = new Intent(getContext(), TwitterSyncService.class);
-					i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
+					i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
 					getContext().startService(i);
 				}
 

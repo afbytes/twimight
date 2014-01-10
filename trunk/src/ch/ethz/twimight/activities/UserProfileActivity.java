@@ -165,7 +165,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 		// trigger the update
 		Intent i = new Intent(getBaseContext(), TwitterSyncService.class);
-		i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
 		i.putExtra(TwitterSyncService.EXTRA_USER_ROW_ID, rowId);
 		startService(i);
 
@@ -460,7 +460,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 				// trigger the update
 				Intent i = new Intent(getBaseContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER);
 				i.putExtra(TwitterSyncService.EXTRA_USER_ROW_ID, rowId);
 				startService(i);
 			}

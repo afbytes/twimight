@@ -283,64 +283,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Divider and bottom button bar -->
-
-        <View style="@style/VerticalDivider" />
-
-        <LinearLayout
-            android:id="@+id/showTweetButtons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <ImageButton
-                android:id="@+id/showTweetRetweet"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_retweet" />
-
-            <View style="@style/ButtonBarDivider" />
-
-            <ImageButton
-                android:id="@+id/showTweetFavorite"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_favorite_off" />
-
-            <View style="@style/ButtonBarDivider" />
-
-            <ImageButton
-                android:id="@+id/showTweetReply"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_reply" />
-
-            <View style="@style/ButtonBarDivider" />
-
-            <ImageButton
-                android:id="@+id/showTweetDelete"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_delete" />
-
-            <View style="@style/ButtonBarDivider" />
-
-            <ImageButton
-                android:id="@+id/showTweetOfflineview"
-                style="@style/Button.Borderless"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/ic_download" />
-        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

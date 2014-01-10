@@ -139,7 +139,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 			// we verify the tokens and retrieve the twitter ID
 			Intent i = new Intent(this, TwitterSyncService.class);
-			i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 			registerLoginReceiver();
 			startService(i);
 			removeLoginInterface();
@@ -398,7 +398,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 				// call the twitter service to verify the credentials
 				Intent i = new Intent(LoginActivity.this, TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_LOGIN);
 				registerLoginReceiver();
 				startService(i);
 			}

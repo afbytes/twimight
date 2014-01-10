@@ -9,13 +9,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.TweetDetailFragment.OnTweetDeletedListener;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.adapters.TweetDetailPageAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
 
-public class TweetDetailActivity extends TwimightBaseActivity implements
-		OnTweetDeletedListener {
+public class TweetDetailActivity extends TwimightBaseActivity  {
 
 	public static final String EXTRA_TYPE = "type";
 	public static final String EXTRA_ROW_ID = "rowId";
@@ -130,12 +128,6 @@ public class TweetDetailActivity extends TwimightBaseActivity implements
 							+ "/" + userId), null, null, null, null);
 		}
 		return c;
-
-	}
-
-	@Override
-	public void onDelete() {
-		finish();
 
 	}
 

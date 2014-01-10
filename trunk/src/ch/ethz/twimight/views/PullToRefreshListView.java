@@ -1,4 +1,4 @@
-package ch.ethz.twimight.ui;
+package ch.ethz.twimight.views;
 
 import java.util.HashSet;
 import java.util.Set;

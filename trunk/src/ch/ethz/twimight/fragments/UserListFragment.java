@@ -18,7 +18,7 @@ import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.net.twitter.UserAdapter;
-import ch.ethz.twimight.ui.PullToRefreshListView;
+import ch.ethz.twimight.views.PullToRefreshListView;
 
 @SuppressLint("ValidFragment")
 public class UserListFragment extends ListFragment {
