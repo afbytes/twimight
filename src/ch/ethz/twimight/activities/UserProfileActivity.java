@@ -46,7 +46,7 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
 public class UserProfileActivity extends TwimightBaseActivity {
 
 	private static final String TAG = "ShowUserActivity";
-	
+
 	public static final String EXTRA_TYPE = "type";
 	public static final String EXTRA_ROW_ID = "rowId";
 	public static final String EXTRA_SCREEN_NAME = "screenname";
@@ -135,7 +135,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			// get data from local DB
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			mCursor = getContentResolver().query(uri, null,
-					TwitterUsers.COL_SCREENNAME + " LIKE '" + intent.getStringExtra(EXTRA_SCREEN_NAME) + "'", null, null);
+					TwitterUsers.COL_SCREENNAME + " LIKE '" + intent.getStringExtra(EXTRA_SCREEN_NAME) + "'", null,
+					null);
 
 			if (mCursor.getCount() == 0) {
 				Log.w(TAG, "USER NOT FOUND " + intent.getStringExtra(EXTRA_SCREEN_NAME));
@@ -216,7 +217,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				try {
 					mCursor.unregisterContentObserver(observer);
 				} catch (IllegalStateException ex) {
-					// Log.e(TAG,"error unregistering observer",ex);
+					Log.e(TAG, "error unregistering observer", ex);
 				}
 		}
 	}
@@ -575,10 +576,17 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			// and get a new one
 			uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS + "/"
 					+ rowId);
+			if (mCursor != null) {
+				mCursor.close();
+			}
 			mCursor = getContentResolver().query(uri, null, null, null, null);
+			if (mCursor != null) {
+				mCursor.registerContentObserver(observer);
+			}
 			if (mCursor.getCount() == 0)
 				finish();
 			else {
+				Log.d(TAG, "user data changed");
 				mCursor.moveToFirst();
 				showUserInfo();
 			}
