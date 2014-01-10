@@ -358,6 +358,7 @@ public class TwitterSyncService extends IntentService {
 		for (UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()) {
 			ContentValues mentionedUserValues = new ContentValues();
 			mentionedUserValues.put(TwitterUsers.COL_NAME, userMentionEntity.getName());
+			mentionedUserValues.put(TwitterUsers.COL_TWITTERUSER_ID, userMentionEntity.getId());
 			mentionedUserValues.put(TwitterUsers.COL_SCREENNAME, userMentionEntity.getScreenName());
 			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE
 					| TwitterUsers.FLAG_TO_UPDATEIMAGE);
@@ -564,7 +565,7 @@ public class TwitterSyncService extends IntentService {
 	}
 
 	private class UpdateUserTask implements Callable<ContentValues> {
-		private final Long mTwitterUserId;
+		private final long mTwitterUserId;
 		private final String mTwitteruserScreenName;
 		private final long mRowId;
 		private final int mFlags;
@@ -581,20 +582,27 @@ public class TwitterSyncService extends IntentService {
 			boolean success = false;
 			User user = null;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				Log.d(TAG, "UpdateuserTask call() " + mTwitterUserId + " " + mTwitteruserScreenName + " attempt "
+				Log.d(TAG, "UpdateuserTask call(); twitterUserId: " + mTwitterUserId + "; screenName: " + mTwitteruserScreenName + "; attempt: "
 						+ attempt);
 				try {
-					if (mTwitterUserId != null) {
-						user = mTwitter.showUser(mTwitterUserId);
-					} else if (mTwitteruserScreenName != null) {
+					if (mTwitteruserScreenName != null) {
 						user = mTwitter.showUser(mTwitteruserScreenName);
+					} else if (mTwitterUserId != 0) {
+						user = mTwitter.showUser(mTwitterUserId);
 					}
 					if (user != null) {
 						success = true;
 						break;
 					}
 				} catch (TwitterException e) {
-					e.printStackTrace();
+					if (!e.exceededRateLimitation()) {
+						Log.w(TAG, "exception updating twitterUserId:" + mTwitterUserId + " screenName: "
+								+ mTwitteruserScreenName, e);
+					} else {
+						Log.w(TAG, "rate limit exceeded by UpdateUserTask.call() twitterUserId: " + mTwitterUserId
+								+ " screenName: " + mTwitteruserScreenName);
+						break;
+					}
 				}
 			}
 			// on success: insert user to DB
@@ -625,6 +633,7 @@ public class TwitterSyncService extends IntentService {
 
 		@Override
 		public ContentValues call() throws Exception {
+			Log.d(TAG, "FollowUserTask call()");
 			boolean success = false;
 			User user = null;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
@@ -671,6 +680,7 @@ public class TwitterSyncService extends IntentService {
 
 		@Override
 		public ContentValues call() throws Exception {
+			Log.d(TAG, "UnfollowUserTask call()");
 			boolean success = false;
 			User user = null;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
@@ -1232,19 +1242,24 @@ public class TwitterSyncService extends IntentService {
 		Paging paging = new Paging();
 		paging.setCount(Constants.NR_TWEETS);
 		if (updateDirection == TIMELINE_UPDATE_DIRECTION_UP) {
-			Log.d(TAG, "loadTimeline() direction: UP");
 			paging.setSinceId(getSinceId(getBaseContext(), PREF_TIMELINE_SINCE_ID));
+			Log.d(TAG, "loadTimeline() direction: UP; sinceId: " + paging.getSinceId());
 		} else {
-			Log.d(TAG, "loadTimeline() update direction: DOWN");
 			paging.setMaxId(getTimelineUntilId());
+			Log.d(TAG, "loadTimeline() update direction: DOWN; untilid: "+paging.getMaxId());
 		}
 		boolean success = false;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				timeline = mTwitter.getHomeTimeline(paging);
 			} catch (TwitterException e) {
-				e.printStackTrace();
-				continue;
+				if (!e.exceededRateLimitation()) {
+					e.printStackTrace();
+					continue;
+				} else {
+					Log.w(TAG, "rate limit exceeded by loadTimeline()");
+					break;
+				}
 			}
 			if (timeline != null) {
 				success = true;
@@ -1299,6 +1314,8 @@ public class TwitterSyncService extends IntentService {
 				setSinceId(this, PREF_TIMELINE_SINCE_ID, lastId);
 				setLastUpdate(this, PREF_LAST_TIMELINE_UPDATE, System.currentTimeMillis());
 			}
+		} else {
+			Log.w(TAG, "insertTimeline called with empty timeline");
 		}
 	}
 
