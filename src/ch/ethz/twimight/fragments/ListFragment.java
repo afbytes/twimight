@@ -25,7 +25,7 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	Cursor mCursor;
 
 	PullToRefreshListView mListView;
-	protected static final String TAG = "ListFragment";
+	protected static final String TAG = ListFragment.class.getName();
 
 	public static final String FRAGMENT_TYPE = "fragment_type";
 	public static final String SEARCH_QUERY = "search_query";

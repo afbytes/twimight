@@ -97,13 +97,13 @@
                 android:id="@+id/showTweetText"
                 style="@style/RobotoLightText"
                 android:layout_width="match_parent"
-                android:autoLink="none"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step"
+                android:autoLink="none"
                 android:lineSpacingMultiplier="1.2"
+                android:linksClickable="true"
                 android:text="@string/placeholder_long"
                 android:textColor="@color/dark_text"
-                android:linksClickable="true"
                 android:textSize="22sp" />
 
             <TextView
@@ -133,8 +133,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/unit_step"
-                android:visibility="gone" 
-                />
+                android:visibility="gone" />
 
             <!-- special info -->
 
@@ -283,6 +282,8 @@
             </LinearLayout>
         </LinearLayout>
 
+        <View style="@style/VerticalDivider" />
+        
     </LinearLayout>
 
 </ScrollView>

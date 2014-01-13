@@ -26,18 +26,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.AsyncImageLoader;
+import ch.ethz.twimight.views.TweetButtonBar;
 
 /**
  * Cursor adapter for a cursor containing tweets.
  */
 public class TweetAdapter extends CursorAdapter {
 
-//	 private static final String TAG = "TweetAdapter";
+	private static final String TAG = TweetAdapter.class.getName();
+	private static final long NO_ITEM_SELECTED = -1;
 
 	private HtmlPagesDbHelper htmlDbHelper;
 
@@ -46,7 +49,23 @@ public class TweetAdapter extends CursorAdapter {
 	private final String mOwnHandle;
 	private final String mOwnTwitterId;
 
+	private long mSelectedId;
+
+	public void setSelectedId(long selectedId) {
+		if (selectedId != mSelectedId) {
+			mSelectedId = selectedId;
+			notifyDataSetChanged();
+		} else if (selectedId!=NO_ITEM_SELECTED){
+			clearSelectedId();
+		}
+	}
+
+	public void clearSelectedId() {
+		setSelectedId(NO_ITEM_SELECTED);
+	}
+
 	private static class ViewHolder {
+		private final LinearLayout container;
 		private final View modeStripe;
 		private final TextView tvUsername;
 		private final TextView tvCreatedAt;
@@ -58,6 +77,7 @@ public class TweetAdapter extends CursorAdapter {
 		private final ImageView ivRetweetedIcon;
 		private final ImageView ivFavoriteIcon;
 		private final ImageView ivDownloadIcon;
+		private TweetButtonBar tweetButtonBar;
 
 		private ViewHolder(View row) {
 			modeStripe = row.findViewById(R.id.modeStripe);
@@ -71,6 +91,7 @@ public class TweetAdapter extends CursorAdapter {
 			ivRetweetedIcon = (ImageView) row.findViewById(R.id.ivRetweetedIcon);
 			ivFavoriteIcon = (ImageView) row.findViewById(R.id.ivFavoriteIcon);
 			ivDownloadIcon = (ImageView) row.findViewById(R.id.ivDownloadIcon);
+			container = (LinearLayout) row.findViewById(R.id.container);
 		}
 	}
 
@@ -227,18 +248,34 @@ public class TweetAdapter extends CursorAdapter {
 			holder.tvUsername.setTextColor(context.getResources().getColor(R.color.dark_text));
 		}
 
-		// higlight mentions
+		// highlight mentions
 		Spannable tweetSpannable = new SpannableString(tweetText);
 		String lowerCaseTweetText = tweetText.toLowerCase();
 		int start = lowerCaseTweetText.indexOf(mOwnHandle);
 		int end;
-		while(start!=-1){
+		while (start != -1) {
 			end = start + mOwnHandle.length();
-			tweetSpannable.setSpan(new ForegroundColorSpan(accentColor), start, end,
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			tweetSpannable
+					.setSpan(new ForegroundColorSpan(accentColor), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			start = lowerCaseTweetText.indexOf(mOwnHandle, end);
 		}
 		holder.tvTweetText.setText(tweetSpannable);
-	}
 
+		long rowId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_ROW_ID));
+		if (rowId == mSelectedId) {
+			Log.d(TAG, "MATCH row id: " + rowId + "; selected id: " + mSelectedId + " ; bar==null:"
+					+ (holder.tweetButtonBar == null));
+			if (holder.tweetButtonBar == null) {
+				holder.tweetButtonBar = new TweetButtonBar(context, rowId);
+				holder.container.addView(holder.tweetButtonBar);
+			}
+		} else {
+			Log.d(TAG, "NO MATCH row id: " + rowId + "; selected id: " + mSelectedId + " ; bar==null:"
+					+ (holder.tweetButtonBar == null));
+			if (holder.tweetButtonBar != null) {
+				holder.container.removeView(holder.tweetButtonBar);
+				holder.tweetButtonBar = null;
+			}
+		}
+	}
 }

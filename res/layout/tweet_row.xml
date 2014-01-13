@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/borderless_button_background"
+    android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal" >
 
     <LinearLayout
@@ -11,118 +12,124 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        android:padding="@dimen/unit_step" >
-
-        <ImageView
-            android:id="@+id/ivProfileImage"
-            android:layout_width="@dimen/profile_image_size"
-            android:layout_height="@dimen/profile_image_size"
-            android:background="@color/white" />
-
-        <!-- container for the all the text and icons of the tweet -->
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/unit_step"
-            android:orientation="vertical" >
+            android:orientation="horizontal"
+            android:padding="@dimen/unit_step" >
 
-            <!-- row with username + created at -->
+            <ImageView
+                android:id="@+id/ivProfileImage"
+                android:layout_width="@dimen/profile_image_size"
+                android:layout_height="@dimen/profile_image_size"
+                android:background="@color/white" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/tvUsername"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_toLeftOf="@+id/tvCreatedAt"
-                    android:minLines="1"
-                    android:singleLine="true"
-                    android:text="@string/placeholder_short"
-                    android:textColor="@color/dark_text"
-                    android:textSize="20sp"
-                    android:textStyle="italic" />
-
-                <TextView
-                    android:id="@id/tvCreatedAt"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/tvUsername"
-                    android:layout_alignParentRight="true"
-                    android:layout_gravity="right"
-                    android:layout_marginLeft="5dp"
-                    android:singleLine="true"
-                    android:text="@string/placeholder_short"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </RelativeLayout>
-
-            <!-- tweet text -->
-
-            <TextView
-                android:id="@+id/tvTweetText"
-                style="@style/RobotoLightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/placeholder_long"
-                android:textColor="@color/dark_text"
-                android:textSize="16sp" />
-
-            <!-- "retweeted by" text -->
-
-            <TextView
-                android:id="@+id/tvRetweetedBy"
-                style="@style/RobotoLightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/placeholder_short"
-                android:textColor="@color/medium_gray"
-                android:textSize="14sp" />
-            <!-- row status icons -->
+            <!-- container for the all the text and icons of the tweet -->
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:orientation="horizontal" >
+                android:layout_marginLeft="@dimen/unit_step"
+                android:orientation="vertical" >
 
-                <ImageView
-                    android:id="@+id/ivPendingIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_small_pending" />
+                <!-- row with username + created at -->
 
-                <ImageView
-                    android:id="@+id/ivVerifiedIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_small_verified" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
-                <ImageView
-                    android:id="@+id/ivRetweetedIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_small_retweeted" />
+                    <TextView
+                        android:id="@+id/tvUsername"
+                        style="@style/RobotoLightText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_toLeftOf="@+id/tvCreatedAt"
+                        android:minLines="1"
+                        android:singleLine="true"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/dark_text"
+                        android:textSize="20sp"
+                        android:textStyle="italic" />
 
-                <ImageView
-                    android:id="@+id/ivFavoriteIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_small_favorite" />
+                    <TextView
+                        android:id="@id/tvCreatedAt"
+                        style="@style/RobotoLightText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBottom="@id/tvUsername"
+                        android:layout_alignParentRight="true"
+                        android:layout_gravity="right"
+                        android:layout_marginLeft="5dp"
+                        android:singleLine="true"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+                </RelativeLayout>
 
-                <ImageView
-                    android:id="@+id/ivDownloadIcon"
-                    android:layout_width="wrap_content"
+                <!-- tweet text -->
+
+                <TextView
+                    android:id="@+id/tvTweetText"
+                    style="@style/RobotoLightText"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_small_downloaded" />
+                    android:layout_marginTop="6dp"
+                    android:text="@string/placeholder_long"
+                    android:textColor="@color/dark_text"
+                    android:textSize="16sp" />
+
+                <!-- "retweeted by" text -->
+
+                <TextView
+                    android:id="@+id/tvRetweetedBy"
+                    style="@style/RobotoLightText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+                <!-- row status icons -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:id="@+id/ivPendingIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_small_pending" />
+
+                    <ImageView
+                        android:id="@+id/ivVerifiedIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_small_verified" />
+
+                    <ImageView
+                        android:id="@+id/ivRetweetedIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_small_retweeted" />
+
+                    <ImageView
+                        android:id="@+id/ivFavoriteIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_small_favorite" />
+
+                    <ImageView
+                        android:id="@+id/ivDownloadIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_small_downloaded" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -132,4 +139,4 @@
         android:layout_width="6dp"
         android:layout_height="match_parent" />
 
-    </LinearLayout>
+</LinearLayout>

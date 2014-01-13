@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <View style="@style/VerticalDivider" />
-
     <LinearLayout
         android:id="@+id/showTweetButtons"
         android:layout_width="match_parent"
