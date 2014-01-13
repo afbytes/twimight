@@ -10,7 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.CursorAdapter;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
@@ -142,6 +145,16 @@ public class TweetListFragment extends ListFragment {
 					i.putExtra(USER_ID, userId);
 				}
 				startActivity(i);
+			}
+		});
+		
+		list.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				Log.d(TAG, "long click id: " + id);
+				((TweetAdapter)mListAdapter).setSelectedId(id);
+				return true;
 			}
 		});
 

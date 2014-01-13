@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -186,7 +187,26 @@ public class PullToRefreshListView extends LinearLayout {
 	public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
 		mListView.setOnItemClickListener(listener);
 	}
-
+	
+	/**
+	 * Forwards call to internal ListView.
+	 * 
+	 * @param listener
+	 *            the listener
+	 */
+	public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
+		mListView.setOnItemLongClickListener(listener);
+	}
+	
+	/**
+	 * Forwards call to internal ListView.
+	 * 
+	 * @param listener
+	 *            the listener
+	 */
+	public void setOnScrollListener(AbsListView.OnScrollListener listener){
+		mListView.setOnScrollListener(listener);
+	}
 	/**
 	 * Determines if the current gesture should initiate overscrolling. If so,
 	 * it returns true so that we receive the subsequent touch events of the
