@@ -69,7 +69,7 @@
     <string name="tweet_will_be_deleted">Dä Tweet wird gli glöscht (sobau Internetverbindig besteit).</string>
     <string name="tweet_will_be_favorited">Dä Tweet wird gli zu de Favorite hinzuegfüegt (sobau Internetverbindig besteit).</string>
     <string name="tweet_will_be_unfavorited">Dä Tweet wird gli vo de Favorite entfernt (sobau Internetverbindig besteit).</string>
-    <string name="will_be_retweeted">Dä Retweet wird gli gschickt (sobau Internetverbindig besteit).</string>
+    <string name="tweet_will_be_retweeted">Dä Retweet wird gli gschickt (sobau Internetverbindig besteit).</string>
     <string name="no_tweets">Kener Tweets verfüegbar</string>
     <string name="no_connection">Ke Internetverbindig, nume auti Tweets!</string>
     <string name="location_on">Lokalisierig isch igschaute</string>
