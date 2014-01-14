@@ -160,6 +160,8 @@ public class TweetDetailFragment extends Fragment {
 			mCursor.registerContentObserver(mObserver);
 			updateContent();
 		} else {
+			mCursor = null; // discard completely so that we don't try to
+							// unregister observer from empty cursor
 			getActivity().finish();
 		}
 	}

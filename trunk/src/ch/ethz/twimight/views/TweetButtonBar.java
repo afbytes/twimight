@@ -14,7 +14,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -90,7 +89,8 @@ public class TweetButtonBar extends FrameLayout {
 			mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
 			setupButtons();
 		} else {
-			Log.w(TAG, "cursor not ok; cursor null? " + (mCursor == null) + " row id=" + mRowId);
+			mCursor = null; // discard completely so that we don't try to
+							// unregister observer from empty cursor
 		}
 	}
 
@@ -233,7 +233,7 @@ public class TweetButtonBar extends FrameLayout {
 		// Cache links button
 
 		// get the html status of this tweet
-		if(hasUncachedLinks()){
+		if (hasUncachedLinks()) {
 			mOfflineButton.setVisibility(View.VISIBLE);
 			mOfflineButton.setOnClickListener(new OnClickListener() {
 

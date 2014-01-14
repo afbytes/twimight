@@ -1006,12 +1006,14 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	@Override
 	public int delete(Uri uri, String arg1, String[] arg2) {
-		if (tweetUriMatcher.match(uri) != TWEETS_ID)
+		if (tweetUriMatcher.match(uri) != TWEETS_ID) {
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
+		}
 
 		Log.d(TAG, "Delete TWEETS_ID");
 
 		int nrRows = database.delete(DBOpenHelper.TABLE_TWEETS, "_id=" + uri.getLastPathSegment(), null);
+		getContext().getContentResolver().notifyChange(uri, null);
 		getContext().getContentResolver().notifyChange(Tweets.TABLE_FAVORITES_URI, null);
 		getContext().getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
 
