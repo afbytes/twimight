@@ -63,7 +63,7 @@
     <string name="tweet_will_be_deleted">Il tweet verrà cancellato al più presto(non appena sarà disponibile una connessione ad internet). Pressa qui per annullare</string>
     <string name="tweet_will_be_favorited">Il tweet verrà aggiunto ai preferiti al più presto(non appena sarà disponibile una connessione ad internet).</string>
     <string name="tweet_will_be_unfavorited">Il tweet verrà rimosso dai preferiti al più presto (non appena sarà disponibile una connessione ad internet).</string>
-    <string name="will_be_retweeted">Il retweet verrà pubblicato al più presto (non appena sarà disponibile una connessione ad internet).</string>
+    <string name="tweet_will_be_retweeted">Il retweet verrà pubblicato al più presto (non appena sarà disponibile una connessione ad internet).</string>
     <string name="no_tweets">Nessun Tweet disponibile</string>
     <string name="no_connection">Nessuna connessione disponibile, verranno mostrati i vecchi tweet </string>
     <string name="location_on">GPS attivato</string>

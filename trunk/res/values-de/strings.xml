@@ -72,7 +72,7 @@
     <string name="tweet_will_be_deleted">Dieser Tweet wird bald gelöscht (sobald Internetverbindung besteht). Hier klicken zum Abbrechen.</string>
     <string name="tweet_will_be_favorited">Dieser Tweet wird bald als Favorit markiert (sobald Internetverbindung besteht).</string>
     <string name="tweet_will_be_unfavorited">Dieser Tweet wird bald von den Favoriten entfernt (sobald Internetverbindung besteht).</string>
-    <string name="will_be_retweeted">Dieser Retweet wird bald veröffentlicht (sobald Internetverbindung besteht).</string>
+    <string name="tweet_will_be_retweeted">Dieser Retweet wird bald veröffentlicht (sobald Internetverbindung besteht).</string>
     <string name="no_tweets">Keine Tweets verfügbar</string>
     <string name="no_connection">Keine Internetverbindung, es werden alte Tweets angezeigt!</string>
     <string name="location_on">Lokalisierung ist eingeschaltet</string>

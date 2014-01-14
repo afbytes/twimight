@@ -155,7 +155,7 @@
                     android:id="@+id/showTweetInfoText0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="The digital signature of this Tweet could not be verified!"
+                    android:text="@string/tweet_signature_not_verified"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -179,7 +179,7 @@
                     style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be posted soon (when Internet connection available)."
+                    android:text="@string/tweet_will_be_posted"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -203,8 +203,7 @@
                     style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be deleted soon (when Internet connection available). 
-				Press to abort operation"
+                    android:text="@string/tweet_will_be_deleted"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -228,7 +227,7 @@
                     style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be marked as favorite soon (when Internet connection available)."
+                    android:text="@string/tweet_will_be_favorited"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -252,7 +251,7 @@
                     style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This tweet will be un-favorited soon (when Internet connection available)."
+                    android:text="@string/tweet_will_be_unfavorited"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -276,7 +275,7 @@
                     style="@style/RobotoLightText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="This retweet will be posted soon (when Internet connection available)."
+                    android:text="@string/tweet_will_be_retweeted"
                     android:textColor="@color/medium_gray"
                     android:textSize="14sp" />
             </LinearLayout>

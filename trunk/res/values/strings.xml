@@ -45,11 +45,12 @@
     <string name="search">Search</string>
 
     <!-- Tweeting, Timeline, Favorites -->
+    <string name="tweet_signature_not_verified">The digital signature of this Tweet could not be verified!</string>
     <string name="tweet_will_be_posted">This tweet will be posted soon (when Internet connection available).</string>
-    <string name="tweet_will_be_deleted">This tweet will be deleted soon (when Internet connection available). Press to abort operation</string>
+    <string name="tweet_will_be_deleted">This tweet will be deleted soon (when Internet connection available).\nPress to abort operation</string>
     <string name="tweet_will_be_favorited">This tweet will be marked as favorite soon (when Internet connection available).</string>
     <string name="tweet_will_be_unfavorited">This tweet will be un-favorited soon (when Internet connection available).</string>
-    <string name="will_be_retweeted">This retweet will be posted soon (when Internet connection available).</string>
+    <string name="tweet_will_be_retweeted">This retweet will be posted soon (when Internet connection available).</string>
     <string name="no_tweets">No Tweets available</string>
     <string name="no_connection">Not connected to the Internet, showing old Tweets!</string>
     <string name="location_on">Location is turned on</string>
