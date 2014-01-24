@@ -11,45 +11,105 @@
       Theus Hossmann - Implementation
       Dominik Schatzmann - Message specification
 -->
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-	<PreferenceCategory android:key="prefCategoryNotifications" android:title="Notifications"><PreferenceScreen android:title="Notifications" android:summary="click to enter in the notifications menu" android:key="prefNotifications">
-   		
-   		
-   	<CheckBoxPreference android:key="@string/prefNotifyTweets" android:title="Notify Tweets" android:summary="tap to receive tweet notifications" 
-   	    android:enabled="true" android:selectable="true" android:defaultValue="false" />
-   	
-   	<CheckBoxPreference android:key="@string/prefNotifyMentions" android:summary="tab to be notified about mentions" 
-   	    android:title="Notify Mentions" android:enabled="true" android:selectable="true" android:defaultValue="true" />
-   	
-   	<CheckBoxPreference android:key="@string/prefNotifyDirectMessages" android:summary="tap to be notified about new direct messages" 
-   	    android:enabled="true" android:selectable="true" android:title="Notify Direct Messages" android:defaultValue="true" />
-   	
-</PreferenceScreen>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-</PreferenceCategory>
-<PreferenceCategory android:title="Twitter" android:key="prefCategoryTwitter">
+    <PreferenceCategory
+        android:key="prefCategoryNotifications"
+        android:title="Notifications" >
+        <PreferenceScreen
+            android:key="prefNotifications"
+            android:summary="click to enter in the notifications menu"
+            android:title="Notifications" >
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:enabled="true"
+                android:key="@string/prefNotifyTweets"
+                android:selectable="true"
+                android:summary="tap to receive tweet notifications"
+                android:title="Notify Tweets" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:enabled="true"
+                android:key="@string/prefNotifyMentions"
+                android:selectable="true"
+                android:summary="tab to be notified about mentions"
+                android:title="Notify Mentions" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:enabled="true"
+                android:key="@string/prefNotifyDirectMessages"
+                android:selectable="true"
+                android:summary="tap to be notified about new direct messages"
+                android:title="Notify Direct Messages" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="prefCategoryTwitter"
+        android:title="Twitter" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/prefUseLocation"
+            android:selectable="true"
+            android:summary="Tap to geo-tag your Tweets by default."
+            android:title="Use Location" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/prefRunAtBoot"
+            android:selectable="true"
+            android:summary="Tap to start automatic background updates"
+            android:title="Updates in Background" />
+        <ListPreference
+            android:defaultValue="5"
+            android:enabled="true"
+            android:entries="@array/listArray"
+            android:entryValues="@array/listValues"
+            android:key="@string/prefUpdateInterval"
+            android:summary="select the desired update interval"
+            android:title="Updates Interval" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="prefCategoryOfflineMode"
+        android:title="Offline Mode" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="@string/pref_offline_mode"
+            android:selectable="true"
+            android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets."
+            android:title="Automatic Web Download" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="prefDisasterMode"
+            android:enabled="true"
+            android:key="@string/prefWebShare"
+            android:selectable="true"
+            android:summary="Tap to enable webpage share function in disaster mode, this could drain battery faster"
+            android:title="Web Page Share" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="prefCategoryDisasterMode"
+        android:title="Disaster Mode" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="@string/prefDisasterMode"
+            android:selectable="true"
+            android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."
+            android:title="Disaster Mode" >
+        </CheckBoxPreference>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/prefTDSCommunication"
+            android:selectable="true"
+            android:summary="Tap to enable updates from disaster server"
+            android:title="TDS Communication" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
 
-		<CheckBoxPreference android:title="Use Location" android:key="@string/prefUseLocation" android:selectable="true" 
-		    android:enabled="true" android:defaultValue="true" android:summary="Tap to geo-tag your Tweets by default.">
-		    
-		</CheckBoxPreference>
-		
-		<CheckBoxPreference android:title="Updates in Background" android:key="@string/prefRunAtBoot" android:summary="Tap to start automatic background updates" android:defaultValue="true" android:enabled="true" android:selectable="true"/><ListPreference android:title="Updates Interval" android:summary="select the desired update interval" android:key="@string/prefUpdateInterval" android:enabled="true" android:entries="@array/listArray" android:entryValues="@array/listValues" android:defaultValue="5"/>
-		
-</PreferenceCategory>
-
-    <PreferenceCategory android:title="Offline Mode" android:key="prefCategoryOfflineMode">
-        
-		<CheckBoxPreference android:title="Automatic Web Download" android:selectable="true" android:enabled="true" 
-		    android:defaultValue="false" 
-		    android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets." 
-		    android:key="@string/pref_offline_mode"></CheckBoxPreference>
-		<CheckBoxPreference android:title="Web Page Share" android:key="@string/prefWebShare" android:dependency="prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable webpage share function in disaster mode, this could drain battery faster"></CheckBoxPreference>		
-	</PreferenceCategory>
-   	<PreferenceCategory android:title="Disaster Mode" android:key="prefCategoryDisasterMode">
-		<CheckBoxPreference android:title="Disaster Mode" android:key="@string/prefDisasterMode" android:selectable="true" android:enabled="true" android:defaultValue="false" android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."></CheckBoxPreference>
-		<CheckBoxPreference android:title="TDS Communication" android:key="@string/prefTDSCommunication" android:selectable="true" android:enabled="true" android:defaultValue="true" android:summary="Tap to enable updates from disaster server"></CheckBoxPreference>
-	</PreferenceCategory>
-   	
-   	
 </PreferenceScreen>
