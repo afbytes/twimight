@@ -85,8 +85,8 @@
         </activity>
         <activity
             android:name=".activities.SearchableActivity"
-            android:launchMode="singleTask" 
-            android:label="@string/search_results">
+            android:label="@string/search_results"
+            android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
 
@@ -126,8 +126,7 @@
         </activity>
         <activity
             android:name=".activities.TweetDetailActivity"
-            android:label="Twimight"
-           >
+            android:label="Twimight" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
@@ -257,8 +256,8 @@
             android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
         <provider
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
-            android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" 
-            android:exported="false"/>
+            android:authorities="ch.ethz.twimight.TwimightSuggestionProvider"
+            android:exported="false" />
     </application>
 
 </manifest>
