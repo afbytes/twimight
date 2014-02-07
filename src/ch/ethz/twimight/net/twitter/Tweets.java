@@ -56,7 +56,7 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_SOURCE_ALL = "all";
 
 	/** a specific tweet */
-	public static final String TWEET_ID = "tweet_id";
+	public static final String TWEET_TID = "tweet_tid";
 	/** a search request */
 	public static final String SEARCH = "search";
 	/** new tweets received */

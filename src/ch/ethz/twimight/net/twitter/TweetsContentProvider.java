@@ -38,10 +38,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.TweetListActivity;
+import ch.ethz.twimight.activities.HomeScreenActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
 import ch.ethz.twimight.net.tds.TDSService;
 import ch.ethz.twimight.security.CertificateManager;
@@ -57,7 +56,7 @@ import ch.ethz.twimight.util.Constants;
  */
 public class TweetsContentProvider extends ContentProvider {
 
-	private static final String TAG = "TweetsContentProvider";
+	private static final String TAG = TweetsContentProvider.class.getName();
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
@@ -88,6 +87,8 @@ public class TweetsContentProvider extends ContentProvider {
 
 	private static final int TWEETS_SEARCH = 16;
 
+	private static final int TWEETS_TID = 17;
+
 	public static final String COL_USER_ROW_ID = "userRowId";
 
 	// Here we define all the URIs this provider knows
@@ -97,6 +98,8 @@ public class TweetsContentProvider extends ContentProvider {
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS, TWEETS);
 
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/#", TWEETS_ID);
+
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEET_TID + "/#", TWEETS_TID);
 
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.SEARCH, TWEETS_SEARCH);
 
@@ -190,6 +193,8 @@ public class TweetsContentProvider extends ContentProvider {
 			return Tweets.TWEETS_CONTENT_TYPE;
 		case TWEETS_MENTIONS_ALL:
 			return Tweets.TWEETS_CONTENT_TYPE;
+		case TWEETS_TID:
+			return Tweets.TWEETS_CONTENT_TYPE;
 
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -267,6 +272,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_TEXT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TEXT_PLAIN + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_CREATED + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_SOURCE + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLY_TO_SCREEN_NAME + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_RETWEETCOUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "."
@@ -282,6 +288,37 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ROW_ID + "=" + uri.getLastPathSegment() + ";";
+			c = database.rawQuery(sql, null);
+			c.setNotificationUri(getContext().getContentResolver(), uri);
+
+			break;
+
+		case TWEETS_TID:
+			sql = "SELECT " + DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_TID + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_USER_MENTION_ENTITIES + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HASHTAG_ENTITIES + ", " + DBOpenHelper.TABLE_TWEETS
+					+ "." + Tweets.COL_MEDIA_ENTITIES + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_URL_ENTITIES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MENTIONS + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_TEXT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TEXT_PLAIN + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_CREATED + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_SOURCE + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLYTO + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLY_TO_SCREEN_NAME + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_RETWEETCOUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
+					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
+					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TID + "=" + uri.getLastPathSegment() + ";";
 			c = database.rawQuery(sql, null);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -716,6 +753,7 @@ public class TweetsContentProvider extends ContentProvider {
 	public int bulkInsert(Uri uri, ContentValues[] values) {
 		int numInserted = 0;
 		database.beginTransaction();
+		Log.d(TAG, "bulkinsert");
 		try {
 			int affectedBuffers = 0;
 			for (ContentValues value : values) {
@@ -810,7 +848,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 			verifySignature(cm, km, values);
 
-			if (TweetListActivity.running == false
+			if (HomeScreenActivity.running == false
 					&& PreferenceManager.getDefaultSharedPreferences(getContext())
 							.getBoolean("prefNotifyTweets", false) == true) {
 				// notify user
@@ -941,7 +979,7 @@ public class TweetsContentProvider extends ContentProvider {
 		// now insert
 		try {
 			Uri insertUri = insertTweet(values);
-			if (TweetListActivity.running == false
+			if (HomeScreenActivity.running == false
 					&& ((values.getAsInteger(Tweets.COL_BUFFER) & Tweets.BUFFER_SEARCH) == 0)
 					&& PreferenceManager.getDefaultSharedPreferences(getContext())
 							.getBoolean("prefNotifyTweets", false) == true) {
@@ -990,7 +1028,7 @@ public class TweetsContentProvider extends ContentProvider {
 			// Trigger synch if needed
 			if (values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS) != 0) {
 				Intent i = new Intent(getContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TWEET);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_LOCAL_TWEET);
 				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}
@@ -1009,8 +1047,6 @@ public class TweetsContentProvider extends ContentProvider {
 		if (tweetUriMatcher.match(uri) != TWEETS_ID) {
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
-
-		Log.d(TAG, "Delete TWEETS_ID");
 
 		int nrRows = database.delete(DBOpenHelper.TABLE_TWEETS, "_id=" + uri.getLastPathSegment(), null);
 		getContext().getContentResolver().notifyChange(uri, null);
@@ -1141,7 +1177,7 @@ public class TweetsContentProvider extends ContentProvider {
 					values.put(Tweets.COL_BUFFER, Tweets.BUFFER_MENTIONS);
 				}
 
-				if (TweetListActivity.running == false
+				if (HomeScreenActivity.running == false
 						&& PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean("prefNotifyMentions",
 								true) == true && TwitterSyncService.firstMentionsSyncCompleted(getContext())) {
 					// notify user
@@ -1218,21 +1254,21 @@ public class TweetsContentProvider extends ContentProvider {
 
 		CharSequence contentTitle = getContext().getString(R.string.tweet_content_title);
 		CharSequence contentText = "New Tweets!";
-		Intent notificationIntent = new Intent(getContext(), TweetListActivity.class);
+		Intent notificationIntent = new Intent(getContext(), HomeScreenActivity.class);
 		PendingIntent contentIntent;
 
 		switch (type) {
 		case (NOTIFY_MENTION):
 			contentText = getContext().getString(R.string.mention_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.MENTIONS_KEY);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_MENTIONS);
 			break;
 		case (NOTIFY_DISASTER):
 			contentText = getContext().getString(R.string.dis_tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.FAVORITES_KEY);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_FAVORITES);
 			break;
 		case (NOTIFY_TWEET):
 			contentText = getContext().getString(R.string.tweet_content_text);
-			notificationIntent.putExtra(TweetListActivity.FILTER_REQUEST, TweetListFragment.TIMELINE_KEY);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_TIMELINE);
 			break;
 		default:
 			break;

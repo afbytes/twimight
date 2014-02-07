@@ -12,15 +12,23 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.fragments.FollowersFragment;
+import ch.ethz.twimight.fragments.FriendsFragment;
+import ch.ethz.twimight.fragments.ListFragment;
+import ch.ethz.twimight.fragments.PeersFragment;
 import ch.ethz.twimight.fragments.UserListFragment;
-import ch.ethz.twimight.fragments.adapters.ListViewPageAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 
 /**
@@ -38,6 +46,8 @@ public class UserListActivity extends TwimightBaseActivity {
 	ViewPager viewPager;
 
 	public static final String USER_FILTER_REQUEST = "user_filter_request";
+	
+	private final List<ListFragment> mFragments = new ArrayList<ListFragment>();
 
 	/**
 	 * Called when the activity is first created.
@@ -52,9 +62,16 @@ public class UserListActivity extends TwimightBaseActivity {
 		actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		Bundle bundle = new Bundle();
-		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_USERS);
-		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
+//		Bundle bundle = new Bundle();
+//		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_USERS);
+//		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
+		
+		mFragments.add(new FriendsFragment());
+		mFragments.add(new FollowersFragment());
+		mFragments.add(new PeersFragment());
+		FragmentPagerAdapter pagAdapter = new FragmentListPagerAdapter(getFragmentManager());
+		
+		
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
 
 		viewPager.setAdapter(pagAdapter);
@@ -124,6 +141,23 @@ public class UserListActivity extends TwimightBaseActivity {
 
 		positionIndex = savedInstanceState.getInt("positionIndex");
 		positionTop = savedInstanceState.getInt("positionTop");
+
+	}
+	
+	private class FragmentListPagerAdapter extends FragmentPagerAdapter {
+		public FragmentListPagerAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		@Override
+		public ListFragment getItem(int position) {
+			return mFragments.get(position);
+		}
+
+		@Override
+		public int getCount() {
+			return mFragments.size();
+		}
 
 	}
 

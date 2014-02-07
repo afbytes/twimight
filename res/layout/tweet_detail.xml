@@ -7,282 +7,297 @@
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
 	- Message specification
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/showTweetRoot"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fillViewport="true" >
 
-    <LinearLayout
-        android:id="@+id/showTweetLayout"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/rootContainer"
+    android:orientation="vertical"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:fillViewport="true" >
 
         <LinearLayout
-            android:id="@+id/showTweetUserInfo"
+            android:id="@+id/scrollContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/borderless_button_background"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/double_step"
-            android:paddingLeft="@dimen/unit_step"
-            android:paddingRight="@dimen/unit_step"
-            android:paddingTop="@dimen/double_step" >
-
-            <ImageView
-                android:id="@+id/showTweetProfileImage"
-                android:layout_width="@dimen/profile_image_size"
-                android:layout_height="@dimen/profile_image_size" />
+            android:orientation="vertical" >
 
             <LinearLayout
+                android:id="@+id/originalTweetContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingLeft="@dimen/unit_step" >
+                android:orientation="vertical" >
 
-                <TextView
-                    android:id="@+id/showTweetRealName"
-                    style="@style/RobotoLightText"
+                <LinearLayout
+                    android:id="@+id/showTweetUserInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/placeholder_short"
-                    android:textColor="@color/dark_text"
-                    android:textSize="24sp"
-                    android:textStyle="italic" />
+                    android:background="@drawable/borderless_button_background"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/double_step"
+                    android:paddingLeft="@dimen/unit_step"
+                    android:paddingRight="@dimen/unit_step"
+                    android:paddingTop="@dimen/double_step" >
 
-                <TextView
-                    android:id="@+id/showTweetScreenName"
-                    style="@style/RobotoLightText"
+                    <ImageView
+                        android:id="@+id/showTweetProfileImage"
+                        android:layout_width="@dimen/profile_image_size"
+                        android:layout_height="@dimen/profile_image_size" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingLeft="@dimen/unit_step" >
+
+                        <TextView
+                            android:id="@+id/showTweetRealName"
+                            style="@style/RobotoLightText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/placeholder_short"
+                            android:textColor="@color/dark_text"
+                            android:textSize="24sp"
+                            android:textStyle="italic" />
+
+                        <TextView
+                            android:id="@+id/showTweetScreenName"
+                            style="@style/RobotoLightText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/placeholder_short"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="16sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                divider
+
+                <View style="@style/VerticalDivider" />
+
+                Container for Tweet and additional info
+
+                <LinearLayout
+                    android:id="@+id/tweetLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/placeholder_short"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="16sp"
-                    android:textStyle="italic" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/double_step"
+                    android:paddingLeft="@dimen/unit_step"
+                    android:paddingRight="@dimen/unit_step"
+                    android:paddingTop="@dimen/double_step" >
+
+                    <TextView
+                        android:id="@+id/tvTweetCreationDetails"
+                        style="@style/RobotoLightText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/showTweetText"
+                        style="@style/RobotoLightText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/unit_step"
+                        android:autoLink="none"
+                        android:lineSpacingMultiplier="1.2"
+                        android:linksClickable="true"
+                        android:text="@string/placeholder_long"
+                        android:textColor="@color/dark_text"
+                        android:textSize="22sp" />
+
+                    <TextView
+                        android:id="@+id/showTweetRetweeted_by"
+                        style="@style/RobotoLightText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/unit_step"
+                        android:text="@string/placeholder_short"
+                        android:textColor="@color/medium_gray"
+                        android:textSize="14sp"
+                        android:visibility="visible" />
+
+                    <ImageView
+                        android:id="@+id/showPhotoAttached"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/unit_step"
+                        android:contentDescription="Photo attached with this tweet"
+                        android:onClick="viewPhoto"
+                        android:visibility="gone" />
+
+                    <WebView
+                        android:id="@+id/photoWebView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="@dimen/unit_step"
+                        android:visibility="gone" />
+
+                    special info
+
+                    <LinearLayout
+                        android:id="@+id/showTweetUnverified"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_unverified" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_signature_not_verified"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/showTweetTosend"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_pending" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText1"
+                            style="@style/RobotoLightText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_will_be_posted"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/showTweetTodelete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_pending" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText2"
+                            style="@style/RobotoLightText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_will_be_deleted"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/showTweetTofavorite"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_pending" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText3"
+                            style="@style/RobotoLightText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_will_be_favorited"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/showTweetTounfavorite"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_pending" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText4"
+                            style="@style/RobotoLightText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_will_be_unfavorited"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/showTweetToretweet"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/double_step"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/showTweetInfo5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="@dimen/unit_step"
+                            android:src="@drawable/ic_small_pending" />
+
+                        <TextView
+                            android:id="@+id/showTweetInfoText5"
+                            style="@style/RobotoLightText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tweet_will_be_retweeted"
+                            android:textColor="@color/medium_gray"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+    </ScrollView>
 
-        <!-- divider -->
+    <View style="@style/VerticalDivider" />
 
-        <View style="@style/VerticalDivider" />
-
-        <!-- Container for Tweet and additional info -->
-
-        <LinearLayout
-            android:id="@+id/tweetLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/double_step"
-            android:paddingLeft="@dimen/unit_step"
-            android:paddingRight="@dimen/unit_step"
-            android:paddingTop="@dimen/double_step" >
-
-            <TextView
-                android:id="@+id/tvTweetCreationDetails"
-                style="@style/RobotoLightText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text="@string/placeholder_short"
-                android:textColor="@color/medium_gray"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/showTweetText"
-                style="@style/RobotoLightText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/unit_step"
-                android:autoLink="none"
-                android:lineSpacingMultiplier="1.2"
-                android:linksClickable="true"
-                android:text="@string/placeholder_long"
-                android:textColor="@color/dark_text"
-                android:textSize="22sp" />
-
-            <TextView
-                android:id="@+id/showTweetRetweeted_by"
-                style="@style/RobotoLightText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/unit_step"
-                android:text="@string/placeholder_short"
-                android:textColor="@color/medium_gray"
-                android:textSize="14sp"
-                android:visibility="visible" />
-
-            <ImageView
-                android:id="@+id/showPhotoAttached"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/unit_step"
-                android:contentDescription="Photo attached with this tweet"
-                android:onClick="viewPhoto"
-                android:visibility="gone" />
-
-            <WebView
-                android:id="@+id/photoWebView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/unit_step"
-                android:visibility="gone" />
-
-            <!-- special info -->
-
-            <LinearLayout
-                android:id="@+id/showTweetUnverified"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_unverified" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_signature_not_verified"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/showTweetTosend"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_pending" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText1"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_will_be_posted"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/showTweetTodelete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_pending" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText2"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_will_be_deleted"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/showTweetTofavorite"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_pending" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText3"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_will_be_favorited"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/showTweetTounfavorite"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_pending" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText4"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_will_be_unfavorited"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/showTweetToretweet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/double_step"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:id="@+id/showTweetInfo5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/unit_step"
-                    android:src="@drawable/ic_small_pending" />
-
-                <TextView
-                    android:id="@+id/showTweetInfoText5"
-                    style="@style/RobotoLightText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tweet_will_be_retweeted"
-                    android:textColor="@color/medium_gray"
-                    android:textSize="14sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <View style="@style/VerticalDivider" />
-        
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

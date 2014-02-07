@@ -27,17 +27,15 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	PullToRefreshListView mListView;
 	protected static final String TAG = ListFragment.class.getName();
 
-	public static final String FRAGMENT_TYPE = "fragment_type";
-	public static final String SEARCH_QUERY = "search_query";
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mResolver = getActivity().getContentResolver();
 	}
 
-	private void updateList() {
-		mCursor = getCursor(mType);
+	void updateList() {
+		mCursor = getCursor();
+		overscrollIntent = getOverscrollIntent();
 		Cursor oldCursor = mListAdapter.swapCursor(mCursor);
 		mListAdapter.notifyDataSetChanged();
 		if (oldCursor != null) {
@@ -65,16 +63,8 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 		mListView.unregisterListener(this);
 	}
 
-	public void newQueryText() {
-		// Called when the action bar search text has changed. Update
-		// the search filter
-		updateList();
-		setActionBarTitles();
-	}
-
-	abstract Cursor getCursor(int filter);
-
-	abstract void setActionBarTitles();
+	abstract Cursor getCursor();
+	abstract Intent getOverscrollIntent();
 
 	abstract CursorAdapter getListAdapter();
 
