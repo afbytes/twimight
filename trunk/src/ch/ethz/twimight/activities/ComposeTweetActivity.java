@@ -424,7 +424,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			if (insertUri != null) {
 				// schedule the tweet for uploading to twitter
 				Intent i = new Intent(ComposeTweetActivity.this, TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TWEET);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_LOCAL_TWEET);
 				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
 			}

@@ -55,7 +55,7 @@ import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.activities.TweetListActivity;
+import ch.ethz.twimight.activities.HomeScreenActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
@@ -71,7 +71,8 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_ACTION_LOGIN = "EXTRA_ACTION_LOGIN";
 	public static final String EXTRA_ACTION_SYNC_TIMELINE = "EXTRA_ACTION_SYNC_TIMELINE";
 	public static final String EXTRA_ACTION_SYNC_FAVORITES = "EXTRA_ACTION_SYNC_FAVORITES";
-	public static final String EXTRA_ACTION_SYNC_TWEET = "EXTRA_ACTION_SYNC_TWEET";
+	public static final String EXTRA_ACTION_SYNC_LOCAL_TWEET = "EXTRA_ACTION_SYNC_TWEET";
+	public static final String EXTRA_ACTION_SYNC_REMOTE_TWEET = "EXTRA_ACTION_SYNC_REMOTE_TWEET";
 	public static final String EXTRA_ACTION_SYNC_MENTIONS = "EXTRA_ACTION_SYNC_MENTIONS";
 	public static final String EXTRA_ACTION_SYNC_MESSAGES = "EXTRA_ACTION_SYNC_MESSAGES";
 	public static final String EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES = "EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES";
@@ -89,6 +90,7 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_USER_ROW_ID = "user_row_id";
 	public static final String EXTRA_TWEET_ROW_ID = "tweet_row_id";
 	public static final String EXTRA_SCREEN_NAME = "screen_name";
+	public static final String EXTRA_TWEET_TID = "tweet_tid";
 
 	public static final String EXTRA_FORCE_SYNC = "force_sync";
 
@@ -149,8 +151,8 @@ public class TwitterSyncService extends IntentService {
 			login();
 		} else if (EXTRA_ACTION_SYNC_TIMELINE.equals(action)) {
 			syncTimeline();
-		} else if (EXTRA_ACTION_SYNC_TWEET.equals(action)) {
-			syncTweet();
+		} else if (EXTRA_ACTION_SYNC_LOCAL_TWEET.equals(action)) {
+			syncLocalTweet();
 		} else if (EXTRA_ACTION_SYNC_MENTIONS.equals(action)) {
 			syncMentions();
 		} else if (EXTRA_ACTION_SYNC_FAVORITES.equals(action)) {
@@ -173,6 +175,8 @@ public class TwitterSyncService extends IntentService {
 			searchUser();
 		} else if (EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL.equals(action)) {
 			syncAllTransactional();
+		} else if (EXTRA_ACTION_SYNC_REMOTE_TWEET.equals(action)){
+			syncRemoteTweet();
 		} else {
 			Log.e(TAG, "TwitterSyncService started with no valid action!");
 		}
@@ -345,7 +349,7 @@ public class TwitterSyncService extends IntentService {
 		cv.put(Tweets.COL_USER_MENTION_ENTITIES, Serialization.serialize(tweet.getUserMentionEntities()));
 
 		// if there are urls to this tweet, change the status of html field to 1
-		if (tweet.getURLEntities().length > 0 || tweet.getMediaEntities().length>0) {
+		if (tweet.getURLEntities().length > 0 || tweet.getMediaEntities().length > 0) {
 			cv.put(Tweets.COL_HTML_PAGES, 1);
 
 			boolean isOfflineActive = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
@@ -365,8 +369,6 @@ public class TwitterSyncService extends IntentService {
 			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS);
 			getContentResolver().insert(insertUri, mentionedUserValues);
-			Log.d(TAG,
-					"mention: inserted @" + userMentionEntity.getScreenName() + " name: " + userMentionEntity.getName());
 		}
 
 		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
@@ -383,7 +385,12 @@ public class TwitterSyncService extends IntentService {
 		if (tweet.getInReplyToStatusId() != -1) {
 			cv.put(Tweets.COL_REPLYTO, tweet.getInReplyToStatusId());
 			cv.put(Tweets.COL_REPLY_TO_USER_ID, tweet.getInReplyToUserId());
-			cv.put(Tweets.COL_REPLYTO, tweet.getInReplyToScreenName());
+			cv.put(Tweets.COL_REPLY_TO_SCREEN_NAME, tweet.getInReplyToScreenName());
+
+			Log.d(TAG,
+					"tweet " + cv.getAsLong(Tweets.COL_TID) + " is reply to "
+							+ cv.getAsString(Tweets.COL_REPLY_TO_SCREEN_NAME) + " " + tweet.getInReplyToScreenName());
+			Log.d(TAG, cv.keySet().toString());
 		}
 		cv.put(Tweets.COL_TWITTERUSER, tweet.getUser().getId());
 		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
@@ -582,8 +589,8 @@ public class TwitterSyncService extends IntentService {
 			boolean success = false;
 			User user = null;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				Log.d(TAG, "UpdateuserTask call(); twitterUserId: " + mTwitterUserId + "; screenName: " + mTwitteruserScreenName + "; attempt: "
-						+ attempt);
+				Log.d(TAG, "UpdateuserTask call(); twitterUserId: " + mTwitterUserId + "; screenName: "
+						+ mTwitteruserScreenName + "; attempt: " + attempt);
 				try {
 					if (mTwitteruserScreenName != null) {
 						user = mTwitter.showUser(mTwitteruserScreenName);
@@ -1246,7 +1253,7 @@ public class TwitterSyncService extends IntentService {
 			Log.d(TAG, "loadTimeline() direction: UP; sinceId: " + paging.getSinceId());
 		} else {
 			paging.setMaxId(getTimelineUntilId());
-			Log.d(TAG, "loadTimeline() update direction: DOWN; untilid: "+paging.getMaxId());
+			Log.d(TAG, "loadTimeline() update direction: DOWN; untilid: " + paging.getMaxId());
 		}
 		boolean success = false;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
@@ -1267,7 +1274,7 @@ public class TwitterSyncService extends IntentService {
 			}
 		}
 		if (!success) {
-			if (TweetListActivity.running) {
+			if (HomeScreenActivity.running) {
 				makeToast(getString(R.string.timeline_loading_failure));
 			}
 		}
@@ -1403,7 +1410,7 @@ public class TwitterSyncService extends IntentService {
 			}
 		}
 		if (!success) {
-			if (TweetListActivity.running) {
+			if (HomeScreenActivity.running) {
 				makeToast(getString(R.string.mentions_loading_failure));
 			}
 		}
@@ -1488,7 +1495,7 @@ public class TwitterSyncService extends IntentService {
 			}
 		}
 		if (!success) {
-			if (TweetListActivity.running) {
+			if (HomeScreenActivity.running) {
 				makeToast(getString(R.string.favorites_loading_failure));
 			}
 		}
@@ -1785,10 +1792,42 @@ public class TwitterSyncService extends IntentService {
 	}
 
 	/**
-	 * SYNC TWEET
+	 * SYNC REMOTE TWEET
+	 */
+	
+	private void syncRemoteTweet() {
+		boolean success = false;
+		long tid = mStartIntent.getLongExtra(EXTRA_TWEET_TID, -1);
+		Status tweet = null;
+		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
+			try {
+				tweet = mTwitter.showStatus(tid);
+			} catch (TwitterException e) {
+				e.printStackTrace();
+				tweet = null;
+				continue;
+			}
+			if( tweet!=null){
+			success = true;
+			break;
+			}
+		}
+		// update DB
+		if (success) {
+			Log.d(TAG, "syncRemoteTweet tid="+tid + " successful; text: " + tweet.getText() + "; id: "+ tweet.getId());
+			ContentValues cv = getTweetContentValues(tweet, Tweets.BUFFER_USERS);
+			storeTweets(new ContentValues[]{cv});
+			Uri notifyUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEET_TID + "/"
+					+ tid);
+			getContentResolver().notifyChange(notifyUri,null);
+		}
+	}
+	
+	/**
+	 * SYNC LOCAL TWEET
 	 */
 
-	private void syncTweet() {
+	private void syncLocalTweet() {
 		long rowId = mStartIntent.getLongExtra(EXTRA_TWEET_ROW_ID, -1);
 		Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);
@@ -1859,7 +1898,7 @@ public class TwitterSyncService extends IntentService {
 			}
 		}
 		if (!success) {
-			if (TweetListActivity.running) {
+			if (HomeScreenActivity.running) {
 				makeToast(getString(R.string.dms_loading_failure));
 			}
 		}
@@ -1885,7 +1924,7 @@ public class TwitterSyncService extends IntentService {
 			}
 		}
 		if (!success) {
-			if (TweetListActivity.running) {
+			if (HomeScreenActivity.running) {
 				makeToast(getString(R.string.dms_loading_failure));
 			}
 		}
@@ -2004,9 +2043,10 @@ public class TwitterSyncService extends IntentService {
 		protected Void doInBackground(Void... params) {
 			HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getApplicationContext());
 			htmlDbHelper.open();
-			
+
 			htmlDbHelper.insertLinksIntoDb(mTweet.getURLEntities(), mTweet.getId(), HtmlPagesDbHelper.DOWNLOAD_NORMAL);
-			htmlDbHelper.insertLinksIntoDb(mTweet.getMediaEntities(), mTweet.getId(), HtmlPagesDbHelper.DOWNLOAD_NORMAL);
+			htmlDbHelper
+					.insertLinksIntoDb(mTweet.getMediaEntities(), mTweet.getId(), HtmlPagesDbHelper.DOWNLOAD_NORMAL);
 			return null;
 		}
 

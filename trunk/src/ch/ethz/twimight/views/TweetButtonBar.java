@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -34,9 +35,9 @@ import ch.ethz.twimight.util.Serialization;
 
 public class TweetButtonBar extends FrameLayout {
 
-	private static final String TAG = TweetButtonBar.class.getName();
+	// private static final String TAG = TweetButtonBar.class.getName();
 
-	private final long mRowId;
+	private long mRowId = -1;
 	private ContentObserver mObserver;
 
 	private ImageButton mRetweetButton;
@@ -55,13 +56,24 @@ public class TweetButtonBar extends FrameLayout {
 
 	private Cursor mCursor;
 
+	public TweetButtonBar(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.tweet_button_bar,
+				this, true);
+		captureViews();
+	}
+
+	public void setRowId(long rowId) {
+		mRowId = rowId;
+		mUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
+	}
+
 	public TweetButtonBar(Context context, long rowId) {
 		super(context);
 		((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.tweet_button_bar,
 				this, true);
 		captureViews();
-		mRowId = rowId;
-		mUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
+		setRowId(rowId);
 	}
 
 	@Override
@@ -77,20 +89,22 @@ public class TweetButtonBar extends FrameLayout {
 	}
 
 	private void updateCursor() {
-		discardCursor();
-		mCursor = getContext().getContentResolver().query(mUri, null, null, null, null);
+		if (mRowId != -1) {
+			discardCursor();
+			mCursor = getContext().getContentResolver().query(mUri, null, null, null, null);
 
-		if (mCursor != null && mCursor.getCount() > 0) {
-			mCursor.moveToFirst();
-			mObserver = new TweetObserver(new Handler());
-			mCursor.registerContentObserver(mObserver);
-			mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
-			mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
-			setupButtons();
-		} else {
-			mCursor = null; // discard completely so that we don't try to
-							// unregister observer from empty cursor
+			if (mCursor != null && mCursor.getCount() > 0) {
+				mCursor.moveToFirst();
+				mObserver = new TweetObserver(new Handler());
+				mCursor.registerContentObserver(mObserver);
+				mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
+				mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+				mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
+				setupButtons();
+			} else {
+				mCursor = null; // discard completely so that we don't try to
+								// unregister observer from empty cursor
+			}
 		}
 	}
 
@@ -109,7 +123,6 @@ public class TweetButtonBar extends FrameLayout {
 			super.onChange(selfChange);
 			updateCursor();
 		}
-
 	}
 
 	private void discardCursor() {

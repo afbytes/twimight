@@ -31,10 +31,4 @@ public class TweetDetailPageAdapter extends FragmentPagerAdapter {
 		// TODO Auto-generated method stub
 		return list.size();
 	}
-
-
-
-	
-	
-
 }

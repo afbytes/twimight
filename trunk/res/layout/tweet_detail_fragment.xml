@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tweetDetailFragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ch.ethz.twimight.views.TweetConversationView
+        android:id="@+id/conversationView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    </ch.ethz.twimight.views.TweetConversationView>
+
+    <View style="@style/VerticalDivider" />
+
+    <ch.ethz.twimight.views.TweetButtonBar
+        android:id="@+id/tweetButtonBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ch.ethz.twimight.views.TweetButtonBar>
+
+</LinearLayout>

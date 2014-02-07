@@ -67,6 +67,11 @@ public class TweetView extends FrameLayout {
 		mContainer = (LinearLayout) findViewById(R.id.container);
 	}
 	
+	@Override
+	public void setBackgroundResource(int resid) {
+		mContainer.setBackgroundResource(resid);
+	}
+	
 	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe, AsyncImageLoader imageLoader) {
 		// set profile image
 		mIvProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);

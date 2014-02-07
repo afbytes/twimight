@@ -33,7 +33,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <uses-feature
         android:name="android.hardware.bluetooth"
@@ -85,7 +85,8 @@
         </activity>
         <activity
             android:name=".activities.SearchableActivity"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask" 
+            android:label="@string/search_results">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
 
@@ -97,7 +98,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".activities.TweetListActivity"
+            android:name=".activities.HomeScreenActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop" >
             <intent-filter>
@@ -126,7 +127,7 @@
         <activity
             android:name=".activities.TweetDetailActivity"
             android:label="Twimight"
-            android:launchMode="singleTop" >
+           >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
