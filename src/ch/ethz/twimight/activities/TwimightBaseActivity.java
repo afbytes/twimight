@@ -50,7 +50,7 @@ import ch.ethz.twimight.util.LogCollector;
  */
 public abstract class TwimightBaseActivity extends ThemeSelectorActivity implements Observer {
 
-	static TwimightBaseActivity instance;
+	static TwimightBaseActivity sInstance;
 	private static final String TAG = "TwimightBaseActivity";
 	public static final boolean D = true;
 	
@@ -96,7 +96,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	@Override
 	public void onResume() {
 		super.onResume();
-		instance = this;
+		sInstance = this;
 
 		// bottom status bar (can't get it in onCreate because layout is not set
 		// yet)
@@ -314,12 +314,12 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 	}
 	
 	private static void updateLoadingBarVisibility(){
-		if (instance != null) {
+		if (sInstance != null) {
 			try {
-				instance.runOnUiThread(new Runnable() {
+				sInstance.runOnUiThread(new Runnable() {
 					public void run() {
-						if (instance.progressBar != null) {
-							instance.progressBar.setVisibility(sIsLoading ? View.VISIBLE : View.GONE);
+						if (sInstance.progressBar != null) {
+							sInstance.progressBar.setVisibility(sIsLoading ? View.VISIBLE : View.GONE);
 						}
 					}
 				});

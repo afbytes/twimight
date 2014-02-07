@@ -63,7 +63,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 	private TextView location;
 	private TextView description;
 	private TextView statsTweets;
-	private TextView statsFavorits;
+	private TextView statsFavorites;
 	private TextView statsFriends;
 	private TextView statsFollowers;
 	private Button followButton;
@@ -97,7 +97,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		location = (TextView) findViewById(R.id.showUserLocation);
 		description = (TextView) findViewById(R.id.showUserDescription);
 		statsTweets = (TextView) findViewById(R.id.statsTweets);
-		statsFavorits = (TextView) findViewById(R.id.statsFavorits);
+		statsFavorites = (TextView) findViewById(R.id.statsFavorites);
 		statsFriends = (TextView) findViewById(R.id.statsFriends);
 		statsFollowers = (TextView) findViewById(R.id.statsFollowers);
 		followButton = (Button) findViewById(R.id.showUserFollow);
@@ -327,7 +327,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 		NumberFormat numberFormat = NumberFormat.getInstance();
 		statsTweets.setText(numberFormat.format(tweets));
-		statsFavorits.setText(numberFormat.format(favorites));
+		statsFavorites.setText(numberFormat.format(favorites));
 		statsFriends.setText(numberFormat.format(follows));
 		statsFollowers.setText(numberFormat.format(followed));
 

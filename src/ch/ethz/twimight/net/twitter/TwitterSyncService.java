@@ -175,7 +175,7 @@ public class TwitterSyncService extends IntentService {
 			searchUser();
 		} else if (EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL.equals(action)) {
 			syncAllTransactional();
-		} else if (EXTRA_ACTION_SYNC_REMOTE_TWEET.equals(action)){
+		} else if (EXTRA_ACTION_SYNC_REMOTE_TWEET.equals(action)) {
 			syncRemoteTweet();
 		} else {
 			Log.e(TAG, "TwitterSyncService started with no valid action!");
@@ -376,12 +376,14 @@ public class TwitterSyncService extends IntentService {
 
 		cv.put(Tweets.COL_TID, tweet.getId());
 
-		if (tweet.isFavorited())
+		if (tweet.isFavorited()) {
 			buffer = buffer | Tweets.BUFFER_FAVORITES;
+		}
 
 		// TODO: How do we know if we have retweeted the tweet?
 		cv.put(Tweets.COL_RETWEETED, 0);
-		cv.put(Tweets.COL_RETWEETCOUNT, tweet.getRetweetCount());
+		cv.put(Tweets.COL_RETWEET_COUNT, tweet.getRetweetCount());
+		cv.put(Tweets.COL_FAVORITE_COUNT, tweet.getFavoriteCount());
 		if (tweet.getInReplyToStatusId() != -1) {
 			cv.put(Tweets.COL_REPLYTO, tweet.getInReplyToStatusId());
 			cv.put(Tweets.COL_REPLY_TO_USER_ID, tweet.getInReplyToUserId());
@@ -1794,7 +1796,7 @@ public class TwitterSyncService extends IntentService {
 	/**
 	 * SYNC REMOTE TWEET
 	 */
-	
+
 	private void syncRemoteTweet() {
 		boolean success = false;
 		long tid = mStartIntent.getLongExtra(EXTRA_TWEET_TID, -1);
@@ -1807,22 +1809,23 @@ public class TwitterSyncService extends IntentService {
 				tweet = null;
 				continue;
 			}
-			if( tweet!=null){
-			success = true;
-			break;
+			if (tweet != null) {
+				success = true;
+				break;
 			}
 		}
 		// update DB
 		if (success) {
-			Log.d(TAG, "syncRemoteTweet tid="+tid + " successful; text: " + tweet.getText() + "; id: "+ tweet.getId());
+			Log.d(TAG,
+					"syncRemoteTweet tid=" + tid + " successful; text: " + tweet.getText() + "; id: " + tweet.getId());
 			ContentValues cv = getTweetContentValues(tweet, Tweets.BUFFER_USERS);
-			storeTweets(new ContentValues[]{cv});
-			Uri notifyUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + Tweets.TWEET_TID + "/"
-					+ tid);
-			getContentResolver().notifyChange(notifyUri,null);
+			storeTweets(new ContentValues[] { cv });
+			Uri notifyUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+					+ Tweets.TWEET_TID + "/" + tid);
+			getContentResolver().notifyChange(notifyUri, null);
 		}
 	}
-	
+
 	/**
 	 * SYNC LOCAL TWEET
 	 */

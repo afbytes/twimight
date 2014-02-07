@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
-	the accompanying materials are made available under the terms of the GNU 
-	Public License v2.0 which accompanies this distribution, and is available 
-	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
-	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
-	- Message specification
--->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/originalTweetContainer"
     android:layout_width="match_parent"
@@ -68,11 +59,11 @@
     <!-- Container for Tweet and additional info -->
 
     <LinearLayout
-        android:background="@color/white"
         android:id="@+id/tweetLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@color/white"
         android:orientation="vertical"
         android:paddingBottom="@dimen/double_step"
         android:paddingLeft="@dimen/unit_step"
@@ -112,6 +103,61 @@
             android:textColor="@color/medium_gray"
             android:textSize="14sp"
             android:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/favoriteStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/unit_step"
+                android:layout_marginTop="@dimen/unit_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="@dimen/quarter_step"
+                    android:src="@drawable/ic_small_favorite" />
+
+                <TextView
+                    android:id="@+id/tvFavoriteCount"
+                    style="@style/RobotoLightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/retweetStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/unit_step"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="@dimen/quarter_step"
+                    android:src="@drawable/ic_small_retweeted" />
+
+                <TextView
+                    android:id="@+id/tvRetweetCount"
+                    style="@style/RobotoLightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placeholder_short"
+                    android:textColor="@color/medium_gray"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/showPhotoAttached"
@@ -276,4 +322,5 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>

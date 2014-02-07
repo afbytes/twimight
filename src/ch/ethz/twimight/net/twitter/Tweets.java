@@ -109,8 +109,10 @@ public class Tweets implements BaseColumns {
 	public static final String COL_REPLY_TO_SCREEN_NAME = "reply_to_screen_name";
 	/** did we retweet the tweet? */
 	public static final String COL_RETWEETED = "retweeted";
+	/** how many favorites does twitter report for this tweet */
+	public static final String COL_FAVORITE_COUNT = "favorite_count";
 	/** how many retweets does twitter report for this tweet */
-	public static final String COL_RETWEETCOUNT = "retweet_count";
+	public static final String COL_RETWEET_COUNT = "retweet_count";
 	/** has been retweeted by */
 	public static final String COL_RETWEETED_BY = "retweetedBy";
 	/** does the tweet mention the local user */

@@ -9,8 +9,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
-    android:versionCode="1700025"
-    android:versionName="1.1.4" >
+    android:versionCode="1700026"
+    android:versionName="1.1.5" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -200,9 +200,6 @@
             android:name=".net.opportunistic.ScanningService"
             android:enabled="true" />
         <service
-            android:name=".net.twitter.PicturesIntentService"
-            android:enabled="true" />
-        <service
             android:name=".net.Html.HtmlService"
             android:enabled="true" />
         <service android:name=".net.twitter.TwitterSyncService" />
@@ -260,7 +257,8 @@
             android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
         <provider
             android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
-            android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" />
+            android:authorities="ch.ethz.twimight.TwimightSuggestionProvider" 
+            android:exported="false"/>
     </application>
 
 </manifest>

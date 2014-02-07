@@ -38,8 +38,8 @@ public class ConditionsActivity extends Activity {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		// delete preferences if old version
 		int currentVersionCode;
-		// preferences are deleted when previous installed version is less than this:
-		int minVersionCode = 1700024;
+		// preferences are deleted when previous installed version is less than this (usually the version with the last db update because we need to):
+		int minVersionCode = 1700026;
 		try {
 			int savedVersionCode = prefs.getInt(PREF_VERSION_CODE, 0);
 			if (savedVersionCode<minVersionCode) {
