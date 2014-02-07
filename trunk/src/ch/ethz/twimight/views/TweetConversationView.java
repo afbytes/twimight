@@ -65,7 +65,7 @@ public class TweetConversationView extends FrameLayout {
 			}
 		});
 	}
-
+	
 	/**
 	 * Initializes the complete view to the content of the tweet with the given
 	 * row ID.

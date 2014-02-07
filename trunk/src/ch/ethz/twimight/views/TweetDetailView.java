@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -93,6 +94,10 @@ public class TweetDetailView extends FrameLayout {
 	private LinearLayout mToUnfavoriteNotification;
 	private LinearLayout mToRetweetNotification;
 	private TextView mToDeleteText;
+	private View mRetweetStatus;
+	private TextView mTvRetweetCount;
+	private View mFavoriteStatus;
+	private TextView mTvFavoriteStatus;
 
 	private int mFlags;
 	private int mBuffer;
@@ -120,7 +125,7 @@ public class TweetDetailView extends FrameLayout {
 		mHtmlDbHelper.open();
 		updateCursor();
 	}
-	
+
 	@Override
 	protected void onAttachedToWindow() {
 		Log.d(TAG, "onAttachedToWindow " + this);
@@ -174,6 +179,10 @@ public class TweetDetailView extends FrameLayout {
 		mToUnfavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTounfavorite);
 		mToRetweetNotification = (LinearLayout) findViewById(R.id.showTweetToretweet);
 		mToDeleteText = (TextView) findViewById(R.id.showTweetInfoText2);
+		mRetweetStatus = findViewById(R.id.retweetStatus);
+		mTvRetweetCount = (TextView) findViewById(R.id.tvRetweetCount);
+		mFavoriteStatus = findViewById(R.id.favoriteStatus);
+		mTvFavoriteStatus = (TextView) findViewById(R.id.tvFavoriteCount);
 	}
 
 	private final class TweetObserver extends ContentObserver {
@@ -308,6 +317,22 @@ public class TweetDetailView extends FrameLayout {
 			mTvRetweetedBy.setVisibility(View.GONE);
 		}
 
+		// retweet and favorite count
+		int retweetCount = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_RETWEET_COUNT));
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		if (retweetCount > 0) {
+			mRetweetStatus.setVisibility(View.VISIBLE);
+			mTvRetweetCount.setText(numberFormat.format(retweetCount));
+		} else {
+			mRetweetStatus.setVisibility(View.GONE);
+		}
+		int favoriteCount = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FAVORITE_COUNT));
+		if (favoriteCount > 0) {
+			mFavoriteStatus.setVisibility(View.VISIBLE);
+			mTvFavoriteStatus.setText(numberFormat.format(favoriteCount));
+		} else {
+			mFavoriteStatus.setVisibility(View.GONE);
+		}
 	}
 
 	/**

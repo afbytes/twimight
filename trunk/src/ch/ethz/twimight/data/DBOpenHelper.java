@@ -13,13 +13,10 @@
 package ch.ethz.twimight.data;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.twitter.DirectMessages;
 import ch.ethz.twimight.net.twitter.Tweets;
@@ -47,7 +44,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	public static final String COL_ROW_ID = BaseColumns._ID;
 
-	private static final int DATABASE_VERSION = 55;
+	private static final int DATABASE_VERSION = 56;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -100,7 +97,8 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_REPLY_TO_USER_ID + " integer, "
 			+ Tweets.COL_REPLY_TO_SCREEN_NAME + " text, "
 			+ Tweets.COL_RETWEETED + " integer, "
-			+ Tweets.COL_RETWEETCOUNT + " integer, "
+			+ Tweets.COL_FAVORITE_COUNT + " integer, "
+			+ Tweets.COL_RETWEET_COUNT + " integer, "
 			+ Tweets.COL_RETWEETED_BY + " text, "
 			+ Tweets.COL_MENTIONS + " integer, "
 			+ Tweets.COL_LAT + " real, "

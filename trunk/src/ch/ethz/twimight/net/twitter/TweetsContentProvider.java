@@ -67,7 +67,7 @@ public class TweetsContentProvider extends ContentProvider {
 	private static UriMatcher tweetUriMatcher;
 
 	private static final int TWEETS = 1;
-	private static final int TWEETS_ID = 2;
+	private static final int TWEETS_ROW_ID = 2;
 
 	private static final int TWEETS_TIMELINE_NORMAL = 4;
 	private static final int TWEETS_TIMELINE_DISASTER = 5;
@@ -97,7 +97,7 @@ public class TweetsContentProvider extends ContentProvider {
 		tweetUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS, TWEETS);
 
-		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/#", TWEETS_ID);
+		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/#", TWEETS_ROW_ID);
 
 		tweetUriMatcher.addURI(Tweets.TWEET_AUTHORITY, Tweets.TWEETS + "/" + Tweets.TWEET_TID + "/#", TWEETS_TID);
 
@@ -167,7 +167,7 @@ public class TweetsContentProvider extends ContentProvider {
 		case TWEETS:
 			return Tweets.TWEETS_CONTENT_TYPE;
 
-		case TWEETS_ID:
+		case TWEETS_ROW_ID:
 			return Tweets.TWEET_CONTENT_TYPE;
 
 		case TWEETS_USER_ID:
@@ -260,7 +260,7 @@ public class TweetsContentProvider extends ContentProvider {
 			c.setNotificationUri(getContext().getContentResolver(), Tweets.ALL_TWEETS_URI);
 			break;
 
-		case TWEETS_ID:
+		case TWEETS_ROW_ID:
 			if (TwimightBaseActivity.D)
 				Log.d(TAG, "Query TWEETS_ID " + uri.getLastPathSegment());
 			sql = "SELECT " + DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, " + DBOpenHelper.TABLE_TWEETS + "."
@@ -274,20 +274,21 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_SOURCE + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLY_TO_SCREEN_NAME + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETCOUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
-					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
-					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
-					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE "
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ROW_ID + "=" + uri.getLastPathSegment() + ";";
+					+ Tweets.COL_RETWEET_COUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FAVORITE_COUNT
+					+ ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FLAGS + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS userRowId, " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_TWITTERUSER_ID + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
+					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME + "=" + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_SCREENNAME + " " + "WHERE " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_ROW_ID + "=" + uri.getLastPathSegment() + ";";
 			c = database.rawQuery(sql, null);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -305,7 +306,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_SOURCE + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLY_TO_SCREEN_NAME + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETCOUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
+					+ Tweets.COL_RETWEET_COUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
@@ -338,7 +339,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_CREATED + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_SOURCE + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_REPLYTO + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETCOUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
+					+ Tweets.COL_RETWEET_COUNT + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
@@ -1002,7 +1003,7 @@ public class TweetsContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
-		if (tweetUriMatcher.match(uri) != TWEETS_ID) {
+		if (tweetUriMatcher.match(uri) != TWEETS_ROW_ID) {
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
 
@@ -1044,7 +1045,7 @@ public class TweetsContentProvider extends ContentProvider {
 	 */
 	@Override
 	public int delete(Uri uri, String arg1, String[] arg2) {
-		if (tweetUriMatcher.match(uri) != TWEETS_ID) {
+		if (tweetUriMatcher.match(uri) != TWEETS_ROW_ID) {
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
 
@@ -1260,15 +1261,18 @@ public class TweetsContentProvider extends ContentProvider {
 		switch (type) {
 		case (NOTIFY_MENTION):
 			contentText = getContext().getString(R.string.mention_content_text);
-			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_MENTIONS);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB,
+					HomeScreenActivity.EXTRA_INITIAL_TAB_MENTIONS);
 			break;
 		case (NOTIFY_DISASTER):
 			contentText = getContext().getString(R.string.dis_tweet_content_text);
-			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_FAVORITES);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB,
+					HomeScreenActivity.EXTRA_INITIAL_TAB_FAVORITES);
 			break;
 		case (NOTIFY_TWEET):
 			contentText = getContext().getString(R.string.tweet_content_text);
-			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB, HomeScreenActivity.EXTRA_INITIAL_TAB_TIMELINE);
+			notificationIntent.putExtra(HomeScreenActivity.EXTRA_KEY_INITIAL_TAB,
+					HomeScreenActivity.EXTRA_INITIAL_TAB_TIMELINE);
 			break;
 		default:
 			break;
