@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="listArray">
-        <item>1 min</item>
-        <item>5 min</item>
-        <item>15 min</item>
-        <item>30 min</item>
-        <item>1 hour</item>
-        <item>4 hours</item>
-        <item>12 hour</item>
-        <item>Once a day</item>
+    <string-array name="backgroundUpdateIntervalNames">
+        <item>no background updates</item>
+        <item>once a minute</item>
+        <item>every 5 minutes</item>
+        <item>every 15 minutes</item>
+        <item>every 30 minutes</item>
+        <item>once an hour</item>
+        <item>every 4 hours</item>
+        <item>every 12 hours</item>
+        <item>once a day</item>
     </string-array>
-    <string-array name="listValues">
+    <string-array name="backgroundUpdateIntervalValues">
+        <item>0</item>
         <item>1</item>
         <item>5</item>
         <item>15</item>

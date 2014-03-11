@@ -56,6 +56,7 @@ import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.Preferences;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
 /**
@@ -68,6 +69,7 @@ import ch.ethz.twimight.util.TwimightSuggestionProvider;
  * when logging in.
  * 
  * @author thossmann
+ * @author Steven Meliopoulos
  * 
  */
 public class LoginActivity extends Activity implements OnClickListener {
@@ -230,7 +232,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 			buttonLogin.setOnClickListener(null);
 		}
 		TwimightBaseActivity.unbindDrawables(findViewById(R.id.showLoginRoot));
-
 	}
 
 	/**
@@ -240,7 +241,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 */
 
 	private class GetRequestTokenTask extends AsyncTask<Void, Void, String> {
-
 		@Override
 		protected String doInBackground(Void... params) {
 
@@ -290,7 +290,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 				buttonLogin.setEnabled(true);
 			}
 		}
-
 	}
 
 	private class GetAccessTokensTask extends AsyncTask<Uri, Void, String> {
@@ -420,26 +419,22 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 */
 	public static void startAlarms(Context context) {
 
-		// Start the alarm for communication with the TDS
-		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-				context.getString(R.string.prefTDSCommunication), Constants.TDS_DEFAULT_ON) == true) {
-
+		// start the alarm for communication with the TDS
+		boolean tdsCommunicationEnabled = Preferences.getBoolean(context, R.string.pref_key_tds_communication,
+				Constants.TDS_DEFAULT_ON);
+		if (tdsCommunicationEnabled) {
 			new TDSAlarm(context, Constants.TDS_UPDATE_INTERVAL);
 		}
 
-		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-				context.getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON) == true) {
-
+		// start the scanning alarm for disaster mode
+		boolean disasterModeEnabled = Preferences.getBoolean(context, R.string.pref_key_disaster_mode,
+				Constants.DISASTER_DEFAULT_ON);
+		if (disasterModeEnabled) {
 			new ScanningAlarm(context, false);
 		}
 
 		// start the twitter update alarm
-		if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-				context.getString(R.string.prefRunAtBoot), Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true) {
-
-			new TwitterAlarm(context);
-		}
-
+		TwitterAlarm.initialize(context);
 	}
 
 	/**
@@ -752,9 +747,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private class LoginReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent != null)
+			if (intent != null) {
 				if (intent.getAction() != null) {
-
 					if (intent.getAction().equals(LoginActivity.LOGIN_RESULT_ACTION)) {
 						Log.d(TAG, "LoginReceiver");
 						if (intent.hasExtra(LoginActivity.LOGIN_RESULT)) {
@@ -770,7 +764,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						}
 					}
 				}
-
+			}
 		}
 	}
 

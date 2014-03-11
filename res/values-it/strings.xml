@@ -102,10 +102,13 @@
     <string name="send">Invia</string>
 
     <!-- Tweet Notification -->
-    <string name="tweet_content_title">Nuovi tweets</string>
-    <string name="tweet_content_text">Nuovi tweets nella tua timeline</string>
-    <string name="mention_content_text">Nuovi tweet in cui sei menzionato</string>
-    <string name="dis_tweet_content_text">Nuovi tweet in modalità disastro</string>
+    <string name="notification_title_new_tweets">Nuovi tweets</string>
+    <string name="notification_title_new_mentions">Nuovi tweet in cui sei menzionato</string>
+
+    <!-- Notifications -->
+    <string name="notification_title_new_tweets">%s nuovi tweets</string>
+    <string name="notification_title_new_mentions">%s nuovi menzioni</string>
+    <string name="notification_title_new_direct_messages">%s nuovi messaggi diretti</string>
 
     <!-- Install -->
     <string name="permission">Accesso al Content provider di Twimight</string>
@@ -164,7 +167,7 @@
     <string name="no_thanks">No Grazie</string>
 
     <!-- Preferences -->
-    <string name="notifications">Notifiche</string>
+    <string name="pref_title_category_notifications">Notifiche</string>
     <string name="notifications_explain">Clicca per il menu delle notifiche</string>
     <string name="notify_tweets">Notifica Tweets</string>
     <string name="notify_tweets_explain">Seleziona per ricevere notifiche sui tweet</string>

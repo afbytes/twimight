@@ -123,8 +123,10 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					+ rowId);
 			mCursor = getContentResolver().query(uri, null, null, null, null);
 
-			if (mCursor.getCount() == 0)
+			if (mCursor == null || mCursor.getCount() == 0) {
 				finish();
+				return;
+			}
 
 			mCursor.moveToFirst();
 
@@ -138,7 +140,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					TwitterUsers.COL_SCREENNAME + " LIKE '" + intent.getStringExtra(EXTRA_SCREEN_NAME) + "'", null,
 					null);
 
-			if (mCursor.getCount() == 0) {
+			if (mCursor == null || mCursor.getCount() == 0) {
 				Log.w(TAG, "USER NOT FOUND " + intent.getStringExtra(EXTRA_SCREEN_NAME));
 				finish();
 				return;

@@ -27,12 +27,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.Preferences;
 import ch.ethz.twimight.util.SDCardHelper;
 
 /**
@@ -45,7 +47,7 @@ public class TDSRequestMessage {
 
 	private int version;
 	Context context;
-	
+
 	private static final String TAG = "TDSRequestMessage";
 
 	private JSONObject authenticationObject;
@@ -78,14 +80,12 @@ public class TDSRequestMessage {
 	 * @return JSON Object
 	 * @throws JSONException
 	 */
-	public void createAuthenticationObject(int consumerId,
-			String twitterAccessToken, String twitterAccessTokenSecret)
+	public void createAuthenticationObject(int consumerId, String twitterAccessToken, String twitterAccessTokenSecret)
 			throws JSONException {
 		authenticationObject = new JSONObject();
 		authenticationObject.put("consumer_id", consumerId);
 		authenticationObject.put("access_token", twitterAccessToken);
-		authenticationObject.put("access_token_secret",
-				twitterAccessTokenSecret);
+		authenticationObject.put("access_token_secret", twitterAccessTokenSecret);
 	}
 
 	/**
@@ -109,30 +109,22 @@ public class TDSRequestMessage {
 			tweets.moveToFirst();
 			disTweetsObject = new JSONObject();
 			JSONArray disTweetsArray = new JSONArray();
-			CertificateManager cm = new CertificateManager(
-					context.getApplicationContext());
+			CertificateManager cm = new CertificateManager(context.getApplicationContext());
 
 			while (!tweets.isAfterLast()) {
 
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))) {
 					JSONObject row = new JSONObject();
-					row.put(Tweets.COL_TEXT, tweets.getString(tweets
-							.getColumnIndex(Tweets.COL_TEXT)));
-					row.put(Tweets.COL_TWITTERUSER, tweets.getLong(tweets
-							.getColumnIndex(Tweets.COL_TWITTERUSER)));
-					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets
-							.getColumnIndex(Tweets.COL_DISASTERID)));
-					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets
-							.getColumnIndex(Tweets.COL_SIGNATURE)));
+					row.put(Tweets.COL_TEXT, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT)));
+					row.put(Tweets.COL_TWITTERUSER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TWITTERUSER)));
+					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
+					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 
-					SimpleDateFormat simpleFormat = new SimpleDateFormat(
-							"yyyy-MM-dd HH:mm:ss");
-					row.put(Tweets.COL_CREATED + "_phone", simpleFormat
-							.format(new Date(tweets.getLong(tweets
-									.getColumnIndex(Tweets.COL_CREATED)))));
+					SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					row.put(Tweets.COL_CREATED + "_phone",
+							simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED)))));
 					// add picture if available
-					if (tweets.getString(tweets
-							.getColumnIndex(Tweets.COL_MEDIA)) != null) {
+					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_MEDIA)) != null) {
 						try {
 							String base64Photo = getPhotoAsBase64(tweets);
 							Log.d(TAG, base64Photo);
@@ -161,8 +153,7 @@ public class TDSRequestMessage {
 		String encodedImage = null;
 		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
 		Log.d("photo", "photo name:" + photoFileName);
-		String userID = String.valueOf(c.getLong(c
-				.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
 		// locate the directory where the photos are stored
 		String photoPath = Tweets.PHOTO_PATH + "/" + userID;
 		SDCardHelper sdCardHelper = new SDCardHelper();
@@ -177,8 +168,7 @@ public class TDSRequestMessage {
 	 * @return JSON Object
 	 * @throws JSONException
 	 */
-	public void createStatisticObject(Cursor stats, long follCount)
-			throws JSONException {
+	public void createStatisticObject(Cursor stats, long follCount) throws JSONException {
 
 		if (stats != null) {
 			statisticObject = new JSONObject();
@@ -187,31 +177,24 @@ public class TDSRequestMessage {
 			while (!stats.isAfterLast()) {
 
 				JSONObject row = new JSONObject();
-				row.put("latitude", Double.toString(stats.getDouble(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LAT))));
-				row.put("longitude", Double.toString(stats.getDouble(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LNG))));
+				row.put("latitude",
+						Double.toString(stats.getDouble(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LAT))));
+				row.put("longitude",
+						Double.toString(stats.getDouble(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_LNG))));
 				row.put("accuracy",
-						Integer.toString(stats.getInt(stats
-								.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_ACCURACY))));
-				row.put("provider",
-						stats.getString(stats
-								.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_PROVIDER)));
-				row.put("timestamp", Long.toString(stats.getLong(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_TIMESTAMP))));
-				row.put("network", stats.getString(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_NETWORK)));
-				row.put("event", stats.getString(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_EVENT)));
-				row.put("link", stats.getString(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_LINK)));
-				row.put("isDisaster", Integer.toString(stats.getInt(stats
-						.getColumnIndex(StatisticsDBHelper.KEY_ISDISASTER))));
+						Integer.toString(stats.getInt(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_ACCURACY))));
+				row.put("provider", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_LOCATION_PROVIDER)));
+				row.put("timestamp",
+						Long.toString(stats.getLong(stats.getColumnIndex(StatisticsDBHelper.KEY_TIMESTAMP))));
+				row.put("network", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_NETWORK)));
+				row.put("event", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_EVENT)));
+				row.put("link", stats.getString(stats.getColumnIndex(StatisticsDBHelper.KEY_LINK)));
+				row.put("isDisaster",
+						Integer.toString(stats.getInt(stats.getColumnIndex(StatisticsDBHelper.KEY_ISDISASTER))));
 				row.put("followers_count", follCount);
-				SharedPreferences prefs = PreferenceManager
-						.getDefaultSharedPreferences(context);
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 				row.put("dis_mode_used",
-						prefs.getBoolean(Constants.DIS_MODE_USED, false));
+						Preferences.getBoolean(context, R.string.pref_key_disastermode_has_been_used, false));
 
 				statisticArray.put(row);
 				stats.moveToNext();
@@ -239,18 +222,15 @@ public class TDSRequestMessage {
 	 * @return
 	 * @throws JSONException
 	 */
-	public void createCertificateObject(KeyPair toSign, KeyPair toRevoke)
-			throws JSONException {
+	public void createCertificateObject(KeyPair toSign, KeyPair toRevoke) throws JSONException {
 
 		certificateObject = new JSONObject();
 		if (toSign != null) {
-			certificateObject.put("public_key",
-					KeyManager.getPemPublicKey(toSign));
+			certificateObject.put("public_key", KeyManager.getPemPublicKey(toSign));
 		}
 
 		if (toRevoke != null) {
-			certificateObject.put("revoke",
-					KeyManager.getPemPublicKey(toRevoke));
+			certificateObject.put("revoke", KeyManager.getPemPublicKey(toRevoke));
 		}
 	}
 

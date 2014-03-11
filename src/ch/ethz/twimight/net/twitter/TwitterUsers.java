@@ -18,13 +18,15 @@ import android.provider.BaseColumns;
 
 /**
  * Twitter Users columns
+ * 
  * @author thossmann
- *
+ * 
  */
 public class TwitterUsers implements BaseColumns {
 
 	// This class cannot be instantiated
-	private TwitterUsers(){ }
+	private TwitterUsers() {
+	}
 
 	/**
 	 * The authority part of the URI
@@ -35,19 +37,18 @@ public class TwitterUsers implements BaseColumns {
 	 * The twitter users
 	 */
 	public static final String TWITTERUSERS = "users";
-	
-	
+
 	// MIME type definitions
 	/**
 	 * The MIME type for a set of twitter users
 	 */
 	public static final String TWITTERUSERS_CONTENT_TYPE = "vnd.android.cursor.dir/vnd.twimight.twitteruser";
-	
+
 	/**
 	 * The MIME type of a single twitter user
 	 */
 	public static final String TWITTERUSER_CONTENT_TYPE = "vnd.android.cursor.item/vnd.twimight.twitteruser";
-	
+
 	// URI name definitions
 
 	/**
@@ -70,7 +71,7 @@ public class TwitterUsers implements BaseColumns {
 	 * Only the screenname of a user
 	 */
 	public static final String TWITTERUSERS_SCREENNAME = null;
-	
+
 	/**
 	 * The name of the twitter users id
 	 */
@@ -79,7 +80,7 @@ public class TwitterUsers implements BaseColumns {
 	 * The name of the twitter users id
 	 */
 	public static final String TWITTERUSERS_PICTURE = "pictures";
-	
+
 	// here start the column names
 	public static final String COL_ROW_ID = BaseColumns._ID;
 	public static final String COL_SCREENNAME = "user_screenname";
@@ -100,44 +101,46 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_CREATED = "u_created_at";
 	public static final String COL_PROTECTED = "protected";
 	public static final String COL_VERIFIED = "verified";
-	
-	public static final String COL_ISFOLLOWER = "following"; /** is the user following us? */
-	public static final String COL_ISFRIEND = "follow"; /** are we following the user? */
-	public static final String COL_ISDISASTER_PEER = "disaster_peer"; /** have we met the user in disaster mode */
-	public static final String COL_IS_SEARCH_RESULT = "search_result"; /** have we met the user in disaster mode */
-	public static final String COL_FOLLOWREQUEST = "follow_request_sent"; /** was a following request sent to twitter? */	
+
+	/** is the user following us? */
+	public static final String COL_ISFOLLOWER = "following";
+	/** are we following the user? */
+	public static final String COL_ISFRIEND = "follow";
+	/** have we met the user in disaster mode */
+	public static final String COL_ISDISASTER_PEER = "disaster_peer";
+	/** have we met the user in disaster mode */
+	public static final String COL_IS_SEARCH_RESULT = "search_result";
+	/** was a following request sent to twitter? */
+	public static final String COL_FOLLOWREQUEST = "follow_request_sent";
 	public static final String COL_LASTUPDATE = "last_update";
 	public static final String COL_LAST_PICTURE_UPDATE = "last_picture_update";
 	public static final String COL_FLAGS = "u_flags";
 
 	public static final String COL_PROFILEIMAGE_PATH = "_data";
-	public static final String COL_PROFILEIMAGE = "image";  /** this is used only in disaster mode to sent the profile image */
+	/** this is used only in disaster mode to sent the profile image */
+	public static final String COL_PROFILEIMAGE = "image";
 
-	
 	public static final String DEFAULT_SORT_ORDER = COL_SCREENNAME;
-	
+
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_UPDATE = 1;
 	public static final int FLAG_TO_FOLLOW = 2;
 	public static final int FLAG_TO_UNFOLLOW = 4;
 	public static final int FLAG_TO_UPDATEIMAGE = 8;
-	
-	
+
 	/**
-	 *  URI to reference all twitter users
+	 * URI to reference all twitter users
 	 */
 	private static final String BASE_URI = "content://" + TWITTERUSERS_AUTHORITY + "/" + TWITTERUSERS + "/";
 	public static final Uri TWITTERUSERS_URI = Uri.parse(BASE_URI);
-	
+
 	/**
 	 * The content:// style URL
 	 */
 	public static final Uri CONTENT_URI = TWITTERUSERS_URI;
 	public static final Uri USERS_FRIENDS_URI = Uri.parse(BASE_URI + COL_ISFRIEND);
-	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI +  COL_ISFOLLOWER );
-	public static final Uri USERS_SEARCH_URI = Uri.parse(BASE_URI + TWITTERUSERS_SEARCH );
+	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI + COL_ISFOLLOWER);
+	public static final Uri USERS_SEARCH_URI = Uri.parse(BASE_URI + TWITTERUSERS_SEARCH);
 	public static final Uri USERS_DISASTER_URI = Uri.parse(BASE_URI + COL_ISDISASTER_PEER);
 
-
-	
 }

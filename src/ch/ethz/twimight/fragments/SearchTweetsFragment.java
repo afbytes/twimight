@@ -3,12 +3,23 @@ package ch.ethz.twimight.fragments;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import ch.ethz.twimight.activities.SearchableActivity;
 import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.Tweets;
 
 public class SearchTweetsFragment extends TweetListFragment {
 
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = super.onCreateView(inflater, container, savedInstanceState);
+		getListView().setOverscrollEnabled(false);
+		return view;
+	}
+	
 	@Override
 	Intent getTweetClickIntent(long rowId) {
 		Intent intent = new Intent(getActivity(), TweetDetailActivity.class);

@@ -64,6 +64,7 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	}
 
 	abstract Cursor getCursor();
+
 	abstract Intent getOverscrollIntent();
 
 	abstract CursorAdapter getListAdapter();
@@ -73,13 +74,13 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 		if (overscrollIntent != null) {
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_TIMELINE_UPDATE_DIRECTION,
 					TwitterSyncService.TIMELINE_UPDATE_DIRECTION_UP);
-//			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
-//				Constants.TIMELINE_BUFFER_SIZE -= 50;
-//			}
+			// if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
+			// Constants.TIMELINE_BUFFER_SIZE -= 50;
+			// }
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
+			Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=UP");
+			getActivity().startService(overscrollIntent);
 		}
-		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=UP");
-		getActivity().startService(overscrollIntent);
 	}
 
 	@Override
@@ -87,13 +88,13 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 		if (overscrollIntent != null) {
 			overscrollIntent.putExtra(TwitterSyncService.EXTRA_TIMELINE_UPDATE_DIRECTION,
 					TwitterSyncService.TIMELINE_UPDATE_DIRECTION_DOWN);
-//			if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
-//				Constants.TIMELINE_BUFFER_SIZE -= 50;
-//			}
+			// if (Constants.TIMELINE_BUFFER_SIZE >= 150) {
+			// Constants.TIMELINE_BUFFER_SIZE -= 50;
+			// }
 			Log.i(TAG, "BUFFER_SIZE =  " + Constants.TIMELINE_BUFFER_SIZE);
+			Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=DOWN");
+			getActivity().startService(overscrollIntent);
 		}
-		Log.d(TAG, "ListFragment sending TimelineSyncService intent dir=DOWN");
-		getActivity().startService(overscrollIntent);
 	}
 
 }

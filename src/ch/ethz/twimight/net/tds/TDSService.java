@@ -20,7 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -33,9 +32,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.text.Html;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.activities.DmConversationListActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
@@ -47,42 +47,43 @@ import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.security.RevocationListEntry;
 import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.EasySSLSocketFactory;
-
-
+import ch.ethz.twimight.util.Preferences;
 
 /**
- * The service to send all kinds of API calls to the disaster server. 
+ * The service to send all kinds of API calls to the disaster server.
+ * 
  * @author thossman
- *
+ * 
  */
 public class TDSService extends Service {
 
 	private static final String TAG = "TDSService";
 
-
-	private static final String TDS_LAST_UPDATE = "TDSLastUpdate"; /** Name of the last update in shared preferences */
-	private static final String TDS_UPDATE_INTERVAL = "TDSUpdateInterval"; /** Name of the update interval in shared preference */
+	private static final String TDS_LAST_UPDATE = "TDSLastUpdate";
+	/** Name of the last update in shared preferences */
+	private static final String TDS_UPDATE_INTERVAL = "TDSUpdateInterval";
+	/** Name of the update interval in shared preference */
 
 	public static final int SYNCH_ALL = 1;
 	public static final int SYNCH_REVOKE = 2;
 	public static final int SYNCH_SIGN = 3;
 	public static final int SYNCH_ALL_FORCE = 4;
 	public static final int SYNCH_BUG = 5;
-	
-	//bug report
+
+	// bug report
 	public static final String DESCRIPTION_FIELD = "description";
 	public static final String TYPE_FIELD = "classification";
-	
-	//logging
+
+	// logging
 	private static final int SERVER_NOTIFICATION_ID = 2;
 	private static final int NOTIFY_MESSAGE = 1;
 	private static final int NOTIFY_ACTION = 2;
-	
-	Intent bugResponseIntent;	
+
+	Intent bugResponseIntent;
 
 	TDSCommunication tds;
 	// TDS request URL
-		private static final String REQUEST_URL = Constants.TDS_BASE_URL + "messages/push.json";		
+	private static final String REQUEST_URL = Constants.TDS_BASE_URL + "messages/push.json";
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -90,62 +91,66 @@ public class TDSService extends Service {
 	}
 
 	/**
-	 * Executed when the service is started. We return START_STICKY to not be stopped immediately.
+	 * Executed when the service is started. We return START_STICKY to not be
+	 * stopped immediately.
 	 */
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId){
-		if (TwimightBaseActivity.D) Log.d(TAG, "started..");
-		
-		//  release the lock
-		//TDSAlarm.releaseWakeLock();
-		
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (TwimightBaseActivity.D)
+			Log.d(TAG, "started..");
+
+		// release the lock
+		// TDSAlarm.releaseWakeLock();
+
 		// Do we have connectivity?
-		ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-		if(cm.getActiveNetworkInfo()==null || !cm.getActiveNetworkInfo().isConnected()){
-			if (TwimightBaseActivity.D) Log.d(TAG, "Error synching: no connectivity");
-			schedulePeriodic(false);			
-			
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnected()) {
+			if (TwimightBaseActivity.D)
+				Log.d(TAG, "Error synching: no connectivity");
+			schedulePeriodic(false);
+
 			return START_NOT_STICKY;
-			
+
 		} else {
 			// Create twitter object
 			String token = LoginActivity.getAccessToken(this);
 			String secret = LoginActivity.getAccessTokenSecret(this);
-			if(!(token == null || secret == null) ) {
+			if (!(token == null || secret == null)) {
 				try {
 					tds = new TDSCommunication(getBaseContext(), Constants.CONSUMER_ID, token, secret);
 				} catch (JSONException e) {
-					if (TwimightBaseActivity.D) Log.e(TAG, "error while setting up TDS Communication");
+					if (TwimightBaseActivity.D)
+						Log.e(TAG, "error while setting up TDS Communication");
 					schedulePeriodic(false);
 					return START_NOT_STICKY;
 				}
 			} else {
-				if (TwimightBaseActivity.D) Log.i(TAG, "Error synching: no access token or secret");
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "Error synching: no access token or secret");
 				schedulePeriodic(false);
-				
+
 				return START_NOT_STICKY;
 			}
 
-
 			// check what we have to synch
 			int synchRequest = intent.getIntExtra("synch_request", SYNCH_ALL);
-			switch(synchRequest){
-			case SYNCH_ALL:				
+			switch (synchRequest) {
+			case SYNCH_ALL:
 				synchAll();
 				break;
-				
-			case SYNCH_ALL_FORCE:				
+
+			case SYNCH_ALL_FORCE:
 				synchAllForce();
 				break;
-				
-			case SYNCH_REVOKE:				
+
+			case SYNCH_REVOKE:
 				synchRevoke();
 				break;
-				
-			case SYNCH_SIGN:				
+
+			case SYNCH_SIGN:
 				synchSign();
 				break;
-							
+
 			default:
 				throw new IllegalArgumentException("Exception: Unknown synch request");
 			}
@@ -153,30 +158,31 @@ public class TDSService extends Service {
 			return START_NOT_STICKY;
 		}
 
-		
 	}
-
-
 
 	/**
 	 * Regular TDS update, if needed
 	 */
 	private void synchAll() {
-		
-		if(needUpdate()){
-			if (TwimightBaseActivity.D) Log.d(TAG, "starting synch task");
+
+		if (needUpdate()) {
+			if (TwimightBaseActivity.D)
+				Log.d(TAG, "starting synch task");
 			new SynchAllTask().execute();
 		} else {
-			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - getLastUpdate(getBaseContext())));
-			if (TwimightBaseActivity.D) Log.d(TAG, "no synch needed");
+			TDSAlarm.scheduleCommunication(this, Constants.TDS_UPDATE_INTERVAL
+					- (System.currentTimeMillis() - getLastUpdate(getBaseContext())));
+			if (TwimightBaseActivity.D)
+				Log.d(TAG, "no synch needed");
 		}
 	}
-	
+
 	/**
 	 * Regular TDS update, forced (outside the update schedule)
 	 */
 	private void synchAllForce() {
-		if (TwimightBaseActivity.D) Log.i(TAG, "starting synch task");
+		if (TwimightBaseActivity.D)
+			Log.i(TAG, "starting synch task");
 		new SynchAllTask().execute();
 
 	}
@@ -184,22 +190,22 @@ public class TDSService extends Service {
 	/**
 	 * Revoke the current key
 	 */
-	private void synchRevoke(){
+	private void synchRevoke() {
 		new RevokeTask().execute();
 	}
 
 	/**
 	 * Sign a new key
 	 */
-	private void synchSign(){
+	private void synchSign() {
 		new SignTask().execute();
 	}
-	
+
 	/**
 	 * Schedule the next periodic TDS communication
 	 */
-	private void schedulePeriodic(boolean result){
-		if(result){
+	private void schedulePeriodic(boolean result) {
+		if (result) {
 			// remember the time of successful update
 			setLastUpdate();
 
@@ -209,7 +215,8 @@ public class TDSService extends Service {
 			// reschedule
 			TDSAlarm.scheduleCommunication(getBaseContext(), Constants.TDS_UPDATE_INTERVAL);
 
-			if (TwimightBaseActivity.D) Log.i(TAG,"update successful");
+			if (TwimightBaseActivity.D)
+				Log.i(TAG, "update successful");
 		} else {
 			// get the last successful update
 			Long lastUpdate = getLastUpdate(getBaseContext());
@@ -219,10 +226,10 @@ public class TDSService extends Service {
 
 			// when should the next update be scheduled?
 			Long nextUpdate = 0L;
-			if(System.currentTimeMillis()-lastUpdate > Constants.TDS_UPDATE_INTERVAL){
+			if (System.currentTimeMillis() - lastUpdate > Constants.TDS_UPDATE_INTERVAL) {
 				nextUpdate = currentUpdateInterval;
 			} else {
-				nextUpdate = Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis()-lastUpdate);
+				nextUpdate = Constants.TDS_UPDATE_INTERVAL - (System.currentTimeMillis() - lastUpdate);
 			}
 
 			// exponentially schedule again after TDS_UPDAT_RETRY_INTERVAL
@@ -230,29 +237,30 @@ public class TDSService extends Service {
 
 			currentUpdateInterval *= 2;
 			// cap at TDS_UPDATE_INTERVAL
-			if(currentUpdateInterval > Constants.TDS_UPDATE_INTERVAL){
+			if (currentUpdateInterval > Constants.TDS_UPDATE_INTERVAL) {
 				currentUpdateInterval = Constants.TDS_UPDATE_INTERVAL;
 			}
 
 			// write back to shared preferences
 			setUpdateInterval(currentUpdateInterval);
-			if (TwimightBaseActivity.D) Log.i(TAG, "update not successful");
+			if (TwimightBaseActivity.D)
+				Log.i(TAG, "update not successful");
 		}
 
-		
 	}
 
 	/**
 	 * Get the time (unix time stamp) of the last successful update
 	 */
-	public static Long getLastUpdate(Context context){
+	public static Long getLastUpdate(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getLong(TDS_LAST_UPDATE, 0);
 
 	}
 
 	/**
-	 * Set the current time (unix time stamp) as the time of last successful update
+	 * Set the current time (unix time stamp) as the time of last successful
+	 * update
 	 */
 	private void setLastUpdate() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -271,7 +279,7 @@ public class TDSService extends Service {
 	}
 
 	/**
-	 * Stores the current update interval in Shared preferences 
+	 * Stores the current update interval in Shared preferences
 	 */
 	private void setUpdateInterval(Long updateInterval) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -284,32 +292,33 @@ public class TDSService extends Service {
 	/**
 	 * Do we need a periodic update?
 	 */
-	private boolean needUpdate(){
+	private boolean needUpdate() {
 
 		// when was the last successful update?
-		if(System.currentTimeMillis() - getLastUpdate(getBaseContext()) > Constants.TDS_UPDATE_INTERVAL){
+		if (System.currentTimeMillis() - getLastUpdate(getBaseContext()) > Constants.TDS_UPDATE_INTERVAL) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public static void resetLastUpdate(Context context){
+	public static void resetLastUpdate(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putLong(TDS_LAST_UPDATE, 0L);
 		prefEditor.commit();
 	}
 
-	public static void resetUpdateInterval(Context context){
+	public static void resetUpdateInterval(Context context) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		prefEditor.putLong(TDS_UPDATE_INTERVAL, Constants.TDS_UPDATE_INTERVAL);
-		prefEditor.commit();		
+		prefEditor.commit();
 	}
 
 	/**
 	 * Set up an HTTP client.
+	 * 
 	 * @return
 	 * @throws GeneralSecurityException
 	 */
@@ -325,36 +334,38 @@ public class TDSService extends Service {
 		params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
 
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		HttpConnectionParams.setConnectionTimeout(params, Constants.HTTP_CONNECTION_TIMEOUT); // Connection timeout
-		HttpConnectionParams.setSoTimeout(params, Constants.HTTP_SOCKET_TIMEOUT); // Socket timeout
-
+		HttpConnectionParams.setConnectionTimeout(params, Constants.HTTP_CONNECTION_TIMEOUT); // Connection
+																								// timeout
+		HttpConnectionParams.setSoTimeout(params, Constants.HTTP_SOCKET_TIMEOUT); // Socket
+																					// timeout
 
 		ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
 		return new DefaultHttpClient(cm, params);
 
 	}
-	
-	
+
 	/**
 	 * This Task performs the periodic communication with the TDS
+	 * 
 	 * @author thossmann
-	 *
+	 * 
 	 */
-	private class SynchAllTask extends AsyncTask<Void, Void, Boolean>{
+	private class SynchAllTask extends AsyncTask<Void, Void, Boolean> {
 
 		/**
 		 * The task
 		 */
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			try{
+			try {
 				// wait a bit until we have connectivity
-				// TODO: This is a hack, we should wait for a connectivity change intent, or a timeout, to proceed.
+				// TODO: This is a hack, we should wait for a connectivity
+				// change intent, or a timeout, to proceed.
 				Thread.sleep(Constants.WAIT_FOR_CONNECTIVITY);
-				
+
 				// request potential bluetooth peers
 				String mac = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("mac", null);
-				if(mac!=null){
+				if (mac != null) {
 					tds.createBluetoothObject(mac);
 				}
 
@@ -365,65 +376,73 @@ public class TDSService extends Service {
 
 				// do we need a new certificate?
 				CertificateManager cm = new CertificateManager(getBaseContext());
-				if(cm.needNewCertificate()){
+				if (cm.needNewCertificate()) {
 					KeyManager km = new KeyManager(getBaseContext());
 					tds.createCertificateObject(km.getKey(), null);
-					if (TwimightBaseActivity.D) Log.i(TAG, "we need a new certificate");
-				} 
-				
+					if (TwimightBaseActivity.D)
+						Log.i(TAG, "we need a new certificate");
+				}
+
 				// follower key list
 				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getApplicationContext());
 				tds.createFollowerObject(fm.getLastUpdate());
-				
-				//send statistics
+
+				// send statistics
 				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getApplicationContext());
 				statisticAdapter.open();
-				tds.createStatisticObject(statisticAdapter.getData(),statisticAdapter.getFollowersCount());
-				
-				//Preparing disaster tweets to be sent to the server
-				Cursor cursor = getContentResolver().query(Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + 
-						"/" + Tweets.TWEETS_TABLE_TIMELINE 	+ "/" + Tweets.TWEETS_SOURCE_DISASTER + "/" + Tweets.TWEETS_SINCE_LAST_UPDATE), null, null, null, null);
-				
+				tds.createStatisticObject(statisticAdapter.getData(), statisticAdapter.getFollowersCount());
+
+				// Preparing disaster tweets to be sent to the server
+				Cursor cursor = getContentResolver().query(
+						Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
+								+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_DISASTER + "/"
+								+ Tweets.TWEETS_SINCE_LAST_UPDATE), null, null, null, null);
+
 				tds.createDisTweetsObject(cursor);
 
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request", e);
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while assembling request", e);
 				return false;
 			}
 
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient(),REQUEST_URL);
+				success = tds.sendRequest(getClient(), REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
-			if(!success) 				
-				return false;			
+			if (!success)
+				return false;
 
-			if (TwimightBaseActivity.D) Log.i(TAG, "success");
+			if (TwimightBaseActivity.D)
+				Log.i(TAG, "success");
 			try {
-				
-				//delete old logs
+
+				// delete old logs
 				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
 				statHelper.open();
 				statHelper.deleteOldData();
-				
+
 				// authentication
-				String twitterId = tds.parseAuthentication();				
-				if(!LoginActivity.getTwitterId(getBaseContext()).equals( twitterId  )){
-					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
+				String twitterId = tds.parseAuthentication();
+				if (!LoginActivity.getTwitterId(getBaseContext()).equals(twitterId)) {
+					if (TwimightBaseActivity.D)
+						Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
 
 				// certificate
 				String certPem = tds.parseCertificate();
-				if(certPem != null){
+				if (certPem != null) {
 					CertificateManager cm = new CertificateManager(getBaseContext());
 					cm.setCertificate(certPem);
 				}
-				if (TwimightBaseActivity.D) Log.d(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D)
+					Log.d(TAG, "certificate parsed");
 
 				// revocation
 				RevocationDBHelper rm = new RevocationDBHelper(getApplicationContext());
@@ -431,59 +450,66 @@ public class TDSService extends Service {
 				rm.deleteExpired();
 				// first, we check the version
 				int revocationListVersion = tds.parseRevocationVersion();
-				if(revocationListVersion!=0 && revocationListVersion > rm.getCurrentVersion()){
+				if (revocationListVersion != 0 && revocationListVersion > rm.getCurrentVersion()) {
 					// next, we get the update of the list
 					List<RevocationListEntry> revocationList = tds.parseRevocation();
-					if(!revocationList.isEmpty()){
+					if (!revocationList.isEmpty()) {
 						rm.processUpdate(revocationList);
 					}
 					rm.setCurrentVersion(revocationListVersion);
 					// check if our certificate is on the new revocation list
 					CertificateManager cm = new CertificateManager(getBaseContext());
-					if(rm.isRevoked(cm.getSerial())){
-						if (TwimightBaseActivity.D) Log.i(TAG, "Our certificate got revoked! Deleting key and certificate");
+					if (rm.isRevoked(cm.getSerial())) {
+						if (TwimightBaseActivity.D)
+							Log.i(TAG, "Our certificate got revoked! Deleting key and certificate");
 						cm.deleteCertificate();
 						KeyManager km = new KeyManager(getBaseContext());
 						km.deleteKey();
 					}
 				} else {
-					if (TwimightBaseActivity.D) Log.d(TAG, "no new revocations");
+					if (TwimightBaseActivity.D)
+						Log.d(TAG, "no new revocations");
 				}
-				if (TwimightBaseActivity.D) Log.d(TAG, "revocation parsed");
+				if (TwimightBaseActivity.D)
+					Log.d(TAG, "revocation parsed");
 
 				// Followers
-				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getApplicationContext());				
+				FriendsKeysDBHelper fm = new FriendsKeysDBHelper(getApplicationContext());
 				fm.open();
-				List<TDSPublicKey> keyList = tds.parseFollower();			
-				if(keyList != null){
+				List<TDSPublicKey> keyList = tds.parseFollower();
+				if (keyList != null) {
 					fm.insertKeys(keyList);
 					long lastUpdate = tds.parseFollowerLastUpdate();
-					if(lastUpdate != 0){
+					if (lastUpdate != 0) {
 						fm.setLastUpdate(lastUpdate);
 					}
 				}
-				if (TwimightBaseActivity.D) Log.i(TAG, "followers parsed");
-				
-				//notification
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "followers parsed");
+
+				// notification
 				try {
 					JSONObject notifMessage = tds.getNotification();
-					JSONArray notifArray = notifMessage.getJSONArray("list");					
-					for (int i=0; i<notifArray.length(); i++) {
+					JSONArray notifArray = notifMessage.getJSONArray("list");
+					for (int i = 0; i < notifArray.length(); i++) {
 						JSONObject notification = (JSONObject) notifArray.get(i);
 						if (notification.getInt("classification") == NOTIFY_ACTION)
-							notifyUser(notification.getInt("classification"),notification.getString("content"), notification.getString("link"));
+							notifyUser(notification.getInt("classification"), notification.getString("content"),
+									notification.getString("link"));
 						else
-							notifyUser(notification.getInt("classification"),notification.getString("content"), null);
+							notifyUser(notification.getInt("classification"), notification.getString("content"), null);
 					}
-					
-					
-				} catch(Exception ex){}
-				
-				//TODO: parsing list of tweets posted to the twitter servers
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
+				// TODO: parsing list of tweets posted to the twitter servers
 				tds.parseDisTweets();
 
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response",e);
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while parsing response", e);
 			}
 
 			return true;
@@ -495,92 +521,97 @@ public class TDSService extends Service {
 		}
 
 	}
-	
+
 	/**
 	 * Creates and triggers the status bar notifications
 	 */
-	private void notifyUser(int type, String tickerText, String url){
-		
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_notification;
-		long when = System.currentTimeMillis();
-		Notification notification = new Notification(icon, Html.fromHtml(tickerText, null, null), when);
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-		
-		Context context = getApplicationContext();
-		
-		CharSequence contentTitle = "New TDS Notification";
-		CharSequence contentText = " ";
-		
-		Intent  notificationIntent = null;		
-		PendingIntent contentIntent = null;
-		switch(type){
-		
-		case(NOTIFY_MESSAGE):
-			contentText = tickerText;		
+	private void notifyUser(int type, String tickerText, String url) {
+		CharSequence contentText = null;
+		Intent notificationIntent = new Intent(this, DmConversationListActivity.class);
+		PendingIntent contentIntent;
+		switch (type) {
+		case (NOTIFY_MESSAGE):
+			contentText = tickerText;
 			break;
-		case(NOTIFY_ACTION):
-			notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));		
-			contentText = tickerText;			
+		case (NOTIFY_ACTION):
+			notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+			contentText = tickerText;
 			contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 			break;
 		default:
 			break;
-		}		
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		mNotificationManager.notify(SERVER_NOTIFICATION_ID, notification);
-
+		}
+		contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+		builder.setSmallIcon(R.drawable.ic_notification);
+		builder.setContentTitle(getString(R.string.tds_notification_title));
+		builder.setContentText(contentText);
+		builder.setContentIntent(contentIntent);
+		builder.setAutoCancel(true);
+		// sound
+		String soundUriString = Preferences.getString(this, R.string.pref_key_notification_ringtone, null);
+		Uri soundUri = Uri.parse(soundUriString);
+		builder.setSound(soundUri);
+		// notify
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(SERVER_NOTIFICATION_ID, builder.build());
 	}
 
 	/**
 	 * This Task revokes the current certificate.
+	 * 
 	 * @author thossmann
-	 *
+	 * 
 	 */
-	private class RevokeTask extends AsyncTask<Void, Void, Boolean>{
+	private class RevokeTask extends AsyncTask<Void, Void, Boolean> {
 
 		/**
 		 * The task
 		 */
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			try{
-				KeyManager km = new KeyManager(getBaseContext());			
+			try {
+				KeyManager km = new KeyManager(getBaseContext());
 				tds.createCertificateObject(null, km.getKey());
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while assembling request");
 				return false;
 			}
 
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient(),REQUEST_URL);
+				success = tds.sendRequest(getClient(), REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
-			if(!success) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Error while sending");
+			if (!success) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Error while sending");
 				return false;
 			}
 
-			if (TwimightBaseActivity.D) Log.i(TAG, "success");
+			if (TwimightBaseActivity.D)
+				Log.i(TAG, "success");
 
 			try {
 
 				// authentication
 				String twitterId = tds.parseAuthentication();
-				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
-					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
+				if (!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))) {
+					if (TwimightBaseActivity.D)
+						Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				if (TwimightBaseActivity.D) Log.i(TAG, "authentication parsed");
-
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "authentication parsed");
 
 				// certificate
 				int status = tds.parseCertificateStatus();
-				if(status != 200) {
+				if (status != 200) {
 					return false;
 				} else {
 					// delete certificate
@@ -590,10 +621,12 @@ public class TDSService extends Service {
 					KeyManager km = new KeyManager(getBaseContext());
 					km.deleteKey();
 				}
-				if (TwimightBaseActivity.D) Log.i(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "certificate parsed");
 
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response");
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while parsing response");
 				return false;
 			}
 
@@ -602,7 +635,7 @@ public class TDSService extends Service {
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if(result){
+			if (result) {
 				// create new key
 				KeyManager km = new KeyManager(getBaseContext());
 				km.generateKey();
@@ -619,53 +652,59 @@ public class TDSService extends Service {
 
 	/**
 	 * This Task submits the kurrent key for signing
+	 * 
 	 * @author thossmann
-	 *
+	 * 
 	 */
-	private class SignTask extends AsyncTask<Void, Void, Boolean>{
+	private class SignTask extends AsyncTask<Void, Void, Boolean> {
 
 		/**
 		 * The task
 		 */
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			try{
-				KeyManager km = new KeyManager(getBaseContext());			
+			try {
+				KeyManager km = new KeyManager(getBaseContext());
 				tds.createCertificateObject(km.getKey(), null);
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while assembling request");
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while assembling request");
 				return false;
 			}
 
 			boolean success = false;
 			// Send the request
 			try {
-				success = tds.sendRequest(getClient(),REQUEST_URL);
+				success = tds.sendRequest(getClient(), REQUEST_URL);
 			} catch (GeneralSecurityException e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "GeneralSecurityException while sending TDS request");
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "GeneralSecurityException while sending TDS request");
 			}
 
-			if(!success) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Error while sending");
+			if (!success) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Error while sending");
 				return false;
 			}
 
-			if (TwimightBaseActivity.D) Log.i(TAG, "success");
+			if (TwimightBaseActivity.D)
+				Log.i(TAG, "success");
 
 			try {
 
 				// authentication
 				String twitterId = tds.parseAuthentication();
-				if(!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))){
-					if (TwimightBaseActivity.D) Log.e(TAG, "Twitter ID mismatch!");
+				if (!twitterId.equals(LoginActivity.getTwitterId(getBaseContext()))) {
+					if (TwimightBaseActivity.D)
+						Log.e(TAG, "Twitter ID mismatch!");
 					return false;
 				}
-				if (TwimightBaseActivity.D) Log.i(TAG, "authentication parsed");
-
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "authentication parsed");
 
 				// certificate
 				int status = tds.parseCertificateStatus();
-				if(status != 200) {
+				if (status != 200) {
 					return false;
 				} else {
 					// insert new certificate
@@ -673,10 +712,12 @@ public class TDSService extends Service {
 					String certificatePem = tds.parseCertificate();
 					cm.setCertificate(certificatePem);
 				}
-				if (TwimightBaseActivity.D) Log.i(TAG, "certificate parsed");
+				if (TwimightBaseActivity.D)
+					Log.i(TAG, "certificate parsed");
 
-			} catch(Exception e) {
-				if (TwimightBaseActivity.D) Log.e(TAG, "Exception while parsing response");
+			} catch (Exception e) {
+				if (TwimightBaseActivity.D)
+					Log.e(TAG, "Exception while parsing response");
 				return false;
 			}
 
@@ -685,7 +726,7 @@ public class TDSService extends Service {
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if(result){
+			if (result) {
 				// TODO: how do we notify the user?
 
 			} else {

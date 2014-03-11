@@ -25,6 +25,7 @@ import android.widget.ListView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.DmConversationAdapter;
 import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.net.twitter.NotificationService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
@@ -62,9 +63,8 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
 		c = getContentResolver().query(
-				Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/"
-						+ DirectMessages.DMS + "/" + DirectMessages.DMS_USERS),
-				null, null, null, null);
+				Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
+						+ DirectMessages.DMS_USERS), null, null, null, null);
 
 		Log.e(TAG, "Users: " + c.getCount());
 
@@ -73,21 +73,16 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 		dmUsersListView.setEmptyView(findViewById(R.id.dmListEmpty));
 		// Click listener when the user clicks on a user
 		dmUsersListView.setClickable(true);
-		dmUsersListView
-				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> arg0, View arg1,
-							int position, long arg3) {
-						Cursor c = (Cursor) dmUsersListView
-								.getItemAtPosition(position);
-						Intent i = new Intent(getBaseContext(),
-								DmListActivity.class);
-						i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-						i.putExtra("screenname", c.getString(c
-								.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
-						startActivity(i);
-					}
-				});
+		dmUsersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+				Cursor c = (Cursor) dmUsersListView.getItemAtPosition(position);
+				Intent i = new Intent(getBaseContext(), DmListActivity.class);
+				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
+				i.putExtra("screenname", c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+				startActivity(i);
+			}
+		});
 
 	}
 
@@ -98,10 +93,16 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 	public void onResume() {
 		super.onResume();
 		running = true;
-
+		markDirectMessagesSeen();
 		if (positionIndex != 0 | positionTop != 0) {
 			dmUsersListView.setSelectionFromTop(positionIndex, positionTop);
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		markDirectMessagesSeen();
 	}
 
 	@Override
@@ -136,7 +137,13 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 			super.onOptionsItemSelected(item);
 
 		return true;
+	}
 
+	private void markDirectMessagesSeen() {
+		Intent timelineSeenIntent = new Intent(this, NotificationService.class);
+		timelineSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION,
+				NotificationService.ACTION_MARK_DIRECT_MESSAGES_SEEN);
+		startService(timelineSeenIntent);
 	}
 
 	/**
