@@ -63,7 +63,7 @@ import ch.ethz.twimight.util.InternalStorageHelper;
 import ch.ethz.twimight.util.Serialization;
 
 public class TwitterSyncService extends IntentService {
-	private static final String TAG = "TwitterSyncService";
+	private static final String TAG = TwitterSyncService.class.getName();
 
 	static final int MAX_LOAD_ATTEMPTS = 2;
 
@@ -181,6 +181,10 @@ public class TwitterSyncService extends IntentService {
 			Log.e(TAG, "TwitterSyncService started with no valid action!");
 		}
 		TwimightBaseActivity.setLoading(false);
+		// make notifications if needed
+		Intent notificationIntent = new Intent(this, NotificationService.class);
+		notificationIntent.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_NOTIFY_PENDING);
+		startService(notificationIntent);
 		Log.d(TAG, "TwitterSyncService onHandleIntent() done");
 	}
 
@@ -353,7 +357,7 @@ public class TwitterSyncService extends IntentService {
 			cv.put(Tweets.COL_HTML_PAGES, 1);
 
 			boolean isOfflineActive = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-					this.getString(R.string.pref_offline_mode), false);
+					this.getString(R.string.pref_key_offline_mode), false);
 			if (isOfflineActive) {
 				new CacheUrlTask(tweet).execute();
 			}

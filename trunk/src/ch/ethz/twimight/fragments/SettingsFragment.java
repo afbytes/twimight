@@ -5,169 +5,168 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import android.preference.RingtonePreference;
+import android.text.TextUtils;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
-import ch.ethz.twimight.net.Html.HtmlPage;
 import ch.ethz.twimight.net.opportunistic.ScanningAlarm;
 import ch.ethz.twimight.net.opportunistic.ScanningService;
+import ch.ethz.twimight.net.twitter.NotificationService;
 import ch.ethz.twimight.net.twitter.TwitterAlarm;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.Preferences;
 
-public class SettingsFragment extends PreferenceFragment {
+/**
+ * User settings fragment
+ * 
+ * @author Steven Meliopoulos
+ * 
+ */
+public class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 
-	protected static final String TAG = "PreferenceActivity";
+	private static final String TAG = SettingsFragment.class.getName();
 
-	private OnSharedPreferenceChangeListener prefListener;
-	private SharedPreferences prefs;
 	BluetoothAdapter mBluetoothAdapter;
 	static final int REQUEST_DISCOVERABLE = 2;
 
-	/**
-	 * Set everything up.
-	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.prefs);
+		addPreferencesFromResource(R.xml.user_settings);
+	}
 
-		prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+	@Override
+	public void onResume() {
+		super.onResume();
+		initializePreferenceStates();
+		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+	}
 
-		prefListener = new OnSharedPreferenceChangeListener() {
-
-			// this is where we take action after the user changes a setting!
-			public void onSharedPreferenceChanged(
-					SharedPreferences preferences, String key) {
-
-				if (key.equals(getString(R.string.prefDisasterMode))) { // toggle
-																		// disaster
-																		// mode
-					if (preferences.getBoolean(
-							getString(R.string.prefDisasterMode),
-							Constants.DISASTER_DEFAULT_ON) == true) {
-
-						if (LoginActivity.getTwitterId(getActivity()
-								.getBaseContext()) != null
-								&& LoginActivity
-										.getTwitterScreenname(getActivity()
-												.getBaseContext()) != null) {
-							enableDisasterMode();
-							// Are we in disaster mode?
-
-						}
-
-					} else {
-						disableDisasterMode(getActivity()
-								.getApplicationContext());
-						getActivity().finish();
-					}
-
-				} else if (key.equals(getString(R.string.prefTDSCommunication))) {
-
-					// toggle TDS communication
-					if (preferences.getBoolean(
-							getString(R.string.prefTDSCommunication),
-							Constants.TDS_DEFAULT_ON) == true) {
-						// new TDSAlarm(getApplicationContext(),
-						// Constants.TDS_UPDATE_INTERVAL);
-						Log.i(TAG, "start TDS communication");
-					} else {
-						// stopService(new Intent(getApplicationContext(),
-						// TDSService.class));
-						// TDSAlarm.stopTDSCommuniction(getApplicationContext());
-					}
-
-				} else if (key.equals(getString(R.string.prefRunAtBoot))) {
-
-					if (preferences.getBoolean(
-							getString(R.string.prefRunAtBoot),
-							Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true) {
-						ListPreference updatesBackground = (ListPreference) getPreferenceScreen()
-								.findPreference(
-										getString(R.string.prefUpdateInterval));
-						updatesBackground.setEnabled(true);
-						new TwitterAlarm(getActivity().getBaseContext());
-
-					} else {
-						ListPreference updatesBackground = (ListPreference) getPreferenceScreen()
-								.findPreference(
-										getString(R.string.prefUpdateInterval));
-						updatesBackground.setEnabled(false);
-						TwitterAlarm.stopTwitterAlarm(getActivity()
-								.getBaseContext());
-					}
-				} else if (key.equals(getString(R.string.prefUpdateInterval))) {
-					Constants.UPDATER_UPDATE_PERIOD = Long
-							.parseLong(preferences
-									.getString(
-											getString(R.string.prefUpdateInterval),
-											"5")) * 60 * 1000L;
-					Log.i(TAG, "new update interval: "
-							+ Constants.UPDATER_UPDATE_PERIOD);
-
-					// start the twitter update alarm
-					if (PreferenceManager.getDefaultSharedPreferences(
-							getActivity().getBaseContext()).getBoolean(
-							getString(R.string.prefRunAtBoot),
-							Constants.TWEET_DEFAULT_RUN_AT_BOOT) == true) {
-						new TwitterAlarm(getActivity().getBaseContext());
-					}
-				} else if (key.equals(getString(R.string.pref_offline_mode))) {
-
-					if (preferences.getBoolean(
-							getString(R.string.pref_offline_mode),
-							Constants.OFFLINE_DEFAULT_ON)) {
-
-						setOfflinePreference(true, getActivity());
-					} else {
-
-						setOfflinePreference(false, getActivity());
-					}
-
-				}
-			}
-
-		};
-
+	@Override
+	public void onPause() {
+		super.onPause();
+		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 	}
 
 	/**
-	 * Enables Bluetooth when Disaster Mode get's enabled.
+	 * Initializes preference properties that need to be set dynamically.
+	 */
+	private void initializePreferenceStates() {
+		updateBackgroundUpdatePreference();
+		updateNotificationSoundPreference();
+	}
+
+	/**
+	 * Sets the summary of the background update interval preference to display
+	 * the selected value.
+	 */
+	private void updateBackgroundUpdatePreference() {
+		ListPreference backgroundUpdatePreference = (ListPreference) findPreference(getString(R.string.pref_key_update_interval));
+		String selectedValue = backgroundUpdatePreference.getValue();
+		String[] values = getResources().getStringArray(R.array.backgroundUpdateIntervalValues);
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] != null && values[i].equals(selectedValue)) {
+				String[] names = getResources().getStringArray(R.array.backgroundUpdateIntervalNames);
+				backgroundUpdatePreference.setSummary(names[i]);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Sets the summary of the notification ringtone preference to display the
+	 * name of the selected ringtone.
+	 */
+	private void updateNotificationSoundPreference() {
+		RingtonePreference ringtonePreference = (RingtonePreference) getPreferenceScreen().findPreference(
+				getString(R.string.pref_key_notification_ringtone));
+		String uri = Preferences.getString(getActivity(), R.string.pref_key_notification_ringtone, null);
+		String summary;
+		if (!TextUtils.isEmpty(uri)) {
+			Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), Uri.parse(uri));
+			summary = ringtone.getTitle(getActivity());
+		} else {
+			summary = getString(R.string.ringtone_title_none);
+		}
+		ringtonePreference.setSummary(summary);
+	}
+
+	/**
+	 * Enables Bluetooth when Disaster Mode is enabled.
 	 */
 	private void enableDisasterMode() {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter.isEnabled())
-			ScanningAlarm.setBluetoothInitialState(getActivity()
-					.getBaseContext(), true);
+			ScanningAlarm.setBluetoothInitialState(getActivity().getBaseContext(), true);
 		else
-			ScanningAlarm.setBluetoothInitialState(getActivity()
-					.getBaseContext(), false);
+			ScanningAlarm.setBluetoothInitialState(getActivity().getBaseContext(), false);
 		// for statistics
-		setDisasterModeUsed();
-
+		Preferences.update(getActivity(), R.string.pref_key_disastermode_has_been_used, true);
 		if (mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-			Intent discoverableIntent = new Intent(
-					BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(
-					BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
 			startActivityForResult(discoverableIntent, REQUEST_DISCOVERABLE);
-
 		} else {
 			new ScanningAlarm(getActivity().getApplicationContext(), true);
 			getActivity().finish();
 		}
-
 	}
 
-	private void setDisasterModeUsed() {
-		SharedPreferences.Editor edit = prefs.edit();
-		edit.putBoolean(Constants.DIS_MODE_USED, true);
-		edit.commit();
+	/**
+	 * Takes necessary actions when settings are changed (starting services,
+	 * updating preference summary etc.).
+	 */
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+		if (key.equals(getString(R.string.pref_key_disaster_mode))) {
+			if (preferences.getBoolean(getString(R.string.pref_key_disaster_mode), Constants.DISASTER_DEFAULT_ON) == true) {
+				if (LoginActivity.getTwitterId(getActivity().getBaseContext()) != null
+						&& LoginActivity.getTwitterScreenname(getActivity().getBaseContext()) != null) {
+					enableDisasterMode();
+				}
+			} else {
+				disableDisasterMode(getActivity().getApplicationContext());
+				getActivity().finish();
+			}
+		} else if (key.equals(getString(R.string.pref_key_tds_communication))) {
+			// toggle TDS communication
+			if (preferences.getBoolean(getString(R.string.pref_key_tds_communication), Constants.TDS_DEFAULT_ON) == true) {
+				// new TDSAlarm(getApplicationContext(),
+				// Constants.TDS_UPDATE_INTERVAL);
+			} else {
+				// stopService(new Intent(getApplicationContext(),
+				// TDSService.class));
+				// TDSAlarm.stopTDSCommuniction(getApplicationContext());
+			}
+		} else if (key.equals(getString(R.string.pref_key_update_interval))) {
+			updateBackgroundUpdatePreference();
+			TwitterAlarm.initialize(getActivity());
+		} else if (key.equals(getString(R.string.pref_key_notification_ringtone))) {
+			updateNotificationSoundPreference();
+		} else if (key.equals(getString(R.string.pref_key_notify_tweets))) {
+			Intent timelineSeenIntent = new Intent(getActivity(), NotificationService.class);
+			timelineSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION,
+					NotificationService.ACTION_MARK_TIMELINE_SEEN);
+			getActivity().startService(timelineSeenIntent);
+		} else if (key.equals(getString(R.string.pref_key_notify_mentions))) {
+			Intent mentionsSeenIntent = new Intent(getActivity(), NotificationService.class);
+			mentionsSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION,
+					NotificationService.ACTION_MARK_MENTIONS_SEEN);
+			getActivity().startService(mentionsSeenIntent);
+		} else if (key.equals(getString(R.string.pref_key_notify_direct_messages))) {
+			Intent directMessagesSeenIntent = new Intent(getActivity(), NotificationService.class);
+			directMessagesSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION,
+					NotificationService.ACTION_MARK_DIRECT_MESSAGES_SEEN);
+			getActivity().startService(directMessagesSeenIntent);
+		}
 	}
 
 	public static void disableDisasterMode(Context context) {
@@ -178,69 +177,30 @@ public class SettingsFragment extends PreferenceFragment {
 		ScanningAlarm.stopScanning(context);
 		Intent in = new Intent(context, ScanningService.class);
 		context.stopService(in);
-
 	}
 
 	private static boolean getBluetoothInitialState(Context context) {
-
-		SharedPreferences pref = PreferenceManager
-				.getDefaultSharedPreferences(context);
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
 		return pref.getBoolean("wasBlueEnabled", true);
-
-	}
-
-	// set offline mode preference
-	public static void setOfflinePreference(boolean pref, Context context) {
-
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor prefEditor = prefs.edit();
-		prefEditor.putBoolean(HtmlPage.OFFLINE_PREFERENCE, pref);
-		prefEditor.commit();
-	}
-
-	/**
-	 * Important: register shared preference change listener here!
-	 */
-	@Override
-	public void onResume() {
-		super.onResume();
-		prefs.registerOnSharedPreferenceChangeListener(prefListener);
-	}
-
-	/**
-	 * Important: unregister shared preferece chnage listener here!
-	 */
-	@Override
-	public void onPause() {
-		super.onPause();
-		prefs.unregisterOnSharedPreferenceChangeListener(prefListener);
 	}
 
 	public static boolean isDisModeActive(Context context) {
-		return PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean("prefDisasterMode", false);
+		return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("prefDisasterMode", false);
 	}
-	
-	
-	
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch(requestCode) {
-		case REQUEST_DISCOVERABLE:		
-			
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case REQUEST_DISCOVERABLE:
 			if (resultCode == BluetoothAdapter.STATE_CONNECTING) {
-				new ScanningAlarm(getActivity().getApplicationContext(),true);
+				new ScanningAlarm(getActivity().getApplicationContext(), true);
 				getActivity().finish();
 			} else if (resultCode == BluetoothAdapter.STATE_DISCONNECTED) {
-				SharedPreferences.Editor edit = prefs.edit();
-				edit.putBoolean(getString(R.string.prefDisasterMode), Constants.DISASTER_DEFAULT_ON);
-				edit.commit();	
-				CheckBoxPreference disPref = (CheckBoxPreference)findPreference(getString(R.string.prefDisasterMode));
+				Preferences.update(getActivity(), R.string.pref_key_disaster_mode, Constants.DISASTER_DEFAULT_ON);
+				CheckBoxPreference disPref = (CheckBoxPreference) findPreference(getString(R.string.pref_key_disaster_mode));
 				disPref.setChecked(false);
 			}
-			
-			
 		}
 	}
 }

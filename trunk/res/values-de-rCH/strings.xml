@@ -108,10 +108,15 @@
     <string name="send">Schicke</string>
 
     <!-- Tweet Notification -->
-    <string name="tweet_content_title">Nöi Tweet(s)!</string>
-    <string name="tweet_content_text">Du hesch nöi Tweet(s) ir Timeline</string>
-    <string name="mention_content_text">Du hesch nöi Mention(s)</string>
-    <string name="dis_tweet_content_text">Du hesch nöi Katastrophe-Tweet(s)</string>
+    <string name="notification_title_new_tweets">Nöi Tweet(s)!</string>
+    <string name="notification_title_new_mentions">Du hesch nöi Mention(s)</string>
+    
+        <!-- Tweet Notification -->
+    <string name="notification_title_new_tweets">%s nöi Tweets</string>
+    <string name="notification_title_new_mentions">%s nöi Erwähnige</string>
+    <string name="notification_title_new_direct_messages">%s nöi Diräktnachrichtä</string>
+    <string name="tds_notification_title">Nöi TDS notification!</string>
+    
 
     <!-- Install -->
     <string name="permission">Zuegriff uf Twimight Content Providers</string>
@@ -168,7 +173,7 @@
     <string name="no_thanks">Nei merci</string>
 
     <!-- Preferences -->
-    <string name="notifications">Benachrichtige</string>
+    <string name="pref_title_category_notifications">Benachrichtige</string>
     <string name="notifications_explain">Hie klicke für ds Benachrichtigungsmenu</string>
     <string name="notify_tweets">Tweets</string>
     <string name="notify_tweets_explain">Markiere um über nöi Tweets benachrichtigt z wärde.</string>

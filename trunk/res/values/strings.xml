@@ -122,11 +122,11 @@
     <string name="direct_messages">Direct Messages</string>
     <string name="delete_dm">Delete Direct Message</string>
 
-    <!-- Tweet Notification -->
-    <string name="tweet_content_title">New Tweet(s)!</string>
-    <string name="tweet_content_text">New tweet(s) in your timeline</string>
-    <string name="mention_content_text">You have new mention(s)</string>
-    <string name="dis_tweet_content_text">You have new disaster tweet(s)</string>
+    <!-- Notifications -->
+    <string name="notification_title_new_tweets">%s new tweets</string>
+    <string name="notification_title_new_mentions">%s new mentions</string>
+    <string name="notification_title_new_direct_messages">%s new direct messages</string>
+    <string name="tds_notification_title">New TDS notification!</string>
 
     <!-- Install -->
     <string name="permission">Access to Twimight content providers</string>
@@ -187,24 +187,17 @@
     <string name="no_thanks">No Thanks</string>
 
     <!-- Preferences -->
-    <string name="pref_offline_mode">prefOfflineMode</string>
-    <string name="prefWebShare">prefWebShare</string>
-    <string name="prefDisasterMode">prefDisasterMode</string>
-    <string name="prefTDSCommunication">refTDSCommunication</string>
-    <string name="prefUpdateInterval">prefUpdateInterval</string>
-    <string name="prefRunAtBoot">prefRunAtBoot</string>
-    <string name="prefUseLocation">prefUseLocation</string>
-    <string name="prefNotifyTweets">prefNotifyTweets</string>
-    <string name="prefNotifyMentions">prefNotifyMentions</string>
-    <string name="prefNotifyDirectMessages">prefNotifyDirectMessages</string>
-    <string name="notifications">Notifications</string>
-    <string name="notifications_explain">click to enter in the notifications menu</string>
-    <string name="notify_tweets">Notify Tweets</string>
-    <string name="notify_tweets_explain">tap to receive tweet notifications</string>
-    <string name="notify_mentions">Notify Mentions</string>
-    <string name="notify_mentions_explain">tap to be notified about mentions</string>
-    <string name="notify_dms">Notify Direct Messages</string>
-    <string name="notify_dms_explain">tap to be notified about new direct messages</string>
+    <string name="pref_title_category_notifications">Notifications</string>
+    <string name="pref_title_notify_new_tweets">New tweets</string>
+    <string name="pref_title_notify_mentions">Mentions</string>
+    <string name="pref_title_notify_direct_messages">Direct messages</string>
+    <string name="pref_title_notification_ringtone">Sound</string>
+    <string name="pref_title_notification_vibrate">Vibrate</string>
+    <string name="pref_title_category_twitter">Twitter</string>
+    <string name="pref_title_use_location">Use Location</string>
+    <string name="pref_summary_use_location_on">Geotagging new tweets is enabled by default</string>
+    <string name="pref_summary_use_location_off">Geotagging new tweets is disabled by default</string>
+    <string name="pref_title_background_updates">Background updates</string>
     <string name="use_location">Use Location</string>
     <string name="use_location_explain">Tap to geo-tag your Tweets by default.</string>
     <string name="updates_background">Updates in Background</string>
@@ -217,6 +210,7 @@
     <string name="tds_communication_explain">Tap to enable updates from Twimight Server</string>
     <string name="location_updates">Location Updates</string>
     <string name="location_updates_explain">Send periodic location updates to Twimight Server? Note that this will be of great use for the Disaster Mode when needed!</string>
+    <string name="ringtone_title_none">None</string>
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight has superpowers!

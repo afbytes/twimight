@@ -9,8 +9,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
-    android:versionCode="1700026"
-    android:versionName="1.1.5" >
+    android:versionCode="1700027"
+    android:versionName="1.1.6" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
 
     <permission
@@ -203,6 +204,7 @@
             android:enabled="true" />
         <service android:name=".net.twitter.TwitterSyncService" />
         <service android:name=".net.twitter.TweetActionService" />
+        <service android:name=".net.twitter.NotificationService" />
 
         <!-- RECEIVERS -->
 

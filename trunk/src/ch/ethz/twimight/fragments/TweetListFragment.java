@@ -17,6 +17,8 @@ import ch.ethz.twimight.views.PullToRefreshListView;
 public abstract class TweetListFragment extends ListFragment {
 
 	public static final String USER_ID = "USER_ID";
+	
+	private PullToRefreshListView mPullToRefreshListView;
 
 	public TweetListFragment() {
 
@@ -33,11 +35,11 @@ public abstract class TweetListFragment extends ListFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		PullToRefreshListView list = (PullToRefreshListView) super.onCreateView(inflater,
+		mPullToRefreshListView = (PullToRefreshListView) super.onCreateView(inflater,
 				container, savedInstanceState);
 		// Click listener when the user clicks on a tweet
-		list.setClickable(true);
-		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		mPullToRefreshListView.setClickable(true);
+		mPullToRefreshListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
@@ -48,7 +50,7 @@ public abstract class TweetListFragment extends ListFragment {
 			}
 		});
 		
-		list.setOnItemLongClickListener(new OnItemLongClickListener() {
+		mPullToRefreshListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -58,7 +60,11 @@ public abstract class TweetListFragment extends ListFragment {
 			}
 		});
 
-		return list;
+		return mPullToRefreshListView;
+	}
+	
+	PullToRefreshListView getListView(){
+		return mPullToRefreshListView;
 	}
 	
 	@Override

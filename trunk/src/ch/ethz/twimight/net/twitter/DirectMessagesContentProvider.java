@@ -13,24 +13,16 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.DmConversationListActivity;
-import ch.ethz.twimight.activities.DmListActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.DBOpenHelper;
 import ch.ethz.twimight.security.CertificateManager;
@@ -56,14 +48,12 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 	private static final int DMS = 1;
 	private static final int DM_ID = 2;
-
 	private static final int LIST_ALL = 3;
 	private static final int LIST_NORMAL = 4;
 	private static final int LIST_DISASTER = 5;
-
 	private static final int USERS = 6;
-
 	private static final int USER = 7;
+	private static final int INCOMING_RECEIVED_AFTER = 8;
 
 	// Here we define all the URIs this provider knows
 	static {
@@ -79,19 +69,19 @@ public class DirectMessagesContentProvider extends ContentProvider {
 
 		dmUriMatcher.addURI(DirectMessages.DM_AUTHORITY, DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/"
 				+ DirectMessages.DMS_SOURCE_ALL, LIST_ALL);
+
 		dmUriMatcher.addURI(DirectMessages.DM_AUTHORITY, DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/"
 				+ DirectMessages.DMS_SOURCE_NORMAL, LIST_NORMAL);
+
 		dmUriMatcher.addURI(DirectMessages.DM_AUTHORITY, DirectMessages.DMS + "/" + DirectMessages.DMS_LIST + "/"
 				+ DirectMessages.DMS_SOURCE_DISASTER, LIST_DISASTER);
 
+		dmUriMatcher.addURI(DirectMessages.DM_AUTHORITY, DirectMessages.DMS + "/"
+				+ DirectMessages.FILTER_INCOMING_RECEIVED_AFTER + "/#", INCOMING_RECEIVED_AFTER);
 	}
 
-	// for the status bar notification
-	private static final int DM_NOTIFICATION_ID = 2;
-
-	private static final int NOTIFY_DM = 3;
-	private static final int NOTIFY_DISASTER_DM = 4;
-
+	public static final String COL_USER_ROW_ID = "userRowId";
+	
 	/**
 	 * onCreate we initialize and open the DB.
 	 */
@@ -110,23 +100,20 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		switch (dmUriMatcher.match(uri)) {
 		case DMS:
 			return DirectMessages.DMS_CONTENT_TYPE;
-
 		case DM_ID:
 			return DirectMessages.DM_CONTENT_TYPE;
-
 		case USER:
 			return DirectMessages.DMS_CONTENT_TYPE;
-
 		case USERS:
 			return DirectMessages.DMUSERS_CONTENT_TYPE;
-
 		case LIST_ALL:
 			return DirectMessages.DMS_CONTENT_TYPE;
 		case LIST_NORMAL:
 			return DirectMessages.DMS_CONTENT_TYPE;
 		case LIST_DISASTER:
 			return DirectMessages.DMS_CONTENT_TYPE;
-
+		case INCOMING_RECEIVED_AFTER:
+			return DirectMessages.DMS_CONTENT_TYPE;
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
@@ -179,7 +166,7 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + ", " + DBOpenHelper.TABLE_DMS + "."
 					+ DirectMessages.COL_ISDISASTER + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_FLAGS
 					+ ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_DMID + ", " + DBOpenHelper.TABLE_USERS
-					+ "._id AS userRowId, " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
+					+ "._id AS "+COL_USER_ROW_ID+", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_DMS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER
@@ -255,7 +242,29 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		case LIST_NORMAL:
 			// TODO
 			break;
+			
+		case INCOMING_RECEIVED_AFTER:
+			Log.d(TAG, "Query INCOMING_RECEIVED_AFTER");
 
+			sql = "SELECT " + DBOpenHelper.TABLE_DMS + "._id, " + DBOpenHelper.TABLE_DMS + "."
+					+ DirectMessages.COL_TEXT + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER + ", "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + ", " + DBOpenHelper.TABLE_DMS + "."
+					+ DirectMessages.COL_ISDISASTER + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_FLAGS
+					+ ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_DMID + ", " + DBOpenHelper.TABLE_USERS
+					+ "._id AS "+COL_USER_ROW_ID+", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_DMS + " " + "JOIN "
+					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER
+					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + " " + "WHERE "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_RECEIVER + "==" + LoginActivity.getTwitterId(getContext()) + " AND "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_RECEIVED + ">" + uri.getLastPathSegment() + " " + "ORDER BY "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + " DESC " + "LIMIT 100";
+
+			c = database.rawQuery(sql, null);
+			// TODO: Correct notification URI
+			c.setNotificationUri(getContext().getContentResolver(), DirectMessages.CONTENT_URI);
+
+			break;
 		default:
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
 		}
@@ -439,7 +448,8 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			if (values.containsKey(DirectMessages.COL_FLAGS) && values.getAsInteger(DirectMessages.COL_FLAGS) != 0) {
 
 				Intent i = new Intent(getContext(), TwitterSyncService.class);
-				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION,
+						TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
 				getContext().startService(i);
 			}
 
@@ -614,35 +624,19 @@ public class DirectMessagesContentProvider extends ContentProvider {
 				c.close();
 			}
 
+
 			long rowId = database.insert(DBOpenHelper.TABLE_DMS, null, values);
 			if (rowId >= 0) {
-
-				// are we the receiver?
-				if (values.containsKey(DirectMessages.COL_RECEIVER)
-						&& Long.toString(values.getAsLong(DirectMessages.COL_RECEIVER)).equals(
-								LoginActivity.getTwitterId(getContext()))) {
-
-					if ((!DmConversationListActivity.running && !DmListActivity.running) && TwitterSyncService.firstIncomingDmSyncCompleted(getContext())
-							&& PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(
-									"prefNotifyDirectMessages", true) == true) {
-						// notify user
-						notifyUser(
-								NOTIFY_DM,
-								values.getAsString(DirectMessages.COL_SENDER) + ": "
-										+ values.getAsString(DirectMessages.COL_TEXT));
-
-					}
-				}
 				Uri insertUri = ContentUris.withAppendedId(DirectMessages.CONTENT_URI, rowId);
 				getContext().getContentResolver().notifyChange(insertUri, null);
 
 				if (flags > 0) {
 					// start synch service with a synch tweet request
 					Intent i = new Intent(getContext(), TwitterSyncService.class);
-					i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
+					i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION,
+							TwitterSyncService.EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES);
 					getContext().startService(i);
 				}
-
 				return insertUri;
 			} else {
 				throw new IllegalStateException("Could not insert direct message into DB " + values);
@@ -650,38 +644,6 @@ public class DirectMessagesContentProvider extends ContentProvider {
 		} else {
 			throw new IllegalArgumentException("Illegal direct message: " + values);
 		}
-	}
-
-	/**
-	 * Creates and triggers the status bar notifications
-	 */
-	private void notifyUser(int type, String tickerText) {
-
-		NotificationManager mNotificationManager = (NotificationManager) getContext().getSystemService(
-				Context.NOTIFICATION_SERVICE);
-		int icon = R.drawable.ic_notification;
-		long when = System.currentTimeMillis();
-		Notification notification = new Notification(icon, tickerText, when);
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		Context context = getContext().getApplicationContext();
-
-		CharSequence contentTitle = getContext().getString(R.string.dm_content_title);
-		CharSequence contentText = "New DirectMessages!";
-		Intent notificationIntent = new Intent(getContext(), DmConversationListActivity.class);
-		PendingIntent contentIntent;
-		switch (type) {
-		case (NOTIFY_DM):
-			contentText = getContext().getString(R.string.dm_content_text);
-			break;
-		default:
-			break;
-		}
-		contentIntent = PendingIntent.getActivity(getContext(), 0, notificationIntent, 0);
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
-		mNotificationManager.notify(DM_NOTIFICATION_ID, notification);
-
 	}
 
 }

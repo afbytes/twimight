@@ -47,14 +47,14 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_TABLE_MENTIONS = "mentions";
 	/** the mentions filter */
 	public static final String TWEETS_TABLE_USER = "user";
-
 	/** only normal tweets (no disaster tweets) */
 	public static final String TWEETS_SOURCE_NORMAL = "normal";
 	/** only disaster tweets */
 	public static final String TWEETS_SOURCE_DISASTER = "disaster";
 	/** both, normal and disaster tweets */
 	public static final String TWEETS_SOURCE_ALL = "all";
-
+	/** part of content provider url that returns only tweets that were received after a specified value */
+	public static final String FILTER_RECEIVED_AFTER = "received_after";
 	/** a specific tweet */
 	public static final String TWEET_TID = "tweet_tid";
 	/** a search request */

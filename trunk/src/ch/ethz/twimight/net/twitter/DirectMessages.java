@@ -59,6 +59,11 @@ public class DirectMessages implements BaseColumns {
 	public static final String DMS_USERS = "users";
 	/** all direct message from and to a user */
 	public static final String DMS_USER = "user";
+	/**
+	 * part of content provider url that returns only tweets that were received
+	 * after a specified value
+	 */
+	public static final String FILTER_INCOMING_RECEIVED_AFTER = "incoming_received_after";
 
 	// here start the column names
 	public static final String COL_ROW_ID = BaseColumns._ID;
@@ -80,6 +85,8 @@ public class DirectMessages implements BaseColumns {
 	public static final String COL_BUFFER = "buffer_flags";
 	/** Transactional flags */
 	public static final String COL_FLAGS = "flags";
+	/** Notification status */
+	public static final String COL_NOTIFICATION_STATUS = "notification_status";
 
 	// for disaster mode
 	/** disaster or normal message? */
@@ -115,4 +122,7 @@ public class DirectMessages implements BaseColumns {
 	/** Disaster messages for other users */
 	public static final int BUFFER_DISASTER_OTHERS = 8;
 
+	public static final int NOTIFICATION_STATUS_SEEN = 3;
+	public static final int NOTIFICATION_STATUS_NOTIFIED = 2;
+	public static final int NOTIFICATION_STATUS_PENDING = 1;
 }

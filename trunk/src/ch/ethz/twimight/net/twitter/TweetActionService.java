@@ -56,7 +56,7 @@ public class TweetActionService extends IntentService {
 		String action = intent.getStringExtra(EXTRA_KEY_ACTION);
 		mUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
 		mCursor = getContentResolver().query(mUri, null, null, null, null);
-		if(mCursor!=null){
+		if (mCursor != null) {
 			mCursor.moveToFirst();
 			if (EXTRA_ACTION_RETWEET.equals(action)) {
 				retweet();
@@ -198,13 +198,17 @@ public class TweetActionService extends IntentService {
 		List<String> linkUrls = new LinkedList<String>();
 		byte[] serializedMediaEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
 		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
-		for (URLEntity mediaEntity : mediaEntities) {
-			linkUrls.add(mediaEntity.getURL());
+		if (mediaEntities != null) {
+			for (URLEntity mediaEntity : mediaEntities) {
+				linkUrls.add(mediaEntity.getURL());
+			}
 		}
 		byte[] serializedUrlEntities = mCursor.getBlob(mCursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
 		URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
-		for (URLEntity urlEntity : urlEntities) {
-			linkUrls.add(urlEntity.getURL());
+		if (urlEntities != null) {
+			for (URLEntity urlEntity : urlEntities) {
+				linkUrls.add(urlEntity.getURL());
+			}
 		}
 		return linkUrls;
 	}

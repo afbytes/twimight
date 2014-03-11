@@ -158,6 +158,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ DirectMessages.COL_RECEIVED + " integer, "
 			+ DirectMessages.COL_FLAGS + " integer default 0, "
 			+ DirectMessages.COL_BUFFER + " integer default 0, "
+			+ DirectMessages.COL_NOTIFICATION_STATUS + " integer default " + DirectMessages.NOTIFICATION_STATUS_SEEN + ", "
 			+ DirectMessages.COL_ISDISASTER + " integer default 0, "
 			+ DirectMessages.COL_DISASTERID + " integer, "
 			+ DirectMessages.COL_ISVERIFIED + " integer, "

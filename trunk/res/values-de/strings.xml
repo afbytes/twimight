@@ -60,8 +60,7 @@
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight hat Superkräfte!
-        \n\nFalls die Internetverbindung zusammenbricht, aktiviere den
-        <b><i>Katastrophen-Modus</i></b> in den Einstellungen. Katastrophen-Tweets
+        \n\nFalls die Internetverbindung zusammenbricht, aktiviere den<b><i>Katastrophen-Modus</i></b> in den Einstellungen. Katastrophen-Tweets
         werden epidemisch zwischen allen Telefonen im Katastrophen-Modus
         verbreitet, auch ohne 3G oder WLAN.
         \n\nSobald die Verbindung wieder hergestellt wird, werden deine
@@ -111,10 +110,11 @@
     <string name="send">Schicken</string>
 
     <!-- Tweet Notification -->
-    <string name="tweet_content_title">Neue(r) Tweet(s)!</string>
-    <string name="tweet_content_text">Neue(r) Tweet(s) in deiner timeline</string>
-    <string name="mention_content_text">Du hast neue mention(s)</string>
-    <string name="dis_tweet_content_text">Du hast neue Katastrophen-Tweet(s)</string>
+    <string name="notification_title_new_tweets">%s neue Tweets</string>
+    <string name="notification_title_new_mentions">%s neue Erwähnungen</string>
+    <string name="notification_title_new_direct_messages">%s neue Direktnachrichten</string>
+    <string name="tds_notification_title">Neue TDS notification!</string>
+    
 
     <!-- Install -->
     <string name="permission">Zugriff auf Twimight Content Providers</string>
@@ -171,7 +171,7 @@
     <string name="no_thanks">Nein danke</string>
 
     <!-- Preferences -->
-    <string name="notifications">Benachrichtigungen</string>
+    <string name="pref_title_category_notifications">Benachrichtigungen</string>
     <string name="notifications_explain">Hier klicken um ins Benachrichtigungsmenu zu gelangen</string>
     <string name="notify_tweets">Tweets</string>
     <string name="notify_tweets_explain">Markieren um über neue Tweets benachrichtigt zu werden.</string>

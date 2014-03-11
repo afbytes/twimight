@@ -32,6 +32,7 @@ import ch.ethz.twimight.fragments.TimelineFragment;
 import ch.ethz.twimight.fragments.adapters.FragmentListPagerAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.location.LocationHelper;
+import ch.ethz.twimight.net.twitter.NotificationService;
 import ch.ethz.twimight.util.Constants;
 
 /**
@@ -64,7 +65,7 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 
 	ViewPager mViewPager;
 	FragmentListPagerAdapter mPagerAdapter;
-	
+
 	private String[] mFragmentTitles;
 
 	/**
@@ -93,8 +94,9 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		handler.postDelayed(checkLocation, 1 * 60 * 1000L);
 
 		getActionBar().setSubtitle("@" + LoginActivity.getTwitterScreenname(this));
-		mFragmentTitles = new String[]{getString(R.string.timeline), getString(R.string.favorites), getString(R.string.mentions)};
-		
+		mFragmentTitles = new String[] { getString(R.string.timeline), getString(R.string.favorites),
+				getString(R.string.mentions) };
+
 		mPagerAdapter = new FragmentListPagerAdapter(getFragmentManager());
 		mPagerAdapter.addFragment(new TimelineFragment());
 		mPagerAdapter.addFragment(new FavoritesFragment());
@@ -119,25 +121,28 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		actionBar.setDisplayHomeAsUpEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		Tab timelineTab = actionBar.newTab().setIcon(R.drawable.ic_timeline).setTabListener(new TabListener(mViewPager));
+		Tab timelineTab = actionBar.newTab().setIcon(R.drawable.ic_timeline)
+				.setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(timelineTab);
 
-		Tab favoritesTab = actionBar.newTab().setIcon(R.drawable.ic_favorites).setTabListener(new TabListener(mViewPager));
+		Tab favoritesTab = actionBar.newTab().setIcon(R.drawable.ic_favorites)
+				.setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(favoritesTab);
 
-		Tab mentionsTab = actionBar.newTab().setIcon(R.drawable.ic_mentions).setTabListener(new TabListener(mViewPager));
+		Tab mentionsTab = actionBar.newTab().setIcon(R.drawable.ic_mentions)
+				.setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(mentionsTab);
-		
+
 		int initialPosition = 0;
 		Intent intent = getIntent();
 		if (intent.hasExtra(EXTRA_KEY_INITIAL_TAB)) {
 			String initialTab = intent.getStringExtra(EXTRA_KEY_INITIAL_TAB);
-			
-			if(EXTRA_INITIAL_TAB_TIMELINE.equals(initialTab)){
+
+			if (EXTRA_INITIAL_TAB_TIMELINE.equals(initialTab)) {
 				initialPosition = 0;
-			} else if(EXTRA_INITIAL_TAB_FAVORITES.equals(initialTab)){
+			} else if (EXTRA_INITIAL_TAB_FAVORITES.equals(initialTab)) {
 				initialPosition = 1;
-			} else if(EXTRA_INITIAL_TAB_MENTIONS.equals(initialTab)){
+			} else if (EXTRA_INITIAL_TAB_MENTIONS.equals(initialTab)) {
 				initialPosition = 2;
 			}
 			intent.removeExtra(EXTRA_KEY_INITIAL_TAB);
@@ -145,8 +150,8 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		mViewPager.setCurrentItem(initialPosition);
 		setFragment(initialPosition);
 	}
-	
-	private void setFragment(int position){
+
+	private void setFragment(int position) {
 		getActionBar().setTitle(mFragmentTitles[position]);
 		getActionBar().setSelectedNavigationItem(position);
 	}
@@ -177,7 +182,8 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 	public void onResume() {
 		super.onResume();
 		running = true;
-
+		markTimelineSeen();
+		markMentionsSeen();
 		Long pauseTimestamp = getOnPauseTimestamp(this);
 		if (pauseTimestamp != 0 && (System.currentTimeMillis() - pauseTimestamp) > 10 * 60 * 1000L) {
 			handler = new Handler();
@@ -187,11 +193,24 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 
 	@Override
 	protected void onPause() {
-
 		super.onPause();
 		setOnPauseTimestamp(System.currentTimeMillis(), this);
+		markTimelineSeen();
+		markMentionsSeen();
 	}
 
+	private void markTimelineSeen(){
+		Intent timelineSeenIntent = new Intent(this, NotificationService.class);
+		timelineSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_TIMELINE_SEEN);
+		startService(timelineSeenIntent);
+	}
+	
+	private void markMentionsSeen(){
+		Intent mentionsSeenIntent = new Intent(this, NotificationService.class);
+		mentionsSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_MENTIONS_SEEN);
+		startService(mentionsSeenIntent);
+	}
+	
 	/**
 	 * 
 	 * @param id

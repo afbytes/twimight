@@ -23,7 +23,8 @@ import android.content.Intent;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
-import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.R;
+import ch.ethz.twimight.util.Preferences;
 
 /**
  * Regularly schedules and handles alarms to fetch updates from twitter
@@ -36,21 +37,22 @@ public class TwitterAlarm extends BroadcastReceiver {
 	private static final String WAKE_LOCK = "TwitterLock";
 	private static final String TAG = "TwitterAlarm";
 	private static WakeLock wakeLock;
-	Intent intent;
 
-	public TwitterAlarm() {
+
+	public static void initialize(Context context) {
+		stopTwitterAlarm(context);
+		long intervalMinutes = Long.valueOf(Preferences.getString(context, R.string.pref_key_update_interval, "5"));
+		if (intervalMinutes > 0) {
+			long intervalMillis = intervalMinutes * 60 * 1000;
+			AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+			Intent intent = new Intent(context, TwitterAlarm.class);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent,
+					PendingIntent.FLAG_UPDATE_CURRENT);
+			alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, intervalMillis,
+					intervalMillis, pendingIntent);
+		}
 	}
 
-	public TwitterAlarm(Context context) {
-
-		AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		intent = new Intent(context, TwitterAlarm.class);
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-		alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, Constants.UPDATER_UPDATE_PERIOD,
-				Constants.UPDATER_UPDATE_PERIOD, pendingIntent);
-		Log.i(TAG, "alarm set");
-	}
 
 	/**
 	 * This is executed when the alarm goes off.
@@ -72,10 +74,11 @@ public class TwitterAlarm extends BroadcastReceiver {
 		i = new Intent(context, TwitterSyncService.class);
 		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MESSAGES);
 		context.startService(i);
-// tentatively removing transactional sync (should be done in every step)
-//		// sync transactional
-//		i = new Intent(context, TransactionalSyncService.class);
-//		context.startService(i);
+		// tentatively removing transactional sync (should be done in every
+		// step)
+		// // sync transactional
+		// i = new Intent(context, TransactionalSyncService.class);
+		// context.startService(i);
 		// sync friends
 		i = new Intent(context, TwitterSyncService.class);
 		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FRIENDS);
