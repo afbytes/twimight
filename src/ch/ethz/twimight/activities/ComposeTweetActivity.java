@@ -418,7 +418,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result)
-				Toast.makeText(ComposeTweetActivity.this, getString(R.string.no_connection4), Toast.LENGTH_SHORT)
+				Toast.makeText(ComposeTweetActivity.this, getString(R.string.no_connection_upload_tweet), Toast.LENGTH_SHORT)
 						.show();
 
 			if (insertUri != null) {

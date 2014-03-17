@@ -242,7 +242,7 @@ public class ComposeDmActivity extends ThemeSelectorActivity {
 		protected void onPostExecute(Boolean result) {
 			if (result)
 				Toast.makeText(ComposeDmActivity.this,
-						getString(R.string.no_connection3), Toast.LENGTH_SHORT)
+						getString(R.string.no_connection_send_message), Toast.LENGTH_SHORT)
 						.show();
 
 			super.onPostExecute(result);

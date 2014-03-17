@@ -5,8 +5,7 @@
 	Public License v2.0 which accompanies this distribution, and is available 
 	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo 
 	Carta - Implementation Theus Hossmann - Implementation Dominik Schatzmann 
-	- Message specification
--->
+	- Message specification-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.ethz.twimight"
     android:versionCode="1700027"
@@ -44,12 +43,12 @@
     <application
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_label" >
+        android:label="@string/app_name" >
 
         <!-- ACTIVITIES -->
 
         <activity
-            android:name=".activities.ConditionsActivity"
+            android:name="ch.ethz.twimight.activities.ConditionsActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
             android:noHistory="false"
@@ -61,14 +60,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.TipsActivity"
+            android:name="ch.ethz.twimight.activities.TipsActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
             android:noHistory="false"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
         </activity>
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="ch.ethz.twimight.activities.LoginActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
             android:noHistory="false"
@@ -85,7 +84,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SearchableActivity"
+            android:name="ch.ethz.twimight.activities.SearchableActivity"
             android:label="@string/search_results"
             android:launchMode="singleTask" >
             <intent-filter>
@@ -99,7 +98,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".activities.HomeScreenActivity"
+            android:name="ch.ethz.twimight.activities.HomeScreenActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop" >
             <intent-filter>
@@ -118,7 +117,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.UserTweetListActivity"
+            android:name="ch.ethz.twimight.activities.UserTweetListActivity"
             android:label="User Tweets"
             android:launchMode="singleTop" >
             <meta-data
@@ -126,14 +125,14 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.TweetDetailActivity"
+            android:name="ch.ethz.twimight.activities.TweetDetailActivity"
             android:label="Twimight" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.UserProfileActivity"
+            android:name="ch.ethz.twimight.activities.UserProfileActivity"
             android:label="User"
             android:launchMode="singleTop" >
             <meta-data
@@ -141,7 +140,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.UserListActivity"
+            android:name="ch.ethz.twimight.activities.UserListActivity"
             android:label="Twimight"
             android:launchMode="singleTop" >
             <meta-data
@@ -149,7 +148,7 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.DmConversationListActivity"
+            android:name="ch.ethz.twimight.activities.DmConversationListActivity"
             android:label="Direct Messages"
             android:launchMode="singleTop" >
             <meta-data
@@ -157,59 +156,72 @@
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.DmListActivity"
+            android:name="ch.ethz.twimight.activities.DmListActivity"
             android:label="Direct Messages" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".activities.SearchableActivity" />
         </activity>
         <activity
-            android:name=".activities.ComposeTweetActivity"
+            android:name="ch.ethz.twimight.activities.ComposeTweetActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
             android:theme="@style/TranslucentTheme"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activities.ComposeDmActivity"
+            android:name="ch.ethz.twimight.activities.ComposeDmActivity"
             android:label="Twimight"
             android:launchMode="singleTop"
             android:theme="@style/TranslucentTheme"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name="ch.ethz.twimight.activities.SettingsActivity"
             android:label="Settings" />
         <activity
-            android:name=".activities.AboutActivity"
+            android:name="ch.ethz.twimight.activities.AboutActivity"
             android:label="About Twimight"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
         <activity
-            android:name=".activities.WebViewActivity"
+            android:name="ch.ethz.twimight.activities.WebViewActivity"
             android:label="WebView"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
         <activity
-            android:name=".activities.PhotoViewActivity"
+            android:name="ch.ethz.twimight.activities.PhotoViewActivity"
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
+        </activity>
+        <activity
+            android:name="ch.ethz.twimight.UrlRedirectActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="twitter.com"
+                    android:scheme="http" />
+            </intent-filter>
         </activity>
 
         <!-- SERVICES -->
 
         <service
-            android:name=".net.tds.TDSService"
+            android:name="ch.ethz.twimight.net.tds.TDSService"
             android:enabled="true" />
         <service
-            android:name=".net.opportunistic.ScanningService"
+            android:name="ch.ethz.twimight.net.opportunistic.ScanningService"
             android:enabled="true" />
         <service
-            android:name=".net.Html.HtmlService"
+            android:name="ch.ethz.twimight.net.Html.HtmlService"
             android:enabled="true" />
-        <service android:name=".net.twitter.TwitterSyncService" />
-        <service android:name=".net.twitter.TweetActionService" />
-        <service android:name=".net.twitter.NotificationService" />
+        <service android:name="ch.ethz.twimight.net.twitter.TwitterSyncService" />
+        <service android:name="ch.ethz.twimight.net.twitter.TweetActionService" />
+        <service android:name="ch.ethz.twimight.net.twitter.NotificationService" />
 
         <!-- RECEIVERS -->
 
         <receiver
-            android:name=".util.CommunicationReceiver"
+            android:name="ch.ethz.twimight.util.CommunicationReceiver"
             android:enabled="true"
             android:priority="0" >
             <intent-filter>
@@ -217,7 +229,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".util.BootReceiver"
+            android:name="ch.ethz.twimight.util.BootReceiver"
             android:enabled="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
             <intent-filter>
@@ -225,18 +237,10 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".util.OMFReceiver"
-            android:enabled="true"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="autom_enable_disaster_mode" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".net.opportunistic.ScanningAlarm"
+            android:name="ch.ethz.twimight.net.opportunistic.ScanningAlarm"
             android:enabled="true" />
         <receiver
-            android:name=".net.tds.TDSAlarm"
+            android:name="ch.ethz.twimight.net.tds.TDSAlarm"
             android:enabled="true" />
         <receiver
             android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"

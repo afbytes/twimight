@@ -2,17 +2,17 @@
 <resources>
 
     <string-array name="backgroundUpdateIntervalNames">
-        <item>no background updates</item>
-        <item>once a minute</item>
-        <item>every 5 minutes</item>
-        <item>every 15 minutes</item>
-        <item>every 30 minutes</item>
-        <item>once an hour</item>
-        <item>every 4 hours</item>
-        <item>every 12 hours</item>
-        <item>once a day</item>
+        <item>@string/update_interval_none</item>
+        <item>@string/update_interval_1_min</item>
+        <item>@string/update_interval_5_min</item>
+        <item>@string/update_interval_15_min</item>
+        <item>@string/update_interval_30_min</item>
+        <item>@string/update_interval_1_h</item>
+        <item>@string/update_interval_4_h</item>
+        <item>@string/update_interval_12_h</item>
+        <item>@string/update_interval_1_d</item>
     </string-array>
-    <string-array name="backgroundUpdateIntervalValues">
+    <integer-array name="backgroundUpdateIntervalValues">
         <item>0</item>
         <item>1</item>
         <item>5</item>
@@ -22,7 +22,6 @@
         <item>240</item>
         <item>720</item>
         <item>1440</item>
-    </string-array>
+    </integer-array>
  
-
 </resources>
