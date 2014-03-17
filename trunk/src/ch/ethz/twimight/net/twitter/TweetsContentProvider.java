@@ -1212,7 +1212,7 @@ public class TweetsContentProvider extends ContentProvider {
 
 		if (localUserScreenName != null) {
 			// we convert to lower case to check if it's a mention
-			if (text.toLowerCase(Locale.getDefault()).matches(".*@" + localUserScreenName.toLowerCase() + "\\W.*")) {
+			if (text.toLowerCase(Locale.getDefault()).matches(".*@" + localUserScreenName.toLowerCase(Locale.getDefault()) + "\\W.*")) {
 
 				values.put(Tweets.COL_MENTIONS, 1);
 				// put into mentions buffer

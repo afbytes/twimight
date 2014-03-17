@@ -1,5 +1,7 @@
 package ch.ethz.twimight.views;
 
+import java.util.Locale;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -48,7 +50,7 @@ public class TweetView extends FrameLayout {
 		mAccentColorNormalMode2 = context.getResources().getColor(R.color.accent_normalmode_2);
 		mAccentColorDisasterMode2 = context.getResources().getColor(R.color.accent_disastermode_2);
 		
-		mOwnHandle = "@" + LoginActivity.getTwitterScreenname(context).toLowerCase();
+		mOwnHandle = "@" + LoginActivity.getTwitterScreenname(context).toLowerCase(Locale.getDefault());
 		mOwnTwitterId = LoginActivity.getTwitterId(context);
 		
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -210,7 +212,7 @@ public class TweetView extends FrameLayout {
 
 		// highlight mentions
 		Spannable tweetSpannable = new SpannableString(tweetText);
-		String lowerCaseTweetText = tweetText.toLowerCase();
+		String lowerCaseTweetText = tweetText.toLowerCase(Locale.getDefault());
 		int start = lowerCaseTweetText.indexOf(mOwnHandle);
 		int end;
 		while (start != -1) {

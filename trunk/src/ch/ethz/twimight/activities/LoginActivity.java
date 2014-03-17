@@ -210,7 +210,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 
 				new GetRequestTokenTask().execute();
 			} else {
-				Toast.makeText(this, getString(R.string.no_connection2), Toast.LENGTH_LONG).show();
+				Toast.makeText(this, getString(R.string.no_connection_login), Toast.LENGTH_LONG).show();
 			}
 			break;
 		}

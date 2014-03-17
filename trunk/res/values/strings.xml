@@ -7,6 +7,7 @@
   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
   
   Contributors:
+      Steven Meliopoulos - Implementation
       Paolo Carta - Implementation
       Theus Hossmann - Implementation
       Dominik Schatzmann - Message specification
@@ -15,13 +16,9 @@
 
     <!-- General -->
     <string name="app_name">Twimight</string>
-    <string name="app_label">Twimight</string>
-    <string name="twitter">Twitter</string>
     <string name="tweets">Tweets</string>
     <string name="tweet_length">140</string>
     <string name="tweet">Tweet</string>
-    <string name="users">Users</string>
-    <string name="user">User</string>
     <string name="message">Message</string>
     <string name="action_mention">Mention</string>
     <string name="cancel">Cancel</string>
@@ -30,9 +27,8 @@
     <string name="no">No</string>
     <string name="placeholder_short">Lorem Ipsum</string>
     <string name="placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed urna lacus, iaculis feugiat magna in, ornare pellentesque purus.</string>
-
+    
     <!-- Menu -->
-    <string name="home">Home</string>
     <string name="profile">My Profile</string>
     <string name="messages">Messages</string>
     <string name="settings">Settings</string>
@@ -51,11 +47,10 @@
     <string name="tweet_will_be_favorited">This tweet will be marked as favorite soon (when Internet connection available).</string>
     <string name="tweet_will_be_unfavorited">This tweet will be un-favorited soon (when Internet connection available).</string>
     <string name="tweet_will_be_retweeted">This retweet will be posted soon (when Internet connection available).</string>
-    <string name="no_tweets">No Tweets available</string>
     <string name="no_connection">Not connected to the Internet, showing old Tweets!</string>
     <string name="location_on">Location is turned on</string>
     <string name="location_off">Location is turned off</string>
-    <string name="no_connection4">No connectivity, your Tweet will be uploaded to Twitter once we have a connection!</string>
+    <string name="no_connection_upload_tweet">No connectivity! Your Tweet will be uploaded to Twitter once we have a connection.</string>
     <string name="picker">Complete action using</string>
     <string name="retweeted_by">retweeted by</string>
     <string name="delete_tweet">Are you sure you want to delete your Tweet?</string>
@@ -79,19 +74,16 @@
 
     <!-- web page caching and pictures -->
     <string name="clear_cache_question">Are you sure you want to clear all files and data of saved webpages?</string>
-    <string name="clear_cache_title">Clear Cache</string>
+    <string name="clear_cache_title">Clear cache</string>
     <string name="loading">Loading</string>
     <string name="file_not_exists">Page not downloaded yet</string>
-    <string name="url_not_added">The URL has not been added to the Database</string>
-    <string name="loading_finished">Loading finished.</string>
-    <string name="faulty_page">The page is corrupted. It will downloaded again shortly</string>
+    <string name="url_not_added">The URL has not been added to the database</string>
+    <string name="loading_finished">Loading finished</string>
+    <string name="faulty_page">The page is corrupted. It will downloaded again shortly.</string>
     <string name="no_valid_pdf">No valid application for viewing pdf files</string>
     <string name="no_valid_pictures">No valid application for viewing pictures</string>
     <string name="no_valid_audio">No valid application for playing audio files</string>
     <string name="no_valid_video">No valid application for playing video files</string>
-    <string name="pages_not_downloaded">Unable to surf in offline mode because pages have not been downloaded</string>
-    <string name="downloaded">Downloaded</string>
-    <string name="downloading">Downloading</string>
     <string name="download_toast">The linked pages will be downloaded for offline viewing.</string>
 
     <!-- User, Friends -->
@@ -103,24 +95,19 @@
     <string name="will_start_following">You will start following this user once Internet connectivity is available.</string>
     <string name="follow">Follow</string>
     <string name="unfollow">Unfollow</string>
-    <string name="no_users">No users available.</string>
 
     <!-- Searching -->
-    <string name="no_results">No results</string>
     <string name="search_hint">Search Tweets and users</string>
-    <string name="results_for">Search Results for</string>
     <string name="search_results">Search Results</string>
 
     <!-- Direct Messages -->
+    <string name="direct_messages">Direct Messages</string>
+    <string name="with">with</string>
     <string name="no_dms">No direct messages available</string>
     <string name="to">To</string>
-    <string name="no_connection3">No connectivity, your Message will be sent once we have a connection!</string>
-    <string name="dm_content_title">New Direct Messages!</string>
-    <string name="dm_content_text">You have new direct message(s)</string>
+    <string name="no_connection_send_message">No connectivity! Your Message will be sent once we have a connection.</string>
     <string name="send">Send</string>
-    <string name="with">with</string>
-    <string name="direct_messages">Direct Messages</string>
-    <string name="delete_dm">Delete Direct Message</string>
+    <string name="delete_dm">Delete direct message</string>
 
     <!-- Notifications -->
     <string name="notification_title_new_tweets">%s new tweets</string>
@@ -129,12 +116,11 @@
     <string name="tds_notification_title">New TDS notification!</string>
 
     <!-- Install -->
-    <string name="permission">Access to Twimight content providers</string>
     <string name="permDescription">This permission will grant access to content providers. Data might be manipulated by malicious applications.</string>
 
     <!-- Login, Logout -->
     <string name="login">Login</string>
-    <string name="no_connection2">Not connected to the Internet, please try again later</string>
+    <string name="no_connection_login">Not connected to the Internet, please try again later</string>
     <string name="error_signing">Signing the request failed</string>
     <string name="error_twitter">Twitter is not reachable at the moment, please try again later</string>
     <string name="error_parameters">Required parameters were not correctly set</string>
@@ -155,7 +141,7 @@
     <string name="no_certificate">No valid certificate.</string>
     <string name="no_update">No update</string>
     <string name="starting_update">Starting TDS update.</string>
-    <string name="mighty">The mighty Twitter client!</string>
+    <string name="twimight_slogan">The mighty Twitter client!</string>
     <string name="copyright">\u00A9 CSG, ETH Zurich, 2012</string>
     <string name="revoke">Revoke</string>
     <string name="revoke_key">Are you sure you want to revoke your key? You should only do that if the private key was compromised (e.g., your phone was stolen).</string>
@@ -198,19 +184,16 @@
     <string name="pref_summary_use_location_on">Geotagging new tweets is enabled by default</string>
     <string name="pref_summary_use_location_off">Geotagging new tweets is disabled by default</string>
     <string name="pref_title_background_updates">Background updates</string>
-    <string name="use_location">Use Location</string>
-    <string name="use_location_explain">Tap to geo-tag your Tweets by default.</string>
-    <string name="updates_background">Updates in Background</string>
-    <string name="updates_background_explain">Tap to start automatic background updates</string>
-    <string name="updates_interval">Updates Interval</string>
-    <string name="updates_interval_explain">select the desired update interval</string>
-    <string name="disaster_mode">Disaster Mode</string>
-    <string name="disaster_mode_explain">Tap to enable disaster mode. Note that this enables Bluetooth.</string>
-    <string name="tds_communication">Twimight Server Communication</string>
-    <string name="tds_communication_explain">Tap to enable updates from Twimight Server</string>
-    <string name="location_updates">Location Updates</string>
-    <string name="location_updates_explain">Send periodic location updates to Twimight Server? Note that this will be of great use for the Disaster Mode when needed!</string>
     <string name="ringtone_title_none">None</string>
+    <string name="update_interval_none">no background updates</string>
+    <string name="update_interval_1_min">once a minute</string>
+    <string name="update_interval_5_min">every 5 minutes</string>
+    <string name="update_interval_15_min">every 15 minutes</string>
+    <string name="update_interval_30_min">every 30 minutes</string>
+    <string name="update_interval_1_h">once an hour</string>
+    <string name="update_interval_4_h">every 4 hours</string>
+    <string name="update_interval_12_h">every 12 hours</string>
+    <string name="update_interval_1_d">once a day</string>
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight has superpowers!
