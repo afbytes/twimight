@@ -12,7 +12,7 @@
         <item>@string/update_interval_12_h</item>
         <item>@string/update_interval_1_d</item>
     </string-array>
-    <integer-array name="backgroundUpdateIntervalValues">
+    <string-array name="backgroundUpdateIntervalValues">
         <item>0</item>
         <item>1</item>
         <item>5</item>
@@ -22,6 +22,6 @@
         <item>240</item>
         <item>720</item>
         <item>1440</item>
-    </integer-array>
- 
+    </string-array>
+
 </resources>

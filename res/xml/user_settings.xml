@@ -71,14 +71,15 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:key="prefCategoryOfflineMode"
-        android:title="Offline Mode" >
+        android:title="@string/pref_title_category_offline_mode" >
         <CheckBoxPreference
             android:defaultValue="false"
             android:enabled="true"
             android:key="@string/pref_key_offline_mode"
             android:selectable="true"
-            android:summary="Tap to enable automatic webpage download. Note that this will automatically download webpages linked to tweets."
-            android:title="Automatic Web Download" >
+            android:summaryOn="@string/pref_summary_automatic_web_download_on"
+            android:summaryOff="@string/pref_summary_automatic_web_download_off"
+            android:title="@string/pref_title_automatic_web_download" >
         </CheckBoxPreference>
         <CheckBoxPreference
             android:defaultValue="false"
@@ -86,28 +87,29 @@
             android:enabled="true"
             android:key="@string/pref_key_web_share"
             android:selectable="true"
-            android:summary="Tap to enable webpage share function in disaster mode, this could drain battery faster"
-            android:title="Web Page Share" >
+            android:summaryOn="@string/pref_summary_web_page_sharing_on"
+            android:summaryOff="@string/pref_summary_web_page_sharing_off"
+            android:title="@string/pref_title_web_page_sharing" >
         </CheckBoxPreference>
     </PreferenceCategory>
     <PreferenceCategory
         android:key="prefCategoryDisasterMode"
-        android:title="Disaster Mode" >
+        android:title="@string/pref_title_category_disater_mode" >
         <CheckBoxPreference
             android:defaultValue="false"
             android:enabled="true"
             android:key="@string/pref_key_disaster_mode"
             android:selectable="true"
-            android:summary="Tap to enable disaster mode. Note that this enables Bluetooth."
-            android:title="Disaster Mode" >
+            android:title="@string/pref_title_disater_mode" >
         </CheckBoxPreference>
         <CheckBoxPreference
             android:defaultValue="true"
             android:enabled="true"
             android:key="@string/pref_key_tds_communication"
             android:selectable="true"
-            android:summary="Tap to enable updates from disaster server"
-            android:title="TDS Communication" >
+            android:summaryOn="@string/pref_summary_tds_communication_on"
+            android:summaryOff="@string/pref_summary_tds_communication_off"
+            android:title="@string/pref_title_tds_communication" >
         </CheckBoxPreference>
     </PreferenceCategory>
 

@@ -33,7 +33,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 
@@ -385,7 +384,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getBaseContext(), UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.FOLLOWERS_KEY);
+				i.putExtra(UserListActivity.EXTRA_KEY_INITIAL_TAB, UserListActivity.EXTRA_INITIAL_TAB_FOLLOWERS);
 				startActivity(i);
 
 			}
@@ -400,7 +399,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getBaseContext(), UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.FRIENDS_KEY);
+				i.putExtra(UserListActivity.EXTRA_KEY_INITIAL_TAB, UserListActivity.EXTRA_INITIAL_TAB_FOLLOWING);
 				startActivity(i);
 			}
 
@@ -412,7 +411,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			public void onClick(View v) {
 
 				Intent i = new Intent(getBaseContext(), UserListActivity.class);
-				i.putExtra(UserListActivity.USER_FILTER_REQUEST, UserListFragment.PEERS_KEY);
+				i.putExtra(UserListActivity.EXTRA_KEY_INITIAL_TAB, UserListActivity.EXTRA_INITIAL_TAB_PEERS);
 				startActivity(i);
 
 			}

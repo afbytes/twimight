@@ -58,7 +58,7 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
 
 	ActionBar actionBar;
-	public static final String EXTRA_KEY_INITIAL_TAB = "filter_request";
+	public static final String EXTRA_KEY_INITIAL_TAB = "EXTRA_KEY_INITIAL_TAB";
 	public static final String EXTRA_INITIAL_TAB_TIMELINE = "EXTRA_INITIAL_TAB_TIMELINE";
 	public static final String EXTRA_INITIAL_TAB_FAVORITES = "EXTRA_INITIAL_TAB_FAVORITES";
 	public static final String EXTRA_INITIAL_TAB_MENTIONS = "EXTRA_INITIAL_TAB_MENTIONS";
@@ -132,9 +132,12 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		Tab mentionsTab = actionBar.newTab().setIcon(R.drawable.ic_mentions)
 				.setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(mentionsTab);
+		setSelectedTab(getIntent());
 
+	}
+
+	private void setSelectedTab(Intent intent) {
 		int initialPosition = 0;
-		Intent intent = getIntent();
 		if (intent.hasExtra(EXTRA_KEY_INITIAL_TAB)) {
 			String initialTab = intent.getStringExtra(EXTRA_KEY_INITIAL_TAB);
 
@@ -173,6 +176,7 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		setIntent(intent);
+		setSelectedTab(intent);
 	}
 
 	/**
@@ -199,18 +203,20 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		markMentionsSeen();
 	}
 
-	private void markTimelineSeen(){
+	private void markTimelineSeen() {
 		Intent timelineSeenIntent = new Intent(this, NotificationService.class);
-		timelineSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_TIMELINE_SEEN);
+		timelineSeenIntent
+				.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_TIMELINE_SEEN);
 		startService(timelineSeenIntent);
 	}
-	
-	private void markMentionsSeen(){
+
+	private void markMentionsSeen() {
 		Intent mentionsSeenIntent = new Intent(this, NotificationService.class);
-		mentionsSeenIntent.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_MENTIONS_SEEN);
+		mentionsSeenIntent
+				.putExtra(NotificationService.EXTRA_KEY_ACTION, NotificationService.ACTION_MARK_MENTIONS_SEEN);
 		startService(mentionsSeenIntent);
 	}
-	
+
 	/**
 	 * 
 	 * @param id

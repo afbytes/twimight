@@ -18,9 +18,9 @@ public abstract class UserListFragment extends ListFragment {
 
 	public static final int SEARCH_USERS = 10;
 
-	public static final int FRIENDS_KEY = 20;
-	public static final int FOLLOWERS_KEY = 21;
-	public static final int PEERS_KEY = 22;
+//	public static final int FRIENDS_KEY = 20;
+//	public static final int FOLLOWERS_KEY = 21;
+//	public static final int PEERS_KEY = 22;
 
 	public UserListFragment() {
 	};
