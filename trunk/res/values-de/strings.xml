@@ -29,7 +29,7 @@
     <string name="placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed urna lacus, iaculis feugiat magna in, ornare pellentesque purus.</string>
 
     <!-- Menu -->
-    <string name="profile">Mein Profil</string>
+    <string name="my_profile">Mein Profil</string>
     <string name="messages">Nachrichten</string>
     <string name="settings">Einstellungen</string>
     <string name="cache_html">Links speichern</string>
@@ -87,6 +87,8 @@
     <string name="download_toast">Links werden zum offline Betrachten gespeichert.</string>
 
     <!-- User, Friends -->
+    <string name="users">Benutzer</string>
+    <string name="profile">Profil</string>
     <string name="followers">Follower</string>
     <string name="friends">Folge ich</string>
     <string name="favorites">Favoriten</string>
@@ -191,6 +193,18 @@
     <string name="update_interval_4_h">alle 4 Stunden</string>
     <string name="update_interval_12_h">alle 12 Stunden</string>
     <string name="update_interval_1_d">einmal am Tag</string>
+    <string name="pref_title_category_offline_mode">Offline-Modus</string>
+    <string name="pref_summary_automatic_web_download_on">In Tweets verlinkte Webseiten werden automatisch heruntergeladen</string>
+    <string name="pref_summary_automatic_web_download_off">In Tweets verlinkte Webseiten werden nicht automatisch heruntergeladen</string>
+    <string name="pref_title_automatic_web_download">Automatischer Web-Download</string>
+    <string name="pref_title_web_page_sharing">Web Page Sharing</string>
+    <string name="pref_summary_web_page_sharing_on">Heruntergeladene Webseiten werden mit anderen Usern im Desaster-Modus geteilt. Dies kann den Batterieverbrauch steigern.</string>
+    <string name="pref_summary_web_page_sharing_off">Heruntergeladene Webseiten werden nicht mit anderen Usern im Desaster-Modus geteilt.</string>
+    <string name="pref_title_category_disater_mode">Desaster-Modus</string>
+    <string name="pref_title_disater_mode">Desaster-Modus</string>
+    <string name="pref_title_tds_communication">TDS-Kommunikation</string>
+    <string name="pref_summary_tds_communication_on">Empfange Updates vom Twimight-Server</string>
+    <string name="pref_summary_tds_communication_off">Empfange keine Updates vom Twimight-Server</string>
 
     <!-- Disaster mode -->
     <string name="dis_mode_description">Twimight hat Superkräfte!

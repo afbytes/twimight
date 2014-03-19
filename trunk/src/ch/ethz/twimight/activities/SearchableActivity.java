@@ -26,15 +26,20 @@ import ch.ethz.twimight.fragments.adapters.FragmentListPagerAdapter;
 import ch.ethz.twimight.listeners.TabListener;
 import ch.ethz.twimight.util.TwimightSuggestionProvider;
 
+public class SearchableActivity extends TwimightBaseActivity /*
+															 * implements
+															 * OnInitCompletedListener
+															 */{
 
-
-public class SearchableActivity extends TwimightBaseActivity /*implements OnInitCompletedListener*/ {
-
-//	private static final String TAG = "SearchableActivity";
+	// private static final String TAG = "SearchableActivity";
 
 	private SearchUsersFragment mUserFragment;
 	private SearchTweetsFragment mTweetsFragment;
-	
+
+	public static final String EXTRA_KEY_INITIAL_TAB = "EXTRA_KEY_INITIAL_TAB";
+	public static final String EXTRA_INITIAL_TAB_TWEETS = "EXTRA_INITIAL_TAB_TWEETS";
+	public static final String EXTRA_INITIAL_TAB_USERS = "EXTRA_INITIAL_TAB_USERS";
+
 	ViewPager mViewPager;
 	public static String mQuery;
 	FragmentListPagerAdapter mPagerAdapter;
@@ -57,7 +62,7 @@ public class SearchableActivity extends TwimightBaseActivity /*implements OnInit
 		mPagerAdapter = new FragmentListPagerAdapter(getFragmentManager());
 		mPagerAdapter.addFragment(mTweetsFragment);
 		mPagerAdapter.addFragment(mUserFragment);
-		
+
 		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setCurrentItem(actionBar.getSelectedNavigationIndex());
 
@@ -74,16 +79,31 @@ public class SearchableActivity extends TwimightBaseActivity /*implements OnInit
 			}
 		});
 
-		Tab tab = actionBar.newTab().setText("Tweets").setTabListener(new TabListener(mViewPager));
+		Tab tab = actionBar.newTab().setText(getString(R.string.tweets)).setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab().setText("Users").setTabListener(new TabListener(mViewPager));
+		tab = actionBar.newTab().setText(getString(R.string.users)).setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(tab);
-
-		// Get the intent and get the query
+		
 		mIntent = getIntent();
-		// processIntent(intent);
+		// Get the intent and get the query
+		setInitialTab(getIntent());
 
+	}
+
+	private void setInitialTab(Intent intent) {
+		int initialPosition = 0;
+		if (intent.hasExtra(EXTRA_KEY_INITIAL_TAB)) {
+			String initialTab = intent.getStringExtra(EXTRA_KEY_INITIAL_TAB);
+
+			if (EXTRA_INITIAL_TAB_TWEETS.equals(initialTab)) {
+				initialPosition = 0;
+			} else if (EXTRA_INITIAL_TAB_USERS.equals(initialTab)) {
+				initialPosition = 1;
+			}
+			intent.removeExtra(EXTRA_KEY_INITIAL_TAB);
+		}
+		mViewPager.setCurrentItem(initialPosition);
 	}
 
 	private void processIntent(Intent intent) {
@@ -101,6 +121,7 @@ public class SearchableActivity extends TwimightBaseActivity /*implements OnInit
 	protected void onNewIntent(Intent intent) {
 		setIntent(intent);
 		processIntent(intent);
+		setInitialTab(intent);
 		mTweetsFragment.notifyNewQuery();
 		mUserFragment.notifyNewQuery();
 	}
@@ -120,5 +141,5 @@ public class SearchableActivity extends TwimightBaseActivity /*implements OnInit
 		mViewPager = null;
 
 	}
-	
+
 }

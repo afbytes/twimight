@@ -37,7 +37,7 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
  */
 public class DmConversationListActivity extends TwimightBaseActivity {
 
-	private static final String TAG = "ShowDMUsersListActivity";
+	private static final String TAG = DmConversationListActivity.class.getName();
 
 	// Views
 	private ListView dmUsersListView;

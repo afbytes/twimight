@@ -28,7 +28,6 @@ import ch.ethz.twimight.fragments.FollowersFragment;
 import ch.ethz.twimight.fragments.FriendsFragment;
 import ch.ethz.twimight.fragments.ListFragment;
 import ch.ethz.twimight.fragments.PeersFragment;
-import ch.ethz.twimight.fragments.UserListFragment;
 import ch.ethz.twimight.listeners.TabListener;
 
 /**
@@ -39,14 +38,17 @@ import ch.ethz.twimight.listeners.TabListener;
  */
 public class UserListActivity extends TwimightBaseActivity {
 
-	private static final String TAG = "ShowUsersActivity";
+	private static final String TAG = UserListActivity.class.getName();
+	
+	public static final String EXTRA_KEY_INITIAL_TAB = "EXTRA_KEY_INITIAL_TAB";
+	public static final String EXTRA_INITIAL_TAB_FOLLOWERS = "EXTRA_INITIAL_TAB_FOLLOWERS";
+	public static final String EXTRA_INITIAL_TAB_FOLLOWING = "EXTRA_INITIAL_TAB_FOLLOWING";
+	public static final String EXTRA_INITIAL_TAB_PEERS = "EXTRA_INITIAL_TAB_PEERS";
 
 	private int positionIndex;
 	private int positionTop;
-	ViewPager viewPager;
+	ViewPager mViewPager;
 
-	public static final String USER_FILTER_REQUEST = "user_filter_request";
-	
 	private final List<ListFragment> mFragments = new ArrayList<ListFragment>();
 
 	/**
@@ -57,25 +59,19 @@ public class UserListActivity extends TwimightBaseActivity {
 		super.onCreate(null);
 		setContentView(R.layout.main);
 
-		Intent intent = getIntent();
 		// action bar
 		actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-//		Bundle bundle = new Bundle();
-//		bundle.putInt(ListViewPageAdapter.BUNDLE_TYPE, ListViewPageAdapter.BUNDLE_TYPE_USERS);
-//		ListViewPageAdapter pagAdapter = new ListViewPageAdapter(getFragmentManager(), bundle);
-		
 		mFragments.add(new FriendsFragment());
 		mFragments.add(new FollowersFragment());
 		mFragments.add(new PeersFragment());
 		FragmentPagerAdapter pagAdapter = new FragmentListPagerAdapter(getFragmentManager());
 		
-		
-		viewPager = (ViewPager) findViewById(R.id.viewpager);
+		mViewPager = (ViewPager) findViewById(R.id.viewpager);
 
-		viewPager.setAdapter(pagAdapter);
-		viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+		mViewPager.setAdapter(pagAdapter);
+		mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
 				// When swiping between pages, select the
@@ -84,35 +80,39 @@ public class UserListActivity extends TwimightBaseActivity {
 			}
 		});
 
-		Tab tab = actionBar.newTab().setText(R.string.friends).setTabListener(new TabListener(viewPager));
+		Tab tab = actionBar.newTab().setText(R.string.friends).setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab().setText(R.string.followers).setTabListener(new TabListener(viewPager));
+		tab = actionBar.newTab().setText(R.string.followers).setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(tab);
 
-		tab = actionBar.newTab().setText(R.string.peers).setTabListener(new TabListener(viewPager));
+		tab = actionBar.newTab().setText(R.string.peers).setTabListener(new TabListener(mViewPager));
 		actionBar.addTab(tab);
 
-		// actionBar.setSelectedNavigationItem(intent.getIntExtra(USER_FILTER_REQUEST,
-		// FRIENDS_KEY));
-		int selectedItemIndex;
-		switch (intent.getIntExtra(USER_FILTER_REQUEST, 0)) {
+		setInitialTab(getIntent());
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		setInitialTab(intent);
+	}
+	
+	private void setInitialTab(Intent intent) {
+		int initialPosition = 0;
+		if (intent.hasExtra(EXTRA_KEY_INITIAL_TAB)) {
+			String initialTab = intent.getStringExtra(EXTRA_KEY_INITIAL_TAB);
 
-		case UserListFragment.FRIENDS_KEY:
-			selectedItemIndex = 0;
-			break;
-		case UserListFragment.FOLLOWERS_KEY:
-			selectedItemIndex = 1;
-			break;
-		case UserListFragment.PEERS_KEY:
-			selectedItemIndex = 2;
-			break;
-		default:
-			selectedItemIndex = 0;
+			if (EXTRA_INITIAL_TAB_FOLLOWING.equals(initialTab)) {
+				initialPosition = 0;
+			} else if (EXTRA_INITIAL_TAB_FOLLOWERS.equals(initialTab)) {
+				initialPosition = 1;
+			} else if (EXTRA_INITIAL_TAB_PEERS.equals(initialTab)) {
+				initialPosition = 2;
+			}
+			intent.removeExtra(EXTRA_KEY_INITIAL_TAB);
 		}
-
-		viewPager.setCurrentItem(selectedItemIndex);
-
+		mViewPager.setCurrentItem(initialPosition);
 	}
 
 	/**

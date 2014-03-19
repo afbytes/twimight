@@ -28,7 +28,7 @@
     <string name="placeholder_long">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed urna lacus, iaculis feugiat magna in, ornare pellentesque purus.</string>
 
     <!-- Menu -->
-    <string name="profile">Profilo</string>
+    <string name="my_profile">Profilo</string>
     <string name="messages">Messaggi</string>
     <string name="settings">Impostazioni</string>
     <string name="cache_html">Salva Links</string>
