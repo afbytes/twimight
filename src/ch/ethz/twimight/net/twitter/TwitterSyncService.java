@@ -547,10 +547,7 @@ public class TwitterSyncService extends IntentService {
 
 	private void notifyProfileImageUpdate() {
 		ContentResolver contentResolver = getContentResolver();
-		contentResolver.notifyChange(Tweets.TABLE_TIMELINE_URI, null);
-		contentResolver.notifyChange(Tweets.TABLE_MENTIONS_URI, null);
-		contentResolver.notifyChange(Tweets.TABLE_FAVORITES_URI, null);
-		contentResolver.notifyChange(Tweets.TABLE_SEARCH_URI, null);
+		contentResolver.notifyChange(Tweets.ALL_TWEETS_URI, null);
 		contentResolver.notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
 		contentResolver.notifyChange(TwitterUsers.USERS_DISASTER_URI, null);
 		contentResolver.notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
@@ -1820,13 +1817,14 @@ public class TwitterSyncService extends IntentService {
 		}
 		// update DB
 		if (success) {
-			Log.d(TAG,
-					"syncRemoteTweet tid=" + tid + " successful; text: " + tweet.getText() + "; id: " + tweet.getId());
 			ContentValues cv = getTweetContentValues(tweet, Tweets.BUFFER_USERS);
 			storeTweets(new ContentValues[] { cv });
+			ContentValues userValues = getUserContentValues(tweet.getUser());
+			storeUser(userValues);
 			Uri notifyUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
 					+ Tweets.TWEET_TID + "/" + tid);
 			getContentResolver().notifyChange(notifyUri, null);
+			syncTransactionalUsers();
 		}
 	}
 

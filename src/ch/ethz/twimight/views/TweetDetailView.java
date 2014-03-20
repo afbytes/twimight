@@ -142,13 +142,17 @@ public class TweetDetailView extends FrameLayout {
 	private void updateCursor() {
 		discardCursor();
 		mCursor = getContext().getContentResolver().query(mUri, null, null, null, null);
-
-		if (mCursor != null && mCursor.getCount() > 0) {
-			mCursor.moveToFirst();
+		
+		if (mCursor != null) {
+			Log.d(TAG, "cursor not null");
 			mObserver = new TweetObserver(new Handler());
 			mCursor.registerContentObserver(mObserver);
-			updateContent();
+			if (mCursor.getCount() > 0) {
+				mCursor.moveToFirst();
+				updateContent();
+			}
 		} else {
+			Log.d(TAG, "cursor is null");
 			mCursor = null; // discard completely so that we don't try to
 							// unregister observer from empty cursor
 		}

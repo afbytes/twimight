@@ -183,7 +183,7 @@ public class Tweets implements BaseColumns {
 	public static final int BUFFER_FAVORITES = 8;
 	/** All mentions of the local user */
 	public static final int BUFFER_MENTIONS = 16;
-	/** All mentions of the local user */
+	/** Tweets by users (e.g. some user's timeline) */
 	public static final int BUFFER_USERS = 32;
 	/** Results obtained from searching on Twitter */
 	public static final int BUFFER_SEARCH = 64;
