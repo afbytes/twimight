@@ -105,7 +105,12 @@ public class UrlRedirectActivity extends Activity {
 	}
 
 	private void launchTweet() {
-
+		Uri uri = getIntent().getData();
+		Long tid = Long.valueOf(uri.getPathSegments().get(2));
+		Intent intent = new Intent(this, TweetDetailActivity.class);
+		intent.putExtra(TweetDetailActivity.EXTRA_KEY_CONTEXT, TweetDetailActivity.EXTRA_CONTEXT_SINGLE_TWEET_TID);
+		intent.putExtra(TweetDetailActivity.EXTRA_KEY_TID, tid);
+		startActivity(intent);
 	}
 
 	private void launchProfile() {

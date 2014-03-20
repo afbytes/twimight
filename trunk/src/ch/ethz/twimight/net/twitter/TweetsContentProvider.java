@@ -275,8 +275,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_TWITTERUSER_ID + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_TWITTERUSER_ID + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
@@ -289,6 +289,7 @@ public class TweetsContentProvider extends ContentProvider {
 			break;
 
 		case TWEETS_TID:
+			long tid = Long.valueOf(uri.getLastPathSegment());
 			sql = "SELECT " + DBOpenHelper.TABLE_TWEETS + "." + "_id AS _id, " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_TID + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_USER_MENTION_ENTITIES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HASHTAG_ENTITIES + ", " + DBOpenHelper.TABLE_TWEETS
@@ -306,14 +307,14 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
 					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE "
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TID + "=" + uri.getLastPathSegment() + ";";
+					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TID + "=" + tid + ";";
 			c = database.rawQuery(sql, null);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -339,8 +340,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + ", "
 					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
 					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
@@ -376,8 +377,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -446,8 +447,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -482,8 +483,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -527,9 +528,9 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_BUFFER + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
-					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_SCREENNAME
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + " " + "WHERE ("
@@ -568,14 +569,15 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
-					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER
-					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + " " + "WHERE ("
-					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + "&" + Tweets.BUFFER_FAVORITES + ")!=0 "
-					+ "AND (" + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + " & (" + Tweets.BUFFER_DISASTER
-					+ "|" + Tweets.BUFFER_MYDISASTER + ") )=0 " + "ORDER BY " + Tweets.DEFAULT_SORT_ORDER + ";";
+					+ "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " "
+					+ "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "."
+					+ Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID
+					+ " " + "WHERE (" + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + "&"
+					+ Tweets.BUFFER_FAVORITES + ")!=0 " + "AND (" + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER
+					+ " & (" + Tweets.BUFFER_DISASTER + "|" + Tweets.BUFFER_MYDISASTER + ") )=0 " + "ORDER BY "
+					+ Tweets.DEFAULT_SORT_ORDER + ";";
 			c = database.rawQuery(sql, null);
 
 			// TODO: correct notification URI
@@ -602,8 +604,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -639,8 +641,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -674,9 +676,9 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FLAGS + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_BUFFER + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
-					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + " " + "WHERE ("
@@ -710,9 +712,9 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_HTML_PAGES + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "."
-					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS
-					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ Tweets.COL_RETWEETED_BY + ", " + DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREENNAME + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM " + DBOpenHelper.TABLE_TWEETS + " " + "JOIN "
 					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER
 					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTERUSER_ID + " " + "WHERE ("
@@ -747,8 +749,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -783,8 +785,8 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.COL_MEDIA + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES + ", "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTERID + ", " + DBOpenHelper.TABLE_TWEETS + "."
 					+ Tweets.COL_ISVERIFIED + ", " + DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_RETWEETED_BY + ", "
-					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
+					+ DBOpenHelper.TABLE_USERS + "." + "_id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_SCREENNAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
 					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILEIMAGE_PATH + " " + "FROM "
 					+ DBOpenHelper.TABLE_TWEETS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TWITTERUSER + "=" + DBOpenHelper.TABLE_USERS + "."
@@ -816,6 +818,7 @@ public class TweetsContentProvider extends ContentProvider {
 		try {
 			int affectedBuffers = 0;
 			for (ContentValues value : values) {
+				Log.d(TAG, "bulkinsert: " + value.toString());
 				if (insertNormalTweet(value) != null) {
 					numInserted++;
 					affectedBuffers |= value.getAsInteger(Tweets.COL_BUFFER);
@@ -977,7 +980,7 @@ public class TweetsContentProvider extends ContentProvider {
 		Cursor c = database.query(DBOpenHelper.TABLE_TWEETS, null, Tweets.COL_DISASTERID + "=" + disasterId, null,
 				null, null, null);
 		if (c.getCount() == 1) {
-
+			Log.d(TAG, "tweet with disaster id " + disasterId + " exists in db");
 			c.moveToFirst();
 			if (Long.toString(c.getLong(c.getColumnIndex(Tweets.COL_TWITTERUSER))).equals(
 					LoginActivity.getTwitterId(getContext()))) {
@@ -1002,7 +1005,7 @@ public class TweetsContentProvider extends ContentProvider {
 			}
 
 			Uri updateUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/"
-					+ Integer.toString(c.getInt(c.getColumnIndex("_id"))));
+					+ Integer.toString(c.getInt(c.getColumnIndex(Tweets.COL_ROW_ID))));
 			update(updateUri, values, null, null);
 			c.close();
 
@@ -1212,7 +1215,8 @@ public class TweetsContentProvider extends ContentProvider {
 
 		if (localUserScreenName != null) {
 			// we convert to lower case to check if it's a mention
-			if (text.toLowerCase(Locale.getDefault()).matches(".*@" + localUserScreenName.toLowerCase(Locale.getDefault()) + "\\W.*")) {
+			if (text.toLowerCase(Locale.getDefault()).matches(
+					".*@" + localUserScreenName.toLowerCase(Locale.getDefault()) + "\\W.*")) {
 
 				values.put(Tweets.COL_MENTIONS, 1);
 				// put into mentions buffer
@@ -1234,6 +1238,7 @@ public class TweetsContentProvider extends ContentProvider {
 			// ////////////////////////////////
 
 			long rowId = database.insertOrThrow(DBOpenHelper.TABLE_TWEETS, null, values);
+
 			if (rowId >= 0) {
 				Uri insertUri = ContentUris.withAppendedId(Tweets.ALL_TWEETS_URI, rowId);
 
