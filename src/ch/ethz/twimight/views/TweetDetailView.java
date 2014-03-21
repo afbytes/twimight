@@ -506,7 +506,7 @@ public class TweetDetailView extends FrameLayout {
 		@Override
 		public void onClick(View view) {
 			Intent i = new Intent(view.getContext(), UserProfileActivity.class);
-			i.putExtra("screenname", mScreenName);
+			i.putExtra(UserProfileActivity.EXTRA_KEY_SCREEN_NAME, mScreenName);
 			view.getContext().startActivity(i);
 		}
 	}
