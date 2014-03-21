@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import ch.ethz.twimight.activities.UserProfileActivity;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.net.twitter.UserAdapter;
 import ch.ethz.twimight.views.PullToRefreshListView;
 
@@ -48,7 +49,7 @@ public abstract class UserListFragment extends ListFragment {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
 				Cursor c = (Cursor) arg0.getItemAtPosition(position);
 				Intent i = new Intent(getActivity(), UserProfileActivity.class);
-				i.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, c.getInt(c.getColumnIndex("_id")));
+				i.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID)));
 				i.putExtra(UserProfileActivity.EXTRA_KEY_TYPE, mType);
 				startActivity(i);
 			}

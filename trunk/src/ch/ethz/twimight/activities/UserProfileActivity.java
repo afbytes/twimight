@@ -164,7 +164,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					+ "/" + mRequestedRowId);
 			mCursor = getContentResolver().query(uri, null, null, null, null);
 
-		} else {
+		} else if( mRequestedScreenName!=null){
 			// load by screen name
 			Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			mCursor = getContentResolver().query(uri, null,

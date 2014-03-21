@@ -160,7 +160,7 @@ public class TweetTagHandler implements TagHandler {
 				 Toast.makeText(context, "There was an error, please try again.", Toast.LENGTH_SHORT).show();
 			 else{
 				 Intent i = new Intent(context, UserProfileActivity.class);
-				 i.putExtra("screenname", screenname);
+				 i.putExtra(UserProfileActivity.EXTRA_KEY_SCREEN_NAME, screenname);
 				 context.startActivity(i);
 			 }
 

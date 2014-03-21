@@ -162,18 +162,20 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 			Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			Cursor c = getContentResolver().query(uri, null,
 					TwitterUsers.COL_TWITTERUSER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
-			if (c.getCount() != 1)
-				return false;
-			c.moveToFirst();
-			int rowId = c.getInt(c.getColumnIndex("_id"));
+			if (c!=null && c.getCount() >0){
+				c.moveToFirst();
+				long rowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 
-			if (rowId > 0) {
-				// show the local user
-				i = new Intent(this, UserProfileActivity.class);
-				i.putExtra("rowId", rowId);
-				startActivity(i);
+				if (rowId != TwitterUsers.NO_ROW_ID) {
+					// show the local user
+					i = new Intent(this, UserProfileActivity.class);
+					i.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, rowId);
+					startActivity(i);
+				}
+				c.close();
+			} else {
+				return false;
 			}
-			c.close();
 			break;
 
 		case R.id.menu_messages:
