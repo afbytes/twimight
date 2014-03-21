@@ -149,7 +149,7 @@ public class DmListActivity extends TwimightBaseActivity implements
 
 		if (item.getItemId() == R.id.menu_write_tweet) {
 			Intent i = new Intent(getBaseContext(), ComposeDmActivity.class);
-			i.putExtra("recipient", screenname);
+			i.putExtra(ComposeDmActivity.EXTRA_KEY_RECIPIENT_SCREEN_NAME, screenname);
 			startActivity(i);
 
 		} else

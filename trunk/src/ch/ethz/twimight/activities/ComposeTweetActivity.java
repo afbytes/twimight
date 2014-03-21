@@ -61,19 +61,22 @@ import ch.ethz.twimight.util.SDCardHelper;
  */
 public class ComposeTweetActivity extends ThemeSelectorActivity {
 
-	private static final String TAG = "TweetActivity";
+	private static final String TAG = ComposeTweetActivity.class.getName();
+	
+	public static final String EXTRA_KEY_TEXT = "EXTRA_KEY_TEXT";
+	public static final String EXTRA_KEY_IS_REPLY_TO = "EXTRA_KEY_IS_REPLY_TO";
 
-	private boolean useLocation;
+	private boolean mUseLocation;
 	private EditText mEtTweetText;
 	private TextView mTvCharacterCounter;
 	private Button mBtnSend;
 	private View mPhotoPreviewContainer;
 	private ImageView mPhotoPreview;
 
-	private long isReplyTo;
+	private long mIsReplyTo;
 
 	// the following are all to deal with location
-	private ImageButton locationButton;
+	private ImageButton mBtnLocation;
 
 	private TextWatcher mTextWatcher;
 
@@ -113,15 +116,15 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mBtnSend = (Button) findViewById(R.id.tweet_send);
 		// User settings: do we use location or not?
 
-		useLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation",
+		mUseLocation = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("prefUseLocation",
 				Constants.TWEET_DEFAULT_LOCATION);
 
-		locationButton = (ImageButton) findViewById(R.id.tweet_location);
+		mBtnLocation = (ImageButton) findViewById(R.id.tweet_location);
 
-		if (useLocation) {
-			locationButton.setImageResource(R.drawable.ic_location_on);
+		if (mUseLocation) {
+			mBtnLocation.setImageResource(R.drawable.ic_location_on);
 		} else {
-			locationButton.setImageResource(R.drawable.ic_location_off);
+			mBtnLocation.setImageResource(R.drawable.ic_location_off);
 		}
 		// get username and picture
 		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
@@ -175,8 +178,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 		Intent i = getIntent();
 		mEtTweetText = (EditText) findViewById(R.id.tweetText);
-		if (i.hasExtra("text")) {
-			mEtTweetText.setText(Html.fromHtml("<i>" + i.getStringExtra("text") + "</i>"));
+		if (i.hasExtra(EXTRA_KEY_TEXT)) {
+			mEtTweetText.setText(Html.fromHtml("<i>" + i.getStringExtra(EXTRA_KEY_TEXT) + "</i>"));
 		}
 		if (mEtTweetText.getText().length() == 0) {
 			mBtnSend.setEnabled(false);
@@ -185,8 +188,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		mTvCharacterCounter = (TextView) findViewById(R.id.tweet_characters);
 		checkTweetLength();
 
-		if (i.hasExtra("isReplyTo")) {
-			isReplyTo = i.getLongExtra("isReplyTo", 0);
+		if (i.hasExtra(EXTRA_KEY_IS_REPLY_TO)) {
+			mIsReplyTo = i.getLongExtra(EXTRA_KEY_IS_REPLY_TO, 0);
 		}
 
 		// This makes sure we do not enter more than 140 characters
@@ -273,16 +276,16 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	}
 
 	public void toggleLocation(View unused) {
-		if (useLocation) {
+		if (mUseLocation) {
 			locHelper.unRegisterLocationListener();
 			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_off), Toast.LENGTH_SHORT).show();
-			locationButton.setImageResource(R.drawable.ic_location_off);
-			useLocation = false;
+			mBtnLocation.setImageResource(R.drawable.ic_location_off);
+			mUseLocation = false;
 		} else {
 			locHelper.registerLocationListener();
 			Toast.makeText(ComposeTweetActivity.this, getString(R.string.location_on), Toast.LENGTH_SHORT).show();
-			locationButton.setImageResource(R.drawable.ic_location_on);
-			useLocation = true;
+			mBtnLocation.setImageResource(R.drawable.ic_location_on);
+			mUseLocation = true;
 		}
 	}
 
@@ -292,7 +295,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (useLocation) {
+		if (mUseLocation) {
 			locHelper.registerLocationListener();
 		}
 	}
@@ -425,7 +428,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 				// schedule the tweet for uploading to twitter
 				Intent i = new Intent(ComposeTweetActivity.this, TwitterSyncService.class);
 				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_LOCAL_TWEET);
-				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
+				i.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_ROW_ID, Long.valueOf(insertUri.getLastPathSegment()));
 				startService(i);
 			}
 			finish();
@@ -444,13 +447,13 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, mEtTweetText.getText().toString());
 		tweetContentValues.put(Tweets.COL_TWITTERUSER, LoginActivity.getTwitterId(this));
 		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
-		if (isReplyTo > 0) {
-			tweetContentValues.put(Tweets.COL_REPLYTO, isReplyTo);
+		if (mIsReplyTo > 0) {
+			tweetContentValues.put(Tweets.COL_REPLYTO, mIsReplyTo);
 		}
 		// set the current timestamp
 		tweetContentValues.put(Tweets.COL_CREATED, System.currentTimeMillis());
 
-		if (useLocation) {
+		if (mUseLocation) {
 			Location loc = locHelper.getLocation();
 			if (loc != null) {
 				tweetContentValues.put(Tweets.COL_LAT, loc.getLatitude());

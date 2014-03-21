@@ -18,6 +18,7 @@ import android.os.Bundle;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.fragments.TweetListFragment;
 import ch.ethz.twimight.fragments.UserTweetsFragment;
+import ch.ethz.twimight.net.twitter.TwitterUsers;
 
 /**
  * Shows the most recent tweets of a user
@@ -27,7 +28,7 @@ import ch.ethz.twimight.fragments.UserTweetsFragment;
  */
 public class UserTweetListActivity extends TwimightBaseActivity {
 
-	public static final String EXTRA_USER_ID = "EXTRA_USER_ID";
+	public static final String EXTRA_KEY_USER_ROW_ID = "EXTRA_KEY_USER_ROW_ID";
 
 	/**
 	 * Called when the activity is first created.
@@ -36,13 +37,13 @@ public class UserTweetListActivity extends TwimightBaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (!getIntent().hasExtra(EXTRA_USER_ID)) {
+		if (!getIntent().hasExtra(EXTRA_KEY_USER_ROW_ID)) {
 			finish();
 		}
 
 		setContentView(R.layout.main);
 
-		long userId = getIntent().getLongExtra(EXTRA_USER_ID, 0);
+		long userId = getIntent().getLongExtra(EXTRA_KEY_USER_ROW_ID, TwitterUsers.NO_ROW_ID);
 		
 		TweetListFragment userTweetFragment = new UserTweetsFragment();
 		Bundle bundle = new Bundle();

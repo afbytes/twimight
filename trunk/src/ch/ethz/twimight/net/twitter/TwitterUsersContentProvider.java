@@ -179,7 +179,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			// start synch service with a synch followers request
 			i = new Intent(getContext(), TwitterSyncService.class);
 			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_USER);
-			i.putExtra(TwitterSyncService.EXTRA_USER_SEARCH_QUERY, where);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_USER_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
 		default:
@@ -191,14 +191,14 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	@Override
 	public synchronized Uri insert(Uri uri, ContentValues values) {
-
-		if (twitterusersUriMatcher.match(uri) != USERS)
+		if (twitterusersUriMatcher.match(uri) != USERS) {
 			throw new IllegalArgumentException("Unsupported URI: " + uri);
+		}
 
 		if (checkValues(values)) {
-
-			return insertNewUser(values);
-
+			Uri insertUri = insertOrUpdate(values);
+			getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+			return insertUri;
 		} else {
 			throw new IllegalArgumentException("Illegal user: " + values);
 		}
@@ -206,7 +206,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	private Cursor isUserAlreadyStored(ContentValues values) {
 		// if we already have the user, we update with the new info
-		String[] projection = { "_id", TwitterUsers.COL_PROFILEIMAGE_PATH, TwitterUsers.COL_IMAGEURL };
+		String[] projection = { TwitterUsers.COL_ROW_ID, TwitterUsers.COL_PROFILEIMAGE_PATH, TwitterUsers.COL_IMAGEURL };
 		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection,
 				TwitterUsers.COL_SCREENNAME + " = '" + values.getAsString(TwitterUsers.COL_SCREENNAME) + "' OR "
 						+ TwitterUsers.COL_TWITTERUSER_ID + "=" + values.getAsString(TwitterUsers.COL_TWITTERUSER_ID),
@@ -214,16 +214,17 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		if (c.getCount() == 1) {
 			c.moveToFirst();
 			return c;
-		} else
+		} else {
 			return null;
+		}
 	}
 
-	private Uri insertNewUser(ContentValues values) {
+	private Uri insertOrUpdate(ContentValues values) {
 
 		Cursor c = isUserAlreadyStored(values);
 
 		if (c != null) {
-
+			// user is already in DB
 			if (values.containsKey(TwitterUsers.COL_FLAGS)
 					&& ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) != 0)) {
 				// if we already have an image
@@ -246,19 +247,20 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			return updateUri;
 
 		} else {
-			// return insertNewUser(values);
+			// user is not yet in DB
 			try {
+				Log.d(TAG, "inserting " + values.toString());
 				long rowId = database.insert(DBOpenHelper.TABLE_USERS, null, values);
 				if (rowId >= 0) {
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 							+ TwitterUsers.TWITTERUSERS + "/" + rowId);
 					purge(DBOpenHelper.TABLE_USERS, values);
-
 					return insertUri;
-				} else
+				} else {
 					return null;
-
+				}
 			} catch (SQLException ex) {
+				ex.printStackTrace();
 				return null;
 			}
 		}
@@ -273,13 +275,12 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		int numInserted = 0;
 		database.beginTransaction();
 		try {
-
 			for (ContentValues value : values) {
 				if (value != null) {
 					if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE_PATH)) {
 						updateUser(uri, value);
 					} else {
-						if (insertNewUser(value) != null) {
+						if (insertOrUpdate(value) != null) {
 							numInserted++;
 						}
 					}
@@ -290,6 +291,7 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		} finally {
 			database.endTransaction();
 		}
+		getContext().getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
 		return numInserted;
 	}
 
@@ -314,8 +316,9 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		int nrRows = database.update(DBOpenHelper.TABLE_USERS, values, "_id=" + values.getAsLong("_id"), null);
 		if (nrRows > 0) {
 			return nrRows;
-		} else
+		} else {
 			return -1;
+		}
 	}
 
 	@Override

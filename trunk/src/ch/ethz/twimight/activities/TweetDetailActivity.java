@@ -98,8 +98,8 @@ public class TweetDetailActivity extends TwimightBaseActivity {
 				// tweet not in db yet -> load it!
 				Intent loadTweetIntent = new Intent(this, TwitterSyncService.class);
 				loadTweetIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION,
-						TwitterSyncService.EXTRA_ACTION_SYNC_REMOTE_TWEET);
-				loadTweetIntent.putExtra(TwitterSyncService.EXTRA_TWEET_TID, mTid);
+						TwitterSyncService.EXTRA_ACTION_LOAD_TWEET_BY_TID);
+				loadTweetIntent.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_TID, mTid);
 				startService(loadTweetIntent);
 				// register observer so we can initialize the activity once the
 				// content is available

@@ -123,8 +123,8 @@ public class TweetConversationView extends FrameLayout {
 		} else {
 			Intent loadTweetIntent = new Intent(getContext(), TwitterSyncService.class);
 			loadTweetIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION,
-					TwitterSyncService.EXTRA_ACTION_SYNC_REMOTE_TWEET);
-			loadTweetIntent.putExtra(TwitterSyncService.EXTRA_TWEET_TID, tid);
+					TwitterSyncService.EXTRA_ACTION_LOAD_TWEET_BY_TID);
+			loadTweetIntent.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_TID, tid);
 			getContext().startService(loadTweetIntent);
 			mTweetLoadedObserver = new ConversationTweetContentObserver(new Handler(), tid, c);
 			c.registerContentObserver(mTweetLoadedObserver);

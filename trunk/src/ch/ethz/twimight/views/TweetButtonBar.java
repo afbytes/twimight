@@ -193,12 +193,14 @@ public class TweetButtonBar extends FrameLayout {
 				@Override
 				public void onClick(View v) {
 					Intent i = new Intent(getContext(), ComposeTweetActivity.class);
-					if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID)))
-						i.putExtra("isReplyTo", mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_TID)));
-					else
-						i.putExtra("isReplyTo", -1);
-					i.putExtra("text", "@" + mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))
-							+ " ");
+					if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_TID))) {
+						i.putExtra(ComposeTweetActivity.EXTRA_KEY_IS_REPLY_TO,
+								mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_TID)));
+					} else {
+						i.putExtra(ComposeTweetActivity.EXTRA_KEY_IS_REPLY_TO, -1);
+					}
+					i.putExtra(ComposeTweetActivity.EXTRA_KEY_TEXT,
+							"@" + mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)) + " ");
 					getContext().startActivity(i);
 				}
 			});

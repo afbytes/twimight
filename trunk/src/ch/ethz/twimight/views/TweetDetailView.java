@@ -101,7 +101,7 @@ public class TweetDetailView extends FrameLayout {
 
 	private int mFlags;
 	private int mBuffer;
-	private int mUserRowId;
+	private long mUserRowId;
 	private String mText;
 	private String mScreenName;
 	private String mTwitterUserId;
@@ -142,7 +142,7 @@ public class TweetDetailView extends FrameLayout {
 	private void updateCursor() {
 		discardCursor();
 		mCursor = getContext().getContentResolver().query(mUri, null, null, null, null);
-		
+
 		if (mCursor != null) {
 			Log.d(TAG, "cursor not null");
 			mObserver = new TweetObserver(new Handler());
@@ -227,7 +227,7 @@ public class TweetDetailView extends FrameLayout {
 		if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS)) > 0) {
 			Intent i = new Intent(getContext(), TwitterSyncService.class);
 			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_LOCAL_TWEET);
-			i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(mUri.getLastPathSegment()));
+			i.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_ROW_ID, Long.valueOf(mUri.getLastPathSegment()));
 			getContext().startService(i);
 		}
 	}
@@ -343,12 +343,12 @@ public class TweetDetailView extends FrameLayout {
 	 * The user info
 	 */
 	private void setUserInfo() {
-		mUserRowId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
+		mUserRowId = mCursor.getLong(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 		mUserInfoView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(getContext(), UserProfileActivity.class);
-				i.putExtra("rowId", mUserRowId);
+				i.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, mUserRowId);
 				i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				getContext().startActivity(i);
 			}
