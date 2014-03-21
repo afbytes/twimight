@@ -15,8 +15,8 @@
         android:focusable="true"
         android:orientation="horizontal"
         android:paddingBottom="@dimen/double_step"
-        android:paddingLeft="@dimen/unit_step"
-        android:paddingRight="@dimen/unit_step"
+        android:paddingEnd="@dimen/unit_step"
+        android:paddingStart="@dimen/unit_step"
         android:paddingTop="@dimen/double_step" >
 
         <ImageView
@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingLeft="@dimen/unit_step" >
+            android:paddingStart="@dimen/unit_step" >
 
             <TextView
                 android:id="@+id/showTweetRealName"
@@ -37,6 +37,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/placeholder_short"
                 android:textColor="@color/dark_text"
+                android:textDirection="locale"
                 android:textSize="24sp"
                 android:textStyle="italic" />
 
@@ -47,6 +48,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/placeholder_short"
                 android:textColor="@color/medium_gray"
+                android:textDirection="locale"
                 android:textSize="16sp"
                 android:textStyle="italic" />
         </LinearLayout>
@@ -66,8 +68,8 @@
         android:background="@color/white"
         android:orientation="vertical"
         android:paddingBottom="@dimen/double_step"
-        android:paddingLeft="@dimen/unit_step"
-        android:paddingRight="@dimen/unit_step"
+        android:paddingEnd="@dimen/unit_step"
+        android:paddingStart="@dimen/unit_step"
         android:paddingTop="@dimen/double_step" >
 
         <TextView
@@ -91,6 +93,7 @@
             android:linksClickable="true"
             android:text="@string/placeholder_long"
             android:textColor="@color/dark_text"
+            android:textDirection="locale"
             android:textSize="22sp" />
 
         <TextView

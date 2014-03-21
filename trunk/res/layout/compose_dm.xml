@@ -28,12 +28,13 @@
                 style="@style/RobotoLightText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/dm_characters"
+                android:layout_toStartOf="@+id/dm_characters"
                 android:hint="@string/to"
                 android:singleLine="true"
                 android:textColor="@color/dark_text"
+                android:textDirection="locale"
                 android:textSize="16sp" />
 
             <EditText
@@ -46,6 +47,7 @@
                 android:hint="@string/message"
                 android:inputType="textMultiLine|textCapSentences"
                 android:textColor="@color/dark_text"
+                android:textDirection="locale"
                 android:textSize="16sp" />
 
             <TextView
@@ -53,9 +55,9 @@
                 style="@style/RobotoLightText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="@dimen/unit_step"
-                android:gravity="right"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="@dimen/unit_step"
+                android:gravity="end"
                 android:text="@string/tweet_length"
                 android:textColor="@color/medium_gray"
                 android:textSize="20sp" />
@@ -81,7 +83,7 @@
                     style="?attr/solidButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_marginStart="@dimen/half_step"
                     android:layout_weight="1.0"
                     android:text="@string/send" />
             </LinearLayout>

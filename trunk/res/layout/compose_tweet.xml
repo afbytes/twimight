@@ -40,7 +40,7 @@
                     android:id="@+id/tweetContainerRight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/unit_step"
+                    android:layout_marginStart="@dimen/unit_step"
                     android:orientation="vertical" >
 
                     <LinearLayout
@@ -84,7 +84,7 @@
                             style="@style/RobotoLightText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="right"
+                            android:gravity="end"
                             android:text="@string/tweet_length"
                             android:textColor="@color/medium_gray"
                             android:textSize="20sp" />
@@ -97,6 +97,7 @@
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine|textCapSentences"
                         android:textColor="@color/dark_text"
+                        android:textDirection="locale"
                         android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -185,7 +186,7 @@
                     style="?attr/solidButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/half_step"
+                    android:layout_marginStart="@dimen/half_step"
                     android:layout_weight="1.0"
                     android:onClick="sendTweet"
                     android:text="@string/tweet" />

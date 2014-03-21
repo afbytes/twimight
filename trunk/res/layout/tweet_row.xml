@@ -31,7 +31,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/unit_step"
+                android:layout_marginStart="@dimen/unit_step"
                 android:orientation="vertical" >
 
                 <!-- row with username + created at -->
@@ -45,8 +45,9 @@
                         style="@style/RobotoLightText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_toLeftOf="@+id/tvCreatedAt"
+                        android:layout_alignParentStart="true"
+                        android:textDirection="locale"
+                        android:layout_toStartOf="@+id/tvCreatedAt"
                         android:minLines="1"
                         android:singleLine="true"
                         android:text="@string/placeholder_short"
@@ -60,9 +61,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignBottom="@id/tvUsername"
-                        android:layout_alignParentRight="true"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="5dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_gravity="end"
+                        android:layout_marginStart="5dp"
                         android:singleLine="true"
                         android:text="@string/placeholder_short"
                         android:textColor="@color/medium_gray"
@@ -77,6 +78,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:textDirection="locale"
+                    android:gravity="start"
                     android:text="@string/placeholder_long"
                     android:textColor="@color/dark_text"
                     android:textSize="16sp" />

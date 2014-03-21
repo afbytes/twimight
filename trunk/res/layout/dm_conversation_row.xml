@@ -18,7 +18,7 @@
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/unit_step"
+        android:layout_marginStart="@dimen/unit_step"
         android:orientation="vertical" >
 
         <TextView
@@ -38,12 +38,13 @@
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/quarter_step"
             android:minLines="1"
             android:singleLine="true"
             android:text="@string/placeholder_short"
             android:textColor="@color/medium_gray"
+            android:textDirection="locale"
             android:textSize="16sp"
-            android:layout_marginTop="@dimen/quarter_step"
             android:textStyle="italic" />
 
         <TextView
@@ -54,6 +55,7 @@
             android:layout_marginTop="@dimen/half_step"
             android:text="@string/placeholder_short"
             android:textColor="@color/dark_text"
+            android:textDirection="locale"
             android:textSize="16sp" />
     </LinearLayout>
 
