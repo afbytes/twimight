@@ -21,7 +21,7 @@ public class TimelineFragment extends TweetListFragment {
 		Intent overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
 		overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
 		overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
-		overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
+		overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_FORCE_SYNC, true);
 		return overscrollIntent;
 	}
 

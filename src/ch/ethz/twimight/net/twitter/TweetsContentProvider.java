@@ -355,7 +355,7 @@ public class TweetsContentProvider extends ContentProvider {
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
 			i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SEARCH_TWEET);
-			i.putExtra(TwitterSyncService.EXTRA_TWEET_SEARCH_QUERY, where);
+			i.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_SEARCH_QUERY, where);
 			getContext().startService(i);
 			break;
 
@@ -546,7 +546,7 @@ public class TweetsContentProvider extends ContentProvider {
 				// start synch service with a synch user tweets request
 				i = new Intent(getContext(), TwitterSyncService.class);
 				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_USER_TWEETS);
-				i.putExtra(TwitterSyncService.EXTRA_SCREEN_NAME, screenName);
+				i.putExtra(TwitterSyncService.EXTRA_KEY_SCREEN_NAME, screenName);
 				getContext().startService(i);
 			}
 			// userCursor.close();
@@ -814,11 +814,9 @@ public class TweetsContentProvider extends ContentProvider {
 	public int bulkInsert(Uri uri, ContentValues[] values) {
 		int numInserted = 0;
 		database.beginTransaction();
-		Log.d(TAG, "bulkinsert");
 		try {
 			int affectedBuffers = 0;
 			for (ContentValues value : values) {
-				Log.d(TAG, "bulkinsert: " + value.toString());
 				if (insertNormalTweet(value) != null) {
 					numInserted++;
 					affectedBuffers |= value.getAsInteger(Tweets.COL_BUFFER);
@@ -1077,7 +1075,7 @@ public class TweetsContentProvider extends ContentProvider {
 			if (values.containsKey(Tweets.COL_FLAGS) && values.getAsInteger(Tweets.COL_FLAGS) != 0) {
 				Intent i = new Intent(getContext(), TwitterSyncService.class);
 				i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_LOCAL_TWEET);
-				i.putExtra(TwitterSyncService.EXTRA_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
+				i.putExtra(TwitterSyncService.EXTRA_KEY_TWEET_ROW_ID, Long.valueOf(uri.getLastPathSegment()));
 				getContext().startService(i);
 			}
 

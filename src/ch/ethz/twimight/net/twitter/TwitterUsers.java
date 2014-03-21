@@ -142,5 +142,8 @@ public class TwitterUsers implements BaseColumns {
 	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI + COL_ISFOLLOWER);
 	public static final Uri USERS_SEARCH_URI = Uri.parse(BASE_URI + TWITTERUSERS_SEARCH);
 	public static final Uri USERS_DISASTER_URI = Uri.parse(BASE_URI + COL_ISDISASTER_PEER);
+	
+	public static final long NO_ROW_ID = -1;
+	public static final long NO_TID = -1;
 
 }

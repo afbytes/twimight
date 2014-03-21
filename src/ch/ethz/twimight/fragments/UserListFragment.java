@@ -48,8 +48,8 @@ public abstract class UserListFragment extends ListFragment {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
 				Cursor c = (Cursor) arg0.getItemAtPosition(position);
 				Intent i = new Intent(getActivity(), UserProfileActivity.class);
-				i.putExtra(UserProfileActivity.EXTRA_ROW_ID, c.getInt(c.getColumnIndex("_id")));
-				i.putExtra(UserProfileActivity.EXTRA_TYPE, mType);
+				i.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, c.getInt(c.getColumnIndex("_id")));
+				i.putExtra(UserProfileActivity.EXTRA_KEY_TYPE, mType);
 				startActivity(i);
 			}
 		});

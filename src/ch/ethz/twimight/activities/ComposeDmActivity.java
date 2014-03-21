@@ -44,7 +44,10 @@ import ch.ethz.twimight.util.Constants;
  */
 public class ComposeDmActivity extends ThemeSelectorActivity {
 
-	private static final String TAG = "NewDMActivity";
+	private static final String TAG = ComposeDmActivity.class.getName();
+	
+	public static final String EXTRA_KEY_RECIPIENT_SCREEN_NAME = "EXTRA_KEY_RECIPIENT_SCREEN_NAME";
+	public static final String EXTRA_KEY_TEXT = "EXTRA_KEY_TEXT";
 
 	private EditText text;
 	private EditText recepient;
@@ -87,8 +90,8 @@ public class ComposeDmActivity extends ThemeSelectorActivity {
 		Intent i = getIntent();
 
 		text = (EditText) findViewById(R.id.dmText);
-		if (i.hasExtra("text")) {
-			text.setText(i.getStringExtra("text"));
+		if (i.hasExtra(EXTRA_KEY_TEXT)) {
+			text.setText(i.getStringExtra(EXTRA_KEY_TEXT));
 			text.setSelection(text.getText().length());
 		}
 

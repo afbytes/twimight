@@ -17,6 +17,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 
 import twitter4j.DirectMessage;
@@ -54,8 +56,8 @@ import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.bluetest.credentials.Obfuscator;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.HomeScreenActivity;
+import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
@@ -72,7 +74,8 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_ACTION_SYNC_TIMELINE = "EXTRA_ACTION_SYNC_TIMELINE";
 	public static final String EXTRA_ACTION_SYNC_FAVORITES = "EXTRA_ACTION_SYNC_FAVORITES";
 	public static final String EXTRA_ACTION_SYNC_LOCAL_TWEET = "EXTRA_ACTION_SYNC_TWEET";
-	public static final String EXTRA_ACTION_SYNC_REMOTE_TWEET = "EXTRA_ACTION_SYNC_REMOTE_TWEET";
+	public static final String EXTRA_ACTION_LOAD_TWEET_BY_TID = "EXTRA_ACTION_LOAD_TWEET_BY_TID";
+	public static final String EXTRA_ACTION_LOAD_USER_BY_SCREEN_NAME = "EXTRA_ACTION_LOAD_USER_BY_SCREEN_NAME";
 	public static final String EXTRA_ACTION_SYNC_MENTIONS = "EXTRA_ACTION_SYNC_MENTIONS";
 	public static final String EXTRA_ACTION_SYNC_MESSAGES = "EXTRA_ACTION_SYNC_MESSAGES";
 	public static final String EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES = "EXTRA_ACTION_SYNC_TRANSACTIONAL_MESSAGES";
@@ -84,15 +87,16 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_ACTION_SEARCH_USER = "EXTRA_ACTION_SEARCH_USER";
 	public static final String EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL = "EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL";
 
-	public static final String EXTRA_TWEET_SEARCH_QUERY = "tweet_search_query";
 	private static final int MAX_USER_SEARCH_PAGES = 5;
-	public static final String EXTRA_USER_SEARCH_QUERY = "user_search_query";
-	public static final String EXTRA_USER_ROW_ID = "user_row_id";
-	public static final String EXTRA_TWEET_ROW_ID = "tweet_row_id";
-	public static final String EXTRA_SCREEN_NAME = "screen_name";
-	public static final String EXTRA_TWEET_TID = "tweet_tid";
 
-	public static final String EXTRA_FORCE_SYNC = "force_sync";
+	public static final String EXTRA_KEY_TWEET_SEARCH_QUERY = "tweet_search_query";
+	public static final String EXTRA_KEY_USER_SEARCH_QUERY = "user_search_query";
+	public static final String EXTRA_KEY_USER_ROW_ID = "user_row_id";
+	public static final String EXTRA_KEY_TWEET_ROW_ID = "tweet_row_id";
+	public static final String EXTRA_KEY_SCREEN_NAME = "screen_name";
+	public static final String EXTRA_KEY_TWEET_TID = "tweet_tid";
+
+	public static final String EXTRA_KEY_FORCE_SYNC = "force_sync";
 
 	public static final String EXTRA_TIMELINE_UPDATE_DIRECTION = "update_direction";
 	public static final int TIMELINE_UPDATE_DIRECTION_UP = 1;
@@ -175,8 +179,10 @@ public class TwitterSyncService extends IntentService {
 			searchUser();
 		} else if (EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL.equals(action)) {
 			syncAllTransactional();
-		} else if (EXTRA_ACTION_SYNC_REMOTE_TWEET.equals(action)) {
-			syncRemoteTweet();
+		} else if (EXTRA_ACTION_LOAD_TWEET_BY_TID.equals(action)) {
+			loadTweetByTid();
+		} else if (EXTRA_ACTION_LOAD_USER_BY_SCREEN_NAME.equals(action)) {
+			loadUserByScreenName();
 		} else {
 			Log.e(TAG, "TwitterSyncService started with no valid action!");
 		}
@@ -503,6 +509,7 @@ public class TwitterSyncService extends IntentService {
 		Uri queryUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 		Cursor c = getContentResolver().query(queryUri, null, TwitterUsers.COL_FLAGS + "!=0", null, null);
 		if (c != null && c.getCount() > 0) {
+			Log.d(TAG, c.getCount() + " transactional users");
 			boolean profileImageUpdateNotificationNeeded = false;
 			ExecutorService executorService = Executors.newCachedThreadPool();
 			List<Future<ContentValues>> futureResults = new LinkedList<Future<ContentValues>>();
@@ -548,10 +555,11 @@ public class TwitterSyncService extends IntentService {
 	private void notifyProfileImageUpdate() {
 		ContentResolver contentResolver = getContentResolver();
 		contentResolver.notifyChange(Tweets.ALL_TWEETS_URI, null);
-		contentResolver.notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
-		contentResolver.notifyChange(TwitterUsers.USERS_DISASTER_URI, null);
-		contentResolver.notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
-		contentResolver.notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
+		contentResolver.notifyChange(TwitterUsers.TWITTERUSERS_URI, null);
+		// contentResolver.notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
+		// contentResolver.notifyChange(TwitterUsers.USERS_DISASTER_URI, null);
+		// contentResolver.notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
+		// contentResolver.notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
 	}
 
 	private Callable<ContentValues> getUserSyncTask(Cursor c, boolean force) {
@@ -575,16 +583,23 @@ public class TwitterSyncService extends IntentService {
 	}
 
 	private class UpdateUserTask implements Callable<ContentValues> {
-		private final long mTwitterUserId;
-		private final String mTwitteruserScreenName;
+		private final long mRequestedTid;
+		private final String mRequestedScreenName;
 		private final long mRowId;
 		private final int mFlags;
 
 		private UpdateUserTask(Cursor c) {
-			mTwitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
-			mTwitteruserScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			mRequestedTid = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
+			mRequestedScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
 			mRowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 			mFlags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
+		}
+
+		public UpdateUserTask(String screenName) {
+			mRequestedScreenName = screenName;
+			mRequestedTid = TwitterUsers.NO_TID;
+			mRowId = TwitterUsers.NO_ROW_ID;
+			mFlags = 0;
 		}
 
 		@Override
@@ -592,13 +607,13 @@ public class TwitterSyncService extends IntentService {
 			boolean success = false;
 			User user = null;
 			for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
-				Log.d(TAG, "UpdateuserTask call(); twitterUserId: " + mTwitterUserId + "; screenName: "
-						+ mTwitteruserScreenName + "; attempt: " + attempt);
+				Log.d(TAG, "UpdateuserTask call(); twitterUserId: " + mRequestedTid + "; screenName: "
+						+ mRequestedScreenName + "; attempt: " + attempt);
 				try {
-					if (mTwitteruserScreenName != null) {
-						user = mTwitter.showUser(mTwitteruserScreenName);
-					} else if (mTwitterUserId != 0) {
-						user = mTwitter.showUser(mTwitterUserId);
+					if (mRequestedScreenName != null) {
+						user = mTwitter.showUser(mRequestedScreenName);
+					} else if (mRequestedTid != TwitterUsers.NO_TID) {
+						user = mTwitter.showUser(mRequestedTid);
 					}
 					if (user != null) {
 						success = true;
@@ -606,11 +621,11 @@ public class TwitterSyncService extends IntentService {
 					}
 				} catch (TwitterException e) {
 					if (!e.exceededRateLimitation()) {
-						Log.w(TAG, "exception updating twitterUserId:" + mTwitterUserId + " screenName: "
-								+ mTwitteruserScreenName, e);
+						Log.w(TAG, "exception updating twitterUserId:" + mRequestedTid + " screenName: "
+								+ mRequestedScreenName, e);
 					} else {
-						Log.w(TAG, "rate limit exceeded by UpdateUserTask.call() twitterUserId: " + mTwitterUserId
-								+ " screenName: " + mTwitteruserScreenName);
+						Log.w(TAG, "rate limit exceeded by UpdateUserTask.call() twitterUserId: " + mRequestedTid
+								+ " screenName: " + mRequestedScreenName);
 						break;
 					}
 				}
@@ -621,7 +636,9 @@ public class TwitterSyncService extends IntentService {
 				cv = getUserContentValues(user);
 				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
 				cv.put(TwitterUsers.COL_FLAGS, mFlags & ~TwitterUsers.FLAG_TO_UPDATE);
-				cv.put(TwitterUsers.COL_ROW_ID, mRowId);
+				if (mRowId != TwitterUsers.NO_ROW_ID) {
+					cv.put(TwitterUsers.COL_ROW_ID, mRowId);
+				}
 			}
 			return cv;
 		}
@@ -776,6 +793,9 @@ public class TwitterSyncService extends IntentService {
 		HttpGet httpGet = new HttpGet(url);
 		HttpResponse mHttpResponse;
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+		BasicHttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+		httpClient.setParams(httpParams);
 		try {
 			mHttpResponse = httpClient.execute(httpGet);
 			if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -1232,7 +1252,7 @@ public class TwitterSyncService extends IntentService {
 
 	private boolean isTimelineSyncNeeded() {
 		boolean needed = false;
-		if (mStartIntent.getBooleanExtra(EXTRA_FORCE_SYNC, false)) {
+		if (mStartIntent.getBooleanExtra(EXTRA_KEY_FORCE_SYNC, false)) {
 			needed = true;
 		} else if ((System.currentTimeMillis() - getLastUpdate(PREF_LAST_TIMELINE_UPDATE) > Constants.TIMELINE_MIN_SYNCH)) {
 			needed = true;
@@ -1382,7 +1402,7 @@ public class TwitterSyncService extends IntentService {
 
 	private boolean isMentionsSyncNeeded() {
 		boolean needed = false;
-		if (mStartIntent.getBooleanExtra(EXTRA_FORCE_SYNC, false)) {
+		if (mStartIntent.getBooleanExtra(EXTRA_KEY_FORCE_SYNC, false)) {
 			needed = true;
 		} else if ((System.currentTimeMillis() - getLastUpdate(PREF_LAST_MENTIONS_UPDATE) > Constants.MENTIONS_MIN_SYNCH)) {
 			needed = true;
@@ -1467,7 +1487,7 @@ public class TwitterSyncService extends IntentService {
 
 	private boolean isFavoritesSyncNeeded() {
 		boolean needed = false;
-		if (mStartIntent.getBooleanExtra(EXTRA_FORCE_SYNC, false)) {
+		if (mStartIntent.getBooleanExtra(EXTRA_KEY_FORCE_SYNC, false)) {
 			needed = true;
 		} else if ((System.currentTimeMillis() - getLastUpdate(PREF_LAST_FAVORITES_UPDATE) > Constants.FAVORITES_MIN_SYNCH)) {
 			needed = true;
@@ -1596,7 +1616,8 @@ public class TwitterSyncService extends IntentService {
 			}
 			storeUsers(friendsValues.toArray(new ContentValues[friendsValues.size()]));
 			setLastUpdate(this, PREF_LAST_FRIENDS_UPDATE, System.currentTimeMillis());
-			getContentResolver().notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
+			// getContentResolver().notifyChange(TwitterUsers.USERS_FRIENDS_URI,
+			// null);
 			syncTransactionalUsers();
 		}
 	}
@@ -1679,7 +1700,7 @@ public class TwitterSyncService extends IntentService {
 
 	private void searchTweet() {
 		Log.d(TAG, "SearchTweetService executeSync() called on Thread " + Thread.currentThread().getId());
-		String queryString = mStartIntent.getStringExtra(EXTRA_TWEET_SEARCH_QUERY);
+		String queryString = mStartIntent.getStringExtra(EXTRA_KEY_TWEET_SEARCH_QUERY);
 		if (queryString != null) {
 			List<Status> searchResults = loadSearchTweets(queryString);
 			insertSearchTweets(searchResults);
@@ -1725,7 +1746,7 @@ public class TwitterSyncService extends IntentService {
 	 */
 	private void searchUser() {
 		Log.d(TAG, "SearchUserService executeSync() called on Thread " + Thread.currentThread().getId());
-		String queryString = mStartIntent.getStringExtra(EXTRA_USER_SEARCH_QUERY);
+		String queryString = mStartIntent.getStringExtra(EXTRA_KEY_USER_SEARCH_QUERY);
 		if (queryString != null) {
 			List<User> searchResults = loadSearchUsers(queryString);
 			insertSearchUsers(searchResults);
@@ -1769,20 +1790,25 @@ public class TwitterSyncService extends IntentService {
 	 * SYNC USER
 	 */
 	private void syncUser() {
-		long rowId = mStartIntent.getLongExtra(EXTRA_USER_ROW_ID, -1);
-		Uri queryUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS
-				+ "/" + rowId);
-		Cursor c = getContentResolver().query(queryUri, null, null, null, null);
-		if (c != null && c.getCount() > 0) {
-			c.moveToFirst();
-			Callable<ContentValues> userSyncTask = getUserSyncTask(c, true);
+		Callable<ContentValues> userSyncTask = null;
+		long rowId = mStartIntent.getLongExtra(EXTRA_KEY_USER_ROW_ID, TwitterUsers.NO_ROW_ID);
+		// update a user that is already in the DB by row id
+		if (rowId != TwitterUsers.NO_ROW_ID) {
+			Uri queryUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+					+ TwitterUsers.TWITTERUSERS + "/" + rowId);
+			Cursor c = getContentResolver().query(queryUri, null, null, null, null);
+			if (c != null && c.getCount() > 0) {
+				c.moveToFirst();
+				userSyncTask = getUserSyncTask(c, true);
+				c.close();
+			}
 			try {
 				ContentValues cv = userSyncTask.call();
 				if (cv != null) {
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 							+ TwitterUsers.TWITTERUSERS);
 					getContentResolver().bulkInsert(insertUri, new ContentValues[] { cv });
-					getContentResolver().notifyChange(TwitterUsers.CONTENT_URI, null);
+
 					if (userSyncTask instanceof ProfileImageUpdateTask) {
 						notifyProfileImageUpdate();
 					}
@@ -1791,16 +1817,40 @@ public class TwitterSyncService extends IntentService {
 				e.printStackTrace();
 			}
 		}
-		c.close();
 	}
 
 	/**
-	 * SYNC REMOTE TWEET
+	 * LOAD USER BY SCREEN NAME
+	 */
+	private void loadUserByScreenName() {
+		boolean success = false;
+		String screenName = mStartIntent.getStringExtra(EXTRA_KEY_SCREEN_NAME);
+		User user = null;
+		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
+			try {
+				user = mTwitter.showUser(screenName);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(user!=null){
+				success=true;
+				break;
+			}
+		}
+		if(success){
+			ContentValues cv = getUserContentValues(user);
+			storeUser(cv);
+			syncTransactionalUsers();
+		}
+	}
+
+	/**
+	 * LOAD TWEET BY TID
 	 */
 
-	private void syncRemoteTweet() {
+	private void loadTweetByTid() {
 		boolean success = false;
-		long tid = mStartIntent.getLongExtra(EXTRA_TWEET_TID, -1);
+		long tid = mStartIntent.getLongExtra(EXTRA_KEY_TWEET_TID, -1);
 		Status tweet = null;
 		for (int attempt = 0; attempt < MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
@@ -1833,7 +1883,7 @@ public class TwitterSyncService extends IntentService {
 	 */
 
 	private void syncLocalTweet() {
-		long rowId = mStartIntent.getLongExtra(EXTRA_TWEET_ROW_ID, -1);
+		long rowId = mStartIntent.getLongExtra(EXTRA_KEY_TWEET_ROW_ID, -1);
 		Uri queryUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + rowId);
 		Cursor c = getContentResolver().query(queryUri, null, null, null, null);
 		if (c != null && c.getCount() > 0) {
@@ -2006,7 +2056,7 @@ public class TwitterSyncService extends IntentService {
 	 */
 
 	private void syncUserTweets() {
-		String screenName = mStartIntent.getStringExtra(EXTRA_SCREEN_NAME);
+		String screenName = mStartIntent.getStringExtra(EXTRA_KEY_SCREEN_NAME);
 		if (screenName != null) {
 			List<Status> userTweets = loadUserTweets(screenName);
 			insertUserTweets(userTweets);

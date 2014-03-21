@@ -129,13 +129,11 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
 		if (item.getItemId() == R.id.menu_write_tweet) {
 			startActivity(new Intent(getBaseContext(), ComposeDmActivity.class));
-
-		} else
+		} else {
 			super.onOptionsItemSelected(item);
-
+		}
 		return true;
 	}
 

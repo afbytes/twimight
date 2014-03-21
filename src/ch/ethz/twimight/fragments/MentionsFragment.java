@@ -29,7 +29,7 @@ public class MentionsFragment extends TweetListFragment {
 	Intent getOverscrollIntent() {
 		Intent overscrollIntent = new Intent(getActivity(), TwitterSyncService.class);
 		overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);
-		overscrollIntent.putExtra(TwitterSyncService.EXTRA_FORCE_SYNC, true);
+		overscrollIntent.putExtra(TwitterSyncService.EXTRA_KEY_FORCE_SYNC, true);
 		return overscrollIntent;
 	}
 	
