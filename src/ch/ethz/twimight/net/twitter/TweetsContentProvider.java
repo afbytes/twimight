@@ -350,7 +350,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_TEXT + " LIKE '%" + where + "%' " + "ORDER BY "
 					+ Tweets.DEFAULT_SORT_ORDER + ";";
 			c = database.rawQuery(sql, null);
-			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_SEARCH_URI);
+			c.setNotificationUri(getContext().getContentResolver(), Tweets.ALL_TWEETS_URI);
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
@@ -387,7 +387,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ Tweets.REVERSE_SORT_ORDER + " LIMIT 5;";
 			c = database.rawQuery(sql, null);
 			// TODO: Correct notification URI
-			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
+			c.setNotificationUri(getContext().getContentResolver(), Tweets.ALL_TWEETS_URI);
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);
@@ -459,7 +459,7 @@ public class TweetsContentProvider extends ContentProvider {
 					+ "ORDER BY " + Tweets.DEFAULT_SORT_ORDER + ";";
 
 			c = database.rawQuery(sql, null);
-			c.setNotificationUri(getContext().getContentResolver(), Tweets.TABLE_TIMELINE_URI);
+			c.setNotificationUri(getContext().getContentResolver(), Tweets.ALL_TWEETS_URI);
 
 			// start synch service with a synch timeline request
 			i = new Intent(getContext(), TwitterSyncService.class);

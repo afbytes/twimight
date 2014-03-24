@@ -87,8 +87,6 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_ACTION_SEARCH_USER = "EXTRA_ACTION_SEARCH_USER";
 	public static final String EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL = "EXTRA_ACTION_SYNC_ALL_TRANSACTIONAL";
 
-	private static final int MAX_USER_SEARCH_PAGES = 5;
-
 	public static final String EXTRA_KEY_TWEET_SEARCH_QUERY = "tweet_search_query";
 	public static final String EXTRA_KEY_USER_SEARCH_QUERY = "user_search_query";
 	public static final String EXTRA_KEY_USER_ROW_ID = "user_row_id";
@@ -101,6 +99,7 @@ public class TwitterSyncService extends IntentService {
 	public static final String EXTRA_TIMELINE_UPDATE_DIRECTION = "update_direction";
 	public static final int TIMELINE_UPDATE_DIRECTION_UP = 1;
 	public static final int TIMELINE_UPDATE_DIRECTION_DOWN = 2;
+	private static final int MAX_USER_SEARCH_PAGES = 5;
 
 	private static final String PREF_LAST_TIMELINE_UPDATE = "last_timeline_update";
 	private static final String PREF_TIMELINE_SINCE_ID = "timeline_since_id";
@@ -553,6 +552,7 @@ public class TwitterSyncService extends IntentService {
 	}
 
 	private void notifyProfileImageUpdate() {
+		Log.d(TAG, "notifyProfileImageUpdate()");
 		ContentResolver contentResolver = getContentResolver();
 		contentResolver.notifyChange(Tweets.ALL_TWEETS_URI, null);
 		contentResolver.notifyChange(TwitterUsers.TWITTERUSERS_URI, null);
@@ -1745,13 +1745,12 @@ public class TwitterSyncService extends IntentService {
 	 * SEARCH USER
 	 */
 	private void searchUser() {
-		Log.d(TAG, "SearchUserService executeSync() called on Thread " + Thread.currentThread().getId());
 		String queryString = mStartIntent.getStringExtra(EXTRA_KEY_USER_SEARCH_QUERY);
+		Log.d(TAG, "searchUser() "+ queryString);
 		if (queryString != null) {
 			List<User> searchResults = loadSearchUsers(queryString);
 			insertSearchUsers(searchResults);
 		}
-		Log.d(TAG, "SearchUserService executeSync() exit");
 	}
 
 	private List<User> loadSearchUsers(String queryString) {
@@ -1832,12 +1831,12 @@ public class TwitterSyncService extends IntentService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if(user!=null){
-				success=true;
+			if (user != null) {
+				success = true;
 				break;
 			}
 		}
-		if(success){
+		if (success) {
 			ContentValues cv = getUserContentValues(user);
 			storeUser(cv);
 			syncTransactionalUsers();
