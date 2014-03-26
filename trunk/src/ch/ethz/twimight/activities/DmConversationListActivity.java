@@ -79,7 +79,7 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 				Cursor c = (Cursor) dmUsersListView.getItemAtPosition(position);
 				Intent i = new Intent(getBaseContext(), DmListActivity.class);
 				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-				i.putExtra("screenname", c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+				i.putExtra("screenname", c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)));
 				startActivity(i);
 			}
 		});

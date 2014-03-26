@@ -40,7 +40,6 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.FriendsKeysDBHelper;
 import ch.ethz.twimight.data.RevocationDBHelper;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
@@ -388,9 +387,9 @@ public class TDSService extends Service {
 				tds.createFollowerObject(fm.getLastUpdate());
 
 				// send statistics
-				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getApplicationContext());
-				statisticAdapter.open();
-				tds.createStatisticObject(statisticAdapter.getData(), statisticAdapter.getFollowersCount());
+//				StatisticsDBHelper statisticAdapter = new StatisticsDBHelper(getApplicationContext());
+//				statisticAdapter.open();
+//				tds.createStatisticObject(statisticAdapter.getData(), statisticAdapter.getFollowersCount());
 
 				// Preparing disaster tweets to be sent to the server
 				Cursor cursor = getContentResolver().query(
@@ -423,9 +422,9 @@ public class TDSService extends Service {
 			try {
 
 				// delete old logs
-				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
-				statHelper.open();
-				statHelper.deleteOldData();
+//				StatisticsDBHelper statHelper = new StatisticsDBHelper(TDSService.this);
+//				statHelper.open();
+//				statHelper.deleteOldData();
 
 				// authentication
 				String twitterId = tds.parseAuthentication();

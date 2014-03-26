@@ -83,12 +83,16 @@ public class TwitterUsers implements BaseColumns {
 
 	// here start the column names
 	public static final String COL_ROW_ID = BaseColumns._ID;
-	public static final String COL_SCREENNAME = "user_screenname";
-	public static final String COL_TWITTERUSER_ID = "twitteruser_id";
+	public static final String COL_SCREEN_NAME = "user_screenname";
+	public static final String COL_TWITTER_USER_ID = "twitteruser_id";
 	public static final String COL_NAME = "name";
 	public static final String COL_LANG = "lang";
 	public static final String COL_DESCRIPTION = "description";
-	public static final String COL_IMAGEURL = "profile_image_url";
+	/** URL of the profile image on twitter or local file uri **/
+	public static final String COL_PROFILE_IMAGE_URI = "profile_image_url";
+	public static final String COL_PROFILE_BACKGROUND_IMAGE_URI = "profile_background_image_uri";
+	public static final String COL_PROFILE_BACKGROUND_COLOR = "profile_background_color";
+	public static final String COL_PROFILE_BANNER_IMAGE_URI = "profile_banner_image_uri";
 	public static final String COL_STATUSES = "statuses_count";
 	public static final String COL_FOLLOWERS = "followers_count";
 	public static final String COL_FRIENDS = "friends_count";
@@ -103,30 +107,30 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_VERIFIED = "verified";
 
 	/** is the user following us? */
-	public static final String COL_ISFOLLOWER = "following";
+	public static final String COL_IS_FOLLOWER = "following";
 	/** are we following the user? */
-	public static final String COL_ISFRIEND = "follow";
+	public static final String COL_IS_FRIEND = "follow";
 	/** have we met the user in disaster mode */
-	public static final String COL_ISDISASTER_PEER = "disaster_peer";
+	public static final String COL_IS_DISASTER_PEER = "disaster_peer";
 	/** have we met the user in disaster mode */
 	public static final String COL_IS_SEARCH_RESULT = "search_result";
 	/** was a following request sent to twitter? */
-	public static final String COL_FOLLOWREQUEST = "follow_request_sent";
-	public static final String COL_LASTUPDATE = "last_update";
-	public static final String COL_LAST_PICTURE_UPDATE = "last_picture_update";
+	public static final String COL_FOLLOW_REQUEST = "follow_request_sent";
+	public static final String COL_LAST_UPDATE = "last_update";
 	public static final String COL_FLAGS = "u_flags";
 
-	public static final String COL_PROFILEIMAGE_PATH = "_data";
+//	public static final String COL_PROFILEIMAGE_PATH = "_data";
+	
+	
 	/** this is used only in disaster mode to sent the profile image */
-	public static final String COL_PROFILEIMAGE = "image";
+	public static final String JSON_FIELD_PROFILE_IMAGE = "image";
 
-	public static final String DEFAULT_SORT_ORDER = COL_SCREENNAME;
+	public static final String DEFAULT_SORT_ORDER = COL_SCREEN_NAME;
 
 	// flags for synchronizing with twitter
 	public static final int FLAG_TO_UPDATE = 1;
 	public static final int FLAG_TO_FOLLOW = 2;
 	public static final int FLAG_TO_UNFOLLOW = 4;
-	public static final int FLAG_TO_UPDATEIMAGE = 8;
 
 	/**
 	 * URI to reference all twitter users
@@ -138,10 +142,10 @@ public class TwitterUsers implements BaseColumns {
 	 * The content:// style URL
 	 */
 	public static final Uri CONTENT_URI = TWITTERUSERS_URI;
-	public static final Uri USERS_FRIENDS_URI = Uri.parse(BASE_URI + COL_ISFRIEND);
-	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI + COL_ISFOLLOWER);
+	public static final Uri USERS_FRIENDS_URI = Uri.parse(BASE_URI + COL_IS_FRIEND);
+	public static final Uri USERS_FOLLOWERS_URI = Uri.parse(BASE_URI + COL_IS_FOLLOWER);
 	public static final Uri USERS_SEARCH_URI = Uri.parse(BASE_URI + TWITTERUSERS_SEARCH);
-	public static final Uri USERS_DISASTER_URI = Uri.parse(BASE_URI + COL_ISDISASTER_PEER);
+	public static final Uri USERS_DISASTER_URI = Uri.parse(BASE_URI + COL_IS_DISASTER_PEER);
 	
 	public static final long NO_ROW_ID = -1;
 	public static final long NO_TID = -1;

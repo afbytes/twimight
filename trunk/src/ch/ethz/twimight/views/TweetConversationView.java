@@ -19,7 +19,6 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.TweetDetailActivity;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
-import ch.ethz.twimight.util.AsyncImageLoader;
 
 /**
  * Displays a single tweet detailed in a big view. If there are previous tweets
@@ -39,14 +38,12 @@ public class TweetConversationView extends FrameLayout {
 	private TweetDetailView mMainTweetView;
 	private final List<View> mTweetViews = new ArrayList<View>();
 	private final BaseAdapter mListAdapter = new ConversationAdapter();
-	private AsyncImageLoader mImageLoader;
 	private ContentObserver mTweetLoadedObserver;
 
 	public TweetConversationView(Context context, AttributeSet attributeSet) {
 		super(context, attributeSet);
 		mListView = new ListView(context);
 		mListView.setSmoothScrollbarEnabled(false);
-		mImageLoader = new AsyncImageLoader(context);
 		addView(mListView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		// OnLayoutChangeListener is needed to get the actual height of the view
 		// as soon as it is known
@@ -65,7 +62,7 @@ public class TweetConversationView extends FrameLayout {
 			}
 		});
 	}
-	
+
 	/**
 	 * Initializes the complete view to the content of the tweet with the given
 	 * row ID.
@@ -90,7 +87,8 @@ public class TweetConversationView extends FrameLayout {
 		Cursor originalTweetCursor = getContext().getContentResolver().query(originalTweetUri, null, null, null, null);
 		if (originalTweetCursor != null && originalTweetCursor.getCount() > 0) {
 			originalTweetCursor.moveToFirst();
-			long replyToTweetId = originalTweetCursor.getLong(originalTweetCursor.getColumnIndex(Tweets.COL_REPLYTO));
+			long replyToTweetId = originalTweetCursor.getLong(originalTweetCursor
+					.getColumnIndex(Tweets.COL_REPLY_TO_TWEET_TID));
 			if (replyToTweetId != 0) {
 				loadPreviousConversationTweet(replyToTweetId);
 			}
@@ -115,7 +113,7 @@ public class TweetConversationView extends FrameLayout {
 		if (c.getCount() > 0) {
 			c.moveToFirst();
 			addPreviousConversationTweet(c);
-			long replyToTweetId = c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO));
+			long replyToTweetId = c.getLong(c.getColumnIndex(Tweets.COL_REPLY_TO_TWEET_TID));
 			if (replyToTweetId != 0) {
 				loadPreviousConversationTweet(replyToTweetId);
 			}
@@ -140,7 +138,7 @@ public class TweetConversationView extends FrameLayout {
 	 */
 	private synchronized void addPreviousConversationTweet(Cursor c) {
 		TweetView tweetView = new TweetView(getContext());
-		tweetView.update(c, false, false, mImageLoader);
+		tweetView.update(c, false, false);
 		long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
 		tweetView.setOnClickListener(new ConversationTweetClickListener(rowId));
 		tweetView.setBackgroundResource(R.drawable.borderless_button_background_faded);

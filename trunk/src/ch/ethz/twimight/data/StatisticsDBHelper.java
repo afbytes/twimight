@@ -133,7 +133,7 @@ public class StatisticsDBHelper {
 	
 	public long getFollowersCount()  {
 		
-		Cursor cursor = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_ISFOLLOWER + "= 1", null,null,null,null);
+		Cursor cursor = database.query(DBOpenHelper.TABLE_USERS, null, TwitterUsers.COL_IS_FOLLOWER + "= 1", null,null,null,null);
 		if (cursor != null){
 			cursor.moveToFirst();
 		

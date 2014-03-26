@@ -83,7 +83,7 @@ public class HtmlPagesDbHelper {
 
 			for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 
-				Long disId = c.getLong(c.getColumnIndex(Tweets.COL_DISASTERID));
+				Long disId = c.getLong(c.getColumnIndex(Tweets.COL_DISASTER_ID));
 				byte[] serializedUrlEntities = c.getBlob(c.getColumnIndex(Tweets.COL_URL_ENTITIES));
 				URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
 

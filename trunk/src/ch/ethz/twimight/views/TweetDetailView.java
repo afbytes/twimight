@@ -8,6 +8,10 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+
 import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
 import twitter4j.TweetEntity;
@@ -72,8 +76,8 @@ public class TweetDetailView extends FrameLayout {
 	private Uri mUri;
 	private SDCardHelper mSdCardHelper;
 	private String mPhotoPath;
-	private LocationHelper mLocationHelper;
-	private StatisticsDBHelper mStatsDbHelper;
+//	private LocationHelper mLocationHelper;
+//	private StatisticsDBHelper mStatsDbHelper;
 	private ConnectivityManager mConnectivityManager;
 	private HtmlPagesDbHelper mHtmlDbHelper;
 
@@ -117,9 +121,9 @@ public class TweetDetailView extends FrameLayout {
 		mRowId = rowId;
 		mUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
 		mSdCardHelper = new SDCardHelper();
-		mLocationHelper = LocationHelper.getInstance(context);
-		mStatsDbHelper = new StatisticsDBHelper(context.getApplicationContext());
-		mStatsDbHelper.open();
+//		mLocationHelper = LocationHelper.getInstance(context);
+//		mStatsDbHelper = new StatisticsDBHelper(context.getApplicationContext());
+//		mStatsDbHelper.open();
 		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		mHtmlDbHelper = new HtmlPagesDbHelper(context);
 		mHtmlDbHelper.open();
@@ -209,7 +213,7 @@ public class TweetDetailView extends FrameLayout {
 	private void updateContent() {
 		mBuffer = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_BUFFER));
 		mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
-		mTwitterUserId = String.valueOf(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		mTwitterUserId = String.valueOf(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 		mPhotoDirectoryPath = Tweets.PHOTO_PATH + "/" + mTwitterUserId;
 		setTweetInfo();
 		setUserInfo();
@@ -218,7 +222,7 @@ public class TweetDetailView extends FrameLayout {
 		mUnverifiedInfo.setVisibility(LinearLayout.GONE);
 		if ((mBuffer & Tweets.BUFFER_DISASTER) != 0) {
 
-			if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_ISVERIFIED)) == 0) {
+			if (mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_IS_VERIFIED)) == 0) {
 				mUnverifiedInfo.setVisibility(LinearLayout.VISIBLE);
 			}
 		}
@@ -238,7 +242,7 @@ public class TweetDetailView extends FrameLayout {
 	 */
 	private void setTweetInfo() {
 
-		mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 		mTvScreenName.setText("@" + mScreenName);
 		mTvRealName.setText(mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_NAME)));
 		mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
@@ -286,8 +290,19 @@ public class TweetDetailView extends FrameLayout {
 				tweetTextSpannable.replace(mediaEntity.getStart(), mediaEntity.getEnd(), mediaEntity.getDisplayURL());
 
 				String html = "<html><head><meta name=\"viewport\" content=\"width=device-width, user-scalable=no\"></head><body style=\"margin:0px; padding:0px\"></body><img width=\"100%%\" src=\"%s\"/></body></html>";
-				mImageWebView.setVisibility(View.VISIBLE);
-				mImageWebView.loadData(String.format(html, mediaEntity.getMediaURL()), "text/html", null);
+				
+				mIvTweetPicture.setVisibility(View.VISIBLE);
+				ImageLoader.getInstance().displayImage(mediaEntity.getMediaURL(), mIvTweetPicture);
+				String mediaUrl = mediaEntity.getMediaURL();
+				if(mediaEntity.getSizes().containsKey(MediaEntity.Size.LARGE)){
+					mediaUrl = mediaUrl+":large";
+				}
+				Log.d(TAG, "loading " + mediaUrl);
+				DisplayImageOptions options = new DisplayImageOptions.Builder().imageScaleType(ImageScaleType.NONE).build();
+				ImageLoader.getInstance().displayImage(mediaUrl, mIvTweetPicture, options);
+				
+//				mImageWebView.setVisibility(View.VISIBLE);
+//				mImageWebView.loadData(String.format(html, mediaEntity.getMediaURL()), "text/html", null);
 			} else if (entity instanceof URLEntity) {
 				URLEntity urlEntity = (URLEntity) entity;
 				tweetTextSpannable.setSpan(new InternalURLSpan(urlEntity.getURL(), normalLinkColor, pressedLinkColor,
@@ -303,7 +318,7 @@ public class TweetDetailView extends FrameLayout {
 
 		// created at
 		tweetCreationDetails.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-				.format(new Date(mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_CREATED)))).toString());
+				.format(new Date(mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_CREATED_AT)))).toString());
 
 		// created via (if available)
 		if (mCursor.getString(mCursor.getColumnIndex(Tweets.COL_SOURCE)) != null) {
@@ -361,25 +376,28 @@ public class TweetDetailView extends FrameLayout {
 	 * Sets the profile picture.
 	 */
 	private void setProfilePicture() {
-		// Profile image
-		if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-
-			int userId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS + "/" + userId);
-			InputStream is;
-
-			try {
-				is = getContext().getContentResolver().openInputStream(imageUri);
-				if (is != null) {
-					Bitmap bm = BitmapFactory.decodeStream(is);
-					mIvProfilePicture.setImageBitmap(bm);
-				} else
-					mIvProfilePicture.setImageResource(R.drawable.profile_image_placeholder);
-			} catch (FileNotFoundException e) {
-				mIvProfilePicture.setImageResource(R.drawable.profile_image_placeholder);
-			}
-		}
+		String profilePictureUrl = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+		ImageLoader.getInstance().displayImage(profilePictureUrl, mIvProfilePicture);
+		
+//		// Profile image
+//		if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+//
+//			int userId = mCursor.getInt(mCursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
+//			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+//					+ TwitterUsers.TWITTERUSERS + "/" + userId);
+//			InputStream is;
+//
+//			try {
+//				is = getContext().getContentResolver().openInputStream(imageUri);
+//				if (is != null) {
+//					Bitmap bm = BitmapFactory.decodeStream(is);
+//					mIvProfilePicture.setImageBitmap(bm);
+//				} else
+//					mIvProfilePicture.setImageResource(R.drawable.profile_image_placeholder);
+//			} catch (FileNotFoundException e) {
+//				mIvProfilePicture.setImageResource(R.drawable.profile_image_placeholder);
+//			}
+//		}
 	}
 
 	/**
@@ -389,11 +407,11 @@ public class TweetDetailView extends FrameLayout {
 		if (mImageWebView.getVisibility() != View.VISIBLE) {
 			// Profile image
 
-			mIvTweetPicture.setVisibility(View.GONE);
+//			mIvTweetPicture.setVisibility(View.GONE);
 			String[] filePath = { mPhotoDirectoryPath };
 			if (mSdCardHelper.checkSDState(filePath)) {
-				if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA))) {
-					String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
+				if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI))) {
+					String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
 					Uri photoUri = Uri.fromFile(mSdCardHelper.getFileFromSDCard(mPhotoDirectoryPath, photoFileName));// photoFileParent,
 					// photoFilename));
 					mPhotoPath = photoUri.getPath();
@@ -633,12 +651,12 @@ public class TweetDetailView extends FrameLayout {
 		@Override
 		public void onClick(View widget) {
 
-			if ((mLocationHelper != null && mLocationHelper.getCount() > 0) && mStatsDbHelper != null
-					&& mConnectivityManager.getActiveNetworkInfo() != null) {
-				mLocationHelper.unRegisterLocationListener();
-				mStatsDbHelper.insertRow(mLocationHelper.getLocation(), mConnectivityManager.getActiveNetworkInfo()
-						.getTypeName(), StatisticsDBHelper.LINK_CLICKED, url, System.currentTimeMillis());
-			}
+//			if ((mLocationHelper != null && mLocationHelper.getCount() > 0) && mStatsDbHelper != null
+//					&& mConnectivityManager.getActiveNetworkInfo() != null) {
+//				mLocationHelper.unRegisterLocationListener();
+//				mStatsDbHelper.insertRow(mLocationHelper.getLocation(), mConnectivityManager.getActiveNetworkInfo()
+//						.getTypeName(), StatisticsDBHelper.LINK_CLICKED, url, System.currentTimeMillis());
+//			}
 
 			if (mConnectivityManager.getActiveNetworkInfo() != null
 					&& mConnectivityManager.getActiveNetworkInfo().isConnected()) {

@@ -1,7 +1,6 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,15 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.util.EntityUtils;
 
 import twitter4j.DirectMessage;
 import twitter4j.GeoLocation;
@@ -38,7 +28,6 @@ import twitter4j.UserMentionEntity;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.IntentService;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -61,7 +50,6 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
-import ch.ethz.twimight.util.InternalStorageHelper;
 import ch.ethz.twimight.util.Serialization;
 
 public class TwitterSyncService extends IntentService {
@@ -371,16 +359,15 @@ public class TwitterSyncService extends IntentService {
 		for (UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()) {
 			ContentValues mentionedUserValues = new ContentValues();
 			mentionedUserValues.put(TwitterUsers.COL_NAME, userMentionEntity.getName());
-			mentionedUserValues.put(TwitterUsers.COL_TWITTERUSER_ID, userMentionEntity.getId());
-			mentionedUserValues.put(TwitterUsers.COL_SCREENNAME, userMentionEntity.getScreenName());
-			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE
-					| TwitterUsers.FLAG_TO_UPDATEIMAGE);
+			mentionedUserValues.put(TwitterUsers.COL_TWITTER_USER_ID, userMentionEntity.getId());
+			mentionedUserValues.put(TwitterUsers.COL_SCREEN_NAME, userMentionEntity.getScreenName());
+			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE);
 			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS);
 			getContentResolver().insert(insertUri, mentionedUserValues);
 		}
 
-		cv.put(Tweets.COL_CREATED, tweet.getCreatedAt().getTime());
+		cv.put(Tweets.COL_CREATED_AT, tweet.getCreatedAt().getTime());
 		cv.put(Tweets.COL_SOURCE, tweet.getSource());
 
 		cv.put(Tweets.COL_TID, tweet.getId());
@@ -394,7 +381,7 @@ public class TwitterSyncService extends IntentService {
 		cv.put(Tweets.COL_RETWEET_COUNT, tweet.getRetweetCount());
 		cv.put(Tweets.COL_FAVORITE_COUNT, tweet.getFavoriteCount());
 		if (tweet.getInReplyToStatusId() != -1) {
-			cv.put(Tweets.COL_REPLYTO, tweet.getInReplyToStatusId());
+			cv.put(Tweets.COL_REPLY_TO_TWEET_TID, tweet.getInReplyToStatusId());
 			cv.put(Tweets.COL_REPLY_TO_USER_ID, tweet.getInReplyToUserId());
 			cv.put(Tweets.COL_REPLY_TO_SCREEN_NAME, tweet.getInReplyToScreenName());
 
@@ -403,8 +390,8 @@ public class TwitterSyncService extends IntentService {
 							+ cv.getAsString(Tweets.COL_REPLY_TO_SCREEN_NAME) + " " + tweet.getInReplyToScreenName());
 			Log.d(TAG, cv.keySet().toString());
 		}
-		cv.put(Tweets.COL_TWITTERUSER, tweet.getUser().getId());
-		cv.put(Tweets.COL_SCREENNAME, tweet.getUser().getScreenName());
+		cv.put(Tweets.COL_USER_TID, tweet.getUser().getId());
+		cv.put(Tweets.COL_SCREEN_NAME, tweet.getUser().getScreenName());
 		cv.put(Tweets.COL_BUFFER, buffer);
 
 		return cv;
@@ -421,8 +408,8 @@ public class TwitterSyncService extends IntentService {
 		ContentValues userContentValues = null;
 		if (user != null && user.getScreenName() != null) {
 			userContentValues = new ContentValues();
-			userContentValues.put(TwitterUsers.COL_TWITTERUSER_ID, user.getId());
-			userContentValues.put(TwitterUsers.COL_SCREENNAME, user.getScreenName());
+			userContentValues.put(TwitterUsers.COL_TWITTER_USER_ID, user.getId());
+			userContentValues.put(TwitterUsers.COL_SCREEN_NAME, user.getScreenName());
 			userContentValues.put(TwitterUsers.COL_NAME, user.getName());
 			if (user.getDescription() != null)
 				userContentValues.put(TwitterUsers.COL_DESCRIPTION, user.getDescription());
@@ -436,13 +423,15 @@ public class TwitterSyncService extends IntentService {
 			userContentValues.put(TwitterUsers.COL_STATUSES, user.getStatusesCount());
 			userContentValues.put(TwitterUsers.COL_VERIFIED, user.isVerified());
 			userContentValues.put(TwitterUsers.COL_PROTECTED, user.isProtected());
+			userContentValues.put(TwitterUsers.COL_PROFILE_BACKGROUND_COLOR, user.getProfileBackgroundColor());
+			userContentValues.put(TwitterUsers.COL_PROFILE_BACKGROUND_IMAGE_URI, user.getProfileBackgroundImageURL());
+			userContentValues.put(TwitterUsers.COL_PROFILE_BANNER_IMAGE_URI, user.getProfileBannerURL());
+			user.getProfileBackgroundImageURL();
 			if (user.getProfileImageURL() != null) {
 				ProfileImageVariant desiredVariant = ProfileImageVariant.BIGGER;
 				String receivedUrl = user.getProfileImageURL().toString();
 				String desiredUrl = ProfileImageVariant.getVariantUrl(receivedUrl, desiredVariant);
-				userContentValues.put(TwitterUsers.COL_IMAGEURL, desiredUrl);
-				// we flag the user for updating their profile image
-				userContentValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATEIMAGE);
+				userContentValues.put(TwitterUsers.COL_PROFILE_IMAGE_URI, desiredUrl);
 			}
 		}
 		return userContentValues;
@@ -478,7 +467,7 @@ public class TwitterSyncService extends IntentService {
 					+ Tweets.TWEETS_TABLE_TIMELINE + "/" + Tweets.TWEETS_SOURCE_NORMAL);
 			updateCount = getContentResolver().bulkInsert(insertUri, tweetsValues);
 		}
-		getContentResolver().notifyChange(Tweets.TABLE_TIMELINE_URI, null);
+		getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 		return updateCount;
 	}
 
@@ -495,6 +484,7 @@ public class TwitterSyncService extends IntentService {
 					+ TwitterUsers.TWITTERUSERS);
 			updateCount = getContentResolver().bulkInsert(insertUri, userValues);
 		}
+		getContentResolver().notifyChange(Tweets.ALL_TWEETS_URI, null);
 		return updateCount;
 	}
 
@@ -509,7 +499,6 @@ public class TwitterSyncService extends IntentService {
 		Cursor c = getContentResolver().query(queryUri, null, TwitterUsers.COL_FLAGS + "!=0", null, null);
 		if (c != null && c.getCount() > 0) {
 			Log.d(TAG, c.getCount() + " transactional users");
-			boolean profileImageUpdateNotificationNeeded = false;
 			ExecutorService executorService = Executors.newCachedThreadPool();
 			List<Future<ContentValues>> futureResults = new LinkedList<Future<ContentValues>>();
 			while (c.moveToNext()) {
@@ -517,9 +506,6 @@ public class TwitterSyncService extends IntentService {
 				if (syncTask != null) {
 					Future<ContentValues> futureResult = executorService.submit(syncTask);
 					futureResults.add(futureResult);
-				}
-				if (syncTask instanceof ProfileImageUpdateTask) {
-					profileImageUpdateNotificationNeeded = true;
 				}
 			}
 			executorService.shutdown();
@@ -543,23 +529,8 @@ public class TwitterSyncService extends IntentService {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (profileImageUpdateNotificationNeeded) {
-				notifyProfileImageUpdate();
-			}
-
 		}
 		c.close();
-	}
-
-	private void notifyProfileImageUpdate() {
-		Log.d(TAG, "notifyProfileImageUpdate()");
-		ContentResolver contentResolver = getContentResolver();
-		contentResolver.notifyChange(Tweets.ALL_TWEETS_URI, null);
-		contentResolver.notifyChange(TwitterUsers.TWITTERUSERS_URI, null);
-		// contentResolver.notifyChange(TwitterUsers.USERS_SEARCH_URI, null);
-		// contentResolver.notifyChange(TwitterUsers.USERS_DISASTER_URI, null);
-		// contentResolver.notifyChange(TwitterUsers.USERS_FOLLOWERS_URI, null);
-		// contentResolver.notifyChange(TwitterUsers.USERS_FRIENDS_URI, null);
 	}
 
 	private Callable<ContentValues> getUserSyncTask(Cursor c, boolean force) {
@@ -568,16 +539,14 @@ public class TwitterSyncService extends IntentService {
 		if ((flags & TwitterUsers.FLAG_TO_UPDATE) > 0) {
 			// Update a user if it's time to do so
 			if (force
-					|| c.isNull(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE))
-					|| (System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LASTUPDATE)) > Constants.USERS_MIN_SYNCH)) {
+					|| c.isNull(c.getColumnIndex(TwitterUsers.COL_LAST_UPDATE))
+					|| (System.currentTimeMillis() - c.getInt(c.getColumnIndex(TwitterUsers.COL_LAST_UPDATE)) > Constants.USERS_MIN_SYNCH)) {
 				userSyncTask = new UpdateUserTask(c);
 			}
 		} else if ((flags & TwitterUsers.FLAG_TO_FOLLOW) > 0) {
 			userSyncTask = new FollowUserTask(c);
 		} else if ((flags & TwitterUsers.FLAG_TO_UNFOLLOW) > 0) {
 			userSyncTask = new UnfollowUserTask(c);
-		} else if ((flags & TwitterUsers.FLAG_TO_UPDATEIMAGE) > 0) {
-			userSyncTask = new ProfileImageUpdateTask(c);
 		}
 		return userSyncTask;
 	}
@@ -589,17 +558,10 @@ public class TwitterSyncService extends IntentService {
 		private final int mFlags;
 
 		private UpdateUserTask(Cursor c) {
-			mRequestedTid = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
-			mRequestedScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			mRequestedTid = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID));
+			mRequestedScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			mRowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 			mFlags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
-		}
-
-		public UpdateUserTask(String screenName) {
-			mRequestedScreenName = screenName;
-			mRequestedTid = TwitterUsers.NO_TID;
-			mRowId = TwitterUsers.NO_ROW_ID;
-			mFlags = 0;
 		}
 
 		@Override
@@ -634,7 +596,7 @@ public class TwitterSyncService extends IntentService {
 			ContentValues cv = null;
 			if (success) {
 				cv = getUserContentValues(user);
-				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_LAST_UPDATE, System.currentTimeMillis());
 				cv.put(TwitterUsers.COL_FLAGS, mFlags & ~TwitterUsers.FLAG_TO_UPDATE);
 				if (mRowId != TwitterUsers.NO_ROW_ID) {
 					cv.put(TwitterUsers.COL_ROW_ID, mRowId);
@@ -652,8 +614,8 @@ public class TwitterSyncService extends IntentService {
 		private final int mFlags;
 
 		private FollowUserTask(Cursor c) {
-			mTwitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
-			mTwitteruserScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			mTwitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID));
+			mTwitteruserScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			mRowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 			mFlags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		}
@@ -682,7 +644,7 @@ public class TwitterSyncService extends IntentService {
 			ContentValues cv = null;
 			if (success) {
 				cv = getUserContentValues(user);
-				cv.put(TwitterUsers.COL_ISFRIEND, 1);
+				cv.put(TwitterUsers.COL_IS_FRIEND, 1);
 				cv.put(TwitterUsers.COL_FLAGS, (mFlags & ~TwitterUsers.FLAG_TO_FOLLOW));
 				cv.put(TwitterUsers.COL_ROW_ID, mRowId);
 				// TODO: toast
@@ -699,8 +661,8 @@ public class TwitterSyncService extends IntentService {
 		private final int mFlags;
 
 		private UnfollowUserTask(Cursor c) {
-			mTwitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID));
-			mTwitteruserScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			mTwitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID));
+			mTwitteruserScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			mRowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
 			mFlags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
 		}
@@ -729,88 +691,13 @@ public class TwitterSyncService extends IntentService {
 			ContentValues cv = null;
 			if (success) {
 				cv = getUserContentValues(user);
-				cv.put(TwitterUsers.COL_ISFRIEND, 0);
+				cv.put(TwitterUsers.COL_IS_FRIEND, 0);
 				cv.put(TwitterUsers.COL_FLAGS, (mFlags & ~TwitterUsers.FLAG_TO_UNFOLLOW));
 				cv.put(TwitterUsers.COL_ROW_ID, mRowId);
 				// TODO: toast
 			}
 			return cv;
 		}
-	}
-
-	private class ProfileImageUpdateTask implements Callable<ContentValues> {
-
-		private final Integer mLastPictureUpdate;
-		private final String mImageUrl;
-		private final String mScreenName;
-		private final long mRowId;
-		private final int mFlags;
-
-		private ProfileImageUpdateTask(Cursor c) {
-			mLastPictureUpdate = c.getInt(c.getColumnIndex(TwitterUsers.COL_LAST_PICTURE_UPDATE));
-			mImageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
-			mScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
-			mRowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
-			mFlags = c.getInt(c.getColumnIndex(TwitterUsers.COL_FLAGS));
-		}
-
-		@Override
-		public ContentValues call() {
-			ContentValues cv = null;
-			if ((System.currentTimeMillis() - mLastPictureUpdate > Constants.USERS_MIN_SYNCH)) {
-				Log.d(TAG, "ProfileImageUpdateTask call() for " + mScreenName);
-				// download the image
-				String biggerVariantUrl = ProfileImageVariant.getVariantUrl(mImageUrl, ProfileImageVariant.BIGGER);
-				byte[] image = downloadImage(biggerVariantUrl);
-				// store image in file system
-				String profileImagePath = null;
-				if (image != null) {
-					InternalStorageHelper helper = new InternalStorageHelper(TwitterSyncService.this);
-					helper.writeImage(image, mScreenName);
-					profileImagePath = new File(getFilesDir(), mScreenName).getPath();
-				}
-				// update user entry in DB
-				cv = new ContentValues();
-				cv.put(TwitterUsers.COL_ROW_ID, mRowId);
-				cv.put(TwitterUsers.COL_FLAGS, mFlags & ~TwitterUsers.FLAG_TO_UPDATEIMAGE);
-				cv.put(TwitterUsers.COL_PROFILEIMAGE_PATH, profileImagePath);
-				cv.put(TwitterUsers.COL_LAST_PICTURE_UPDATE, System.currentTimeMillis());
-			}
-			return cv;
-		}
-	}
-
-	/**
-	 * Downloads the resource at the given URL
-	 * 
-	 * @param url
-	 *            the URL of a reource accessible via HTTP
-	 * @return the downloaded resource as a byte array or null if the download
-	 *         fails
-	 */
-	private byte[] downloadImage(String url) {
-		byte[] image = null;
-		HttpGet httpGet = new HttpGet(url);
-		HttpResponse mHttpResponse;
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		BasicHttpParams httpParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
-		httpClient.setParams(httpParams);
-		try {
-			mHttpResponse = httpClient.execute(httpGet);
-			if (mHttpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-				try {
-					image = EntityUtils.toByteArray(mHttpResponse.getEntity());
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return image;
 	}
 
 	/**
@@ -1000,7 +887,7 @@ public class TwitterSyncService extends IntentService {
 		String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 		StatusUpdate statusUpdate = new StatusUpdate(text);
 		// media?
-		String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		String mediaName = c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
 		if (mediaName != null) {
 			String mediaUrl = Environment.getExternalStoragePublicDirectory(
 					Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this) + "/" + mediaName).getAbsolutePath();
@@ -1015,8 +902,8 @@ public class TwitterSyncService extends IntentService {
 			statusUpdate.setLocation(location);
 		}
 		// is reply?
-		if (c.getColumnIndex(Tweets.COL_REPLYTO) >= 0) {
-			long replyToId = c.getLong(c.getColumnIndex(Tweets.COL_REPLYTO));
+		if (c.getColumnIndex(Tweets.COL_REPLY_TO_TWEET_TID) >= 0) {
+			long replyToId = c.getLong(c.getColumnIndex(Tweets.COL_REPLY_TO_TWEET_TID));
 			statusUpdate.setInReplyToStatusId(replyToId);
 		}
 		// update status
@@ -1330,7 +1217,7 @@ public class TwitterSyncService extends IntentService {
 				ContentValues userValues;
 				if (!tweet.isRetweet()) {
 					userValues = getUserContentValues(tweet.getUser());
-					userValues.put(TwitterUsers.COL_ISFRIEND, 1);
+					userValues.put(TwitterUsers.COL_IS_FRIEND, 1);
 				} else {
 					userValues = getUserContentValues(tweet.getRetweetedStatus().getUser());
 				}
@@ -1610,8 +1497,8 @@ public class TwitterSyncService extends IntentService {
 			List<ContentValues> friendsValues = new LinkedList<ContentValues>();
 			for (User friend : friends) {
 				ContentValues cv = getUserContentValues(friend);
-				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
-				cv.put(TwitterUsers.COL_ISFRIEND, 1);
+				cv.put(TwitterUsers.COL_LAST_UPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_IS_FRIEND, 1);
 				friendsValues.add(cv);
 			}
 			storeUsers(friendsValues.toArray(new ContentValues[friendsValues.size()]));
@@ -1683,8 +1570,8 @@ public class TwitterSyncService extends IntentService {
 			List<ContentValues> followersValues = new LinkedList<ContentValues>();
 			for (User follower : followers) {
 				ContentValues cv = getUserContentValues(follower);
-				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
-				cv.put(TwitterUsers.COL_ISFOLLOWER, 1);
+				cv.put(TwitterUsers.COL_LAST_UPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_IS_FOLLOWER, 1);
 				followersValues.add(cv);
 			}
 			storeUsers(followersValues.toArray(new ContentValues[followersValues.size()]));
@@ -1746,7 +1633,7 @@ public class TwitterSyncService extends IntentService {
 	 */
 	private void searchUser() {
 		String queryString = mStartIntent.getStringExtra(EXTRA_KEY_USER_SEARCH_QUERY);
-		Log.d(TAG, "searchUser() "+ queryString);
+		Log.d(TAG, "searchUser() " + queryString);
 		if (queryString != null) {
 			List<User> searchResults = loadSearchUsers(queryString);
 			insertSearchUsers(searchResults);
@@ -1774,7 +1661,7 @@ public class TwitterSyncService extends IntentService {
 			List<ContentValues> usersValues = new LinkedList<ContentValues>();
 			for (User user : searchResults) {
 				ContentValues cv = getUserContentValues(user);
-				cv.put(TwitterUsers.COL_LASTUPDATE, System.currentTimeMillis());
+				cv.put(TwitterUsers.COL_LAST_UPDATE, System.currentTimeMillis());
 				cv.put(TwitterUsers.COL_IS_SEARCH_RESULT, 1);
 				usersValues.add(cv);
 			}
@@ -1807,10 +1694,6 @@ public class TwitterSyncService extends IntentService {
 					Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 							+ TwitterUsers.TWITTERUSERS);
 					getContentResolver().bulkInsert(insertUri, new ContentValues[] { cv });
-
-					if (userSyncTask instanceof ProfileImageUpdateTask) {
-						notifyProfileImageUpdate();
-					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

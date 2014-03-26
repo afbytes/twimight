@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
@@ -19,9 +18,9 @@ import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
-import ch.ethz.twimight.util.AsyncImageLoader;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class TweetView extends FrameLayout {
 
@@ -74,20 +73,22 @@ public class TweetView extends FrameLayout {
 		mContainer.setBackgroundResource(resid);
 	}
 	
-	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe, AsyncImageLoader imageLoader) {
+	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe) {
 		// set profile image
 		mIvProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 		mIvProfileImage.setImageDrawable(null);
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-			int userRowId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-			imageLoader.loadImage(imageUri, mIvProfileImage);
-		}
+		String imageUrl = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+		ImageLoader.getInstance().displayImage(imageUrl, mIvProfileImage);
+//		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
+//			int userRowId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
+//			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
+//					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
+//			imageLoader.loadImage(imageUri, mIvProfileImage);
+//		}
 
 		// if we don't have a real name, we use the screen name
 		if (cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)) == null) {
-			mTvUsername.setText("@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)));
+			mTvUsername.setText("@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)));
 		} else {
 			mTvUsername.setText(cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)));
 		}
@@ -97,7 +98,7 @@ public class TweetView extends FrameLayout {
 		mTvTweetText.setText(tweetText);
 
 		// set "created at"
-		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED));
+		long createdAt = cursor.getLong(cursor.getColumnIndex(Tweets.COL_CREATED_AT));
 
 		mTvCreatedAt.setText(DateUtils.getRelativeTimeSpanString(createdAt));
 
@@ -126,7 +127,7 @@ public class TweetView extends FrameLayout {
 				HtmlPagesDbHelper htmlDbHelper = new HtmlPagesDbHelper(getContext().getApplicationContext());
 				htmlDbHelper.open();
 
-				long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTERID));
+				long disId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_DISASTER_ID));
 				Cursor curHtml = htmlDbHelper.getTweetUrls(disId);
 
 				if (curHtml != null && curHtml.getCount() > 0) {
@@ -179,7 +180,7 @@ public class TweetView extends FrameLayout {
 			accentColor = mAccentColorDisasterMode2;
 			// set verified icon for disaster tweets
 			mIvVerifiedIcon.setVisibility(View.VISIBLE);
-			if (cursor.getInt(cursor.getColumnIndex(Tweets.COL_ISVERIFIED)) > 0) {
+			if (cursor.getInt(cursor.getColumnIndex(Tweets.COL_IS_VERIFIED)) > 0) {
 				mIvVerifiedIcon.setImageResource(R.drawable.ic_small_verified);
 			} else {
 				mIvVerifiedIcon.setImageResource(R.drawable.ic_small_unverified);
@@ -200,7 +201,7 @@ public class TweetView extends FrameLayout {
 		}
 
 		// highlight own tweet
-		boolean ownTweet = Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_TWITTERUSER))).equals(
+		boolean ownTweet = Long.toString(cursor.getLong(cursor.getColumnIndex(Tweets.COL_USER_TID))).equals(
 				mOwnTwitterId);
 		if (ownTweet) {
 			mTvUsername.setTextColor(accentColor);

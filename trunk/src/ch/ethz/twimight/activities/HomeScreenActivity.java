@@ -19,19 +19,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.fragments.FavoritesFragment;
 import ch.ethz.twimight.fragments.MentionsFragment;
 import ch.ethz.twimight.fragments.TimelineFragment;
 import ch.ethz.twimight.fragments.adapters.FragmentListPagerAdapter;
 import ch.ethz.twimight.listeners.TabListener;
-import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.NotificationService;
 import ch.ethz.twimight.util.Constants;
 
@@ -47,14 +44,14 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 
 	public static boolean running = false;
 	// handler
-	static Handler handler;
+//	static Handler handler;
 
 	// LOGS
-	LocationHelper locHelper;
+//	LocationHelper locHelper;
 	long timestamp;
 	ConnectivityManager cm;
-	StatisticsDBHelper locDBHelper;
-	CheckLocation checkLocation;
+//	StatisticsDBHelper locDBHelper;
+//	CheckLocation checkLocation;
 	public static final String ON_PAUSE_TIMESTAMP = "onPauseTimestamp";
 
 	ActionBar actionBar;
@@ -79,19 +76,19 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		// reduces overdraw of whole screen by 1
 		getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.transparent));
 
-		// statistics
-		locDBHelper = new StatisticsDBHelper(getApplicationContext());
-		locDBHelper.open();
+//		// statistics
+//		locDBHelper = new StatisticsDBHelper(getApplicationContext());
+//		locDBHelper.open();
 
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		timestamp = System.currentTimeMillis();
 
-		locHelper = LocationHelper.getInstance(this);
-		locHelper.registerLocationListener();
-
-		handler = new Handler();
-		checkLocation = new CheckLocation();
-		handler.postDelayed(checkLocation, 1 * 60 * 1000L);
+//		locHelper = LocationHelper.getInstance(this);
+//		locHelper.registerLocationListener();
+//
+//		handler = new Handler();
+//		checkLocation = new CheckLocation();
+//		handler.postDelayed(checkLocation, 1 * 60 * 1000L);
 
 		getActionBar().setSubtitle("@" + LoginActivity.getTwitterScreenname(this));
 		mFragmentTitles = new String[] { getString(R.string.timeline), getString(R.string.favorites),
@@ -159,19 +156,19 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		getActionBar().setSelectedNavigationItem(position);
 	}
 
-	private class CheckLocation implements Runnable {
-
-		@Override
-		public void run() {
-			if (locHelper != null && locHelper.getCount() > 0 && locDBHelper != null
-					&& cm.getActiveNetworkInfo() != null) {
-				Log.i(TAG, "writing log");
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
-						StatisticsDBHelper.APP_STARTED, null, timestamp);
-				locHelper.unRegisterLocationListener();
-			}
-		}
-	}
+//	private class CheckLocation implements Runnable {
+//
+//		@Override
+//		public void run() {
+//			if (locHelper != null && locHelper.getCount() > 0 && locDBHelper != null
+//					&& cm.getActiveNetworkInfo() != null) {
+//				Log.i(TAG, "writing log");
+//				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+//						StatisticsDBHelper.APP_STARTED, null, timestamp);
+//				locHelper.unRegisterLocationListener();
+//			}
+//		}
+//	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -188,11 +185,11 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		running = true;
 		markTimelineSeen();
 		markMentionsSeen();
-		Long pauseTimestamp = getOnPauseTimestamp(this);
-		if (pauseTimestamp != 0 && (System.currentTimeMillis() - pauseTimestamp) > 10 * 60 * 1000L) {
-			handler = new Handler();
-			handler.post(new CheckLocation());
-		}
+//		Long pauseTimestamp = getOnPauseTimestamp(this);
+//		if (pauseTimestamp != 0 && (System.currentTimeMillis() - pauseTimestamp) > 10 * 60 * 1000L) {
+//			handler = new Handler();
+//			handler.post(new CheckLocation());
+//		}
 	}
 
 	@Override
@@ -243,7 +240,7 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 	@Override
 	protected void onStop() {
 		running = false;
-		locHelper.unRegisterLocationListener();
+//		locHelper.unRegisterLocationListener();
 		super.onStop();
 
 	}
@@ -262,22 +259,22 @@ public class HomeScreenActivity extends TwimightBaseActivity {
 		actionBar = null;
 
 		Log.i(TAG, "destroying main activity");
-		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L) && locHelper != null && locDBHelper != null
-				&& cm.getActiveNetworkInfo() != null) {
-
-			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null) {
-				handler.removeCallbacks(checkLocation);
-				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
-						StatisticsDBHelper.APP_STARTED, null, timestamp);
-			} else {
-			}
-		}
-
-		if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {
-			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
-					StatisticsDBHelper.APP_CLOSED, null, System.currentTimeMillis());
-		} else {
-		}
+//		if ((System.currentTimeMillis() - timestamp <= 1 * 60 * 1000L) && locHelper != null && locDBHelper != null
+//				&& cm.getActiveNetworkInfo() != null) {
+//
+//			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null) {
+////				handler.removeCallbacks(checkLocation);
+//				locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+//						StatisticsDBHelper.APP_STARTED, null, timestamp);
+//			} else {
+//			}
+//		}
+//
+//		if ((locHelper != null && locHelper.getCount() > 0) && locDBHelper != null && cm.getActiveNetworkInfo() != null) {
+//			locDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+//					StatisticsDBHelper.APP_CLOSED, null, System.currentTimeMillis());
+//		} else {
+//		}
 
 		TwimightBaseActivity.unbindDrawables(findViewById(R.id.rootRelativeLayout));
 

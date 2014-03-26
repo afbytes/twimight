@@ -40,7 +40,7 @@ public class ConditionsActivity extends Activity {
 		int currentVersionCode;
 		// preferences are deleted when previous installed version is less than minVersionCode.
 		// 
-		int minVersionCode = 1700026;
+		int minVersionCode = 1700029;
 		try {
 			int savedVersionCode = prefs.getInt(PREF_VERSION_CODE, 0);
 			if (savedVersionCode<minVersionCode) {

@@ -96,13 +96,13 @@ public class Tweets implements BaseColumns {
 	public static final String COL_USER_MENTION_ENTITIES = "user_mention_entities";
 
 	/** the user id of the author */
-	public static final String COL_TWITTERUSER = "twitteruser_id";
+	public static final String COL_USER_TID = "twitteruser_id";
 	/** the user screenname of the author */
-	public static final String COL_SCREENNAME = "user_screenname";
+	public static final String COL_SCREEN_NAME = "user_screenname";
 	/** the "official" tweet ID from twitter */
 	public static final String COL_TID = "t_id";
 	/** the tweet ID to which this tweet replies */
-	public static final String COL_REPLYTO = "reply_to";
+	public static final String COL_REPLY_TO_TWEET_TID = "reply_to";
 	/** the user ID to which this tweet repies */
 	public static final String COL_REPLY_TO_USER_ID = "reply_to_user_id";
 	/** the user ID to which this tweet repies */
@@ -122,7 +122,7 @@ public class Tweets implements BaseColumns {
 	/** longitude in case of geo-tagging */
 	public static final String COL_LNG = "lng";
 	/** the creation timestamp (millisecs since 1970) */
-	public static final String COL_CREATED = "created";
+	public static final String COL_CREATED_AT = "created";
 	/** timestamp we insert the tweet into the DB */
 	public static final String COL_RECEIVED = "received";
 	/**
@@ -131,8 +131,8 @@ public class Tweets implements BaseColumns {
 	public static final String COL_SOURCE = "source";
 	/** which buffer(s) is the tweet in */
 	public static final String COL_BUFFER = "buffer_flags";
-	/** url of media */
-	public static final String COL_MEDIA = "media_url";
+	/** path to media (i.e. photo) attached to locally created tweet or received disaster tweet */
+	public static final String COL_LOCAL_MEDIA_URI = "media_url";
 	/** Transactional flags */
 	public static final String COL_FLAGS = "flags";
 	// /** url hashtag */
@@ -146,16 +146,16 @@ public class Tweets implements BaseColumns {
 	 * is the java hashcode (32Bit) of the String
 	 * TWEETS_COLUMNS_TEXT+TWEETS_COLUMNS_USER
 	 */
-	public static final String COL_DISASTERID = "d_id";
+	public static final String COL_DISASTER_ID = "d_id";
 	/** is the signature of the disaster tweet valid? */
-	public static final String COL_ISVERIFIED = "is_verified";
+	public static final String COL_IS_VERIFIED = "is_verified";
 	/** the signature of the disaster tweet */
 	public static final String COL_SIGNATURE = "signature";
 	/** the certificate of the user */
 	public static final String COL_CERTIFICATE = "certificate";
 
-	public static final String DEFAULT_SORT_ORDER = COL_CREATED + " DESC";
-	public static final String REVERSE_SORT_ORDER = COL_CREATED + " ASC";
+	public static final String DEFAULT_SORT_ORDER = COL_CREATED_AT + " desc";
+	public static final String REVERSE_SORT_ORDER = COL_CREATED_AT + " asc";
 
 	// flags for synchronizing with twitter
 	/** The tweet is new and should be posted to twitter */

@@ -45,7 +45,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.location.LocationHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
@@ -129,10 +128,10 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		// get username and picture
 		Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 		Cursor c = getContentResolver().query(uri, null,
-				TwitterUsers.COL_TWITTERUSER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
+				TwitterUsers.COL_TWITTER_USER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
 		c.moveToFirst();
 
-		if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
+		if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
 			int userId = c.getInt(c.getColumnIndex("_id"));
 			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + userId);
@@ -155,7 +154,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		tvName.setText(userName);
 
 		TextView tvScreenName = (TextView) findViewById(R.id.tvScreenname);
-		String userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		String userScreenName = c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 		tvScreenName.setText("@" + userScreenName);
 
 		cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -339,15 +338,15 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 	private class SendTweetTask extends AsyncTask<Void, Void, Boolean> {
 
 		Uri insertUri = null;
-		StatisticsDBHelper statsDBHelper;
+//		StatisticsDBHelper statsDBHelper;
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			boolean result = false;
 
 			// Statistics
-			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
-			statsDBHelper.open();
+//			statsDBHelper = new StatisticsDBHelper(getApplicationContext());
+//			statsDBHelper.open();
 			timestamp = System.currentTimeMillis();
 
 			if (hasMedia) {
@@ -408,8 +407,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 			if (locHelper.getCount() > 0 && cm.getActiveNetworkInfo() != null) {
 
 				Log.i(TAG, "writing log");
-				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
-						StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
+//				statsDBHelper.insertRow(locHelper.getLocation(), cm.getActiveNetworkInfo().getTypeName(),
+//						StatisticsDBHelper.TWEET_WRITTEN, null, timestamp);
 				locHelper.unRegisterLocationListener();
 				Log.i(TAG, String.valueOf(hasMedia));
 			}
@@ -445,13 +444,13 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 
 		tweetContentValues.put(Tweets.COL_TEXT, mEtTweetText.getText().toString());
 		tweetContentValues.put(Tweets.COL_TEXT_PLAIN, mEtTweetText.getText().toString());
-		tweetContentValues.put(Tweets.COL_TWITTERUSER, LoginActivity.getTwitterId(this));
-		tweetContentValues.put(Tweets.COL_SCREENNAME, LoginActivity.getTwitterScreenname(this));
+		tweetContentValues.put(Tweets.COL_USER_TID, LoginActivity.getTwitterId(this));
+		tweetContentValues.put(Tweets.COL_SCREEN_NAME, LoginActivity.getTwitterScreenname(this));
 		if (mIsReplyTo > 0) {
-			tweetContentValues.put(Tweets.COL_REPLYTO, mIsReplyTo);
+			tweetContentValues.put(Tweets.COL_REPLY_TO_TWEET_TID, mIsReplyTo);
 		}
 		// set the current timestamp
-		tweetContentValues.put(Tweets.COL_CREATED, System.currentTimeMillis());
+		tweetContentValues.put(Tweets.COL_CREATED_AT, System.currentTimeMillis());
 
 		if (mUseLocation) {
 			Location loc = locHelper.getLocation();
@@ -462,8 +461,8 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		}
 		// if there is a photo, put the path of photo in the cv
 		if (hasMedia) {
-			tweetContentValues.put(Tweets.COL_MEDIA, finalPhotoName);
-			Log.i(TAG, Tweets.COL_MEDIA + ":" + finalPhotoName);
+			tweetContentValues.put(Tweets.COL_LOCAL_MEDIA_URI, finalPhotoName);
+			Log.i(TAG, Tweets.COL_LOCAL_MEDIA_URI + ":" + finalPhotoName);
 		}
 
 		return tweetContentValues;

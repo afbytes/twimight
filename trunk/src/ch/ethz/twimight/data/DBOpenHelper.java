@@ -44,7 +44,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	
 	public static final String COL_ROW_ID = BaseColumns._ID;
 
-	private static final int DATABASE_VERSION = 56;
+	private static final int DATABASE_VERSION = 57;
 
 	// Database creation sql statement
 	private static final String TABLE_MACS_CREATE = "create table "+TABLE_MACS+" ("
@@ -90,10 +90,10 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_MEDIA_ENTITIES + " blob, "
 			+ Tweets.COL_URL_ENTITIES + " blob, "
 			+ Tweets.COL_USER_MENTION_ENTITIES + " blob, "
-			+ Tweets.COL_TWITTERUSER + " text, "
-			+ Tweets.COL_SCREENNAME+ " text, "
+			+ Tweets.COL_USER_TID + " text, "
+			+ Tweets.COL_SCREEN_NAME+ " text, "
 			+ Tweets.COL_TID + " integer unique, "
-			+ Tweets.COL_REPLYTO + " integer, "
+			+ Tweets.COL_REPLY_TO_TWEET_TID + " integer, "
 			+ Tweets.COL_REPLY_TO_USER_ID + " integer, "
 			+ Tweets.COL_REPLY_TO_SCREEN_NAME + " text, "
 			+ Tweets.COL_RETWEETED + " integer, "
@@ -103,27 +103,30 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ Tweets.COL_MENTIONS + " integer, "
 			+ Tweets.COL_LAT + " real, "
 			+ Tweets.COL_LNG + " real, "
-			+ Tweets.COL_CREATED + " integer, "
+			+ Tweets.COL_CREATED_AT + " integer, "
 			+ Tweets.COL_RECEIVED + " integer, "
 			+ Tweets.COL_SOURCE + " string, "
 			+ Tweets.COL_FLAGS + " integer default 0, "
 			+ Tweets.COL_BUFFER + " integer default 0, "
-			+ Tweets.COL_MEDIA + " text, "
+			+ Tweets.COL_LOCAL_MEDIA_URI + " text, "
 			+ Tweets.COL_HTML_PAGES + " integer default 0, "
-			+ Tweets.COL_DISASTERID + " integer, "
-			+ Tweets.COL_ISVERIFIED + " integer, "
+			+ Tweets.COL_DISASTER_ID + " integer, "
+			+ Tweets.COL_IS_VERIFIED + " integer, "
 			+ Tweets.COL_SIGNATURE + " text, "
 			+ Tweets.COL_CERTIFICATE + " text);";
 
 	// Twitter Users
 	private static final String TABLE_USERS_CREATE = "create table "+TABLE_USERS+" ("
 			+ TwitterUsers.COL_ROW_ID + " integer primary key autoincrement not null, "
-			+ TwitterUsers.COL_SCREENNAME + " string not null, "
-			+ TwitterUsers.COL_TWITTERUSER_ID + " bigint unique, "
+			+ TwitterUsers.COL_SCREEN_NAME + " string not null, "
+			+ TwitterUsers.COL_TWITTER_USER_ID + " bigint unique, "
 			+ TwitterUsers.COL_NAME + " string, "
 			+ TwitterUsers.COL_LANG + " string, "
 			+ TwitterUsers.COL_DESCRIPTION + " string, "
-			+ TwitterUsers.COL_IMAGEURL + " string, "
+			+ TwitterUsers.COL_PROFILE_IMAGE_URI + " string, "
+			+ TwitterUsers.COL_PROFILE_BACKGROUND_COLOR + " string, "
+			+ TwitterUsers.COL_PROFILE_BANNER_IMAGE_URI + " string, "
+			+ TwitterUsers.COL_PROFILE_BACKGROUND_IMAGE_URI + " string, "
 			+ TwitterUsers.COL_STATUSES + " integer, "
 			+ TwitterUsers.COL_FOLLOWERS + " integer, "
 			+ TwitterUsers.COL_FRIENDS + " integer, "
@@ -136,14 +139,12 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 			+ TwitterUsers.COL_CREATED + " integer, "
 			+ TwitterUsers.COL_PROTECTED + " integer, "
 			+ TwitterUsers.COL_VERIFIED + " integer, "
-			+ TwitterUsers.COL_ISFOLLOWER + " integer, "
-			+ TwitterUsers.COL_ISFRIEND + " integer, "
-			+ TwitterUsers.COL_ISDISASTER_PEER + " integer default 0, "
+			+ TwitterUsers.COL_IS_FOLLOWER + " integer, "
+			+ TwitterUsers.COL_IS_FRIEND + " integer, "
+			+ TwitterUsers.COL_IS_DISASTER_PEER + " integer default 0, "
 			+ TwitterUsers.COL_IS_SEARCH_RESULT + " integer default 0, "			
-			+ TwitterUsers.COL_FOLLOWREQUEST + " integer, "
-			+ TwitterUsers.COL_PROFILEIMAGE_PATH + " string, "
-			+ TwitterUsers.COL_LASTUPDATE + " integer, "
-			+ TwitterUsers.COL_LAST_PICTURE_UPDATE + " integer, "
+			+ TwitterUsers.COL_FOLLOW_REQUEST + " integer, "
+			+ TwitterUsers.COL_LAST_UPDATE + " integer, "
 			+ TwitterUsers.COL_FLAGS + " integer default 0);";
 
 	// Direct Messages (including disaster messages)
@@ -170,7 +171,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 	private static final String TABLE_HTML_CREATE = "create table "+TABLE_HTML+" ("
 			+ HtmlPage.COL_PAGE_ID + " integer primary key autoincrement not null, "
 			+ HtmlPage.COL_URL + " string unique not null, "	
-			+ HtmlPage.COL_DISASTERID + " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_DISASTERID +") ON DELETE CASCADE, "			
+			+ HtmlPage.COL_DISASTERID + " bigint REFERENCES " + TABLE_TWEETS + "(" + Tweets.COL_DISASTER_ID +") ON DELETE CASCADE, "			
 			+ HtmlPage.COL_FORCED + " integer default 0, "
 			+ HtmlPage.COL_ATTEMPTS + " integer default 0, "
 			+ HtmlPage.COL_FILENAME + " string unique);";

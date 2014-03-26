@@ -98,7 +98,7 @@ public class TweetButtonBar extends FrameLayout {
 				mObserver = new TweetObserver(new Handler());
 				mCursor.registerContentObserver(mObserver);
 				mFlags = mCursor.getInt(mCursor.getColumnIndex(Tweets.COL_FLAGS));
-				mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+				mScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 				mText = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_TEXT_PLAIN));
 				setupButtons();
 			} else {
@@ -142,7 +142,7 @@ public class TweetButtonBar extends FrameLayout {
 	}
 
 	private void setupButtons() {
-		String userString = Long.toString(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		String userString = Long.toString(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 		String localUserString = LoginActivity.getTwitterId(getContext());
 
 		// Retweet Button
@@ -200,7 +200,7 @@ public class TweetButtonBar extends FrameLayout {
 						i.putExtra(ComposeTweetActivity.EXTRA_KEY_IS_REPLY_TO, -1);
 					}
 					i.putExtra(ComposeTweetActivity.EXTRA_KEY_TEXT,
-							"@" + mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME)) + " ");
+							"@" + mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)) + " ");
 					getContext().startActivity(i);
 				}
 			});

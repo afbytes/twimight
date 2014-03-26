@@ -66,6 +66,10 @@ public class TwitterAlarm extends BroadcastReceiver {
 		Intent i = new Intent(context, TwitterSyncService.class);
 		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_TIMELINE);
 		context.startService(i);
+		// sync favorites
+		i = new Intent(context, TwitterSyncService.class);
+		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_FAVORITES);
+		context.startService(i);
 		// sync mentions
 		i = new Intent(context, TwitterSyncService.class);
 		i.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_SYNC_MENTIONS);

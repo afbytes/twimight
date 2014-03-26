@@ -15,7 +15,6 @@ package ch.ethz.twimight.net.twitter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +22,13 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.data.DBOpenHelper;
-import ch.ethz.twimight.util.AsyncImageLoader;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * Cursor adapter for a cursor containing users.
  */
 public class UserAdapter extends CursorAdapter {
-
-	private final AsyncImageLoader mImageLoader;
 
 	private static class ViewHolder {
 		private final TextView tvUserRealName;
@@ -50,7 +47,6 @@ public class UserAdapter extends CursorAdapter {
 	/** Constructor */
 	public UserAdapter(Context context, Cursor c) {
 		super(context, c, true);
-		mImageLoader = new AsyncImageLoader(context);
 	}
 
 	@Override
@@ -71,7 +67,7 @@ public class UserAdapter extends CursorAdapter {
 		String realName = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME));
 		holder.tvUserRealName.setText(realName);
 		// set screen name
-		String screenName = "@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+		String screenName = "@" + cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 		holder.tvUserScreenName.setText(screenName);
 		// set location
 		String location = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_LOCATION));
@@ -79,12 +75,8 @@ public class UserAdapter extends CursorAdapter {
 		// profile image
 		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 		holder.ivProfileImage.setImageDrawable(null);
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-			int userRowId = cursor.getInt(cursor.getColumnIndex(DBOpenHelper.COL_ROW_ID));
-			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-			mImageLoader.loadImage(imageUri, holder.ivProfileImage);
-		}
+		String imageUri = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+		ImageLoader.getInstance().displayImage(imageUri,	holder.ivProfileImage);
 	}
 
 }
