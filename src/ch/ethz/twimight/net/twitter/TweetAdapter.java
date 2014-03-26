@@ -18,7 +18,6 @@ import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import ch.ethz.twimight.util.AsyncImageLoader;
 import ch.ethz.twimight.views.TweetView;
 
 /**
@@ -26,12 +25,8 @@ import ch.ethz.twimight.views.TweetView;
  */
 public class TweetAdapter extends CursorAdapter {
 
-	private static final String TAG = TweetAdapter.class.getName();
+//	private static final String TAG = TweetAdapter.class.getName();
 	private static final long NO_ITEM_SELECTED = -1;
-
-
-	private final AsyncImageLoader mImageLoader;
-
 
 	private long mSelectedId;
 
@@ -51,7 +46,6 @@ public class TweetAdapter extends CursorAdapter {
 	/** Constructor */
 	public TweetAdapter(Context context, Cursor c) {
 		super(context, c, true);
-		mImageLoader = new AsyncImageLoader(context);
 	}
 
 	@Override
@@ -65,6 +59,6 @@ public class TweetAdapter extends CursorAdapter {
 		TweetView tweetView = (TweetView) row;
 		long rowId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_ROW_ID));
 		boolean showButtonBar = rowId==mSelectedId;
-		tweetView.update(cursor, showButtonBar, true, mImageLoader);
+		tweetView.update(cursor, showButtonBar, true);
 	}
 }

@@ -12,20 +12,15 @@
  ******************************************************************************/
 package ch.ethz.twimight.activities;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.text.NumberFormat;
 
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -35,6 +30,8 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * Display a user
@@ -164,15 +161,16 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					+ "/" + mRequestedRowId);
 			mCursor = getContentResolver().query(uri, null, null, null, null);
 
-		} else if( mRequestedScreenName!=null){
+		} else if (mRequestedScreenName != null) {
 			// load by screen name
 			Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
-			mCursor = getContentResolver().query(uri, null,
-					TwitterUsers.COL_SCREENNAME + " LIKE '" + mRequestedScreenName + "'", null, null);
+			mCursor = getContentResolver().query(uri, null, TwitterUsers.COL_SCREEN_NAME + " like ?",
+					new String[] { mRequestedScreenName }, null);
 			// user not in DB? -> load from twitter
 			if (mCursor != null && mCursor.getCount() == 0) {
 				Intent loadUserIntent = new Intent(this, TwitterSyncService.class);
-				loadUserIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION, TwitterSyncService.EXTRA_ACTION_LOAD_USER_BY_SCREEN_NAME);
+				loadUserIntent.putExtra(TwitterSyncService.EXTRA_KEY_ACTION,
+						TwitterSyncService.EXTRA_ACTION_LOAD_USER_BY_SCREEN_NAME);
 				loadUserIntent.putExtra(TwitterSyncService.EXTRA_KEY_SCREEN_NAME, mRequestedScreenName);
 				startService(loadUserIntent);
 			}
@@ -207,8 +205,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 					+ "/" + rowId);
 			ContentValues cv = new ContentValues();
 			cv.put(TwitterUsers.COL_FLAGS,
-					TwitterUsers.FLAG_TO_UPDATEIMAGE | TwitterUsers.FLAG_TO_UPDATE
-							| mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_FLAGS)));
+					TwitterUsers.FLAG_TO_UPDATE | mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_FLAGS)));
 			getContentResolver().update(uri, cv, null, null);
 
 			// trigger the update
@@ -279,26 +276,12 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		if (mCursor != null && mCursor.getCount() > 0) {
 			showContent(true);
 			mCursor.moveToFirst();
-			// do we have a profile image?
-			if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
-				int userId = mCursor.getInt(mCursor.getColumnIndex("_id"));
-				Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-						+ TwitterUsers.TWITTERUSERS + "/" + userId);
-				InputStream is;
-				try {
-					is = getContentResolver().openInputStream(imageUri);
-					if (is != null) {
-						Bitmap bm = BitmapFactory.decodeStream(is);
-						mIvProfileImage.setImageBitmap(bm);
-					} else {
-						mIvProfileImage.setImageResource(R.drawable.profile_image_placeholder);
-					}
-				} catch (FileNotFoundException e) {
-					Log.e(TAG, "error opening input stream for user id " + userId, e);
-					mIvProfileImage.setImageResource(R.drawable.profile_image_placeholder);
-				}
-			}
-			userScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+			// set image
+			mIvProfileImage.setImageResource(R.drawable.profile_image_placeholder);
+			String imageUri = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+			ImageLoader.getInstance().displayImage(imageUri, mIvProfileImage);
+			// set names
+			userScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			mTvScreenName.setText("@" + userScreenName);
 			mTvRealName.setText(mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_NAME)));
 
@@ -333,21 +316,21 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			mTvStatsFollowers.setText(numberFormat.format(followed));
 
 			// if the user we show is the local user, disable the follow button
-			if (isLocalUser(Long.toString(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))))) {
+			if (isLocalUser(Long.toString(mCursor.getLong(mCursor.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID))))) {
 				showLocalUser();
 			} else {
 				showRemoteUser();
 			}
 
 			// if we have a user ID we show the recent tweets
-			if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID))) {
+			if (!mCursor.isNull(mCursor.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID))) {
 				mBtnShowUserTweets.setOnClickListener(new OnClickListener() {
 
 					@Override
 					public void onClick(View v) {
 						Intent i = new Intent(getBaseContext(), UserTweetListActivity.class);
 						mCursor.moveToFirst();
-						int index = mCursor.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID);
+						int index = mCursor.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID);
 						if (index != -1) {
 							i.putExtra(UserTweetListActivity.EXTRA_KEY_USER_ROW_ID, mCursor.getLong(index));
 							startActivity(i);
@@ -434,7 +417,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		 * request to follow was sent - none of the above, we can follow the
 		 * user
 		 */
-		boolean following = mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_ISFRIEND)) > 0;
+		boolean following = mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_IS_FRIEND)) > 0;
 		if (following) {
 			mBtnFollow.setText(R.string.unfollow);
 		} else {
@@ -449,7 +432,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 						+ TwitterUsers.TWITTERUSERS + "/" + rowId);
 				int flags = mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_FLAGS));
-				boolean following = mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_ISFRIEND)) > 0;
+				boolean following = mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_IS_FRIEND)) > 0;
 				if (following) {
 					getContentResolver().update(uri, setUnfollowFlag(flags), null, null);
 					mBtnFollow.setVisibility(Button.GONE);
@@ -494,7 +477,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 			mLlUnfollowInfo.setVisibility(LinearLayout.GONE);
 		}
 
-		if (mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_FOLLOWREQUEST)) > 0) {
+		if (mCursor.getInt(mCursor.getColumnIndex(TwitterUsers.COL_FOLLOW_REQUEST)) > 0) {
 			// disable follow button
 			mBtnFollow.setVisibility(Button.GONE);
 		}

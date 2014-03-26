@@ -116,15 +116,15 @@ public class TDSRequestMessage {
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))) {
 					JSONObject row = new JSONObject();
 					row.put(Tweets.COL_TEXT, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT)));
-					row.put(Tweets.COL_TWITTERUSER, tweets.getLong(tweets.getColumnIndex(Tweets.COL_TWITTERUSER)));
-					row.put(Tweets.COL_DISASTERID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTERID)));
+					row.put(Tweets.COL_USER_TID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER_TID)));
+					row.put(Tweets.COL_DISASTER_ID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTER_ID)));
 					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));
 
 					SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					row.put(Tweets.COL_CREATED + "_phone",
-							simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED)))));
+					row.put(Tweets.COL_CREATED_AT + "_phone",
+							simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED_AT)))));
 					// add picture if available
-					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_MEDIA)) != null) {
+					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)) != null) {
 						try {
 							String base64Photo = getPhotoAsBase64(tweets);
 							Log.d(TAG, base64Photo);
@@ -151,9 +151,9 @@ public class TDSRequestMessage {
 
 	private String getPhotoAsBase64(Cursor c) throws FileNotFoundException {
 		String encodedImage = null;
-		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA));
+		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
 		Log.d("photo", "photo name:" + photoFileName);
-		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 		// locate the directory where the photos are stored
 		String photoPath = Tweets.PHOTO_PATH + "/" + userID;
 		SDCardHelper sdCardHelper = new SDCardHelper();

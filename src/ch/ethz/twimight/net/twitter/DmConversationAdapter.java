@@ -72,13 +72,13 @@ public class DmConversationAdapter extends CursorAdapter {
 		// set text fields
 
 		// Profile image
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
 			// text fields
 			String realName = cursor.getString(cursor
 					.getColumnIndex(TwitterUsers.COL_NAME));
 			holder.realName.setText(realName);
 			String screenName = cursor.getString(cursor
-					.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+					.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			holder.screenName.setText("@" + screenName);
 			String lastMessage = cursor.getString(cursor
 					.getColumnIndex(DirectMessages.COL_TEXT));

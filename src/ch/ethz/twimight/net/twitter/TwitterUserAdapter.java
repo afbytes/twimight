@@ -33,7 +33,7 @@ import ch.ethz.twimight.R;
  * Cursor adapter for a cursor containing users.
  */
 public class TwitterUserAdapter extends CursorAdapter {
-	static final String[] from = { TwitterUsers.COL_SCREENNAME,
+	static final String[] from = { TwitterUsers.COL_SCREEN_NAME,
 			TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION };
 	static final int[] to = { R.id.showUserScreenName, R.id.showUserRealName,
 			R.id.showUserLocation };
@@ -85,13 +85,13 @@ public class TwitterUserAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View userrow, Context context, Cursor cursor) {
 		ViewHolder holder = (ViewHolder) userrow.getTag();
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
 			// set text fields
 			String realName = cursor.getString(cursor
 					.getColumnIndex(TwitterUsers.COL_NAME));
 			holder.realName.setText(realName);
 			String screenName = cursor.getString(cursor
-					.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+					.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			holder.screenName.setText("@" + screenName);
 			String location = cursor.getString(cursor
 					.getColumnIndex(TwitterUsers.COL_LOCATION));

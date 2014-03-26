@@ -83,7 +83,7 @@ public class DmAdapter extends CursorAdapter {
 		ViewHolder holder = (ViewHolder) dmrow.getTag();
 
 		String screenname = cursor.getString(cursor
-				.getColumnIndex(TwitterUsers.COL_SCREENNAME));
+				.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 		holder.tvScreenname.setText(screenname);
 
 		// Find views by id
@@ -97,7 +97,7 @@ public class DmAdapter extends CursorAdapter {
 		holder.tvMessageText.setText(message);
 
 		// Profile image
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREENNAME))) {
+		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
 			int userId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 			Uri imageUri = Uri.parse("content://"
 					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"

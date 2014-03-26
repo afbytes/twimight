@@ -164,11 +164,12 @@
 
         <ImageView
             android:id="@+id/showPhotoAttached"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:scaleType="centerInside"
             android:layout_marginTop="@dimen/unit_step"
             android:contentDescription="Photo attached with this tweet"
+            android:adjustViewBounds="true"
             android:onClick="viewPhoto"
             android:visibility="gone" />
 

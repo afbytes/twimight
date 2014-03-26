@@ -130,16 +130,16 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 		case USERS_ID:
 			// Log.d(TAG, "Query USERS_ID " + uri.getLastPathSegment());
-			c = database.query(DBOpenHelper.TABLE_USERS, projection, "_id=" + uri.getLastPathSegment(), whereArgs,
-					null, null, sortOrder);
+			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ROW_ID + "=?",
+					new String[] { uri.getLastPathSegment() }, null, null, sortOrder);
 			// c.setNotificationUri(getContext().getContentResolver(),uri);
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.CONTENT_URI);
 			break;
 
 		case USERS_FOLLOWERS:
 			Log.d(TAG, "Query USERS_FOLLOWERS");
-			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFOLLOWER + ">0 AND "
-					+ TwitterUsers.COL_SCREENNAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
+			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_FOLLOWER + ">0 AND "
+					+ TwitterUsers.COL_SCREEN_NAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_FOLLOWERS_URI);
 
@@ -151,8 +151,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			break;
 		case USERS_FRIENDS:
 			Log.i(TAG, "Query USERS_FRIENDS");
-			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISFRIEND + ">0 AND "
-					+ TwitterUsers.COL_SCREENNAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
+			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_FRIEND + ">0 AND "
+					+ TwitterUsers.COL_SCREEN_NAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
 			Log.i(TAG, "cursor count: " + c.getCount());
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_FRIENDS_URI);
 			c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -164,15 +164,15 @@ public class TwitterUsersContentProvider extends ContentProvider {
 			break;
 		case USERS_DISASTER:
 			Log.d(TAG, "Query USERS_DISASTER");
-			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_ISDISASTER_PEER + ">0 AND "
-					+ TwitterUsers.COL_SCREENNAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
+			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_IS_DISASTER_PEER + ">0 AND "
+					+ TwitterUsers.COL_SCREEN_NAME + " IS NOT NULL", whereArgs, null, null, sortOrder);
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_DISASTER_URI);
 			break;
 
 		case USERS_SEARCH:
 			Log.d(TAG, "Query USERS_SEARCH");
-			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREENNAME + " IS NOT NULL"
-					+ " AND " + TwitterUsers.COL_SCREENNAME + " LIKE '%" + where + "%' OR " + TwitterUsers.COL_NAME
+			c = database.query(DBOpenHelper.TABLE_USERS, projection, TwitterUsers.COL_SCREEN_NAME + " IS NOT NULL"
+					+ " AND " + TwitterUsers.COL_SCREEN_NAME + " LIKE '%" + where + "%' OR " + TwitterUsers.COL_NAME
 					+ " LIKE '%" + where + "%' ", whereArgs, null, null, sortOrder);
 			c.setNotificationUri(getContext().getContentResolver(), TwitterUsers.USERS_SEARCH_URI);
 
@@ -206,11 +206,13 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 	private Cursor isUserAlreadyStored(ContentValues values) {
 		// if we already have the user, we update with the new info
-		String[] projection = { TwitterUsers.COL_ROW_ID, TwitterUsers.COL_PROFILEIMAGE_PATH, TwitterUsers.COL_IMAGEURL };
-		Cursor c = database.query(DBOpenHelper.TABLE_USERS, projection,
-				TwitterUsers.COL_SCREENNAME + " = '" + values.getAsString(TwitterUsers.COL_SCREENNAME) + "' OR "
-						+ TwitterUsers.COL_TWITTERUSER_ID + "=" + values.getAsString(TwitterUsers.COL_TWITTERUSER_ID),
-				null, null, null, null);
+		String[] projection = { TwitterUsers.COL_ROW_ID, TwitterUsers.COL_PROFILE_IMAGE_URI };
+		Cursor c = database
+				.query(DBOpenHelper.TABLE_USERS,
+						projection,
+						TwitterUsers.COL_SCREEN_NAME + " = '" + values.getAsString(TwitterUsers.COL_SCREEN_NAME)
+								+ "' OR " + TwitterUsers.COL_TWITTER_USER_ID + "="
+								+ values.getAsString(TwitterUsers.COL_TWITTER_USER_ID), null, null, null, null);
 		if (c.getCount() == 1) {
 			c.moveToFirst();
 			return c;
@@ -225,21 +227,6 @@ public class TwitterUsersContentProvider extends ContentProvider {
 
 		if (c != null) {
 			// user is already in DB
-			if (values.containsKey(TwitterUsers.COL_FLAGS)
-					&& ((values.getAsInteger(TwitterUsers.COL_FLAGS) & TwitterUsers.FLAG_TO_UPDATEIMAGE) != 0)) {
-				// if we already have an image
-				if (!c.isNull(c.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-					String newImageUrl = values.getAsString(TwitterUsers.COL_IMAGEURL);
-					String oldImageUrl = c.getString(c.getColumnIndex(TwitterUsers.COL_IMAGEURL));
-					// and it's for the current url
-					if (newImageUrl == null || newImageUrl.equals(oldImageUrl)) {
-						Log.d(TAG, "urls match -> clear flag");
-						// we clear the flag to download the image
-						values.put(TwitterUsers.COL_FLAGS, values.getAsInteger(TwitterUsers.COL_FLAGS)
-								& (~TwitterUsers.FLAG_TO_UPDATEIMAGE));
-					}
-				}
-			}
 			Uri updateUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
 					+ TwitterUsers.TWITTERUSERS + "/" + Integer.toString(c.getInt(c.getColumnIndex("_id"))));
 			update(updateUri, values, null, null);
@@ -277,12 +264,8 @@ public class TwitterUsersContentProvider extends ContentProvider {
 		try {
 			for (ContentValues value : values) {
 				if (value != null) {
-					if (value.containsKey(TwitterUsers.COL_PROFILEIMAGE_PATH)) {
-						updateUser(uri, value);
-					} else {
-						if (insertOrUpdate(value) != null) {
-							numInserted++;
-						}
+					if (insertOrUpdate(value) != null) {
+						numInserted++;
 					}
 				}
 			}

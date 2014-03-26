@@ -103,11 +103,11 @@ public class TweetActionService extends IntentService {
 	private void delete() {
 		Log.d(TAG, "TweetActionService delete(); row ID: " + mRowId);
 		// delete picture
-		String delPhotoName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA));
+		String delPhotoName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
 		SDCardHelper sdCardHelper = new SDCardHelper();
 		if (delPhotoName != null) {
 			String twitterUserId = String.valueOf(mCursor.getLong(mCursor
-					.getColumnIndex(TwitterUsers.COL_TWITTERUSER_ID)));
+					.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 			String photoPath = Tweets.PHOTO_PATH + "/" + twitterUserId;
 			String[] filePath = { photoPath };
 			if (sdCardHelper.checkSDState(filePath)) {
@@ -254,7 +254,7 @@ public class TweetActionService extends IntentService {
 		SDCardHelper sdCardHelper = new SDCardHelper();
 		if (sdCardHelper.checkSDState(filePath)) {
 
-			Long tweetId = mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_DISASTERID));
+			Long tweetId = mCursor.getLong(mCursor.getColumnIndex(Tweets.COL_DISASTER_ID));
 			for (int i = 0; i < urlsToDownload.size(); i++) {
 
 				Cursor cursorInfo = htmlDbHelper.getPageInfo(urlsToDownload.get(i));

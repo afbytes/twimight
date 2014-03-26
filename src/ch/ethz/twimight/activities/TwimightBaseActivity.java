@@ -161,7 +161,7 @@ public abstract class TwimightBaseActivity extends ThemeSelectorActivity impleme
 		case R.id.menu_my_profile:
 			Uri uri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS);
 			Cursor c = getContentResolver().query(uri, null,
-					TwitterUsers.COL_TWITTERUSER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
+					TwitterUsers.COL_TWITTER_USER_ID + "=" + LoginActivity.getTwitterId(this), null, null);
 			if (c!=null && c.getCount() >0){
 				c.moveToFirst();
 				long rowId = c.getLong(c.getColumnIndex(TwitterUsers.COL_ROW_ID));
