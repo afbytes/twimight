@@ -53,6 +53,7 @@ import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.ImageUrlHelper;
 import ch.ethz.twimight.util.SDCardHelper;
 import ch.ethz.twimight.util.Serialization;
 
@@ -257,6 +258,8 @@ public class TweetDetailView extends FrameLayout {
 		int pressedLinkColor = getResources().getColor(R.color.medium_dark_gray);
 		int pressedLinkBackground = getResources().getColor(R.color.lighter_gray);
 
+		mImageContainer.removeAllViews();
+		
 		while (!allEntities.isEmpty()) {
 			TweetEntity entity = allEntities.remove();
 			if (entity instanceof UserMentionEntity) {
@@ -290,6 +293,11 @@ public class TweetDetailView extends FrameLayout {
 				tweetTextSpannable.setSpan(new InternalURLSpan(urlEntity.getURL(), normalLinkColor, pressedLinkColor,
 						pressedLinkBackground), urlEntity.getStart(), urlEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 				tweetTextSpannable.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
+				// if the url points to an image -> show it
+				String imageUrl = ImageUrlHelper.getImageUrl(urlEntity.getExpandedURL());
+				if(imageUrl!=null){
+					showImage(imageUrl);
+				}
 			}
 		}
 
@@ -379,7 +387,7 @@ public class TweetDetailView extends FrameLayout {
 		imageView.setAdjustViewBounds(true);
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
-		mImageContainer.addView(imageView, layoutParams);
+		mImageContainer.addView(imageView, 0, layoutParams);
 	}
 
 	/**

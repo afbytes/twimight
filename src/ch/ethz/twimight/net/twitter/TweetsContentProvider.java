@@ -48,7 +48,7 @@ import ch.ethz.twimight.util.Constants;
  */
 public class TweetsContentProvider extends ContentProvider {
 
-	private static final String TAG = TweetsContentProvider.class.getName();
+	private static final String TAG = TweetsContentProvider.class.getSimpleName();
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
