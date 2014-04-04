@@ -3,6 +3,8 @@ package ch.ethz.twimight.views;
 import java.util.Locale;
 
 import twitter4j.MediaEntity;
+import twitter4j.TweetEntity;
+import twitter4j.URLEntity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,12 +25,12 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.PhotoViewActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
+import ch.ethz.twimight.net.twitter.EntityQueue;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.ImageUrlHelper;
 import ch.ethz.twimight.util.Serialization;
-
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class TweetView extends FrameLayout {
 
@@ -87,8 +89,8 @@ public class TweetView extends FrameLayout {
 		// set profile image
 		mIvProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 		mIvProfileImage.setImageDrawable(null);
-		String imageUrl = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
-		mIvProfileImage.setImageUri(imageUrl);
+		String profileImageUrl = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+		mIvProfileImage.setImageUri(profileImageUrl);
 		long userRowId = cursor.getLong(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
 		Intent profileImageClickIntent = new Intent(getContext(), UserProfileActivity.class);
 		profileImageClickIntent.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, userRowId);
@@ -244,20 +246,32 @@ public class TweetView extends FrameLayout {
 				mTweetButtonBar = null;
 			}
 		}
-		
+
 		// display media
 		mImageContainer.removeAllViews();
 		byte[] serializedMediaEntities = cursor.getBlob(cursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
 		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
-		for(MediaEntity mediaEntity : mediaEntities){
-			showImage(mediaEntity.getMediaURL());
+		byte[] serializedUrlEntities = cursor.getBlob(cursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
+		URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
+		EntityQueue allEntities = new EntityQueue(mediaEntities, urlEntities);
+		while (!allEntities.isEmpty()) {
+			TweetEntity entity = allEntities.remove();
+			if (entity instanceof MediaEntity) {
+				showImage(((MediaEntity) entity).getMediaURL());
+			} else if (entity instanceof URLEntity) {
+				String imageUrl = ImageUrlHelper.getImageUrl(((URLEntity) entity).getExpandedURL());
+				if (imageUrl != null) {
+					showImage(imageUrl);
+				}
+			}
+
 		}
 	}
-	
+
 	/**
 	 * Creates an image view, sets it to display the specified source, attaches
 	 * a click listener that launches the PhotoViewActivity and adds it to the
-	 * image container. 
+	 * image container.
 	 * 
 	 * @param imageUri
 	 *            remote picture URL of a picture contained in the tweet or
@@ -269,8 +283,9 @@ public class TweetView extends FrameLayout {
 		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
 		imageView.setScaleType(ScaleType.CENTER_INSIDE);
 		imageView.setAdjustViewBounds(true);
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
-		mImageContainer.addView(imageView, layoutParams);
+		mImageContainer.addView(imageView, 0, layoutParams);
 	}
 }

@@ -36,7 +36,7 @@ import ch.ethz.twimight.data.DBOpenHelper;
  */
 public class TwitterUsersContentProvider extends ContentProvider {
 
-	private static final String TAG = "TwitterUsersContentProvider";
+	private static final String TAG = TwitterUsersContentProvider.class.getSimpleName();
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
