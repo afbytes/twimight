@@ -119,6 +119,8 @@ public final class Constants {
 	public static final int TIMELINE_ATTEMPTS = 2;
 	/** The max length of a tweet */
 	public static final int TWEET_LENGTH = 140;
+	/** Number of characters used for media in tweet */
+	public static final int CHARACTERS_RESERVED_PER_MEDIA = 23;
 	/** Are tweets by default geo-tagged or not? */
 	public static final boolean TWEET_DEFAULT_LOCATION = true;
 	/** Are the updates started at boot time ? */

@@ -53,7 +53,7 @@ import ch.ethz.twimight.util.Constants;
 import ch.ethz.twimight.util.Serialization;
 
 public class TwitterSyncService extends IntentService {
-	private static final String TAG = TwitterSyncService.class.getName();
+	private static final String TAG = TwitterSyncService.class.getSimpleName();
 
 	static final int MAX_LOAD_ATTEMPTS = 2;
 

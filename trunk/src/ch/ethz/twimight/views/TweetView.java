@@ -2,7 +2,10 @@ package ch.ethz.twimight.views;
 
 import java.util.Locale;
 
+import twitter4j.MediaEntity;
+
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -14,44 +17,50 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
+import ch.ethz.twimight.activities.PhotoViewActivity;
+import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
+import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.util.Serialization;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class TweetView extends FrameLayout {
 
 	private final LinearLayout mContainer;
+	private final LinearLayout mImageContainer;
 	private final View mModeStripe;
 	private final TextView mTvUsername;
 	private final TextView mTvCreatedAt;
 	private final TextView mTvTweetText;
 	private final TextView mTvRetweetedBy;
-	private final ImageView mIvProfileImage;
+	private final ClickableImageView mIvProfileImage;
 	private final ImageView mIvPendingIcon;
 	private final ImageView mIvVerifiedIcon;
 	private final ImageView mIvRetweetedIcon;
 	private final ImageView mIvFavoriteIcon;
 	private final ImageView mIvDownloadIcon;
 	private TweetButtonBar mTweetButtonBar;
-	
+
 	private final int mAccentColorDisasterMode2;
 	private final int mAccentColorNormalMode2;
-	
+
 	private final String mOwnHandle;
 	private final String mOwnTwitterId;
-	
+
 	public TweetView(Context context) {
 		super(context);
 		mAccentColorNormalMode2 = context.getResources().getColor(R.color.accent_normalmode_2);
 		mAccentColorDisasterMode2 = context.getResources().getColor(R.color.accent_disastermode_2);
-		
+
 		mOwnHandle = "@" + LoginActivity.getTwitterScreenname(context).toLowerCase(Locale.getDefault());
 		mOwnTwitterId = LoginActivity.getTwitterId(context);
-		
+
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflater.inflate(R.layout.tweet_row, this, true);
 		mModeStripe = findViewById(R.id.modeStripe);
@@ -59,32 +68,31 @@ public class TweetView extends FrameLayout {
 		mTvCreatedAt = (TextView) findViewById(R.id.tvCreatedAt);
 		mTvTweetText = (TextView) findViewById(R.id.tvTweetText);
 		mTvRetweetedBy = (TextView) findViewById(R.id.tvRetweetedBy);
-		mIvProfileImage = (ImageView) findViewById(R.id.ivProfileImage);
+		mIvProfileImage = (ClickableImageView) findViewById(R.id.ivProfileImage);
 		mIvPendingIcon = (ImageView) findViewById(R.id.ivPendingIcon);
 		mIvVerifiedIcon = (ImageView) findViewById(R.id.ivVerifiedIcon);
 		mIvRetweetedIcon = (ImageView) findViewById(R.id.ivRetweetedIcon);
 		mIvFavoriteIcon = (ImageView) findViewById(R.id.ivFavoriteIcon);
 		mIvDownloadIcon = (ImageView) findViewById(R.id.ivDownloadIcon);
 		mContainer = (LinearLayout) findViewById(R.id.container);
+		mImageContainer = (LinearLayout) findViewById(R.id.imageContainer);
 	}
-	
+
 	@Override
 	public void setBackgroundResource(int resid) {
 		mContainer.setBackgroundResource(resid);
 	}
-	
+
 	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe) {
 		// set profile image
 		mIvProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
 		mIvProfileImage.setImageDrawable(null);
 		String imageUrl = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
-		ImageLoader.getInstance().displayImage(imageUrl, mIvProfileImage);
-//		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_PROFILEIMAGE_PATH))) {
-//			int userRowId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-//			Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-//					+ TwitterUsers.TWITTERUSERS + "/" + userRowId);
-//			imageLoader.loadImage(imageUri, mIvProfileImage);
-//		}
+		mIvProfileImage.setImageUri(imageUrl);
+		long userRowId = cursor.getLong(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
+		Intent profileImageClickIntent = new Intent(getContext(), UserProfileActivity.class);
+		profileImageClickIntent.putExtra(UserProfileActivity.EXTRA_KEY_ROW_ID, userRowId);
+		mIvProfileImage.setOnClickActivityIntent(profileImageClickIntent);
 
 		// if we don't have a real name, we use the screen name
 		if (cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_NAME)) == null) {
@@ -193,7 +201,7 @@ public class TweetView extends FrameLayout {
 		}
 
 		// set side stripe color
-		if(showModeStripe){
+		if (showModeStripe) {
 			mModeStripe.setVisibility(VISIBLE);
 			mModeStripe.setBackgroundColor(accentColor);
 		} else {
@@ -236,5 +244,33 @@ public class TweetView extends FrameLayout {
 				mTweetButtonBar = null;
 			}
 		}
+		
+		// display media
+		mImageContainer.removeAllViews();
+		byte[] serializedMediaEntities = cursor.getBlob(cursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
+		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
+		for(MediaEntity mediaEntity : mediaEntities){
+			showImage(mediaEntity.getMediaURL());
+		}
+	}
+	
+	/**
+	 * Creates an image view, sets it to display the specified source, attaches
+	 * a click listener that launches the PhotoViewActivity and adds it to the
+	 * image container. 
+	 * 
+	 * @param imageUri
+	 *            remote picture URL of a picture contained in the tweet or
+	 *            local file URI
+	 */
+	private void showImage(String imageUri) {
+		Intent imageClickIntent = new Intent(getContext(), PhotoViewActivity.class);
+		imageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI, imageUri);
+		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
+		imageView.setScaleType(ScaleType.CENTER_INSIDE);
+		imageView.setAdjustViewBounds(true);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
+		mImageContainer.addView(imageView, layoutParams);
 	}
 }
