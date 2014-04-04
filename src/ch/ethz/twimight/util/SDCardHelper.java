@@ -18,7 +18,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 
 public class SDCardHelper {
-//	private final static String TAG = "SDCardHelper";
+	// private final static String TAG = "SDCardHelper";
 	private File SDcardPath;
 
 	private boolean isSDAvail;
@@ -53,8 +53,7 @@ public class SDCardHelper {
 			isSDAvail = true;
 			isSDWritable = true;
 			for (String path : filePath) {
-				SDcardPath = Environment
-						.getExternalStoragePublicDirectory(path);
+				SDcardPath = Environment.getExternalStoragePublicDirectory(path);
 				SDcardPath.mkdirs();
 			}
 
@@ -74,8 +73,7 @@ public class SDCardHelper {
 	public Uri createTmpPhotoStoragePath(String tmpPhotoPath) {
 		if (isSDWritable && isSDAvail) {
 			// uri where the photo will be stored temporally
-			tmpPhotoUri = Uri.fromFile(new File(Environment
-					.getExternalStoragePublicDirectory(tmpPhotoPath), "tmp"
+			tmpPhotoUri = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(tmpPhotoPath), "tmp"
 					+ String.valueOf(System.currentTimeMillis()) + ".jpg"));// photoFileParent,
 																			// photoFilename));
 			return tmpPhotoUri;
@@ -122,10 +120,8 @@ public class SDCardHelper {
 		// Cursor cursor = (new CursorLoader(CONTEXT, contentUri, proj, null,
 		// null, null)).loadInBackground();
 		@SuppressWarnings("deprecation")
-		Cursor cursor = activity.managedQuery(contentUri, proj, null, null,
-				null);
-		int column_index = cursor
-				.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+		Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 		cursor.moveToFirst();
 		return cursor.getString(column_index);
 	}
@@ -144,9 +140,9 @@ public class SDCardHelper {
 
 		// Find the correct scale value. It should be the power of 2.
 		int scale = 1;
-		while (o.outWidth / scale > IMAGE_WIDTH
-				&& o.outHeight / scale > IMAGE_HEIGHT)
+		while (o.outWidth / scale > IMAGE_WIDTH && o.outHeight / scale > IMAGE_HEIGHT) {
 			scale *= 2;
+		}
 
 		// Decode with inSampleSize
 		BitmapFactory.Options o2 = new BitmapFactory.Options();
@@ -163,24 +159,21 @@ public class SDCardHelper {
 	 * @return a base64 encoded string that represents the JPEG image data
 	 * @throws FileNotFoundException
 	 */
-	public String getAsBas64Jpeg(String path, String fileName,
-			Integer maxDimension) throws FileNotFoundException {
+	public String getAsBas64Jpeg(String path, String fileName, Integer maxDimension) throws FileNotFoundException {
 		if (checkSDState(new String[] { path })) {
 			Uri uri = Uri.fromFile(getFileFromSDCard(path, fileName));
 			BitmapFactory.Options options1 = new BitmapFactory.Options();
 			options1.inJustDecodeBounds = true;
 			BitmapFactory.decodeFile(uri.getPath(), options1);
 			int scale = 1;
-			while (options1.outWidth / scale > maxDimension
-					&& options1.outHeight / scale > maxDimension) {
+			while (options1.outWidth / scale > maxDimension && options1.outHeight / scale > maxDimension) {
 				scale *= 2;
 			}
 			BitmapFactory.Options options2 = new BitmapFactory.Options();
 			options2.inSampleSize = scale;
 			Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath(), options2);
 			ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-			bitmap.compress(Bitmap.CompressFormat.JPEG, 100,
-					byteArrayBitmapStream);
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
 			byte[] bytes = byteArrayBitmapStream.toByteArray();
 			String encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
 			return encodedImage;
@@ -199,9 +192,7 @@ public class SDCardHelper {
 	 */
 	public File getFileFromSDCard(String pathName, String fileName) {
 
-		return new File(
-				Environment.getExternalStoragePublicDirectory(pathName),
-				fileName);
+		return new File(Environment.getExternalStoragePublicDirectory(pathName), fileName);
 
 	}
 

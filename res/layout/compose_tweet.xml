@@ -108,11 +108,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/unit_step" >
 
-                <ImageView
+                <ch.ethz.twimight.views.ClickableImageView
                     android:id="@+id/ivPhotoPreview"
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
-                    android:onClick="previewPhoto"
                     android:scaleType="centerCrop" />
 
                 <ImageButton

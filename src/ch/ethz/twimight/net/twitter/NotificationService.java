@@ -24,7 +24,7 @@ import ch.ethz.twimight.util.Preferences;
 
 public class NotificationService extends IntentService {
 
-	private static final String TAG = NotificationService.class.getName();
+	private static final String TAG = NotificationService.class.getSimpleName();
 
 	public static final String EXTRA_KEY_ACTION = "EXTRA_KEY_ACTION";
 	public static final String ACTION_NOTIFY_PENDING = "ACTION_NOTIFY_PENDING";
