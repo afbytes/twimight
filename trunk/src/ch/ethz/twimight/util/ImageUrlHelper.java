@@ -1,7 +1,11 @@
 package ch.ethz.twimight.util;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 import android.content.UriMatcher;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class ImageUrlHelper {
@@ -9,8 +13,11 @@ public class ImageUrlHelper {
 	private static final String TAG = ImageUrlHelper.class.getSimpleName();
 
 	private static final String[] sImageSuffixes = new String[] { ".jpg", ".jpeg", ".png", ".gif" };
-
+	
 	private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+	
+	private static final String sUrlSeparator = "|";
+	private static final Pattern sSeparatorPattern = Pattern.compile(Pattern.quote(sUrlSeparator));
 
 	private static final int TYPE_INSTAGRAM = 1;
 	private static final int TYPE_IMGUR = 2;
@@ -66,5 +73,13 @@ public class ImageUrlHelper {
 		}
 
 		return null;
+	}
+	
+	public static String serializeUrlList(List<String> urls){
+		return TextUtils.join(sUrlSeparator, urls);
+	}
+	
+	public static String[] deserializeUrlList(String urls){
+		return TextUtils.split(urls, sSeparatorPattern);
 	}
 }

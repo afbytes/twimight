@@ -1,230 +1,293 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+<resources
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- TextView restyling with the most commonly used values. -->
-    <style name="RobotoLightText" parent="android:Widget.TextView">
-        <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:includeFontPadding">false</item>
-    </style>
+	<!-- TextView restyling with the most commonly used values. -->
+	<style
+		name="RobotoLightText"
+		parent="android:Widget.TextView">
+		<item name="android:fontFamily">sans-serif-light</item>
+		<item name="android:includeFontPadding">false</item>
+	</style>
 
-    <style name="HugeText">
-        <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@color/dark_text</item>
-        <item name="android:lineSpacingMultiplier">1.2</item>
-    </style>
+	<style name="HugeText">
+		<item name="android:textSize">22sp</item>
+		<item name="android:textColor">@color/dark_text</item>
+		<item name="android:lineSpacingMultiplier">1.2</item>
+	</style>
 
-    <style name="Button" parent="@android:style/Widget.Button">
-        <item name="android:height">42dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-    </style>
+	<style
+		name="Button"
+		parent="@android:style/Widget.Button">
+		<item name="android:height">42dp</item>
+		<item name="android:textSize">16sp</item>
+		<item name="android:focusable">true</item>
+		<item name="android:clickable">true</item>
+	</style>
 
-    <style name="Button.Borderless" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
-        <item name="android:textColor">@color/medium_gray</item>
-        <item name="android:background">@drawable/borderless_button_background_inset</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textSize">12sp</item>
-    </style>
+	<style
+		name="Button.Borderless"
+		parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
+		<item name="android:textColor">@color/medium_gray</item>
+		<item name="android:background">@drawable/borderless_button_background_inset</item>
+		<item name="android:textAllCaps">true</item>
+		<item name="android:textSize">12sp</item>
+	</style>
 
-    <style name="Button.Solid">
-        <item name="android:textColor">@color/white</item>
-    </style>
+	<style name="Button.Solid">
+		<item name="android:textColor">@color/white</item>
+	</style>
 
-    <style name="Button.Solid.NormalMode">
-        <item name="android:background">@drawable/button_solid_normalmode</item>
-        <item name="android:textStyle">bold</item>
-    </style>
+	<style name="Button.Solid.NormalMode">
+		<item name="android:background">@drawable/button_solid_normalmode</item>
+		<item name="android:textStyle">bold</item>
+	</style>
 
-    <style name="Button.Solid.DisasterMode">
-        <item name="android:background">@drawable/button_solid_disastermode</item>
-        <item name="android:textStyle">bold</item>
-    </style>
+	<style name="Button.Solid.DisasterMode">
+		<item name="android:background">@drawable/button_solid_disastermode</item>
+		<item name="android:textStyle">bold</item>
+	</style>
 
-    <style name="Button.Outline">
-        <item name="android:background">@drawable/button_outline</item>
-        <item name="android:textColor">@color/dark_text</item>
-    </style>
+	<style name="Button.Outline">
+		<item name="android:background">@drawable/button_outline</item>
+		<item name="android:textColor">@color/dark_text</item>
+	</style>
 
-    <style name="ButtonBarDivider">
-        <item name="android:layout_width">1dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_marginTop">12dp</item>
-        <item name="android:layout_marginBottom">12dp</item>
-        <item name="android:layout_marginRight">-1dp</item>
-        <item name="android:layout_marginLeft">-1dp</item>
-        <item name="android:background">@color/light_gray</item>
-    </style>
+	<style name="ButtonBarDivider">
+		<item name="android:layout_width">1dp</item>
+		<item name="android:layout_height">match_parent</item>
+		<item name="android:layout_marginTop">12dp</item>
+		<item name="android:layout_marginBottom">12dp</item>
+		<item name="android:layout_marginRight">-1dp</item>
+		<item name="android:layout_marginLeft">-1dp</item>
+		<item name="android:background">@color/light_gray</item>
+	</style>
 
-    <style name="VerticalDivider">
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:background">@color/light_gray</item>
-    </style>
+	<style name="VerticalDivider">
+		<item name="android:layout_height">1dp</item>
+		<item name="android:layout_width">match_parent</item>
+		<item name="android:background">@color/light_gray</item>
+	</style>
 
-    <!--
-    *******************
-    TwimightHolo styles
-    *******************
-    -->
-    <style name="ActionBar.Solid.TwimightHolo" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-        <item name="android:titleTextStyle">@style/ActionBar.TitleTextStyle.TwimightHolo</item>
-        <item name="android:subtitleTextStyle">@style/ActionBar.SubtitleTextStyle.TwimightHolo</item>
-        <item name="android:displayOptions">showHome|homeAsUp|showTitle</item>
-    </style>
+	<!-- ******************* TwimightHolo styles ******************* -->
+	<style
+		name="ActionBar.Solid.TwimightHolo"
+		parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+		<item name="android:titleTextStyle">@style/ActionBar.TitleTextStyle.TwimightHolo</item>
+		<item name="android:subtitleTextStyle">@style/ActionBar.SubtitleTextStyle.TwimightHolo</item>
+		<item name="android:displayOptions">showHome|homeAsUp|showTitle</item>
+	</style>
 
-    <style name="ActionBar.TitleTextStyle.TwimightHolo" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">18sp</item>
-    </style>
+	<style
+		name="ActionBar.TitleTextStyle.TwimightHolo"
+		parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+		<item name="android:textColor">@color/white</item>
+		<item name="android:textSize">18sp</item>
+	</style>
 
-    <style name="ActionBar.SubtitleTextStyle.TwimightHolo" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
-        <item name="android:textColor">@color/white_semi_transparent</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textSize">10sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
+	<style
+		name="ActionBar.SubtitleTextStyle.TwimightHolo"
+		parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle">
+		<item name="android:textColor">@color/white_semi_transparent</item>
+		<item name="android:textAllCaps">true</item>
+		<item name="android:textSize">10sp</item>
+		<item name="android:textStyle">bold</item>
+	</style>
 
-    <style name="ActionBarTabBarStyle.TwimightHolo" parent="@android:style/Widget.Holo.ActionBar.TabBar">
-        <item name="android:divider">@drawable/tab_bar_divider</item>
-    </style>
+	<style
+		name="ActionBarTabBarStyle.TwimightHolo"
+		parent="@android:style/Widget.Holo.ActionBar.TabBar">
+		<item name="android:divider">@drawable/tab_bar_divider</item>
+	</style>
 
-    <style name="ActionBarTabBarStyle.TwimightHolo.TabText" parent="@android:style/Widget.Holo.ActionBar.TabText">
-        <item name="android:textColor">@color/white</item>
-    </style>
+	<style
+		name="ActionBarTabBarStyle.TwimightHolo.TabText"
+		parent="@android:style/Widget.Holo.ActionBar.TabText">
+		<item name="android:textColor">@color/white</item>
+	</style>
 
-    <!--
-    *****************
-    NormalMode styles
-    *****************
-    -->
-    <style name="ActionBar.Solid.TwimightHolo.NormalMode">
-        <item name="android:background">@drawable/ab_solid_normalmode</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_normalmode</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_normalmode</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
-    </style>
+	<!-- ***************** NormalMode styles ***************** -->
+	<style name="ActionBar.Solid.TwimightHolo.NormalMode">
+		<item name="android:background">@drawable/ab_solid_normalmode</item>
+		<item name="android:backgroundStacked">@drawable/ab_stacked_solid_normalmode</item>
+		<item name="android:backgroundSplit">@drawable/ab_bottom_solid_normalmode</item>
+		<item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
+	</style>
 
-    <style name="ActionBar.Transparent.NormalMode" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@drawable/ab_transparent_normalmode</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
-    </style>
+	<style
+		name="ActionBar.Transparent.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ActionBar">
+		<item name="android:background">@drawable/ab_transparent_normalmode</item>
+		<item name="android:progressBarStyle">@style/ProgressBar.NormalMode</item>
+	</style>
 
-    <style name="PopupMenu.NormalMode" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
-    </style>
+	<style
+		name="PopupMenu.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+		<item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
+	</style>
 
-    <style name="DropDownListView.NormalMode" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_normalmode</item>
-    </style>
+	<style
+		name="DropDownListView.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+		<item name="android:listSelector">@drawable/selectable_background_normalmode</item>
+	</style>
 
-    <style name="ActionBarTabStyle.NormalMode" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_normalmode</item>
-    </style>
+	<style
+		name="ActionBarTabStyle.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+		<item name="android:background">@drawable/tab_indicator_ab_normalmode</item>
+	</style>
 
-    <style name="DropDownNav.NormalMode" parent="@android:style/Widget.Holo.Light.Spinner">
-        <item name="android:background">@drawable/spinner_background_ab_normalmode</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_normalmode</item>
-    </style>
+	<style
+		name="DropDownNav.NormalMode"
+		parent="@android:style/Widget.Holo.Light.Spinner">
+		<item name="android:background">@drawable/spinner_background_ab_normalmode</item>
+		<item name="android:popupBackground">@drawable/menu_dropdown_panel_normalmode</item>
+		<item name="android:dropDownSelector">@drawable/selectable_background_normalmode</item>
+	</style>
 
-    <style name="ProgressBar.NormalMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_normalmode</item>
-    </style>
+	<style
+		name="ProgressBar.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+		<item name="android:progressDrawable">@drawable/progress_horizontal_normalmode</item>
+	</style>
 
-    <style name="ActionButton.CloseMode.NormalMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_normalmode</item>
-    </style>
+	<style
+		name="ActionButton.CloseMode.NormalMode"
+		parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+		<item name="android:background">@drawable/btn_cab_done_normalmode</item>
+	</style>
 
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.NormalMode.Widget" parent="@android:style/Theme.Holo">
-        <item name="android:popupMenuStyle">@style/PopupMenu.NormalMode</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.NormalMode</item>
-    </style>
+	<!-- this style is only referenced in a Light.DarkActionBar based theme -->
+	<style
+		name="Theme.NormalMode.Widget"
+		parent="@android:style/Theme.Holo">
+		<item name="android:popupMenuStyle">@style/PopupMenu.NormalMode</item>
+		<item name="android:dropDownListViewStyle">@style/DropDownListView.NormalMode</item>
+	</style>
 
-    <style name="EditText.NormalMode" parent="android:Widget.EditText">
-        <item name="android:background">@drawable/edit_text_normalmode</item>
-        <item name="android:textColor">#000000</item>
-    </style>
+	<style
+		name="EditText.NormalMode"
+		parent="android:Widget.EditText">
+		<item name="android:background">@drawable/edit_text_normalmode</item>
+		<item name="android:textColor">#000000</item>
+	</style>
 
-    <style name="CheckBox.NormalMode" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:button">@drawable/btn_check_normalmode</item>
-    </style>
+	<style
+		name="CheckBox.NormalMode"
+		parent="android:Widget.CompoundButton.CheckBox">
+		<item name="android:button">@drawable/btn_check_normalmode</item>
+	</style>
 
-    <style name="ListView.NormalMode" parent="@android:style/Widget.ListView">
-        <item name="android:divider">@color/light_gray</item>
-        <!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
-        <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
-        <item name="android:listSelector">@drawable/list_selector_background_normalmode</item>
-    </style>
+	<style
+		name="ListView.NormalMode"
+		parent="@android:style/Widget.ListView">
+		<item name="android:divider">@color/light_gray</item>
+		<!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
+		<item
+			name="android:dividerHeight"
+			tools:ignore="PxUsage">1px</item>
+		<item name="android:listSelector">@drawable/list_selector_background_normalmode</item>
+	</style>
 
-    <style name="ActionViewStyle" parent="@android:style/Theme.Holo">
-        <item name="android:background">@color/black</item>
-    </style>
-    <!--
-    ******************* 
-    DisasterMode styles
-     ******************
-    -->
+	<style
+		name="ActionViewStyle"
+		parent="@android:style/Theme.Holo">
+		<item name="android:background">@color/black</item>
+	</style>
+	<!-- ******************* DisasterMode styles ****************** -->
 
-    <style name="ActionBar.Solid.TwimightHolo.DisastertMode">
-        <item name="android:background">@drawable/ab_solid_disastermode</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_disastermode</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_disastermode</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
-    </style>
+	<style name="ActionBar.Solid.TwimightHolo.DisastertMode">
+		<item name="android:background">@drawable/ab_solid_disastermode</item>
+		<item name="android:backgroundStacked">@drawable/ab_stacked_solid_disastermode</item>
+		<item name="android:backgroundSplit">@drawable/ab_bottom_solid_disastermode</item>
+		<item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
+	</style>
 
-    <style name="ActionBar.Transparent.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@drawable/ab_transparent_disastermode</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
-    </style>
+	<style
+		name="ActionBar.Transparent.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.ActionBar">
+		<item name="android:background">@drawable/ab_transparent_disastermode</item>
+		<item name="android:progressBarStyle">@style/ProgressBar.DisasterMode</item>
+	</style>
 
-    <style name="PopupMenu.DisastertMode" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
-    </style>
+	<style
+		name="PopupMenu.DisastertMode"
+		parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+		<item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
+	</style>
 
-    <style name="DropDownListView.DisasterMode" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_disastermode</item>
-    </style>
+	<style
+		name="DropDownListView.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+		<item name="android:listSelector">@drawable/selectable_background_disastermode</item>
+	</style>
 
-    <style name="ActionBarTabStyle.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_disastermode</item>
-    </style>
+	<style
+		name="ActionBarTabStyle.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+		<item name="android:background">@drawable/tab_indicator_ab_disastermode</item>
+	</style>
 
-    <style name="DropDownNav.DisasterMode" parent="@android:style/Widget.Holo.Light.Spinner">
-        <item name="android:background">@drawable/spinner_background_ab_disastermode</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_disastermode</item>
-    </style>
+	<style
+		name="DropDownNav.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.Spinner">
+		<item name="android:background">@drawable/spinner_background_ab_disastermode</item>
+		<item name="android:popupBackground">@drawable/menu_dropdown_panel_disastermode</item>
+		<item name="android:dropDownSelector">@drawable/selectable_background_disastermode</item>
+	</style>
 
-    <style name="ProgressBar.DisasterMode" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_disastermode</item>
-    </style>
+	<style
+		name="ProgressBar.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+		<item name="android:progressDrawable">@drawable/progress_horizontal_disastermode</item>
+	</style>
 
-    <style name="ActionButton.CloseMode.DisasterMode" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_disastermode</item>
-    </style>
+	<style
+		name="ActionButton.CloseMode.DisasterMode"
+		parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+		<item name="android:background">@drawable/btn_cab_done_disastermode</item>
+	</style>
 
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.DisasterMode.Widget" parent="@android:style/Theme.Holo">
-        <item name="android:popupMenuStyle">@style/PopupMenu.DisastertMode</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.DisasterMode</item>
-    </style>
+	<!-- this style is only referenced in a Light.DarkActionBar based theme -->
+	<style
+		name="Theme.DisasterMode.Widget"
+		parent="@android:style/Theme.Holo">
+		<item name="android:popupMenuStyle">@style/PopupMenu.DisastertMode</item>
+		<item name="android:dropDownListViewStyle">@style/DropDownListView.DisasterMode</item>
+	</style>
 
-    <style name="EditText.DisasterMode" parent="android:Widget.EditText">
-        <item name="android:background">@drawable/edit_text_disastermode</item>
-        <item name="android:textColor">#000000</item>
-    </style>
+	<style
+		name="EditText.DisasterMode"
+		parent="android:Widget.EditText">
+		<item name="android:background">@drawable/edit_text_disastermode</item>
+		<item name="android:textColor">#000000</item>
+	</style>
 
-    <style name="CheckBox.DisasterMode" parent="android:Widget.CompoundButton.CheckBox">
-        <item name="android:button">@drawable/btn_check_disastermode</item>
-    </style>
+	<style
+		name="CheckBox.DisasterMode"
+		parent="android:Widget.CompoundButton.CheckBox">
+		<item name="android:button">@drawable/btn_check_disastermode</item>
+	</style>
 
-    <style name="ListView.DisasterMode" parent="@android:style/Widget.ListView">
-        <item name="android:divider">@color/light_gray</item>
-        <!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
-        <item name="android:dividerHeight" tools:ignore="PxUsage">1px</item>
-        <item name="android:listSelector">@drawable/list_selector_background_disastermode</item>
-    </style>
+	<style
+		name="ListView.DisasterMode"
+		parent="@android:style/Widget.ListView">
+		<item name="android:divider">@color/light_gray</item>
+		<!-- here we explicitly want px and not dp because the dp->px conversion might make the divider line blurry or disappear completely depending on the display resolution -->
+		<item
+			name="android:dividerHeight"
+			tools:ignore="PxUsage">1px</item>
+		<item name="android:listSelector">@drawable/list_selector_background_disastermode</item>
+	</style>
+
+	<!-- ActionBar Overlay -->
+	<style
+		name="ActionBar.Overlay"
+		parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+		<item name="android:background">@drawable/ab_overlay</item>
+	</style>
 
 </resources>

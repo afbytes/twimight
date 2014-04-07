@@ -184,7 +184,7 @@
             android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
         <activity
             android:name="ch.ethz.twimight.activities.PhotoViewActivity"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
+            android:theme="@style/OverlayActionBar" >
         </activity>
         <activity android:name="ch.ethz.twimight.activities.UrlRedirectActivity" >
             <intent-filter>

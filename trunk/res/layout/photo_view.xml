@@ -6,6 +6,7 @@
     android:background="@color/dark_gray">
 
     <uk.co.senab.photoview.PhotoView
+        android:paddingTop="?android:attr/actionBarSize"
         android:id="@+id/iv_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

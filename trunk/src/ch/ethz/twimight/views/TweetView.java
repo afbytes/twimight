@@ -2,10 +2,6 @@ package ch.ethz.twimight.views;
 
 import java.util.Locale;
 
-import twitter4j.MediaEntity;
-import twitter4j.TweetEntity;
-import twitter4j.URLEntity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,27 +9,26 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ImageView.ScaleType;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.PhotoViewActivity;
 import ch.ethz.twimight.activities.UserProfileActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
-import ch.ethz.twimight.net.twitter.EntityQueue;
 import ch.ethz.twimight.net.twitter.Tweets;
 import ch.ethz.twimight.net.twitter.TweetsContentProvider;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.util.ImageUrlHelper;
-import ch.ethz.twimight.util.Serialization;
 
 public class TweetView extends FrameLayout {
-
+	private static final String TAG = TweetView.class.getSimpleName();
 	private final LinearLayout mContainer;
 	private final LinearLayout mImageContainer;
 	private final View mModeStripe;
@@ -249,23 +244,36 @@ public class TweetView extends FrameLayout {
 
 		// display media
 		mImageContainer.removeAllViews();
-		byte[] serializedMediaEntities = cursor.getBlob(cursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
-		MediaEntity[] mediaEntities = Serialization.deserialize(serializedMediaEntities);
-		byte[] serializedUrlEntities = cursor.getBlob(cursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
-		URLEntity[] urlEntities = Serialization.deserialize(serializedUrlEntities);
-		EntityQueue allEntities = new EntityQueue(mediaEntities, urlEntities);
-		while (!allEntities.isEmpty()) {
-			TweetEntity entity = allEntities.remove();
-			if (entity instanceof MediaEntity) {
-				showImage(((MediaEntity) entity).getMediaURL());
-			} else if (entity instanceof URLEntity) {
-				String imageUrl = ImageUrlHelper.getImageUrl(((URLEntity) entity).getExpandedURL());
-				if (imageUrl != null) {
-					showImage(imageUrl);
-				}
-			}
-
+		String serializedMediaUris = cursor.getString(cursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
+		for (String mediaUri : ImageUrlHelper.deserializeUrlList(serializedMediaUris)) {
+			addImage(mediaUri);
+			Log.d(TAG, "mediaUri: " + mediaUri);
 		}
+
+		// mImageContainer.removeAllViews();
+		// byte[] serializedMediaEntities =
+		// cursor.getBlob(cursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
+		// MediaEntity[] mediaEntities =
+		// Serialization.deserialize(serializedMediaEntities);
+		// byte[] serializedUrlEntities =
+		// cursor.getBlob(cursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
+		// URLEntity[] urlEntities =
+		// Serialization.deserialize(serializedUrlEntities);
+		// EntityQueue allEntities = new EntityQueue(mediaEntities,
+		// urlEntities);
+		// while (!allEntities.isEmpty()) {
+		// TweetEntity entity = allEntities.remove();
+		// if (entity instanceof MediaEntity) {
+		// addImage(((MediaEntity) entity).getMediaURL());
+		// } else if (entity instanceof URLEntity) {
+		// String imageUrl = ImageUrlHelper.getImageUrl(((URLEntity)
+		// entity).getExpandedURL());
+		// if (imageUrl != null) {
+		// addImage(imageUrl);
+		// }
+		// }
+		//
+		// }
 	}
 
 	/**
@@ -277,14 +285,15 @@ public class TweetView extends FrameLayout {
 	 *            remote picture URL of a picture contained in the tweet or
 	 *            local file URI
 	 */
-	private void showImage(String imageUri) {
+	private void addImage(String imageUri) {
 		Intent imageClickIntent = new Intent(getContext(), PhotoViewActivity.class);
 		imageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI, imageUri);
 		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
 		imageView.setScaleType(ScaleType.CENTER_INSIDE);
 		imageView.setAdjustViewBounds(true);
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
+				(int) (160 * getContext().getResources().getDisplayMetrics().density));
+		imageView.setScaleType(ScaleType.CENTER_CROP);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
 		mImageContainer.addView(imageView, 0, layoutParams);
 	}

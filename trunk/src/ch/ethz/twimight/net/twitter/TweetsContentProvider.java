@@ -111,7 +111,7 @@ public class TweetsContentProvider extends ContentProvider {
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FAVORITE_COUNT,
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LAT, DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LNG,
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_FLAGS, DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_BUFFER,
-			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_LOCAL_MEDIA_URI,
+			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_MEDIA_URIS,
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_HTML_PAGES,
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_DISASTER_ID,
 			DBOpenHelper.TABLE_TWEETS + "." + Tweets.COL_IS_VERIFIED,

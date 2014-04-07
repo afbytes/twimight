@@ -103,7 +103,7 @@ public class TweetActionService extends IntentService {
 	private void delete() {
 		Log.d(TAG, "TweetActionService delete(); row ID: " + mRowId);
 		// delete picture
-		String delPhotoName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
+		String delPhotoName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
 		SDCardHelper sdCardHelper = new SDCardHelper();
 		if (delPhotoName != null) {
 			String twitterUserId = String.valueOf(mCursor.getLong(mCursor
