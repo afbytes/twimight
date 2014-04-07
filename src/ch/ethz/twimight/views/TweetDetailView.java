@@ -394,8 +394,8 @@ public class TweetDetailView extends FrameLayout {
 	 * Set the tweet picture.
 	 */
 	private void setPhotoAttached() {
-		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI))) {
-			String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
+		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS))) {
+			String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
 			Uri photoUri = Uri.fromFile(mSdCardHelper.getFileFromSDCard(mPhotoDirectoryPath, photoFileName));// photoFileParent,
 			showImage(photoUri.toString());
 		}

@@ -738,7 +738,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
 									// tweet, send it
-									if (c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)) != null)
+									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null)
 										sendDisasterPhoto(c);
 								}
 								sendDisasterHtmls(c);
@@ -746,7 +746,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 						}
 
 					} else {
-						if (c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)) != null) {
+						if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 							if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 5 * 60 * 1000L)) {
 								JSONObject toSend;
 
@@ -757,7 +757,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
 									// tweet, send it
-									if (c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)) != null)
+									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null)
 										sendDisasterPhoto(c);
 								}
 							}
@@ -787,7 +787,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 	private boolean sendDisasterPhoto(Cursor c) throws JSONException {
 		JSONObject toSendPhoto;
-		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
+		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
 		Log.d("photo", "photo name:" + photoFileName);
 		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 		// locate the directory where the photos are stored
@@ -968,8 +968,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				o.put(Tweets.COL_LAT, c.getDouble(c.getColumnIndex(Tweets.COL_LAT)));
 			if (c.getColumnIndex(Tweets.COL_LNG) >= 0)
 				o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
-			if (c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI) >= 0)
-				o.put(Tweets.COL_LOCAL_MEDIA_URI, c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)));
+			if (c.getColumnIndex(Tweets.COL_MEDIA_URIS) >= 0)
+				o.put(Tweets.COL_MEDIA_URIS, c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)));
 			if (c.getColumnIndex(Tweets.COL_HTML_PAGES) >= 0)
 				o.put(Tweets.COL_HTML_PAGES, c.getString(c.getColumnIndex(Tweets.COL_HTML_PAGES)));
 			if (c.getColumnIndex(Tweets.COL_SOURCE) >= 0)
@@ -1053,8 +1053,8 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		if (o.has(Tweets.COL_SOURCE))
 			cv.put(Tweets.COL_SOURCE, o.getString(Tweets.COL_SOURCE));
 
-		if (o.has(Tweets.COL_LOCAL_MEDIA_URI))
-			cv.put(Tweets.COL_LOCAL_MEDIA_URI, o.getString(Tweets.COL_LOCAL_MEDIA_URI));
+		if (o.has(Tweets.COL_MEDIA_URIS))
+			cv.put(Tweets.COL_MEDIA_URIS, o.getString(Tweets.COL_MEDIA_URIS));
 
 		if (o.has(Tweets.COL_HTML_PAGES))
 			cv.put(Tweets.COL_HTML_PAGES, o.getString(Tweets.COL_HTML_PAGES));

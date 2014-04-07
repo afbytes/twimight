@@ -39,6 +39,7 @@
     <string name="feedback">Feedback</string>
     <string name="write_tweet">Tweet</string>
     <string name="search">Search</string>
+    <string name="save_image">Save image</string>
 
     <!-- Tweeting, Timeline, Favorites -->
     <string name="tweet_signature_not_verified">The digital signature of this Tweet could not be verified!</string>
@@ -85,6 +86,9 @@
     <string name="no_valid_audio">No valid application for playing audio files</string>
     <string name="no_valid_video">No valid application for playing video files</string>
     <string name="download_toast">The linked pages will be downloaded for offline viewing.</string>
+    <string name="loading_image_failed">Loading image failed!</string>
+    <string name="image_saved">Image saved!</string>
+    <string name="saving_image_failed">Saving image failed!</string>
 
     <!-- User, Friends -->
     <string name="users">Users</string>

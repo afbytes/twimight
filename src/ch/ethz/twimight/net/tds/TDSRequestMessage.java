@@ -124,7 +124,7 @@ public class TDSRequestMessage {
 					row.put(Tweets.COL_CREATED_AT + "_phone",
 							simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED_AT)))));
 					// add picture if available
-					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI)) != null) {
+					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 						try {
 							String base64Photo = getPhotoAsBase64(tweets);
 							Log.d(TAG, base64Photo);
@@ -151,7 +151,7 @@ public class TDSRequestMessage {
 
 	private String getPhotoAsBase64(Cursor c) throws FileNotFoundException {
 		String encodedImage = null;
-		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
+		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
 		Log.d("photo", "photo name:" + photoFileName);
 		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
 		// locate the directory where the photos are stored

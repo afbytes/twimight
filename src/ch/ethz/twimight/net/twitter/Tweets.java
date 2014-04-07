@@ -53,7 +53,10 @@ public class Tweets implements BaseColumns {
 	public static final String TWEETS_SOURCE_DISASTER = "disaster";
 	/** both, normal and disaster tweets */
 	public static final String TWEETS_SOURCE_ALL = "all";
-	/** part of content provider url that returns only tweets that were received after a specified value */
+	/**
+	 * part of content provider url that returns only tweets that were received
+	 * after a specified value
+	 */
 	public static final String FILTER_RECEIVED_AFTER = "received_after";
 	/** a specific tweet */
 	public static final String TWEET_TID = "tweet_tid";
@@ -131,8 +134,18 @@ public class Tweets implements BaseColumns {
 	public static final String COL_SOURCE = "source";
 	/** which buffer(s) is the tweet in */
 	public static final String COL_BUFFER = "buffer_flags";
-	/** path to media (i.e. photo) attached to locally created tweet or received disaster tweet */
-	public static final String COL_LOCAL_MEDIA_URI = "media_url";
+	/**
+	 * Holds a string of image URIs separated by a special character. This
+	 * allows for easier access and thus much better scrolling performance in
+	 * Tweet lists as opposed to the binary deserialization of the UrlEntity
+	 * objects stored in COL_URL_ENTITIES and COL_ MEDIA_ENTITIES. For normal
+	 * tweets these are the URLs of attached images (pic.twitter.com/...) or any
+	 * other URL that is detected to point to an image by ImageUrlHelper (by
+	 * filetype suffix or third party image hoster url). For disaster tweets
+	 * this is just the local file URI of the attached photo. Serialization and
+	 * deserialization should always be done using ImageUrlHelper.
+	 */
+	public static final String COL_MEDIA_URIS = "media_url";
 	/** Transactional flags */
 	public static final String COL_FLAGS = "flags";
 	// /** url hashtag */

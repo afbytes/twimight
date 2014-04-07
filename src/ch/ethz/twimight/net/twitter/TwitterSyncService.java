@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import twitter4j.DirectMessage;
 import twitter4j.GeoLocation;
+import twitter4j.MediaEntity;
 import twitter4j.PagableResponseList;
 import twitter4j.Paging;
 import twitter4j.Query;
@@ -24,7 +25,6 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.URLEntity;
 import twitter4j.User;
-import twitter4j.UserMentionEntity;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.IntentService;
@@ -50,6 +50,7 @@ import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.activities.TwimightBaseActivity;
 import ch.ethz.twimight.data.HtmlPagesDbHelper;
 import ch.ethz.twimight.util.Constants;
+import ch.ethz.twimight.util.ImageUrlHelper;
 import ch.ethz.twimight.util.Serialization;
 
 public class TwitterSyncService extends IntentService {
@@ -332,9 +333,23 @@ public class TwitterSyncService extends IntentService {
 		// with their display versions
 		EntityQueue allUrlEntities = new EntityQueue(tweet.getURLEntities(), tweet.getMediaEntities());
 		StringBuilder augmentedTweetText = new StringBuilder(tweet.getText());
+		List<String> imageUrls = new LinkedList<String>();
 		while (!allUrlEntities.isEmpty()) {
 			URLEntity urlEntity = (URLEntity) allUrlEntities.remove();
 			augmentedTweetText.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
+			// check for image URLs
+			String url;
+			if (urlEntity instanceof MediaEntity) {
+				url = ((MediaEntity) urlEntity).getMediaURL();
+			} else {
+				url = urlEntity.getExpandedURL();
+			}
+			String imageUrl = ImageUrlHelper.getImageUrl(url);
+			Log.d(TAG, "urlentity: " + urlEntity.getExpandedURL());
+			if (imageUrl != null) {
+				// add to start of list because we are iterating backwards
+				imageUrls.add(0, imageUrl);
+			}
 		}
 		cv.put(Tweets.COL_TEXT, augmentedTweetText.toString());
 		// the original version
@@ -345,6 +360,10 @@ public class TwitterSyncService extends IntentService {
 		cv.put(Tweets.COL_URL_ENTITIES, Serialization.serialize(tweet.getURLEntities()));
 		cv.put(Tweets.COL_USER_MENTION_ENTITIES, Serialization.serialize(tweet.getUserMentionEntities()));
 
+		String serializedImageUris = ImageUrlHelper.serializeUrlList(imageUrls);
+		Log.d(TAG, "serializedImageUris: " + serializedImageUris);
+		cv.put(Tweets.COL_MEDIA_URIS, serializedImageUris);
+
 		// if there are urls to this tweet, change the status of html field to 1
 		if (tweet.getURLEntities().length > 0 || tweet.getMediaEntities().length > 0) {
 			cv.put(Tweets.COL_HTML_PAGES, 1);
@@ -354,17 +373,6 @@ public class TwitterSyncService extends IntentService {
 			if (isOfflineActive) {
 				new CacheUrlTask(tweet).execute();
 			}
-		}
-		// if there are mentions we load the users
-		for (UserMentionEntity userMentionEntity : tweet.getUserMentionEntities()) {
-			ContentValues mentionedUserValues = new ContentValues();
-			mentionedUserValues.put(TwitterUsers.COL_NAME, userMentionEntity.getName());
-			mentionedUserValues.put(TwitterUsers.COL_TWITTER_USER_ID, userMentionEntity.getId());
-			mentionedUserValues.put(TwitterUsers.COL_SCREEN_NAME, userMentionEntity.getScreenName());
-			mentionedUserValues.put(TwitterUsers.COL_FLAGS, TwitterUsers.FLAG_TO_UPDATE);
-			Uri insertUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS);
-			getContentResolver().insert(insertUri, mentionedUserValues);
 		}
 
 		cv.put(Tweets.COL_CREATED_AT, tweet.getCreatedAt().getTime());
@@ -887,7 +895,7 @@ public class TwitterSyncService extends IntentService {
 		String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 		StatusUpdate statusUpdate = new StatusUpdate(text);
 		// media?
-		String mediaName = c.getString(c.getColumnIndex(Tweets.COL_LOCAL_MEDIA_URI));
+		String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
 		if (mediaName != null) {
 			String mediaUrl = Environment.getExternalStoragePublicDirectory(
 					Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this) + "/" + mediaName).getAbsolutePath();
