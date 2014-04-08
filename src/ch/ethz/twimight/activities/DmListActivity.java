@@ -20,7 +20,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,10 +31,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import ch.ethz.twimight.R;
-import ch.ethz.twimight.net.twitter.DmAdapter;
 import ch.ethz.twimight.net.twitter.DirectMessages;
+import ch.ethz.twimight.net.twitter.DmAdapter;
 import ch.ethz.twimight.net.twitter.Tweets;
-import android.view.ActionMode;
 
 /**
  * Shows the overview of direct messages. A list view with an item for each user
@@ -41,27 +42,29 @@ import android.view.ActionMode;
  * @author thossmann
  * 
  */
-public class DmListActivity extends TwimightBaseActivity implements
-		ActionMode.Callback {
+public class DmListActivity extends TwimightBaseActivity implements ActionMode.Callback {
 
-	private static final String TAG = "ShowDMListActivity";
+	private static final String TAG = DmListActivity.class.getSimpleName();
+
+	public static final String EXTRA_KEY_USER_ROW_ID = "EXTRA_KEY_USER_ROW_ID";
+	public static final String EXTRA_KEY_SCREEN_NAME = "EXTRA_KEY_SCREEN_NAME";
 
 	// Views
-	private ListView dmUserListView;
+	private ListView mListView;
 
-	private DmAdapter adapter;
-	private Cursor c;
+	private DmAdapter mAdapter;
+	private Cursor mCursor;
 
-	private int rowId;
-	private String screenname;
+	private int mUserRowId;
+	private String mScreenname;
 	public static boolean running = false;
 	int mSelectedPosition;
 
 	// handler
-	static Handler handler;
+	static Handler mHandler;
 
-	private int positionIndex;
-	private int positionTop;
+	private int mPositionIndex;
+	private int mPositionTop;
 
 	private ActionMode mActionMode;
 
@@ -74,38 +77,35 @@ public class DmListActivity extends TwimightBaseActivity implements
 
 		setContentView(R.layout.dm_list);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-		rowId = getIntent().getIntExtra("rowId", 0);
-		screenname = getIntent().getStringExtra("screenname");
+		mUserRowId = getIntent().getIntExtra(EXTRA_KEY_USER_ROW_ID, 0);
+		mScreenname = getIntent().getStringExtra(EXTRA_KEY_SCREEN_NAME);
 
 		// If we don't know which user to show, we stop the activity
-		if (rowId == 0 || screenname == null)
+		if (mUserRowId == 0 || mScreenname == null) {
 			finish();
+		}
 
 		setTitle(getString(R.string.direct_messages));
-		getActionBar()
-				.setSubtitle(getString(R.string.with) + " @" + screenname);
+		getActionBar().setSubtitle(getString(R.string.with) + " @" + mScreenname);
 
-		dmUserListView = (ListView) findViewById(R.id.dmUserList);
-		c = getContentResolver().query(
-				Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/"
-						+ DirectMessages.DMS + "/" + DirectMessages.DMS_USER
-						+ "/" + rowId), null, null, null, null);
+		mListView = (ListView) findViewById(R.id.dmUserList);
+		mCursor = getContentResolver().query(
+				Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
+						+ DirectMessages.DMS_USER + "/" + mUserRowId), null, null, null, null);
 
-		adapter = new DmAdapter(this, c);
-		dmUserListView.setAdapter(adapter);
-		dmUserListView.setEmptyView(findViewById(R.id.dmListEmpty));
-		dmUserListView
-				.setOnItemLongClickListener(new OnItemLongClickListener() {
+		mAdapter = new DmAdapter(this, mCursor);
+		mListView.setAdapter(mAdapter);
+		mListView.setEmptyView(findViewById(R.id.dmListEmpty));
+		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-					@Override
-					public boolean onItemLongClick(AdapterView<?> parent,
-							View view, int position, long id) {
-						mSelectedPosition = position;
-						mActionMode = startActionMode(DmListActivity.this);
-						view.setSelected(true);
-						return true;
-					}
-				});
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				mSelectedPosition = position;
+				mActionMode = startActionMode(DmListActivity.this);
+				view.setSelected(true);
+				return true;
+			}
+		});
 	}
 
 	/**
@@ -116,8 +116,8 @@ public class DmListActivity extends TwimightBaseActivity implements
 		super.onResume();
 		running = true;
 
-		if (positionIndex != 0 | positionTop != 0) {
-			dmUserListView.setSelectionFromTop(positionIndex, positionTop);
+		if (mPositionIndex != 0 | mPositionTop != 0) {
+			mListView.setSelectionFromTop(mPositionIndex, mPositionTop);
 		}
 	}
 
@@ -135,10 +135,10 @@ public class DmListActivity extends TwimightBaseActivity implements
 	public void onDestroy() {
 		super.onDestroy();
 
-		dmUserListView.setAdapter(null);
+		mListView.setAdapter(null);
 
-		if (c != null)
-			c.close();
+		if (mCursor != null)
+			mCursor.close();
 
 		unbindDrawables(findViewById(R.id.showDMUserListRoot));
 
@@ -146,17 +146,19 @@ public class DmListActivity extends TwimightBaseActivity implements
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
-		if (item.getItemId() == R.id.menu_write_tweet) {
+		switch (item.getItemId()) {
+		case R.id.menu_write_tweet:
 			Intent i = new Intent(getBaseContext(), ComposeDmActivity.class);
-			i.putExtra(ComposeDmActivity.EXTRA_KEY_RECIPIENT_SCREEN_NAME, screenname);
+			i.putExtra(ComposeDmActivity.EXTRA_KEY_RECIPIENT_SCREEN_NAME, mScreenname);
 			startActivity(i);
-
-		} else
-			super.onOptionsItemSelected(item);
-
+			break;
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			break;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 		return true;
-
 	}
 
 	/**
@@ -165,13 +167,13 @@ public class DmListActivity extends TwimightBaseActivity implements
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 
-		positionIndex = dmUserListView.getFirstVisiblePosition();
-		View v = dmUserListView.getChildAt(0);
-		positionTop = (v == null) ? 0 : v.getTop();
-		savedInstanceState.putInt("positionIndex", positionIndex);
-		savedInstanceState.putInt("positionTop", positionTop);
+		mPositionIndex = mListView.getFirstVisiblePosition();
+		View v = mListView.getChildAt(0);
+		mPositionTop = (v == null) ? 0 : v.getTop();
+		savedInstanceState.putInt("positionIndex", mPositionIndex);
+		savedInstanceState.putInt("positionTop", mPositionTop);
 
-		Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+		Log.i(TAG, "saving" + mPositionIndex + " " + mPositionTop);
 
 		super.onSaveInstanceState(savedInstanceState);
 	}
@@ -183,10 +185,10 @@ public class DmListActivity extends TwimightBaseActivity implements
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		positionIndex = savedInstanceState.getInt("positionIndex");
-		positionTop = savedInstanceState.getInt("positionTop");
+		mPositionIndex = savedInstanceState.getInt("positionIndex");
+		mPositionTop = savedInstanceState.getInt("positionTop");
 
-		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+		Log.i(TAG, "restoring " + mPositionIndex + " " + mPositionTop);
 	}
 
 	@Override
@@ -219,10 +221,10 @@ public class DmListActivity extends TwimightBaseActivity implements
 	}
 
 	private void deleteSelectedMessage() {
-		c.moveToPosition(mSelectedPosition);
-		int flags = c.getInt(c.getColumnIndex(DirectMessages.COL_FLAGS));
-		Long tid = c.getLong(c.getColumnIndex(DirectMessages.COL_DMID));
-		Long rowId = c.getLong(c.getColumnIndex("_id"));
+		mCursor.moveToPosition(mSelectedPosition);
+		int flags = mCursor.getInt(mCursor.getColumnIndex(DirectMessages.COL_FLAGS));
+		Long tid = mCursor.getLong(mCursor.getColumnIndex(DirectMessages.COL_DMID));
+		Long rowId = mCursor.getLong(mCursor.getColumnIndex("_id"));
 		if ((flags & Tweets.FLAG_TO_DELETE) == 0) {
 
 			if (tid != null) {
@@ -241,30 +243,22 @@ public class DmListActivity extends TwimightBaseActivity implements
 	private void showDeleteDialog(final long tid, final long rowId) {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(
-				"Are you sure you want to delete your Direct Message?")
-				.setCancelable(false)
-				.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								Uri uri = Uri.parse("content://"
-										+ DirectMessages.DM_AUTHORITY + "/"
-										+ DirectMessages.DMS + "/" + rowId);
+		builder.setMessage("Are you sure you want to delete your Direct Message?").setCancelable(false)
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Uri uri = Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
+								+ rowId);
 
-								if (tid != 0) {
-									c.moveToPosition(mSelectedPosition);
-									int flags = c.getInt(c
-											.getColumnIndex(DirectMessages.COL_FLAGS));
-									getContentResolver().update(uri,
-											setDeleteFlag(flags), null, null);
-								} else {
-									getContentResolver()
-											.delete(uri, null, null);
-								}
+						if (tid != 0) {
+							mCursor.moveToPosition(mSelectedPosition);
+							int flags = mCursor.getInt(mCursor.getColumnIndex(DirectMessages.COL_FLAGS));
+							getContentResolver().update(uri, setDeleteFlag(flags), null, null);
+						} else {
+							getContentResolver().delete(uri, null, null);
+						}
 
-							}
-						})
-				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					}
+				}).setNegativeButton("No", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
