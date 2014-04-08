@@ -1,67 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/ch.ethz.twimight"
-    android:id="@+id/rootRelativeLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true" >
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res/ch.ethz.twimight"
+	android:id="@+id/rootRelativeLayout"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:animateLayoutChanges="true">
 
-    <LinearLayout
-        android:id="@+id/bottomStatusBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@color/accent_disastermode_1"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="3dp"
-        android:visibility="?attr/bottomStatusBarVisibility" >
+	<LinearLayout
+		android:id="@+id/bottomStatusBar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:background="@color/accent_disastermode_1"
+		android:gravity="center_vertical"
+		android:orientation="horizontal"
+		android:padding="3dp"
+		android:visibility="?attr/bottomStatusBarVisibility">
 
-        <ImageView
-            android:id="@+id/neighborIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="2dp"
-            android:src="@drawable/ic_small_smartphone" />
+		<ImageView
+			android:id="@+id/neighborIcon"
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:layout_marginLeft="4dp"
+			android:layout_marginRight="2dp"
+			android:src="@drawable/ic_small_smartphone"/>
 
-        <TextView
-            android:id="@+id/tvNeighborCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
+		<TextView
+			android:id="@+id/tvNeighborCount"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/white"
+			android:textSize="12sp"/>
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="14dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:background="@color/white_semi_transparent" />
+		<View
+			android:layout_width="1dp"
+			android:layout_height="14dp"
+			android:layout_marginLeft="10dp"
+			android:layout_marginRight="10dp"
+			android:background="@color/white_semi_transparent"/>
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
-    </LinearLayout>
+		<TextView
+			android:id="@+id/tvStatus"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textColor="@color/white"
+			android:textSize="12sp"/>
+	</LinearLayout>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottomStatusBar" />
+	<android.support.v4.view.ViewPager
+		android:id="@+id/viewpager"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_above="@id/bottomStatusBar"/>
 
-    <ch.ethz.twimight.views.LoadingBar
-        android:id="@+id/progressBar"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:indeterminate="true"
-        android:visibility="gone"
-        app:color="?attr/accentColor2" />
+	<ch.ethz.twimight.views.LoadingBar
+		android:id="@+id/progressBar"
+		android:layout_width="match_parent"
+		android:layout_height="4dp"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:indeterminate="true"
+		android:visibility="gone"
+		app:color="?attr/accentColor2"/>
 
 </RelativeLayout>

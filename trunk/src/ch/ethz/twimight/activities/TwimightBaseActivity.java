@@ -51,7 +51,7 @@ import ch.ethz.twimight.util.LogCollector;
 public abstract class TwimightBaseActivity extends ThemeSelectorActivity implements Observer {
 
 	static TwimightBaseActivity sInstance;
-	private static final String TAG = "TwimightBaseActivity";
+	private static final String TAG = TwimightBaseActivity.class.getSimpleName();
 	public static final boolean D = true;
 	
 	private static boolean sIsLoading = false;

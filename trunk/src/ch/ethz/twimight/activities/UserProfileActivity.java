@@ -18,9 +18,11 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -28,8 +30,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+import ch.ethz.twimight.net.twitter.BannerImageVariant;
+import ch.ethz.twimight.net.twitter.ProfileImageVariant;
 import ch.ethz.twimight.net.twitter.TwitterSyncService;
 import ch.ethz.twimight.net.twitter.TwitterUsers;
+import ch.ethz.twimight.views.ClickableImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -41,7 +46,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
  */
 public class UserProfileActivity extends TwimightBaseActivity {
 
-	private static final String TAG = UserProfileActivity.class.getName();
+	private static final String TAG = UserProfileActivity.class.getSimpleName();
 
 	private static final int NO_ROW_ID = -1;
 
@@ -55,7 +60,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 	// Views
 	private View mContentRoot;
-	private ImageView mIvProfileImage;
+	private ClickableImageView mIvProfileImage;
+	private ImageView mIvBannerImage;
 	private TextView mTvScreenName;
 	private TextView mTvRealName;
 	private TextView mTvLocation;
@@ -101,7 +107,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 
 	private void captureViews() {
 		mContentRoot = findViewById(R.id.userProfileRootView);
-		mIvProfileImage = (ImageView) findViewById(R.id.showUserProfileImage);
+		mIvProfileImage = (ClickableImageView) findViewById(R.id.showUserProfileImage);
+		mIvBannerImage = (ImageView) findViewById(R.id.bannerImage);
 		mTvScreenName = (TextView) findViewById(R.id.showUserScreenName);
 		mTvRealName = (TextView) findViewById(R.id.showUserRealName);
 		mTvLocation = (TextView) findViewById(R.id.showUserLocation);
@@ -276,10 +283,30 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		if (mCursor != null && mCursor.getCount() > 0) {
 			showContent(true);
 			mCursor.moveToFirst();
+			/*
+			 * set banner image to variant that fits the screen size the best
+			 * (using screen size instead of ImageView width because ImageView
+			 * is full width and this way we don't have to wait for the layout
+			 * process to finish to know the width)
+			 */
+			String bannerImageUrl = mCursor
+					.getString(mCursor.getColumnIndex(TwitterUsers.COL_PROFILE_BANNER_IMAGE_URI));
+			Point displaySize = new Point();
+			getWindowManager().getDefaultDisplay().getSize(displaySize);
+			bannerImageUrl = BannerImageVariant.getVariantUrl(bannerImageUrl, displaySize.x);
+			Log.d(TAG, "bannerImageUrl: " + bannerImageUrl);
+			if (bannerImageUrl != null) {
+				ImageLoader.getInstance().displayImage(bannerImageUrl, mIvBannerImage);
+			}
 			// set image
 			mIvProfileImage.setImageResource(R.drawable.profile_image_placeholder);
 			String imageUri = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 			ImageLoader.getInstance().displayImage(imageUri, mIvProfileImage);
+			mIvProfileImage.setImageUri(imageUri);
+			Intent profileImageClickIntent = new Intent(this, PhotoViewActivity.class);
+			profileImageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI,
+					ProfileImageVariant.getVariantUrl(imageUri, ProfileImageVariant.ORIGINAL));
+			mIvProfileImage.setOnClickActivityIntent(profileImageClickIntent);
 			// set names
 			userScreenName = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
 			mTvScreenName.setText("@" + userScreenName);
