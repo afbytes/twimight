@@ -61,7 +61,7 @@
 					</FrameLayout>
 
 					<ch.ethz.twimight.views.MagicTextView
-						android:id="@+id/showUserRealName"
+						android:id="@+id/tvUserRealName"
 						style="@style/RobotoLightText"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
 						android:textStyle="italic"/>
 
 					<ch.ethz.twimight.views.MagicTextView
-						android:id="@+id/showUserScreenName"
+						android:id="@+id/tvUserScreenName"
 						style="@style/RobotoLightText"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
@@ -90,8 +90,24 @@
 						android:textStyle="italic"/>
 
 					<ch.ethz.twimight.views.MagicTextView
-						android:id="@+id/showUserLocation"
+						android:id="@+id/tvUserLocation"
 						style="@style/RobotoLightText"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:gravity="center_horizontal"
+						android:text="@string/placeholder_short"
+						app:strokeColor="#BBFFFFFF"
+						app:strokeWidth="2"
+						app:strokeJoinStyle="miter"
+						android:textColor="@color/dark_text"
+						android:textSize="16sp"
+						android:textStyle="italic"/>
+
+					<ch.ethz.twimight.views.MagicTextView
+						android:id="@+id/tvUserUrl"
+						style="@style/RobotoLightText"
+						android:autoLink="web"
+						android:textColorLink="@color/dark_text"
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:gravity="center_horizontal"

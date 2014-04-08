@@ -22,6 +22,9 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.TextPaint;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -65,6 +68,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 	private TextView mTvScreenName;
 	private TextView mTvRealName;
 	private TextView mTvLocation;
+	private TextView mTvUrl;
 	private TextView mTvDescription;
 	private TextView mTvStatsTweets;
 	private TextView mTvStatsFavorites;
@@ -109,9 +113,10 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		mContentRoot = findViewById(R.id.userProfileRootView);
 		mIvProfileImage = (ClickableImageView) findViewById(R.id.showUserProfileImage);
 		mIvBannerImage = (ImageView) findViewById(R.id.bannerImage);
-		mTvScreenName = (TextView) findViewById(R.id.showUserScreenName);
-		mTvRealName = (TextView) findViewById(R.id.showUserRealName);
-		mTvLocation = (TextView) findViewById(R.id.showUserLocation);
+		mTvScreenName = (TextView) findViewById(R.id.tvUserScreenName);
+		mTvRealName = (TextView) findViewById(R.id.tvUserRealName);
+		mTvLocation = (TextView) findViewById(R.id.tvUserLocation);
+		mTvUrl = (TextView) findViewById(R.id.tvUserUrl);
 		mTvDescription = (TextView) findViewById(R.id.showUserDescription);
 		mTvStatsTweets = (TextView) findViewById(R.id.statsTweets);
 		mTvStatsFavorites = (TextView) findViewById(R.id.statsFavorites);
@@ -317,6 +322,24 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				mTvLocation.setVisibility(TextView.VISIBLE);
 			} else {
 				mTvLocation.setVisibility(TextView.GONE);
+			}
+
+			if (mCursor.getColumnIndex(TwitterUsers.COL_EXPANDED_URL) >= 0) {
+				String displayUrl = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_DISPLAY_URL));
+				String expandedUrl = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_EXPANDED_URL));
+				mTvUrl.setText(displayUrl);
+				Spannable urlSpannable = (Spannable) mTvUrl.getText();
+				URLSpan[] spans = urlSpannable.getSpans(0, urlSpannable.length(), URLSpan.class);
+				for (URLSpan span : spans) {
+					int start = urlSpannable.getSpanStart(span);
+					int end = urlSpannable.getSpanEnd(span);
+					urlSpannable.removeSpan(span);
+					span = new UrlStyleSpan(expandedUrl);
+					urlSpannable.setSpan(span, start, end, 0);
+				}
+				mTvUrl.setVisibility(TextView.VISIBLE);
+			} else {
+				mTvUrl.setVisibility(TextView.GONE);
 			}
 
 			if (mCursor.getColumnIndex(TwitterUsers.COL_DESCRIPTION) >= 0) {
@@ -585,6 +608,18 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);
 			updateCursor();
+		}
+	}
+
+	private class UrlStyleSpan extends URLSpan {
+		public UrlStyleSpan(String url) {
+			super(url);
+		}
+
+		@Override
+		public void updateDrawState(TextPaint ds) {
+			// leaving this method empty prevents the default implementation of
+			// URLSpan from changing the text style (making it bold and underlining it)
 		}
 	}
 }
