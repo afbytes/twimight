@@ -304,7 +304,7 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				ImageLoader.getInstance().displayImage(bannerImageUrl, mIvBannerImage);
 			}
 			// set image
-			mIvProfileImage.setImageResource(R.drawable.profile_image_placeholder);
+			mIvProfileImage.setImageResource(R.drawable.image_placeholder);
 			String imageUri = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 			ImageLoader.getInstance().displayImage(imageUri, mIvProfileImage);
 			mIvProfileImage.setImageUri(imageUri);

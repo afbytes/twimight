@@ -82,7 +82,7 @@ public class TweetView extends FrameLayout {
 
 	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe) {
 		// set profile image
-		mIvProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
+		mIvProfileImage.setBackgroundResource(R.drawable.image_placeholder);
 		mIvProfileImage.setImageDrawable(null);
 		String profileImageUrl = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 		mIvProfileImage.setImageUri(profileImageUrl);
@@ -266,6 +266,7 @@ public class TweetView extends FrameLayout {
 		imageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI, imageUri);
 		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
 		imageView.setScaleType(ScaleType.CENTER_INSIDE);
+		imageView.setBackgroundResource(R.drawable.image_placeholder);
 		imageView.setAdjustViewBounds(true);
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
 				(int) (160 * getContext().getResources().getDisplayMetrics().density));

@@ -73,7 +73,7 @@ public class UserAdapter extends CursorAdapter {
 		String location = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_LOCATION));
 		holder.tvUserLocation.setText(location);
 		// profile image
-		holder.ivProfileImage.setBackgroundResource(R.drawable.profile_image_placeholder);
+		holder.ivProfileImage.setBackgroundResource(R.drawable.image_placeholder);
 		holder.ivProfileImage.setImageDrawable(null);
 		String imageUri = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 		ImageLoader.getInstance().displayImage(imageUri,	holder.ivProfileImage);
