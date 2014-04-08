@@ -1,8 +1,5 @@
 package ch.ethz.twimight.net.twitter;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,6 +18,8 @@ import ch.ethz.twimight.activities.DmConversationListActivity;
 import ch.ethz.twimight.activities.HomeScreenActivity;
 import ch.ethz.twimight.activities.LoginActivity;
 import ch.ethz.twimight.util.Preferences;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class NotificationService extends IntentService {
 
@@ -96,22 +95,6 @@ public class NotificationService extends IntentService {
 		Preferences.update(this, R.string.pref_key_direct_messages_seen_until, timestamp);
 		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		notificationManager.cancel(ID_DIRECT_MESSAGES);
-	}
-
-	private Bitmap getUserImage(int userRowId) {
-		Uri imageUri = Uri.parse("content://" + TwitterUsers.TWITTERUSERS_AUTHORITY + "/" + TwitterUsers.TWITTERUSERS
-				+ "/" + userRowId);
-		InputStream is;
-		Bitmap bitmap = null;
-		try {
-			is = getContentResolver().openInputStream(imageUri);
-			if (is != null) {
-				bitmap = BitmapFactory.decodeStream(is);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		return bitmap;
 	}
 
 	private abstract class NotificationMaker {
@@ -198,7 +181,11 @@ public class NotificationService extends IntentService {
 
 		abstract CharSequence getSingleItemText(Cursor c);
 
-		abstract Bitmap getSingleItemLargeIcon(Cursor c);
+		private Bitmap getSingleItemLargeIcon(Cursor c) {
+			String imageUri = c.getString(c.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+			Bitmap bitmap = ImageLoader.getInstance().loadImageSync(imageUri);
+			return bitmap;
+		}
 
 		abstract CharSequence getMultiItemLine(Cursor c);
 
@@ -225,12 +212,6 @@ public class NotificationService extends IntentService {
 			return text;
 		}
 
-		@Override
-		Bitmap getSingleItemLargeIcon(Cursor c) {
-			int userRowId = c.getInt(c.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-			Bitmap bitmap = getUserImage(userRowId);
-			return bitmap;
-		}
 
 		@Override
 		CharSequence getMultiItemLine(Cursor c) {
@@ -433,13 +414,6 @@ public class NotificationService extends IntentService {
 		CharSequence getSingleItemText(Cursor c) {
 			String text = c.getString(c.getColumnIndex(DirectMessages.COL_TEXT));
 			return text;
-		}
-
-		@Override
-		Bitmap getSingleItemLargeIcon(Cursor c) {
-			int userRowId = c.getInt(c.getColumnIndex(DirectMessagesContentProvider.COL_USER_ROW_ID));
-			Bitmap bitmap = getUserImage(userRowId);
-			return bitmap;
 		}
 
 		@Override

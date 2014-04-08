@@ -255,7 +255,8 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_DMID + ", " + DBOpenHelper.TABLE_USERS
 					+ "._id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_SCREEN_NAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
-					+ " " + "FROM " + DBOpenHelper.TABLE_DMS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
+					+ ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_PROFILE_IMAGE_URI + " " + "FROM "
+					+ DBOpenHelper.TABLE_DMS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
 					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER + "=" + DBOpenHelper.TABLE_USERS + "."
 					+ TwitterUsers.COL_TWITTER_USER_ID + " " + "WHERE " + DBOpenHelper.TABLE_DMS + "."
 					+ DirectMessages.COL_RECEIVER + "==" + LoginActivity.getTwitterId(getContext()) + " AND "
