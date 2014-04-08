@@ -83,7 +83,7 @@ public class DmConversationAdapter extends CursorAdapter {
 			String imageUri = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 			ImageLoader.getInstance().displayImage(imageUri, holder.picture);
 		} else {
-			holder.picture.setImageResource(R.drawable.profile_image_placeholder);
+			holder.picture.setImageResource(R.drawable.image_placeholder);
 		}
 	}
 

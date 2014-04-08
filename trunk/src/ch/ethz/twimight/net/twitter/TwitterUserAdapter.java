@@ -110,16 +110,16 @@ public class TwitterUserAdapter extends CursorAdapter {
 					holder.picture.setImageBitmap(bm);
 				} else
 					holder.picture
-							.setImageResource(R.drawable.profile_image_placeholder);
+							.setImageResource(R.drawable.image_placeholder);
 			} catch (FileNotFoundException e) {
 				// Log.e(TAG,"error opening input stream");
 				holder.picture
-						.setImageResource(R.drawable.profile_image_placeholder);
+						.setImageResource(R.drawable.image_placeholder);
 			}
 
 		} else {
 			holder.picture
-					.setImageResource(R.drawable.profile_image_placeholder);
+					.setImageResource(R.drawable.image_placeholder);
 		}
 
 	}

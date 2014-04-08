@@ -375,6 +375,7 @@ public class TweetDetailView extends FrameLayout {
 		imageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI, imageUri);
 		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
 		imageView.setScaleType(ScaleType.CENTER_INSIDE);
+		imageView.setBackgroundResource(R.drawable.image_placeholder);
 		imageView.setAdjustViewBounds(true);
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
