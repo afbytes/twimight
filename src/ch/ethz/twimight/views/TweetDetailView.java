@@ -110,10 +110,6 @@ public class TweetDetailView extends FrameLayout {
 		mRowId = rowId;
 		mUri = Uri.parse("content://" + Tweets.TWEET_AUTHORITY + "/" + Tweets.TWEETS + "/" + mRowId);
 		mSdCardHelper = new SDCardHelper();
-		// mLocationHelper = LocationHelper.getInstance(context);
-		// mStatsDbHelper = new
-		// StatisticsDBHelper(context.getApplicationContext());
-		// mStatsDbHelper.open();
 		mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		mHtmlDbHelper = new HtmlPagesDbHelper(context);
 		mHtmlDbHelper.open();
@@ -123,7 +119,6 @@ public class TweetDetailView extends FrameLayout {
 	@Override
 	protected void onAttachedToWindow() {
 		Log.d(TAG, "onAttachedToWindow " + this);
-
 		super.onAttachedToWindow();
 	}
 
@@ -163,14 +158,12 @@ public class TweetDetailView extends FrameLayout {
 	private void captureViews() {
 		mTvScreenName = (TextView) findViewById(R.id.showTweetScreenName);
 		mTvRealName = (TextView) findViewById(R.id.showTweetRealName);
-//		mImageWebView = (WebView) findViewById(R.id.photoWebView);
 		mTvTweetText = (TextView) findViewById(R.id.showTweetText);
 		mTvTweetCreationDetails = (TextView) findViewById(R.id.tvTweetCreationDetails);
 		mTvRetweetedBy = (TextView) findViewById(R.id.showTweetRetweeted_by);
 		mUnverifiedInfo = (LinearLayout) findViewById(R.id.showTweetUnverified);
 		mUserInfoView = (LinearLayout) findViewById(R.id.showTweetUserInfo);
 		mIvProfilePicture = (ImageView) findViewById(R.id.showTweetProfileImage);
-//		mIvTweetPicture = (ImageView) findViewById(R.id.showPhotoAttached);
 		mToSendNotification = (LinearLayout) findViewById(R.id.showTweetTosend);
 		mToDeleteNotification = (LinearLayout) findViewById(R.id.showTweetTodelete);
 		mToFavoriteNotification = (LinearLayout) findViewById(R.id.showTweetTofavorite);
@@ -283,21 +276,19 @@ public class TweetDetailView extends FrameLayout {
 						pressedLinkBackground), mediaEntity.getStart(), mediaEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 
 				tweetTextSpannable.replace(mediaEntity.getStart(), mediaEntity.getEnd(), mediaEntity.getDisplayURL());
-
-				// show the picture
-				String mediaUrl = mediaEntity.getMediaURL();
-				showImage(mediaUrl);
 				
 			} else if (entity instanceof URLEntity) {
 				URLEntity urlEntity = (URLEntity) entity;
 				tweetTextSpannable.setSpan(new InternalURLSpan(urlEntity.getURL(), normalLinkColor, pressedLinkColor,
 						pressedLinkBackground), urlEntity.getStart(), urlEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 				tweetTextSpannable.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
-				// if the url points to an image -> show it
-				String imageUrl = ImageUrlHelper.getImageUrl(urlEntity.getExpandedURL());
-				if(imageUrl!=null){
-					showImage(imageUrl);
-				}
+			}
+			
+			// add images
+			mImageContainer.removeAllViews();
+			String serializedMediaUris = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
+			for (String mediaUri : ImageUrlHelper.deserializeUrlList(serializedMediaUris)) {
+				addImage(mediaUri);
 			}
 		}
 
@@ -379,7 +370,7 @@ public class TweetDetailView extends FrameLayout {
 	 *            remote picture URL of a picture contained in the tweet or
 	 *            local file URI
 	 */
-	private void showImage(String imageUri) {
+	private void addImage(String imageUri) {
 		Intent imageClickIntent = new Intent(getContext(), PhotoViewActivity.class);
 		imageClickIntent.putExtra(PhotoViewActivity.EXTRA_KEY_IMAGE_URI, imageUri);
 		ClickableImageView imageView = new ClickableImageView(getContext(), imageUri, imageClickIntent);
@@ -387,7 +378,7 @@ public class TweetDetailView extends FrameLayout {
 		imageView.setAdjustViewBounds(true);
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
-		mImageContainer.addView(imageView, 0, layoutParams);
+		mImageContainer.addView(imageView, layoutParams);
 	}
 
 	/**
@@ -397,7 +388,7 @@ public class TweetDetailView extends FrameLayout {
 		if (!mCursor.isNull(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS))) {
 			String photoFileName = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
 			Uri photoUri = Uri.fromFile(mSdCardHelper.getFileFromSDCard(mPhotoDirectoryPath, photoFileName));// photoFileParent,
-			showImage(photoUri.toString());
+			addImage(photoUri.toString());
 		}
 	}
 

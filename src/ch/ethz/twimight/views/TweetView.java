@@ -250,30 +250,6 @@ public class TweetView extends FrameLayout {
 			Log.d(TAG, "mediaUri: " + mediaUri);
 		}
 
-		// mImageContainer.removeAllViews();
-		// byte[] serializedMediaEntities =
-		// cursor.getBlob(cursor.getColumnIndex(Tweets.COL_MEDIA_ENTITIES));
-		// MediaEntity[] mediaEntities =
-		// Serialization.deserialize(serializedMediaEntities);
-		// byte[] serializedUrlEntities =
-		// cursor.getBlob(cursor.getColumnIndex(Tweets.COL_URL_ENTITIES));
-		// URLEntity[] urlEntities =
-		// Serialization.deserialize(serializedUrlEntities);
-		// EntityQueue allEntities = new EntityQueue(mediaEntities,
-		// urlEntities);
-		// while (!allEntities.isEmpty()) {
-		// TweetEntity entity = allEntities.remove();
-		// if (entity instanceof MediaEntity) {
-		// addImage(((MediaEntity) entity).getMediaURL());
-		// } else if (entity instanceof URLEntity) {
-		// String imageUrl = ImageUrlHelper.getImageUrl(((URLEntity)
-		// entity).getExpandedURL());
-		// if (imageUrl != null) {
-		// addImage(imageUrl);
-		// }
-		// }
-		//
-		// }
 	}
 
 	/**
@@ -295,6 +271,6 @@ public class TweetView extends FrameLayout {
 				(int) (160 * getContext().getResources().getDisplayMetrics().density));
 		imageView.setScaleType(ScaleType.CENTER_CROP);
 		layoutParams.setMargins(0, (int) getContext().getResources().getDimension(R.dimen.unit_step), 0, 0);
-		mImageContainer.addView(imageView, 0, layoutParams);
+		mImageContainer.addView(imageView, layoutParams);
 	}
 }
