@@ -430,6 +430,7 @@ public class TwitterSyncService extends IntentService {
 			userContentValues.put(TwitterUsers.COL_TIMEZONE, user.getTimeZone());
 			userContentValues.put(TwitterUsers.COL_STATUSES, user.getStatusesCount());
 			userContentValues.put(TwitterUsers.COL_VERIFIED, user.isVerified());
+			userContentValues.put(TwitterUsers.COL_URL, user.getURL());
 			userContentValues.put(TwitterUsers.COL_PROTECTED, user.isProtected());
 			userContentValues.put(TwitterUsers.COL_PROFILE_BACKGROUND_COLOR, user.getProfileBackgroundColor());
 			userContentValues.put(TwitterUsers.COL_PROFILE_BACKGROUND_IMAGE_URI, user.getProfileBackgroundImageURL());

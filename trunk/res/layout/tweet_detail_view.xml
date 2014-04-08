@@ -163,29 +163,6 @@
 			</LinearLayout>
 		</LinearLayout>
 
-		<LinearLayout
-		    android:id="@+id/imageContainer"
-		    android:orientation="vertical"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"></LinearLayout>
-
-<!-- 		<ImageView -->
-<!-- 			android:id="@+id/showPhotoAttached" -->
-<!-- 			android:layout_width="match_parent" -->
-<!-- 			android:layout_height="wrap_content" -->
-<!-- 			android:scaleType="centerInside" -->
-<!-- 			android:layout_marginTop="@dimen/unit_step" -->
-<!-- 			android:adjustViewBounds="true" -->
-<!-- 			android:visibility="gone"/> -->
-
-<!-- 		<WebView -->
-<!-- 			android:id="@+id/photoWebView" -->
-<!-- 			android:layout_width="match_parent" -->
-<!-- 			android:layout_height="wrap_content" -->
-<!-- 			android:layout_gravity="center" -->
-<!-- 			android:layout_marginTop="@dimen/unit_step" -->
-<!-- 			android:visibility="gone"/> -->
-
 		<!-- special info -->
 
 		<LinearLayout
@@ -330,6 +307,12 @@
 				android:textColor="@color/medium_gray"
 				android:textSize="14sp"/>
 		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/imageContainer"
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"/>
 	</LinearLayout>
 
 </LinearLayout>
