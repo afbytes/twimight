@@ -37,9 +37,9 @@ public class UserAdapter extends CursorAdapter {
 		private final ImageView ivProfileImage;
 
 		private ViewHolder(View row) {
-			tvUserRealName = (TextView) row.findViewById(R.id.showUserRealName);
-			tvUserScreenName = (TextView) row.findViewById(R.id.showUserScreenName);
-			tvUserLocation = (TextView) row.findViewById(R.id.showUserLocation);
+			tvUserRealName = (TextView) row.findViewById(R.id.tvUserRealName);
+			tvUserScreenName = (TextView) row.findViewById(R.id.tvUserScreenName);
+			tvUserLocation = (TextView) row.findViewById(R.id.tvUserLocation);
 			ivProfileImage = (ImageView) row.findViewById(R.id.showUserProfileImage);
 		}
 	}

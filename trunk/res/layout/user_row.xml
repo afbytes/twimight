@@ -21,7 +21,7 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/showUserRealName"
+            android:id="@+id/tvUserRealName"
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/showUserScreenName"
+            android:id="@+id/tvUserScreenName"
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
             android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/showUserLocation"
+            android:id="@+id/tvUserLocation"
             style="@style/RobotoLightText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

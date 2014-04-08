@@ -45,8 +45,8 @@ public class DmConversationAdapter extends CursorAdapter {
 
 		private ViewHolder(View row){
 			picture = (ImageView) row.findViewById(R.id.showMDUserProfileImage);
-			realName= (TextView) row.findViewById(R.id.showUserRealName);
-			screenName= (TextView) row.findViewById(R.id.showUserScreenName);
+			realName= (TextView) row.findViewById(R.id.tvUserRealName);
+			screenName= (TextView) row.findViewById(R.id.tvUserScreenName);
 			lastMessage= (TextView) row.findViewById(R.id.showDMText);
 		}
 	}

@@ -101,7 +101,8 @@ public class TwitterUsers implements BaseColumns {
 	public static final String COL_LOCATION = "location";
 	public static final String COL_UTCOFFSET = "utc_offset";
 	public static final String COL_TIMEZONE = "timezone";
-	public static final String COL_URL = "url";
+	public static final String COL_EXPANDED_URL = "expanded_url";
+	public static final String COL_DISPLAY_URL = "display_url";
 	public static final String COL_CREATED = "u_created_at";
 	public static final String COL_PROTECTED = "protected";
 	public static final String COL_VERIFIED = "verified";

@@ -35,8 +35,8 @@ import ch.ethz.twimight.R;
 public class TwitterUserAdapter extends CursorAdapter {
 	static final String[] from = { TwitterUsers.COL_SCREEN_NAME,
 			TwitterUsers.COL_NAME, TwitterUsers.COL_LOCATION };
-	static final int[] to = { R.id.showUserScreenName, R.id.showUserRealName,
-			R.id.showUserLocation };
+	static final int[] to = { R.id.tvUserScreenName, R.id.tvUserRealName,
+			R.id.tvUserLocation };
 
 	/** Constructor */
 	public TwitterUserAdapter(Context context, Cursor c) {
@@ -73,11 +73,11 @@ public class TwitterUserAdapter extends CursorAdapter {
 		holder.picture = (ImageView) userrow
 				.findViewById(R.id.showUserProfileImage);
 		holder.realName = (TextView) userrow
-				.findViewById(R.id.showUserRealName);
+				.findViewById(R.id.tvUserRealName);
 		holder.screenName = (TextView) userrow
-				.findViewById(R.id.showUserScreenName);
+				.findViewById(R.id.tvUserScreenName);
 		holder.location = (TextView) userrow
-				.findViewById(R.id.showUserLocation);
+				.findViewById(R.id.tvUserLocation);
 
 	}
 
