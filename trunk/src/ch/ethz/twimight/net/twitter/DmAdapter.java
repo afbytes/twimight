@@ -13,16 +13,9 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +25,8 @@ import android.widget.TextView;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.activities.LoginActivity;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 /**
  * Cursor adapter for a cursor containing users.
  */
@@ -40,7 +35,7 @@ public class DmAdapter extends CursorAdapter {
 	Context context;
 	int flags;
 
-	public static final String TAG = "DMAdapter";
+	public static final String TAG = DmAdapter.class.getSimpleName();
 
 	/** Constructor */
 	public DmAdapter(Context context, Cursor c) {
@@ -50,20 +45,20 @@ public class DmAdapter extends CursorAdapter {
 
 	private static class ViewHolder {
 		View modeStripe;
-		TextView tvScreenname;
-		TextView tvCreatedAt;
-		TextView tvMessageText;
-		ImageView ivProfileImage;
-		ImageView ivPendingIcon;
+		TextView mTvScreenname;
+		TextView mTvCreatedAt;
+		TextView mTvMessageText;
+		ImageView mIvProfileImage;
+		ImageView mIvPendingIcon;
 
 		private ViewHolder(View row) {
 			modeStripe = row.findViewById(R.id.modeStripe);
-			ivProfileImage = (ImageView) row
+			mIvProfileImage = (ImageView) row
 					.findViewById(R.id.showDMProfileImage);
-			tvScreenname = (TextView) row.findViewById(R.id.showDMScreenName);
-			tvCreatedAt = (TextView) row.findViewById(R.id.dmCreatedAt);
-			tvMessageText = (TextView) row.findViewById(R.id.showDMText);
-			ivPendingIcon = (ImageView) row.findViewById(R.id.dmToPost);
+			mTvScreenname = (TextView) row.findViewById(R.id.showDMScreenName);
+			mTvCreatedAt = (TextView) row.findViewById(R.id.dmCreatedAt);
+			mTvMessageText = (TextView) row.findViewById(R.id.showDMText);
+			mIvPendingIcon = (ImageView) row.findViewById(R.id.dmToPost);
 		}
 	}
 
@@ -84,52 +79,30 @@ public class DmAdapter extends CursorAdapter {
 
 		String screenname = cursor.getString(cursor
 				.getColumnIndex(TwitterUsers.COL_SCREEN_NAME));
-		holder.tvScreenname.setText(screenname);
+		holder.mTvScreenname.setText(screenname);
 
 		// Find views by id
 		long createdAt = cursor.getLong(cursor
 				.getColumnIndex(DirectMessages.COL_CREATED));
-		holder.tvCreatedAt.setText(DateUtils
+		holder.mTvCreatedAt.setText(DateUtils
 				.getRelativeTimeSpanString(createdAt));
 
 		String message = cursor.getString(cursor
 				.getColumnIndex(DirectMessages.COL_TEXT));
-		holder.tvMessageText.setText(message);
+		holder.mTvMessageText.setText(message);
 
 		// Profile image
-		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
-			int userId = cursor.getInt(cursor.getColumnIndex(TweetsContentProvider.COL_USER_ROW_ID));
-			Uri imageUri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS + "/" + userId);
-			InputStream is;
-
-			try {
-				is = context.getContentResolver().openInputStream(imageUri);
-				if (is != null) {
-					Bitmap bm = BitmapFactory.decodeStream(is);
-					holder.ivProfileImage.setImageBitmap(bm);
-				} else
-					holder.ivProfileImage
-							.setImageResource(R.drawable.profile_image_placeholder);
-			} catch (FileNotFoundException e) {
-				Log.e(TAG, "error opening input stream", e);
-				holder.ivProfileImage
-						.setImageResource(R.drawable.profile_image_placeholder);
-			}
-		} else {
-			holder.ivProfileImage
-					.setImageResource(R.drawable.profile_image_placeholder);
-		}
-
+		String profileImageUri = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+		ImageLoader.getInstance().displayImage(profileImageUri, holder.mIvProfileImage);
+		
 		// any transactional flags?
 		flags = cursor.getInt(cursor.getColumnIndex(DirectMessages.COL_FLAGS));
 
 		boolean toPost = (flags > 0);
 		if (toPost) {
-			holder.ivPendingIcon.setVisibility(View.VISIBLE);
+			holder.mIvPendingIcon.setVisibility(View.VISIBLE);
 		} else {
-			holder.ivPendingIcon.setVisibility(View.GONE);
+			holder.mIvPendingIcon.setVisibility(View.GONE);
 		}
 
 		// set color for own screenname and mode indicator stripe
@@ -149,9 +122,9 @@ public class DmAdapter extends CursorAdapter {
 								.getColumnIndex(DirectMessages.COL_SENDER)))
 				.equals(LoginActivity.getTwitterId(context));
 		if (ownTweet) {
-			holder.tvScreenname.setTextColor(accentColor);
+			holder.mTvScreenname.setTextColor(accentColor);
 		} else {
-			holder.tvScreenname.setTextColor(context.getResources().getColor(
+			holder.mTvScreenname.setTextColor(context.getResources().getColor(
 					R.color.dark_text));
 		}
 

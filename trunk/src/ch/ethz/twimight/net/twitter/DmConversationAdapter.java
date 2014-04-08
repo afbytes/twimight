@@ -13,14 +13,8 @@
 
 package ch.ethz.twimight.net.twitter;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +22,8 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import ch.ethz.twimight.R;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * Cursor adapter for a cursor containing users.
@@ -65,13 +61,13 @@ public class DmConversationAdapter extends CursorAdapter {
 		return view;
 	}
 
-	/** This is where data is mapped to its view */
+	/** 
+	 * This is where data is mapped to its view 
+	 * */
 	@Override
 	public void bindView(View userrow, Context context, Cursor cursor) {
 		ViewHolder holder = (ViewHolder) userrow.getTag();
-		// set text fields
 
-		// Profile image
 		if (!cursor.isNull(cursor.getColumnIndex(TwitterUsers.COL_SCREEN_NAME))) {
 			// text fields
 			String realName = cursor.getString(cursor
@@ -83,23 +79,9 @@ public class DmConversationAdapter extends CursorAdapter {
 			String lastMessage = cursor.getString(cursor
 					.getColumnIndex(DirectMessages.COL_TEXT));
 			holder.lastMessage.setText(lastMessage);
-			// profile image
-			int userId = cursor.getInt(cursor.getColumnIndex("_id"));
-			Uri imageUri = Uri.parse("content://"
-					+ TwitterUsers.TWITTERUSERS_AUTHORITY + "/"
-					+ TwitterUsers.TWITTERUSERS + "/" + userId);
-			InputStream is;
-
-			try {
-				is = context.getContentResolver().openInputStream(imageUri);
-				if (is != null) {
-					Bitmap bm = BitmapFactory.decodeStream(is);
-					holder.picture.setImageBitmap(bm);
-				} else
-					holder.picture.setImageResource(R.drawable.profile_image_placeholder);
-			} catch (FileNotFoundException e) {
-				holder.picture.setImageResource(R.drawable.profile_image_placeholder);
-			}
+			
+			String imageUri = cursor.getString(cursor.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
+			ImageLoader.getInstance().displayImage(imageUri, holder.picture);
 		} else {
 			holder.picture.setImageResource(R.drawable.profile_image_placeholder);
 		}

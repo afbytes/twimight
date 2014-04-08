@@ -1,274 +1,273 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (c) 2011 ETH Zurich. All rights reserved. This program and 
-	the accompanying materials are made available under the terms of the GNU 
-	Public License v2.0 which accompanies this distribution, and is available 
-	at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: 
-	Paolo Carta - Implementation 
-	Theus Hossmann - Implementation 
-	Dominik Schatzmann - Message specification
--->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ch.ethz.twimight"
-    android:versionCode="1700029"
-    android:versionName="1.1.8" >
+<!-- Copyright (c) 2011 ETH Zurich. All rights reserved. This program and the accompanying materials are made available under the terms of the GNU Public License v2.0 which accompanies this distribution, and is available at http://www.gnu.org/licenses/old-licenses/gpl-2.0.html Contributors: Paolo Carta 
+	- Implementation Theus Hossmann - Implementation Dominik Schatzmann - Message specification -->
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="ch.ethz.twimight"
+	android:versionCode="1700029"
+	android:versionName="1.1.8">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS" />
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+	<uses-permission android:name="android.permission.BLUETOOTH"/>
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.READ_LOGS"/>
+	<uses-permission android:name="android.permission.RESTART_PACKAGES"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.GET_TASKS"/>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="ch.ethz.twimight.CONTENT_PROVIDERS"/>
 
-    <permission
-        android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
-        android:description="@string/permDescription"
-        android:label="Access to Twimight content providers"
-        android:protectionLevel="dangerous" />
+	<permission
+		android:name="ch.ethz.twimight.CONTENT_PROVIDERS"
+		android:description="@string/permDescription"
+		android:label="Access to Twimight content providers"
+		android:protectionLevel="dangerous"/>
 
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+	<uses-sdk
+		android:minSdkVersion="14"
+		android:targetSdkVersion="19"/>
 
-    <uses-feature
-        android:name="android.hardware.bluetooth"
-        android:required="false" />
-    <uses-feature android:name="android.hardware.touchscreen" />
+	<uses-feature
+		android:name="android.hardware.bluetooth"
+		android:required="false"/>
+	<uses-feature android:name="android.hardware.touchscreen"/>
 
-    <application
-        android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true" 
-        android:name="ch.ethz.twimight.application.TwimightApplication">
+	<application
+		android:hardwareAccelerated="true"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:supportsRtl="true"
+		android:name="ch.ethz.twimight.application.TwimightApplication">
 
-        <!-- ACTIVITIES -->
+		<!-- ACTIVITIES -->
 
-        <activity
-            android:name="ch.ethz.twimight.activities.ConditionsActivity"
-            android:launchMode="singleTop"
-            android:noHistory="false"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+		<activity
+			android:name="ch.ethz.twimight.activities.ConditionsActivity"
+			android:launchMode="singleTop"
+			android:noHistory="false"
+			android:theme="@style/TwimightHolo.NormalMode.NoActionBar">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.TipsActivity"
-            android:launchMode="singleTop"
-            android:noHistory="false"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.LoginActivity"
-            android:launchMode="singleTop"
-            android:noHistory="false"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.TipsActivity"
+			android:launchMode="singleTop"
+			android:noHistory="false"
+			android:theme="@style/TwimightHolo.NormalMode.NoActionBar">
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.LoginActivity"
+			android:launchMode="singleTop"
+			android:noHistory="false"
+			android:theme="@style/TwimightHolo.NormalMode.NoActionBar">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+				<category android:name="android.intent.category.DEFAULT"/>
+				<category android:name="android.intent.category.BROWSABLE"/>
 
-                <data
-                    android:host="bluetest"
-                    android:scheme="my-app" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.SearchableActivity"
-            android:label="@string/search_results"
-            android:launchMode="singleTask" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
+				<data
+					android:host="bluetest"
+					android:scheme="my-app"/>
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.SearchableActivity"
+			android:label="@string/search_results"
+			android:launchMode="singleTask">
+			<intent-filter>
+				<action android:name="android.intent.action.SEARCH"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
 
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.HomeScreenActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTop" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+			<meta-data
+				android:name="android.app.searchable"
+				android:resource="@xml/searchable"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.HomeScreenActivity"
+			android:label="@string/app_name"
+			android:launchMode="singleTop">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+				<category android:name="android.intent.category.DEFAULT"/>
+				<category android:name="android.intent.category.BROWSABLE"/>
 
-                <data
-                    android:host="feedback"
-                    android:scheme="my-app" />
-            </intent-filter>
+				<data
+					android:host="feedback"
+					android:scheme="my-app"/>
+			</intent-filter>
 
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.UserTweetListActivity"
-            android:label="@string/tweets"
-            android:launchMode="singleTop" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.TweetDetailActivity"
-            android:label="@string/tweet" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.UserProfileActivity"
-            android:label="@string/profile"
-            android:launchMode="singleTop" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.UserListActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTop" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.DmConversationListActivity"
-            android:label="@string/direct_messages"
-            android:launchMode="singleTop" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.DmListActivity"
-            android:label="@string/direct_messages" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".activities.SearchableActivity" />
-        </activity>
-        <activity
-            android:name="ch.ethz.twimight.activities.ComposeTweetActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/TranslucentTheme"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name="ch.ethz.twimight.activities.ComposeDmActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/TranslucentTheme"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name="ch.ethz.twimight.activities.SettingsActivity"
-            android:label="@string/settings" />
-        <activity
-            android:name="ch.ethz.twimight.activities.AboutActivity"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
-        <activity
-            android:name="ch.ethz.twimight.activities.WebViewActivity"
-            android:theme="@style/TwimightHolo.NormalMode.NoActionBar" />
-        <activity
-            android:name="ch.ethz.twimight.activities.PhotoViewActivity"
-            android:theme="@style/OverlayActionBar" >
-        </activity>
-        <activity android:name="ch.ethz.twimight.activities.UrlRedirectActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.UserTweetListActivity"
+			android:label="@string/tweets"
+			android:launchMode="singleTop">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.TweetDetailActivity"
+			android:label="@string/tweet">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.UserProfileActivity"
+			android:label="@string/profile"
+			android:launchMode="singleTop">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.UserListActivity"
+			android:label="@string/app_name"
+			android:launchMode="singleTop">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.DmConversationListActivity"
+			android:label="@string/direct_messages"
+			android:launchMode="singleTop">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.DmListActivity"
+			android:parentActivityName="ch.ethz.twimight.activities.DmConversationListActivity"
+			android:label="@string/direct_messages">
+			<meta-data
+				android:name="android.app.default_searchable"
+				android:value=".activities.SearchableActivity"/>
+			<!-- Parent activity meta-data to support 4.0 and lower -->
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value="ch.ethz.twimight.activities.DmConversationListActivity"/>
+		</activity>
+		<activity
+			android:name="ch.ethz.twimight.activities.ComposeTweetActivity"
+			android:launchMode="singleTop"
+			android:theme="@style/TranslucentTheme"
+			android:windowSoftInputMode="adjustResize"/>
+		<activity
+			android:name="ch.ethz.twimight.activities.ComposeDmActivity"
+			android:launchMode="singleTop"
+			android:theme="@style/TranslucentTheme"
+			android:windowSoftInputMode="adjustResize"/>
+		<activity
+			android:name="ch.ethz.twimight.activities.SettingsActivity"
+			android:label="@string/settings"/>
+		<activity
+			android:name="ch.ethz.twimight.activities.AboutActivity"
+			android:theme="@style/TwimightHolo.NormalMode.NoActionBar"/>
+		<activity
+			android:name="ch.ethz.twimight.activities.WebViewActivity"
+			android:theme="@style/TwimightHolo.NormalMode.NoActionBar"/>
+		<activity
+			android:name="ch.ethz.twimight.activities.PhotoViewActivity"
+			android:theme="@style/OverlayActionBar">
+		</activity>
+		<activity android:name="ch.ethz.twimight.activities.UrlRedirectActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+				<category android:name="android.intent.category.DEFAULT"/>
+				<category android:name="android.intent.category.BROWSABLE"/>
 
-                <data
-                    android:host="twitter.com"
-                    android:scheme="http" />
-                <data
-                    android:host="www.twitter.com"
-                    android:scheme="http" />
-                <data
-                    android:host="twitter.com"
-                    android:scheme="https" />
-                <data
-                    android:host="www.twitter.com"
-                    android:scheme="https" />
-            </intent-filter>
-        </activity>
+				<data
+					android:host="twitter.com"
+					android:scheme="http"/>
+				<data
+					android:host="www.twitter.com"
+					android:scheme="http"/>
+				<data
+					android:host="twitter.com"
+					android:scheme="https"/>
+				<data
+					android:host="www.twitter.com"
+					android:scheme="https"/>
+			</intent-filter>
+		</activity>
 
-        <!-- SERVICES -->
+		<!-- SERVICES -->
 
-        <service
-            android:name="ch.ethz.twimight.net.tds.TDSService"
-            android:enabled="true" />
-        <service
-            android:name="ch.ethz.twimight.net.opportunistic.ScanningService"
-            android:enabled="true" />
-        <service
-            android:name="ch.ethz.twimight.net.Html.HtmlService"
-            android:enabled="true" />
-        <service android:name="ch.ethz.twimight.net.twitter.TwitterSyncService" />
-        <service android:name="ch.ethz.twimight.net.twitter.TweetActionService" />
-        <service android:name="ch.ethz.twimight.net.twitter.NotificationService" />
+		<service
+			android:name="ch.ethz.twimight.net.tds.TDSService"
+			android:enabled="true"/>
+		<service
+			android:name="ch.ethz.twimight.net.opportunistic.ScanningService"
+			android:enabled="true"/>
+		<service
+			android:name="ch.ethz.twimight.net.Html.HtmlService"
+			android:enabled="true"/>
+		<service android:name="ch.ethz.twimight.net.twitter.TwitterSyncService"/>
+		<service android:name="ch.ethz.twimight.net.twitter.TweetActionService"/>
+		<service android:name="ch.ethz.twimight.net.twitter.NotificationService"/>
 
-        <!-- RECEIVERS -->
+		<!-- RECEIVERS -->
 
-        <receiver
-            android:name="ch.ethz.twimight.util.CommunicationReceiver"
-            android:enabled="true"
-            android:priority="0" >
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="ch.ethz.twimight.util.BootReceiver"
-            android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="ch.ethz.twimight.net.opportunistic.ScanningAlarm"
-            android:enabled="true" />
-        <receiver
-            android:name="ch.ethz.twimight.net.tds.TDSAlarm"
-            android:enabled="true" />
-        <receiver
-            android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
-            android:enabled="true" />
+		<receiver
+			android:name="ch.ethz.twimight.util.CommunicationReceiver"
+			android:enabled="true"
+			android:priority="0">
+			<intent-filter>
+				<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+			</intent-filter>
+		</receiver>
+		<receiver
+			android:name="ch.ethz.twimight.util.BootReceiver"
+			android:enabled="true"
+			android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+			</intent-filter>
+		</receiver>
+		<receiver
+			android:name="ch.ethz.twimight.net.opportunistic.ScanningAlarm"
+			android:enabled="true"/>
+		<receiver
+			android:name="ch.ethz.twimight.net.tds.TDSAlarm"
+			android:enabled="true"/>
+		<receiver
+			android:name="ch.ethz.twimight.net.twitter.TwitterAlarm"
+			android:enabled="true"/>
 
-        <!-- PROVIDERS -->
-        <provider
-            android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
-            android:authorities="ch.ethz.twimight.Tweets"
-            android:exported="true"
-            android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
-        <provider
-            android:name="ch.ethz.twimight.net.twitter.TwitterUsersContentProvider"
-            android:authorities="ch.ethz.twimight.TwitterUsers"
-            android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
-        <provider
-            android:name="ch.ethz.twimight.net.twitter.DirectMessagesContentProvider"
-            android:authorities="ch.ethz.twimight.DMs"
-            android:permission="ch.ethz.twimight.CONTENT_PROVIDERS" />
-        <provider
-            android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
-            android:authorities="ch.ethz.twimight.TwimightSuggestionProvider"
-            android:exported="false" />
-    </application>
+		<!-- PROVIDERS -->
+		<provider
+			android:name="ch.ethz.twimight.net.twitter.TweetsContentProvider"
+			android:authorities="ch.ethz.twimight.Tweets"
+			android:exported="true"
+			android:permission="ch.ethz.twimight.CONTENT_PROVIDERS"/>
+		<provider
+			android:name="ch.ethz.twimight.net.twitter.TwitterUsersContentProvider"
+			android:authorities="ch.ethz.twimight.TwitterUsers"
+			android:permission="ch.ethz.twimight.CONTENT_PROVIDERS"/>
+		<provider
+			android:name="ch.ethz.twimight.net.twitter.DirectMessagesContentProvider"
+			android:authorities="ch.ethz.twimight.DMs"
+			android:permission="ch.ethz.twimight.CONTENT_PROVIDERS"/>
+		<provider
+			android:name="ch.ethz.twimight.util.TwimightSuggestionProvider"
+			android:authorities="ch.ethz.twimight.TwimightSuggestionProvider"
+			android:exported="false"/>
+	</application>
 
 </manifest>

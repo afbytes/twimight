@@ -37,20 +37,20 @@ import ch.ethz.twimight.net.twitter.TwitterUsers;
  */
 public class DmConversationListActivity extends TwimightBaseActivity {
 
-	private static final String TAG = DmConversationListActivity.class.getName();
+	private static final String TAG = DmConversationListActivity.class.getSimpleName();
 
 	// Views
 	private ListView dmUsersListView;
 
-	private DmConversationAdapter adapter;
-	private Cursor c;
+	private DmConversationAdapter mAdapter;
+	private Cursor mCursor;
 	public static boolean running = false;
 
 	// handler
-	static Handler handler;
+	static Handler mHandler;
 
-	private int positionIndex;
-	private int positionTop;
+	private int mPositionIndex;
+	private int mPositionTop;
 
 	/**
 	 * Called when the activity is first created.
@@ -62,14 +62,14 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 		setContentView(R.layout.dm_conversation_list);
 
 		dmUsersListView = (ListView) findViewById(R.id.dmUsersList);
-		c = getContentResolver().query(
+		mCursor = getContentResolver().query(
 				Uri.parse("content://" + DirectMessages.DM_AUTHORITY + "/" + DirectMessages.DMS + "/"
 						+ DirectMessages.DMS_USERS), null, null, null, null);
 
-		Log.e(TAG, "Users: " + c.getCount());
+		Log.e(TAG, "Users: " + mCursor.getCount());
 
-		adapter = new DmConversationAdapter(this, c);
-		dmUsersListView.setAdapter(adapter);
+		mAdapter = new DmConversationAdapter(this, mCursor);
+		dmUsersListView.setAdapter(mAdapter);
 		dmUsersListView.setEmptyView(findViewById(R.id.dmListEmpty));
 		// Click listener when the user clicks on a user
 		dmUsersListView.setClickable(true);
@@ -78,8 +78,8 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 				Cursor c = (Cursor) dmUsersListView.getItemAtPosition(position);
 				Intent i = new Intent(getBaseContext(), DmListActivity.class);
-				i.putExtra("rowId", c.getInt(c.getColumnIndex("_id")));
-				i.putExtra("screenname", c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)));
+				i.putExtra(DmListActivity.EXTRA_KEY_USER_ROW_ID, c.getInt(c.getColumnIndex(TwitterUsers.COL_ROW_ID)));
+				i.putExtra(DmListActivity.EXTRA_KEY_SCREEN_NAME, c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)));
 				startActivity(i);
 			}
 		});
@@ -94,8 +94,8 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 		super.onResume();
 		running = true;
 		markDirectMessagesSeen();
-		if (positionIndex != 0 | positionTop != 0) {
-			dmUsersListView.setSelectionFromTop(positionIndex, positionTop);
+		if (mPositionIndex != 0 | mPositionTop != 0) {
+			dmUsersListView.setSelectionFromTop(mPositionIndex, mPositionTop);
 		}
 	}
 
@@ -121,8 +121,8 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 		dmUsersListView.setOnItemClickListener(null);
 		dmUsersListView.setAdapter(null);
 
-		if (c != null)
-			c.close();
+		if (mCursor != null)
+			mCursor.close();
 
 		unbindDrawables(findViewById(R.id.showDMUsersListRoot));
 	}
@@ -150,13 +150,13 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 
-		positionIndex = dmUsersListView.getFirstVisiblePosition();
+		mPositionIndex = dmUsersListView.getFirstVisiblePosition();
 		View v = dmUsersListView.getChildAt(0);
-		positionTop = (v == null) ? 0 : v.getTop();
-		savedInstanceState.putInt("positionIndex", positionIndex);
-		savedInstanceState.putInt("positionTop", positionTop);
+		mPositionTop = (v == null) ? 0 : v.getTop();
+		savedInstanceState.putInt("positionIndex", mPositionIndex);
+		savedInstanceState.putInt("positionTop", mPositionTop);
 
-		Log.i(TAG, "saving" + positionIndex + " " + positionTop);
+		Log.i(TAG, "saving" + mPositionIndex + " " + mPositionTop);
 
 		super.onSaveInstanceState(savedInstanceState);
 	}
@@ -168,10 +168,10 @@ public class DmConversationListActivity extends TwimightBaseActivity {
 	public void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 
-		positionIndex = savedInstanceState.getInt("positionIndex");
-		positionTop = savedInstanceState.getInt("positionTop");
+		mPositionIndex = savedInstanceState.getInt("positionIndex");
+		mPositionTop = savedInstanceState.getInt("positionTop");
 
-		Log.i(TAG, "restoring " + positionIndex + " " + positionTop);
+		Log.i(TAG, "restoring " + mPositionIndex + " " + mPositionTop);
 	}
 
 }

@@ -39,7 +39,7 @@ import ch.ethz.twimight.util.Constants;
  */
 public class DirectMessagesContentProvider extends ContentProvider {
 
-	private static final String TAG = "DirectMessagesContentProvider";
+	private static final String TAG = DirectMessagesContentProvider.class.getSimpleName();
 
 	private SQLiteDatabase database;
 	private DBOpenHelper dbHelper;
@@ -151,29 +151,31 @@ public class DirectMessagesContentProvider extends ContentProvider {
 			Log.d(TAG, "Query USER");
 			// get the twitter user id
 			sql = "SELECT " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + " " + "FROM "
-					+ DBOpenHelper.TABLE_USERS + " " + "WHERE _id=" + uri.getLastPathSegment() + ";";
+					+ DBOpenHelper.TABLE_USERS + " " + "WHERE " + TwitterUsers.COL_ROW_ID + "="
+					+ uri.getLastPathSegment() + ";";
 			c = database.rawQuery(sql, null);
 
 			if (c.getCount() == 0)
 				return null; // this should not happen
 			c.moveToFirst();
-			long userId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID));
+			long twitterUserId = c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID));
 			c.close();
 
 			// get the direct messages
-			sql = "SELECT " + DBOpenHelper.TABLE_DMS + "._id, " + DBOpenHelper.TABLE_DMS + "."
-					+ DirectMessages.COL_TEXT + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER + ", "
-					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + ", " + DBOpenHelper.TABLE_DMS + "."
-					+ DirectMessages.COL_ISDISASTER + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_FLAGS
-					+ ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_DMID + ", " + DBOpenHelper.TABLE_USERS
-					+ "._id AS " + COL_USER_ROW_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREEN_NAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
-					+ " " + "FROM " + DBOpenHelper.TABLE_DMS + " " + "JOIN " + DBOpenHelper.TABLE_USERS + " " + "ON "
-					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER + "=" + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_TWITTER_USER_ID + " " + "WHERE " + DBOpenHelper.TABLE_DMS + "."
-					+ DirectMessages.COL_RECEIVER + "=" + userId + " " + "OR " + DBOpenHelper.TABLE_DMS + "."
-					+ DirectMessages.COL_SENDER + "=" + userId + " " + "ORDER BY " + DBOpenHelper.TABLE_DMS + "."
-					+ DirectMessages.COL_CREATED + " DESC " + "LIMIT 100";
+			sql = "SELECT " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_ROW_ID + ", " + DBOpenHelper.TABLE_DMS
+					+ "." + DirectMessages.COL_TEXT + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER
+					+ ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + ", " + DBOpenHelper.TABLE_DMS
+					+ "." + DirectMessages.COL_ISDISASTER + ", " + DBOpenHelper.TABLE_DMS + "."
+					+ DirectMessages.COL_FLAGS + ", " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_DMID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ROW_ID + " AS " + COL_USER_ROW_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREEN_NAME + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_PROFILE_IMAGE_URI + " FROM " + DBOpenHelper.TABLE_DMS + " " + "JOIN "
+					+ DBOpenHelper.TABLE_USERS + " " + "ON " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER
+					+ "=" + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + " " + "WHERE "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_RECEIVER + "=" + twitterUserId + " " + "OR "
+					+ DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_SENDER + "=" + twitterUserId + " "
+					+ "ORDER BY " + DBOpenHelper.TABLE_DMS + "." + DirectMessages.COL_CREATED + " DESC " + "LIMIT 100";
 
 			c = database.rawQuery(sql, null);
 			// TODO: Correct notification URI
@@ -200,19 +202,20 @@ public class DirectMessagesContentProvider extends ContentProvider {
 					+ DirectMessages.COL_CREATED + " DESC " + "LIMIT 1";
 
 			// selects all users who have sent or received at least one DM
-			sql = "SELECT " + DBOpenHelper.TABLE_USERS + "._id, " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_TWITTER_USER_ID + ", " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_SCREEN_NAME + ", " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_NAME
-					+ ", " + "(" + subQuery1 + ") AS text, " + "(" + subQuery2 + ") AS created " + "FROM "
-					+ DBOpenHelper.TABLE_USERS + " " + "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS sent ON "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + "=sent."
-					+ DirectMessages.COL_SENDER + " " + "LEFT JOIN " + DBOpenHelper.TABLE_DMS + " AS received ON "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + "=received."
-					+ DirectMessages.COL_RECEIVER + " " + "WHERE " + "(sent." + DirectMessages.COL_TEXT
-					+ " IS NOT NULL OR " + "received." + DirectMessages.COL_TEXT + " IS NOT NULL) " + "AND "
-					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + "<>"
-					+ LoginActivity.getTwitterId(getContext()) + " " + "GROUP BY " + DBOpenHelper.TABLE_USERS + "."
-					+ TwitterUsers.COL_TWITTER_USER_ID + " " + "ORDER BY created DESC LIMIT 100;";
+			sql = "select " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_ROW_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID + ", "
+					+ DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_SCREEN_NAME + ", " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_NAME + ", " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_PROFILE_IMAGE_URI + ", " + "(" + subQuery1 + ") AS text, " + "(" + subQuery2
+					+ ") AS created " + "FROM " + DBOpenHelper.TABLE_USERS + " " + "LEFT JOIN "
+					+ DBOpenHelper.TABLE_DMS + " AS sent ON " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_TWITTER_USER_ID + "=sent." + DirectMessages.COL_SENDER + " " + "LEFT JOIN "
+					+ DBOpenHelper.TABLE_DMS + " AS received ON " + DBOpenHelper.TABLE_USERS + "."
+					+ TwitterUsers.COL_TWITTER_USER_ID + "=received." + DirectMessages.COL_RECEIVER + " " + "WHERE "
+					+ "(sent." + DirectMessages.COL_TEXT + " IS NOT NULL OR " + "received." + DirectMessages.COL_TEXT
+					+ " IS NOT NULL) " + "AND " + DBOpenHelper.TABLE_USERS + "." + TwitterUsers.COL_TWITTER_USER_ID
+					+ "<>" + LoginActivity.getTwitterId(getContext()) + " " + "GROUP BY " + DBOpenHelper.TABLE_USERS
+					+ "." + TwitterUsers.COL_TWITTER_USER_ID + " " + "ORDER BY created DESC LIMIT 100;";
 
 			Log.e(TAG, sql);
 

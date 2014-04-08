@@ -7,7 +7,7 @@ import android.util.Log;
 
 /**
  * Represents the four banner image sizes served by Twitter.
- * 
+ * See https://dev.twitter.com/docs/user-profile-images-and-banners
  * @author Steven Meliopoulos
  * 
  */

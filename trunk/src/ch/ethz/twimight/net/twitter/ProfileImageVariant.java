@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 /**
  * Represents the four profile image sizes served by Twitter.
- * 
+ * See https://dev.twitter.com/docs/user-profile-images-and-banners
  * @author msteven
  * 
  */
