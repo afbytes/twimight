@@ -30,6 +30,7 @@ import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 public class PhotoViewActivity extends Activity {
 
 	private ImageView mImageView;
+	private View mProgressBar;
 	
 	private static final String TAG = PhotoViewActivity.class.getSimpleName();
 
@@ -44,8 +45,9 @@ public class PhotoViewActivity extends Activity {
 		getActionBar().setHomeButtonEnabled(true);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		mImageView = (ImageView) findViewById(R.id.iv_photo);
+		mProgressBar = findViewById(R.id.progressBar);
 		mImageUri = getIntent().getStringExtra(EXTRA_KEY_IMAGE_URI);
-		ImageLoader.getInstance().displayImage(mImageUri, mImageView);
+		ImageLoader.getInstance().displayImage(mImageUri, mImageView, new LoadListener());
 	}
 
 	@Override
@@ -98,7 +100,6 @@ public class PhotoViewActivity extends Activity {
 	}
 
 	private class ImageSaveListener implements ImageLoadingListener {
-
 		@Override
 		public void onLoadingStarted(String imageUri, View view) {
 			// nothing
@@ -118,7 +119,30 @@ public class PhotoViewActivity extends Activity {
 		public void onLoadingCancelled(String imageUri, View view) {
 			// nothing
 		}
+	}
+	
+	private class LoadListener implements ImageLoadingListener {
 
+		@Override
+		public void onLoadingStarted(String imageUri, View view) {
+			mProgressBar.setVisibility(View.VISIBLE);
+		}
+
+		@Override
+		public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+			mProgressBar.setVisibility(View.GONE);
+		}
+
+		@Override
+		public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+			mProgressBar.setVisibility(View.GONE);
+		}
+
+		@Override
+		public void onLoadingCancelled(String imageUri, View view) {
+			mProgressBar.setVisibility(View.GONE);
+		}
+		
 	}
 
 }

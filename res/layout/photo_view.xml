@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" 
-    android:background="@color/dark_gray">
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res/ch.ethz.twimight"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/dark_gray">
 
-    <uk.co.senab.photoview.PhotoView
-        android:paddingTop="?android:attr/actionBarSize"
-        android:id="@+id/iv_photo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
-</LinearLayout>
+	<uk.co.senab.photoview.PhotoView
+		android:paddingTop="?android:attr/actionBarSize"
+		android:id="@+id/iv_photo"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
+
+	<ch.ethz.twimight.views.LoadingBar
+		android:layout_marginTop="?android:attr/actionBarSize"
+		android:id="@+id/progressBar"
+		android:layout_width="match_parent"
+		android:layout_height="4dp"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:indeterminate="true"
+		android:visibility="gone"
+		app:color="@color/white_semi_transparent"/>
+
+</RelativeLayout>
