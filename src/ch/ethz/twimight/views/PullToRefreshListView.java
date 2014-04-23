@@ -389,4 +389,8 @@ public class PullToRefreshListView extends LinearLayout {
 	public void setOverscrollEnabled(boolean enabled) {
 		mIsOverscrollEnabled = enabled;
 	}
+	
+	public ListAdapter getAdapter(){
+		return mListView.getAdapter();
+	}
 }

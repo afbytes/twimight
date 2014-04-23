@@ -138,7 +138,7 @@ public class TweetConversationView extends FrameLayout {
 	 */
 	private synchronized void addPreviousConversationTweet(Cursor c) {
 		TweetView tweetView = new TweetView(getContext());
-		tweetView.update(c, false, false);
+		tweetView.update(c, false, false, true);
 		long rowId = c.getLong(c.getColumnIndex(Tweets.COL_ROW_ID));
 		tweetView.setOnClickListener(new ConversationTweetClickListener(rowId));
 		tweetView.setBackgroundResource(R.drawable.borderless_button_background_faded);

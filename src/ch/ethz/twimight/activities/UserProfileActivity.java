@@ -328,14 +328,16 @@ public class UserProfileActivity extends TwimightBaseActivity {
 				String displayUrl = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_DISPLAY_URL));
 				String expandedUrl = mCursor.getString(mCursor.getColumnIndex(TwitterUsers.COL_EXPANDED_URL));
 				mTvUrl.setText(displayUrl);
-				Spannable urlSpannable = (Spannable) mTvUrl.getText();
-				URLSpan[] spans = urlSpannable.getSpans(0, urlSpannable.length(), URLSpan.class);
-				for (URLSpan span : spans) {
-					int start = urlSpannable.getSpanStart(span);
-					int end = urlSpannable.getSpanEnd(span);
-					urlSpannable.removeSpan(span);
-					span = new UrlStyleSpan(expandedUrl);
-					urlSpannable.setSpan(span, start, end, 0);
+				if (mTvUrl.getText() instanceof Spannable) {
+					Spannable urlSpannable = (Spannable) mTvUrl.getText();
+					URLSpan[] spans = urlSpannable.getSpans(0, urlSpannable.length(), URLSpan.class);
+					for (URLSpan span : spans) {
+						int start = urlSpannable.getSpanStart(span);
+						int end = urlSpannable.getSpanEnd(span);
+						urlSpannable.removeSpan(span);
+						span = new UrlStyleSpan(expandedUrl);
+						urlSpannable.setSpan(span, start, end, 0);
+					}
 				}
 				mTvUrl.setVisibility(TextView.VISIBLE);
 			} else {
@@ -619,7 +621,8 @@ public class UserProfileActivity extends TwimightBaseActivity {
 		@Override
 		public void updateDrawState(TextPaint ds) {
 			// leaving this method empty prevents the default implementation of
-			// URLSpan from changing the text style (making it bold and underlining it)
+			// URLSpan from changing the text style (making it bold and
+			// underlining it)
 		}
 	}
 }

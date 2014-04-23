@@ -1124,7 +1124,9 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			InternalStorageHelper helper = new InternalStorageHelper(getBaseContext());
 			byte[] image = Base64.decode(o.getString(TwitterUsers.JSON_FIELD_PROFILE_IMAGE), Base64.DEFAULT);
 			helper.writeImage(image, screenName);
-			cv.put(TwitterUsers.COL_PROFILE_IMAGE_URI, new File(getFilesDir(), screenName).getPath());
+			String profileImageUri = Uri.fromFile(new File(getFilesDir(), screenName)).toString();
+			Log.d(TAG, "storing profile image at: " + profileImageUri);
+			cv.put(TwitterUsers.COL_PROFILE_IMAGE_URI, profileImageUri);
 		}
 
 		if (o.has(Tweets.COL_USER_TID)) {
