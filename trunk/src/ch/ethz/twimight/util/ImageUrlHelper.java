@@ -79,7 +79,14 @@ public class ImageUrlHelper {
 		return TextUtils.join(sUrlSeparator, urls);
 	}
 	
-	public static String[] deserializeUrlList(String urls){
-		return TextUtils.split(urls, sSeparatorPattern);
+	public static String[] deserializeUrlList(String urlsString){
+		String[] urls;
+		if(urlsString!=null){
+			urls= TextUtils.split(urlsString, sSeparatorPattern);
+		} else {
+			urls = new String[0];
+		}
+		
+		return urls;
 	}
 }

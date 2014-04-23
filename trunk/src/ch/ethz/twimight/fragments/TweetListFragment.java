@@ -1,5 +1,7 @@
 package ch.ethz.twimight.fragments;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -7,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.CursorAdapter;
@@ -60,6 +64,24 @@ public abstract class TweetListFragment extends ListFragment {
 			}
 		});
 
+		mPullToRefreshListView.setOnScrollListener(new OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				if(scrollState==SCROLL_STATE_FLING){
+					((TweetAdapter)mPullToRefreshListView.getAdapter()).setListIsFlinging(true);
+				} else {
+					((TweetAdapter)mPullToRefreshListView.getAdapter()).setListIsFlinging(false);
+					((TweetAdapter)mPullToRefreshListView.getAdapter()).notifyDataSetChanged();
+				}
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				// do nothing
+			}
+		});
+		
 		return mPullToRefreshListView;
 	}
 	

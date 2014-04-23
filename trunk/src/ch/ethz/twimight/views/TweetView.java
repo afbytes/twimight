@@ -80,7 +80,7 @@ public class TweetView extends FrameLayout {
 		mContainer.setBackgroundResource(resid);
 	}
 
-	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe) {
+	public void update(Cursor cursor, boolean showButtonBar, boolean showModeStripe, boolean loadImages) {
 		// set profile image
 		mIvProfileImage.setBackgroundResource(R.drawable.image_placeholder);
 		mIvProfileImage.setImageDrawable(null);
@@ -246,6 +246,9 @@ public class TweetView extends FrameLayout {
 		mImageContainer.removeAllViews();
 		String serializedMediaUris = cursor.getString(cursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
 		for (String mediaUri : ImageUrlHelper.deserializeUrlList(serializedMediaUris)) {
+			if(!loadImages){
+				mediaUri=null;
+			}
 			addImage(mediaUri);
 			Log.d(TAG, "mediaUri: " + mediaUri);
 		}

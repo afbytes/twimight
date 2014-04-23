@@ -27,6 +27,7 @@ public class TweetAdapter extends CursorAdapter {
 
 //	private static final String TAG = TweetAdapter.class.getName();
 	private static final long NO_ITEM_SELECTED = -1;
+	private boolean mListIsFlinging = false;
 
 	private long mSelectedId;
 
@@ -52,6 +53,10 @@ public class TweetAdapter extends CursorAdapter {
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		return new TweetView(context);
 	}
+	
+	public void setListIsFlinging(boolean listIsFlinging){
+		mListIsFlinging = listIsFlinging;
+	}
 
 	/** This is where data is mapped to its view */
 	@Override
@@ -59,6 +64,6 @@ public class TweetAdapter extends CursorAdapter {
 		TweetView tweetView = (TweetView) row;
 		long rowId = cursor.getLong(cursor.getColumnIndex(Tweets.COL_ROW_ID));
 		boolean showButtonBar = rowId==mSelectedId;
-		tweetView.update(cursor, showButtonBar, true);
+		tweetView.update(cursor, showButtonBar, true, !mListIsFlinging);
 	}
 }
