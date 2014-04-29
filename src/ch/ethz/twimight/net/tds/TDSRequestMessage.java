@@ -115,7 +115,7 @@ public class TDSRequestMessage {
 
 				if (!tweets.isNull(tweets.getColumnIndex(Tweets.COL_SIGNATURE))) {
 					JSONObject row = new JSONObject();
-					row.put(Tweets.COL_TEXT, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT)));
+					row.put(Tweets.COL_TEXT_PLAIN, tweets.getString(tweets.getColumnIndex(Tweets.COL_TEXT_PLAIN)));
 					row.put(Tweets.COL_USER_TID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_USER_TID)));
 					row.put(Tweets.COL_DISASTER_ID, tweets.getLong(tweets.getColumnIndex(Tweets.COL_DISASTER_ID)));
 					row.put(Tweets.COL_SIGNATURE, tweets.getString(tweets.getColumnIndex(Tweets.COL_SIGNATURE)));

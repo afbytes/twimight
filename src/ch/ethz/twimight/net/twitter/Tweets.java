@@ -85,9 +85,15 @@ public class Tweets implements BaseColumns {
 	/**
 	 * the tweet text (uses display version of urls => ready for display without
 	 * further processing but not aligned with entity indexes)
+	 * 
+	 * for locally created tweets (including disaster tweets) COL_TEXT and COL_TEXT_PLAIN are the same.
 	 */
 	public static final String COL_TEXT = "text";
-	/** original tweet text with twitter urls **/
+	/** 
+	 * original tweet text with twitter urls 
+	 * 
+	 * the Twimight server expects the tweet text in a json field called "text_plain"
+	 * **/
 	public static final String COL_TEXT_PLAIN = "text_plain";
 	/** serialized array of hashtag entities */
 	public static final String COL_HASHTAG_ENTITIES = "hashtag_entities";
