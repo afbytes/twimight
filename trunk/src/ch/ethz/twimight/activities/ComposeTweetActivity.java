@@ -419,7 +419,7 @@ public class ComposeTweetActivity extends ThemeSelectorActivity {
 		}
 		// if there is a photo, put the path of photo in the cv
 		if (mHasMedia) {
-			tweetContentValues.put(Tweets.COL_MEDIA_URIS, mFinalPhotoName);
+			tweetContentValues.put(Tweets.COL_MEDIA_URIS, mPhotoUri.toString());
 			Log.i(TAG, Tweets.COL_MEDIA_URIS + ":" + mFinalPhotoName);
 		}
 

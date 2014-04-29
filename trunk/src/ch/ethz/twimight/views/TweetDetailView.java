@@ -202,7 +202,7 @@ public class TweetDetailView extends FrameLayout {
 		setTweetInfo();
 		setUserInfo();
 		setProfilePicture();
-		setPhotoAttached();
+		setImages();
 		mUnverifiedInfo.setVisibility(LinearLayout.GONE);
 		if ((mBuffer & Tweets.BUFFER_DISASTER) != 0) {
 
@@ -251,8 +251,6 @@ public class TweetDetailView extends FrameLayout {
 		int pressedLinkColor = getResources().getColor(R.color.medium_dark_gray);
 		int pressedLinkBackground = getResources().getColor(R.color.lighter_gray);
 
-		mImageContainer.removeAllViews();
-		
 		while (!allEntities.isEmpty()) {
 			TweetEntity entity = allEntities.remove();
 			if (entity instanceof UserMentionEntity) {
@@ -283,13 +281,7 @@ public class TweetDetailView extends FrameLayout {
 						pressedLinkBackground), urlEntity.getStart(), urlEntity.getEnd(), Spannable.SPAN_MARK_MARK);
 				tweetTextSpannable.replace(urlEntity.getStart(), urlEntity.getEnd(), urlEntity.getDisplayURL());
 			}
-			
-			// add images
-			mImageContainer.removeAllViews();
-			String serializedMediaUris = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
-			for (String mediaUri : ImageUrlHelper.deserializeUrlList(serializedMediaUris)) {
-				addImage(mediaUri);
-			}
+
 		}
 
 		mTvTweetText.setText(tweetTextSpannable);
@@ -332,6 +324,14 @@ public class TweetDetailView extends FrameLayout {
 			mTvFavoriteStatus.setText(numberFormat.format(favoriteCount));
 		} else {
 			mFavoriteStatus.setVisibility(View.GONE);
+		}
+	}
+	
+	private void setImages(){
+		mImageContainer.removeAllViews();
+		String serializedMediaUris = mCursor.getString(mCursor.getColumnIndex(Tweets.COL_MEDIA_URIS));
+		for (String mediaUri : ImageUrlHelper.deserializeUrlList(serializedMediaUris)) {
+			addImage(mediaUri);
 		}
 	}
 

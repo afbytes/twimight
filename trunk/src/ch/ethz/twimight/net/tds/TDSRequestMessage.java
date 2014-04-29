@@ -13,7 +13,6 @@
 
 package ch.ethz.twimight.net.tds;
 
-import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,7 +29,6 @@ import android.util.Log;
 import ch.ethz.twimight.R;
 import ch.ethz.twimight.data.StatisticsDBHelper;
 import ch.ethz.twimight.net.twitter.Tweets;
-import ch.ethz.twimight.net.twitter.TwitterUsers;
 import ch.ethz.twimight.security.CertificateManager;
 import ch.ethz.twimight.security.KeyManager;
 import ch.ethz.twimight.util.Constants;
@@ -48,7 +46,7 @@ public class TDSRequestMessage {
 	private int version;
 	Context context;
 
-	private static final String TAG = "TDSRequestMessage";
+	private static final String TAG = TDSRequestMessage.class.getSimpleName();
 
 	private JSONObject authenticationObject;
 	private JSONObject bluetoothObject;
@@ -125,13 +123,11 @@ public class TDSRequestMessage {
 							simpleFormat.format(new Date(tweets.getLong(tweets.getColumnIndex(Tweets.COL_CREATED_AT)))));
 					// add picture if available
 					if (tweets.getString(tweets.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
-						try {
-							String base64Photo = getPhotoAsBase64(tweets);
-							Log.d(TAG, base64Photo);
-							row.put(PHOTO, base64Photo);
-						} catch (FileNotFoundException e) {
-							Log.d(TAG, "Can't open photo. Not sending photo.", e);
-						}
+						SDCardHelper sdCardHelper = new SDCardHelper();
+						String base64Photo = sdCardHelper.getImageAsBas64Jpeg(
+								tweets.getString(tweets.getColumnIndex(Tweets.COL_MEDIA_URIS)), null);
+						Log.d(TAG, base64Photo);
+						row.put(PHOTO, base64Photo);
 					}
 
 					disTweetsArray.put(row);
@@ -147,18 +143,6 @@ public class TDSRequestMessage {
 				disTweetsObject = null;
 
 		}
-	}
-
-	private String getPhotoAsBase64(Cursor c) throws FileNotFoundException {
-		String encodedImage = null;
-		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
-		Log.d("photo", "photo name:" + photoFileName);
-		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
-		// locate the directory where the photos are stored
-		String photoPath = Tweets.PHOTO_PATH + "/" + userID;
-		SDCardHelper sdCardHelper = new SDCardHelper();
-		encodedImage = sdCardHelper.getAsBas64Jpeg(photoPath, photoFileName, 1000);
-		return encodedImage;
 	}
 
 	/**

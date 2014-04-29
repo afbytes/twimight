@@ -76,9 +76,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		StateChangedReceiver.BtSwitchingFinished {
 
 	private static final String T = "btdebug";
-	private static final String TAG = "ScanningService";
+	private static final String TAG = ScanningService.class.getSimpleName();
 	/** For Debugging */
 	private static final String WAKE_LOCK = "ScanningServiceWakeLock";
+
+	private static final int MAX_IMAGE_DIMENSIONS_PX = 500;
 
 	public Handler handler;
 	/** Handler for delayed execution of the thread */
@@ -103,10 +105,10 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	private static final long CONNECTION_TIMEOUT = 10000L;
 
 	private static final String TYPE = "message_type";
-	public static final int TWEET = 0;
-	public static final int DM = 1;
-	public static final int PHOTO = 2;
-	public static final int HTML = 3;
+	public static final int MESSAGE_TYPE_TWEET = 0;
+	public static final int MESSAGE_TYPE_DM = 1;
+	public static final int MESSAGE_TYPE_PHOTO = 2;
+	public static final int MESSAGE_TYPE_HTML = 3;
 
 	public static final String FORCED_BLUE_SCAN = "forced_bluetooth_scan";
 
@@ -536,13 +538,13 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			try {
 				// if input parameter is String, then cast it to String
 				o = new JSONObject(s[0]);
-				if (o.getInt(TYPE) == TWEET) {
+				if (o.getInt(TYPE) == MESSAGE_TYPE_TWEET) {
 					Log.d("disaster", "receive a tweet");
 					processTweet(o);
-				} else if (o.getInt(TYPE) == PHOTO) {
+				} else if (o.getInt(TYPE) == MESSAGE_TYPE_PHOTO) {
 					Log.d("disaster", "receive a photo");
 					processPhoto(o);
-				} else if (o.getInt(TYPE) == HTML) {
+				} else if (o.getInt(TYPE) == MESSAGE_TYPE_HTML) {
 					Log.d("disaster", "receive xml");
 					processHtml(o);
 				} else {
@@ -618,10 +620,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 	private void processPhoto(JSONObject o) {
 		try {
-			Log.i(TAG, "processPhoto");
 			String jsonString = o.getString("image");
 			String userID = o.getString("userID");
 			String photoFileName = o.getString("photoName");
+
+			Log.d(TAG, "processPhoto " + jsonString);
 			// locate the directory where the photos are stored
 			photoPath = PHOTO_PATH + "/" + userID;
 			String[] filePath = { photoPath };
@@ -634,7 +637,6 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		} catch (JSONException e1) {
 			Log.e(TAG, "Exception while receiving disaster tweet photo", e1);
 		}
-
 	}
 
 	private void processHtml(JSONObject o) {
@@ -738,8 +740,9 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
 									// tweet, send it
-									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null)
+									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 										sendDisasterPhoto(c);
+									}
 								}
 								sendDisasterHtmls(c);
 							}
@@ -757,8 +760,9 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
 									// tweet, send it
-									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null)
+									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 										sendDisasterPhoto(c);
+									}
 								}
 							}
 						} else if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 1 * 30 * 1000L)) {
@@ -786,26 +790,38 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 	}
 
 	private boolean sendDisasterPhoto(Cursor c) throws JSONException {
-		JSONObject toSendPhoto;
-		String photoFileName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
-		Log.d("photo", "photo name:" + photoFileName);
+		String photoFileUri = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
+		SDCardHelper sdCardHelper = new SDCardHelper();
+		String encodedPhoto = sdCardHelper.getImageAsBas64Jpeg(photoFileUri, MAX_IMAGE_DIMENSIONS_PX);
+		JSONObject toSendPhoto = new JSONObject("{\"image\":\"" + encodedPhoto + "\"}");
+		toSendPhoto.put(TYPE, MESSAGE_TYPE_PHOTO);
 		String userID = String.valueOf(c.getLong(c.getColumnIndex(TwitterUsers.COL_TWITTER_USER_ID)));
-		// locate the directory where the photos are stored
-		photoPath = Tweets.PHOTO_PATH + "/" + userID;
+		toSendPhoto.put("userID", userID);
+		Uri uri = Uri.parse(photoFileUri);
+		String photoFileName = uri.getLastPathSegment();
+		Log.d(TAG, "photoFileName:+ " + photoFileName);
+		toSendPhoto.put("photoName", photoFileName);
+		bluetoothHelper.write(toSendPhoto.toString());
+		return true;
+	}
 
-		try {
-			String base64Photo = sdCardHelper.getAsBas64Jpeg(photoPath, photoFileName, 500);
-			toSendPhoto = new JSONObject("{\"image\":\"" + base64Photo + "\"}");
-			toSendPhoto.put(TYPE, PHOTO);
-			toSendPhoto.put("userID", userID);
-			toSendPhoto.put("photoName", photoFileName);
-			bluetoothHelper.write(toSendPhoto.toString());
-			return true;
-		} catch (FileNotFoundException e) {
-			Log.d(TAG, "Can't open file. Not sending photo.", e);
+	private String getProcessedImage(String photoFileUri) {
+		Bitmap bitmap = ImageLoader.getInstance().loadImageSync(photoFileUri);
+		String encodedImage = null;
+		if (bitmap != null) {
+			// scale down large images
+			if (bitmap.getHeight() > MAX_IMAGE_DIMENSIONS_PX || bitmap.getWidth() > MAX_IMAGE_DIMENSIONS_PX) {
+				double shrinkFactor = ((double) MAX_IMAGE_DIMENSIONS_PX)
+						/ Math.max(bitmap.getWidth(), bitmap.getHeight());
+				bitmap = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * shrinkFactor),
+						(int) (bitmap.getHeight() * shrinkFactor), false);
+			}
+			ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
+			byte[] bytes = byteArrayBitmapStream.toByteArray();
+			encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
 		}
-
-		return false;
+		return encodedImage;
 	}
 
 	private void sendDisasterHtmls(Cursor c) throws JSONException {
@@ -892,7 +908,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 					}
 				}
 			}
-			jsonObj.put(TYPE, HTML);
+			jsonObj.put(TYPE, MESSAGE_TYPE_HTML);
 			return jsonObj;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -917,7 +933,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 			return null;
 
 		} else {
-			o.put(TYPE, DM);
+			o.put(TYPE, MESSAGE_TYPE_DM);
 			o.put(DirectMessages.COL_DISASTERID, c.getLong(c.getColumnIndex(DirectMessages.COL_DISASTERID)));
 			o.put(DirectMessages.COL_CRYPTEXT, c.getString(c.getColumnIndex(DirectMessages.COL_CRYPTEXT)));
 			o.put(DirectMessages.COL_SENDER, c.getString(c.getColumnIndex(DirectMessages.COL_SENDER)));
@@ -951,7 +967,7 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		else {
 
 			o.put(Tweets.COL_USER_TID, c.getLong(c.getColumnIndex(Tweets.COL_USER_TID)));
-			o.put(TYPE, TWEET);
+			o.put(TYPE, MESSAGE_TYPE_TWEET);
 			o.put(TwitterUsers.COL_SCREEN_NAME, c.getString(c.getColumnIndex(TwitterUsers.COL_SCREEN_NAME)));
 			if (c.getColumnIndex(Tweets.COL_CREATED_AT) >= 0)
 				o.put(Tweets.COL_CREATED_AT, c.getLong(c.getColumnIndex(Tweets.COL_CREATED_AT)));
@@ -968,8 +984,11 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 				o.put(Tweets.COL_LAT, c.getDouble(c.getColumnIndex(Tweets.COL_LAT)));
 			if (c.getColumnIndex(Tweets.COL_LNG) >= 0)
 				o.put(Tweets.COL_LNG, c.getDouble(c.getColumnIndex(Tweets.COL_LNG)));
-			if (c.getColumnIndex(Tweets.COL_MEDIA_URIS) >= 0)
-				o.put(Tweets.COL_MEDIA_URIS, c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)));
+			if (!c.isNull(c.getColumnIndex(Tweets.COL_MEDIA_URIS))) {
+				String photoUri = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
+				Uri uri = Uri.parse(photoUri);
+				o.put(Tweets.COL_MEDIA_URIS, uri.getLastPathSegment());
+			}
 			if (c.getColumnIndex(Tweets.COL_HTML_PAGES) >= 0)
 				o.put(Tweets.COL_HTML_PAGES, c.getString(c.getColumnIndex(Tweets.COL_HTML_PAGES)));
 			if (c.getColumnIndex(Tweets.COL_SOURCE) >= 0)
@@ -983,11 +1002,13 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 				String imageUri = c.getString(c.getColumnIndex(TwitterUsers.COL_PROFILE_IMAGE_URI));
 				Bitmap profileImage = ImageLoader.getInstance().loadImageSync(imageUri);
-				ByteArrayOutputStream stream = new ByteArrayOutputStream();
-				profileImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
-				byte[] byteArray = stream.toByteArray();
-				String profileImageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
-				o.put(TwitterUsers.JSON_FIELD_PROFILE_IMAGE, profileImageBase64);
+				if (profileImage != null) {
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					profileImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+					byte[] byteArray = stream.toByteArray();
+					String profileImageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+					o.put(TwitterUsers.JSON_FIELD_PROFILE_IMAGE, profileImageBase64);
+				}
 			}
 
 			return o;
@@ -1053,8 +1074,15 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 		if (o.has(Tweets.COL_SOURCE))
 			cv.put(Tweets.COL_SOURCE, o.getString(Tweets.COL_SOURCE));
 
-		if (o.has(Tweets.COL_MEDIA_URIS))
-			cv.put(Tweets.COL_MEDIA_URIS, o.getString(Tweets.COL_MEDIA_URIS));
+		if (o.has(Tweets.COL_MEDIA_URIS)) {
+			String userID = cv.getAsString(Tweets.COL_USER_TID);
+			photoPath = PHOTO_PATH + "/" + userID;
+			String photoFileName = o.getString(Tweets.COL_MEDIA_URIS);
+			File targetFile = sdCardHelper.getFileFromSDCard(photoPath, photoFileName);
+
+			cv.put(Tweets.COL_MEDIA_URIS, Uri.fromFile(targetFile).toString());
+
+		}
 
 		if (o.has(Tweets.COL_HTML_PAGES))
 			cv.put(Tweets.COL_HTML_PAGES, o.getString(Tweets.COL_HTML_PAGES));
