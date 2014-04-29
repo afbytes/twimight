@@ -25,7 +25,7 @@ public abstract class ListFragment extends Fragment implements PullToRefreshList
 	Cursor mCursor;
 
 	PullToRefreshListView mListView;
-	protected static final String TAG = ListFragment.class.getName();
+	protected static final String TAG = ListFragment.class.getSimpleName();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
