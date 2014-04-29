@@ -1,6 +1,7 @@
 package ch.ethz.twimight.net.twitter;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -893,15 +893,18 @@ public class TwitterSyncService extends IntentService {
 	 *            outcome
 	 */
 	private void updateStatus(Cursor c, boolean notify) {
+		// update status
+		boolean success = false;
+		Status tweet = null;
 
 		String text = c.getString(c.getColumnIndex(Tweets.COL_TEXT));
 		StatusUpdate statusUpdate = new StatusUpdate(text);
 		// media?
-		String mediaName = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
-		if (mediaName != null) {
-			String mediaUrl = Environment.getExternalStoragePublicDirectory(
-					Tweets.PHOTO_PATH + "/" + LoginActivity.getTwitterId(this) + "/" + mediaName).getAbsolutePath();
-			File mediaFile = new File(mediaUrl);
+		String mediaUri = c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS));
+		Log.d(TAG, "tweet: " + text + " mediaUrl: " + mediaUri);
+		if (mediaUri != null) {
+			URI uri = URI.create(mediaUri);
+			File mediaFile = new File(uri);
 			statusUpdate.setMedia(mediaFile);
 		}
 		// location?
@@ -916,9 +919,7 @@ public class TwitterSyncService extends IntentService {
 			long replyToId = c.getLong(c.getColumnIndex(Tweets.COL_REPLY_TO_TWEET_TID));
 			statusUpdate.setInReplyToStatusId(replyToId);
 		}
-		// update status
-		boolean success = false;
-		Status tweet = null;
+
 		for (int attempt = 0; attempt <= MAX_LOAD_ATTEMPTS; attempt++) {
 			try {
 				tweet = mTwitter.updateStatus(statusUpdate);

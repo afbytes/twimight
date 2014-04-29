@@ -252,7 +252,6 @@ public class TweetView extends FrameLayout {
 			addImage(mediaUri);
 			Log.d(TAG, "mediaUri: " + mediaUri);
 		}
-
 	}
 
 	/**

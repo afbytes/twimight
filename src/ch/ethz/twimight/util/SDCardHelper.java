@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import android.app.Activity;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -159,27 +161,23 @@ public class SDCardHelper {
 	 * @return a base64 encoded string that represents the JPEG image data
 	 * @throws FileNotFoundException
 	 */
-	public String getAsBas64Jpeg(String path, String fileName, Integer maxDimension) throws FileNotFoundException {
-		if (checkSDState(new String[] { path })) {
-			Uri uri = Uri.fromFile(getFileFromSDCard(path, fileName));
-			BitmapFactory.Options options1 = new BitmapFactory.Options();
-			options1.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(uri.getPath(), options1);
-			int scale = 1;
-			while (options1.outWidth / scale > maxDimension && options1.outHeight / scale > maxDimension) {
-				scale *= 2;
+	public String getImageAsBas64Jpeg(String fileUri, Integer maxDimensionPx)  {
+
+		Bitmap bitmap = ImageLoader.getInstance().loadImageSync(fileUri);
+		String encodedImage = null;
+		if (bitmap != null) {
+			// scale down large images
+			if (maxDimensionPx != null && (bitmap.getHeight() > maxDimensionPx || bitmap.getWidth() > maxDimensionPx)) {
+				double shrinkFactor = ((double) maxDimensionPx) / Math.max(bitmap.getWidth(), bitmap.getHeight());
+				bitmap = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * shrinkFactor),
+						(int) (bitmap.getHeight() * shrinkFactor), false);
 			}
-			BitmapFactory.Options options2 = new BitmapFactory.Options();
-			options2.inSampleSize = scale;
-			Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath(), options2);
 			ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayBitmapStream);
 			byte[] bytes = byteArrayBitmapStream.toByteArray();
-			String encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
-			return encodedImage;
-		} else {
-			throw new FileNotFoundException("cannot open " + path);
+			encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
 		}
+		return encodedImage;
 	}
 
 	/**
