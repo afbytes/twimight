@@ -68,6 +68,7 @@ public abstract class TweetListFragment extends ListFragment {
 			
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				Log.d(TAG, "onScrollStateChanged " + scrollState);
 				if(scrollState==SCROLL_STATE_FLING){
 					((TweetAdapter)mPullToRefreshListView.getAdapter()).setListIsFlinging(true);
 				} else {
