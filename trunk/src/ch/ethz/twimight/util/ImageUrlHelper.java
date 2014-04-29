@@ -13,9 +13,9 @@ public class ImageUrlHelper {
 	private static final String TAG = ImageUrlHelper.class.getSimpleName();
 
 	private static final String[] sImageSuffixes = new String[] { ".jpg", ".jpeg", ".png", ".gif" };
-	
+
 	private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-	
+
 	private static final String sUrlSeparator = "|";
 	private static final Pattern sSeparatorPattern = Pattern.compile(Pattern.quote(sUrlSeparator));
 
@@ -74,19 +74,19 @@ public class ImageUrlHelper {
 
 		return null;
 	}
-	
-	public static String serializeUrlList(List<String> urls){
+
+	public static String serializeUrlList(List<String> urls) {
 		return TextUtils.join(sUrlSeparator, urls);
 	}
-	
-	public static String[] deserializeUrlList(String urlsString){
+
+	public static String[] deserializeUrlList(String urlsString) {
 		String[] urls;
-		if(urlsString!=null){
-			urls= TextUtils.split(urlsString, sSeparatorPattern);
+		if (urlsString != null) {
+			urls = TextUtils.split(urlsString, sSeparatorPattern);
 		} else {
 			urls = new String[0];
 		}
-		
+
 		return urls;
 	}
 }
