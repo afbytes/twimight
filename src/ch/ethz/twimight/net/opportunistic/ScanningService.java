@@ -735,14 +735,14 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 								toSend = getJSON(c);
 								if (toSend != null) {
-									Log.i(TAG, "sending tweet");
-									Log.d(TAG, toSend.toString(5));
-									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
-									// tweet, send it
+									// tweet, send it first!
 									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 										sendDisasterPhoto(c);
 									}
+									Log.i(TAG, "sending tweet");
+									Log.d(TAG, toSend.toString(5));
+									bluetoothHelper.write(toSend.toString());
 								}
 								sendDisasterHtmls(c);
 							}
@@ -755,14 +755,14 @@ public class ScanningService extends Service implements DevicesReceiver.Scanning
 
 								toSend = getJSON(c);
 								if (toSend != null) {
-									Log.i(TAG, "sending tweet");
-									Log.d(TAG, toSend.toString(5));
-									bluetoothHelper.write(toSend.toString());
 									// if there is a photo related to this
-									// tweet, send it
+									// tweet, send it first!
 									if (c.getString(c.getColumnIndex(Tweets.COL_MEDIA_URIS)) != null) {
 										sendDisasterPhoto(c);
 									}
+									Log.i(TAG, "sending tweet");
+									Log.d(TAG, toSend.toString(5));
+									bluetoothHelper.write(toSend.toString());
 								}
 							}
 						} else if (c.getLong(c.getColumnIndex(Tweets.COL_RECEIVED)) > (last - 1 * 30 * 1000L)) {
