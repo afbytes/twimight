@@ -4,8 +4,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="ch.ethz.twimight"
-	android:versionCode="1700030"
-	android:versionName="1.1.9">
+	android:versionCode="1700031"
+	android:versionName="1.1.10">
 
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
