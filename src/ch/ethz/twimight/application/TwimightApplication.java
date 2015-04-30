@@ -1,13 +1,13 @@
 package ch.ethz.twimight.application;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
-public class TwimightApplication extends Application {
+public class TwimightApplication extends MultiDexApplication {
 	@Override
 	public void onCreate() {
 		super.onCreate();
